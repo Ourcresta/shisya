@@ -1,0 +1,230 @@
+You are a Senior LMS Architect and Senior Full-Stack Engineer.
+
+You are creating a NEW Replit project named:
+
+“SHISYA – Student Portal”
+
+SHISYA is the learner-facing portal of the AISiksha ecosystem.
+It represents the “Student / Shisya” side of learning.
+
+This project MUST consume data from the existing
+“AISiksha Admin Course Factory” backend.
+
+----------------------------------------------------
+ABSOLUTE RULES (DO NOT VIOLATE)
+----------------------------------------------------
+- SHISYA is READ-ONLY for content.
+- SHISYA has NO admin features.
+- SHISYA has NO course creation or editing.
+- SHISYA shows ONLY PUBLISHED courses.
+- SHISYA is Phase-1 = LEARN ONLY.
+
+DO NOT build:
+❌ Admin UI
+❌ Test execution
+❌ Project submission
+❌ Certificate issuing
+❌ Payments
+❌ Advanced roles
+
+----------------------------------------------------
+CORE PHILOSOPHY
+----------------------------------------------------
+Admin Portal (Siksha) = Content Creation  
+Student Portal (Shisya) = Content Consumption  
+
+SHISYA must feel:
+- Clean
+- Calm
+- Student-friendly
+- Trustworthy
+- Fast
+
+----------------------------------------------------
+TECH STACK (RECOMMENDED)
+----------------------------------------------------
+- React + Vite
+- TypeScript
+- Tailwind CSS
+- Shadcn UI
+- TanStack React Query
+- Same API base URL as Admin backend
+
+----------------------------------------------------
+GLOBAL BRANDING
+----------------------------------------------------
+App Name: SHISYA  
+Subtitle (optional):
+- “Learn. Practice. Prove.”
+- “Your learning journey starts here.”
+
+Use neutral, learner-friendly colors.
+Avoid admin-style dashboards.
+
+----------------------------------------------------
+ROUTING STRUCTURE (STRICT)
+----------------------------------------------------
+Implement ONLY these routes:
+
+/                       → Course Catalog
+/courses/:courseId      → Course Overview
+/courses/:courseId/learn
+                        → Modules & Lessons
+/courses/:courseId/learn/:lessonId
+                        → Lesson Viewer
+
+NO admin routes.
+NO editing routes.
+
+----------------------------------------------------
+PAGE 1: COURSE CATALOG
+----------------------------------------------------
+Purpose:
+Allow students to browse available learning content.
+
+Data Rules:
+- Fetch ONLY courses where status = "published"
+
+UI:
+- Course cards displaying:
+  - Course title
+  - Level
+  - Duration
+  - Short description
+  - Skills (if available)
+- CTA button:
+  “Start Learning”
+
+Behavior:
+- Clicking a course opens Course Overview
+
+Empty State:
+“No courses available yet. Please check back later.”
+
+----------------------------------------------------
+PAGE 2: COURSE OVERVIEW
+----------------------------------------------------
+Route:
+/courses/:courseId
+
+Show:
+- Course title
+- Description
+- Level
+- Duration
+- Skills you will gain
+- Certificate requirements summary:
+  - Test required? (Yes / No)
+  - Project required? (Yes / No)
+
+CTA:
+- “Go to Course”
+
+Block access if course is not published.
+
+----------------------------------------------------
+PAGE 3: LEARN VIEW (MODULES & LESSONS)
+----------------------------------------------------
+Route:
+/courses/:courseId/learn
+
+Layout:
+- Left panel: Modules list (accordion style)
+- Right panel: Lesson list
+
+Each module shows:
+- Module title
+- Estimated time
+
+Each lesson shows:
+- Lesson title
+- Estimated time
+- Completion indicator (unchecked by default)
+
+Clicking a lesson:
+- Opens Lesson Viewer
+
+----------------------------------------------------
+PAGE 4: LESSON VIEWER
+----------------------------------------------------
+Route:
+/courses/:courseId/learn/:lessonId
+
+Show:
+- Lesson title
+- Objectives
+- Key concepts
+- AI notes / lesson content
+- Video link (if available)
+- External resources (if available)
+
+Actions:
+- “Mark as Completed”
+- “Back to Course”
+
+----------------------------------------------------
+PROGRESS TRACKING (PHASE-1 SIMPLE)
+----------------------------------------------------
+Implement BASIC progress tracking:
+- Store completed lessons in:
+  - LocalStorage (acceptable for Phase-1)
+  OR
+  - Simple backend table (optional)
+
+Show:
+- ✔ Completed lessons
+- Progress indicator:
+  “X / Y lessons completed”
+
+NO certificates issued yet.
+NO test logic yet.
+
+----------------------------------------------------
+DATA ACCESS & SECURITY
+----------------------------------------------------
+- Use existing READ APIs:
+  - Courses
+  - Modules
+  - Lessons
+  - AI Notes
+- NEVER expose write APIs
+- If invalid courseId or lessonId:
+  - Show friendly error
+  - Redirect to catalog
+
+----------------------------------------------------
+UX RULES
+----------------------------------------------------
+- No admin terminology
+- No edit buttons
+- No raw JSON
+- Graceful loading skeletons
+- Mobile friendly
+- Accessibility friendly
+
+----------------------------------------------------
+OUT OF SCOPE (EXPLICITLY NOT NOW)
+----------------------------------------------------
+❌ Tests execution
+❌ Projects submission
+❌ Certificates issuing
+❌ Student profile management
+❌ Payments
+❌ AI tutor / chatbot
+
+----------------------------------------------------
+DEFINITION OF DONE
+----------------------------------------------------
+SHISYA – Learn MVP is DONE when:
+
+✔ Students can browse published courses
+✔ Students can open a course overview
+✔ Students can view modules & lessons
+✔ Students can read lesson content
+✔ Students can mark lessons completed
+✔ Progress is visible
+✔ No admin feature leakage
+✔ Clean learner-first UX
+
+Build clean, minimal, production-ready code.
+If anything is unclear, ask before implementing.
