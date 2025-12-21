@@ -24,6 +24,7 @@ client/
 │   │   ├── course/          # CourseCard, CourseCardSkeleton, EmptyState
 │   │   ├── project/         # ProjectCard, ProjectSubmissionForm, ProjectStatusBadge
 │   │   ├── test/            # QuestionCard, TestTimer, TestProgress
+│   │   ├── certificate/     # CertificateCard, CertificatePreview, QRCodeBlock
 │   │   └── ui/              # Shadcn components + custom badges
 │   ├── contexts/
 │   │   ├── ProgressContext.tsx      # Centralized lesson progress state
@@ -33,6 +34,8 @@ client/
 │   │   ├── progress.ts      # LocalStorage progress tracking
 │   │   ├── submissions.ts   # LocalStorage project submissions
 │   │   ├── testAttempts.ts  # LocalStorage test attempt tracking
+│   │   ├── certificates.ts  # LocalStorage certificate management
+│   │   ├── eligibility.ts   # Certificate eligibility checking
 │   │   ├── queryClient.ts   # React Query client
 │   │   └── utils.ts         # Utility functions
 │   ├── pages/
@@ -46,6 +49,9 @@ client/
 │   │   ├── TestInstructions.tsx # Test details and start button
 │   │   ├── TestAttempt.tsx      # Active test-taking interface
 │   │   ├── TestResult.tsx       # Score and pass/fail display
+│   │   ├── CertificatesDashboard.tsx  # All earned certificates
+│   │   ├── CertificateViewer.tsx      # Single certificate view
+│   │   ├── CertificateVerify.tsx      # Public verification page
 │   │   └── not-found.tsx        # 404 page
 │   ├── App.tsx
 │   └── index.css
@@ -68,6 +74,9 @@ shared/
 - `/courses/:courseId/tests/:testId` - Test Instructions (pre-test view)
 - `/courses/:courseId/tests/:testId/attempt` - Active Test Attempt
 - `/courses/:courseId/tests/:testId/result` - Test Result Display
+- `/certificates` - Certificate Dashboard (student's earned certificates)
+- `/certificates/:certificateId` - Certificate Viewer with QR code and PDF download
+- `/verify/:certificateId` - Public Certificate Verification (no auth required)
 
 ## API Endpoints (Proxy to Admin Backend)
 Most routes are READ-ONLY proxies to the AISiksha Admin Course Factory:
@@ -105,6 +114,9 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 8. **Course Tests** - Take timed assessments with MCQ and scenario questions
 9. **Test Scoring** - Immediate score calculation (server-side to prevent cheating)
 10. **Test History** - View past attempt results with pass/fail status
+11. **Certificates Dashboard** - View all earned certificates with issue dates and skills
+12. **Certificate Viewer** - Full certificate display with QR code and PDF download
+13. **Public Verification** - Anyone can verify certificate authenticity via URL/QR code
 
 ## Design System
 - Fonts: Inter (body), Space Grotesk (headings)
@@ -124,6 +136,7 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - `shisya_course_progress` - Lesson completion tracking per course
 - `shisya_project_submissions` - Project submission data per course/project
 - `shisya_test_attempts` - Test attempt data (answers, scores, pass/fail status)
+- `shisya_certificates` - Certificate data with IDs, student info, and verification URLs
 
 ## Test System Design
 - **Security**: Correct answers are NEVER sent to the client. Server strips `isCorrect` flag before sending questions.
@@ -131,3 +144,11 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - **One-Time**: Tests cannot be retaken in this version (once attempted, shows result only).
 - **Timer**: Timed tests show countdown with color-coded warnings (amber < 60s, red < 30s with pulse).
 - **Persistence**: Attempts stored in localStorage for instant access to past results.
+
+## Certificate System Design
+- **Auto-Generated**: Certificates are issued when all requirements are met (lessons complete + test passed + project submitted if required)
+- **Certificate IDs**: 12-character randomly generated codes (format: XXXX-XXXX-XXXX)
+- **QR Codes**: Each certificate includes a QR code linking to its public verification page
+- **PDF Download**: Client-side PDF generation using html2canvas and jsPDF
+- **Public Verification**: `/verify/:certificateId` is accessible without authentication for certificate validation
+- **Data Shape**: Certificates include studentName, courseId, courseTitle, certificateTitle, level, skills, issuedAt, verificationUrl
