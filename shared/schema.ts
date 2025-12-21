@@ -127,6 +127,89 @@ export const insertProjectSubmissionSchema = z.object({
 
 export type InsertProjectSubmission = z.infer<typeof insertProjectSubmissionSchema>;
 
+// Test Option Schema (for internal use only - isCorrect never exposed to UI)
+export const testOptionSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  isCorrect: z.boolean(),
+});
+
+export type TestOption = z.infer<typeof testOptionSchema>;
+
+// Test Option for UI (without isCorrect)
+export const testOptionUISchema = z.object({
+  id: z.string(),
+  text: z.string(),
+});
+
+export type TestOptionUI = z.infer<typeof testOptionUISchema>;
+
+// Test Question Schema
+export const testQuestionSchema = z.object({
+  id: z.string(),
+  type: z.enum(["mcq", "scenario"]),
+  difficulty: z.enum(["easy", "medium", "hard"]),
+  questionText: z.string(),
+  options: z.array(testOptionSchema),
+});
+
+export type TestQuestion = z.infer<typeof testQuestionSchema>;
+
+// Test Question for UI (options without isCorrect)
+export interface TestQuestionUI {
+  id: string;
+  type: "mcq" | "scenario";
+  difficulty: "easy" | "medium" | "hard";
+  questionText: string;
+  options: TestOptionUI[];
+}
+
+// Test Schema
+export const testSchema = z.object({
+  id: z.number(),
+  courseId: z.number(),
+  title: z.string(),
+  description: z.string().nullable(),
+  instructions: z.string().nullable(),
+  passingPercentage: z.number(),
+  timeLimit: z.number().nullable(), // in minutes, null = no time limit
+  questionCount: z.number(),
+  createdAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+});
+
+export type Test = z.infer<typeof testSchema>;
+
+// Test with Questions (for backend use only)
+export interface TestWithQuestions extends Test {
+  questions: TestQuestion[];
+}
+
+// Test with Questions for UI (questions without isCorrect in options)
+export interface TestWithQuestionsUI extends Test {
+  questions: TestQuestionUI[];
+}
+
+// Test Attempt Answer Schema
+export const testAttemptAnswerSchema = z.object({
+  questionId: z.string(),
+  selectedOptionId: z.string(),
+});
+
+export type TestAttemptAnswer = z.infer<typeof testAttemptAnswerSchema>;
+
+// Test Attempt Schema (stored in localStorage)
+export const testAttemptSchema = z.object({
+  testId: z.number(),
+  courseId: z.number(),
+  answers: z.array(testAttemptAnswerSchema),
+  scorePercentage: z.number(),
+  passed: z.boolean(),
+  attemptedAt: z.string(),
+});
+
+export type TestAttempt = z.infer<typeof testAttemptSchema>;
+
 // API Response types
 export interface ApiResponse<T> {
   data: T;

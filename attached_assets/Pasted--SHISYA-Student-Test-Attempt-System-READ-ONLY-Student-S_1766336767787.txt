@@ -1,0 +1,342 @@
+
+
+## SHISYA – Student Test Attempt System (READ-ONLY, Student Side)
+
+---
+
+## ROLE & CONTEXT (VERY IMPORTANT)
+
+You are a **Senior Full-Stack Engineer + Senior EdTech Product Architect**.
+
+You are building **SHISYA**, the **student-facing learning portal** of the AISiksha ecosystem.
+
+This module is **STUDENT SIDE ONLY**.
+
+❌ Students cannot create or edit tests
+❌ Students cannot see correct answers before submission
+❌ Students cannot change pass criteria
+
+✅ Students can **attempt tests**, **submit**, and **see results**
+
+This system must integrate cleanly with:
+
+* SHISYA Learn
+* SHISYA Projects
+* AISiksha Admin Test Manager (already built)
+
+---
+
+## GOAL OF THIS MODULE
+
+Build a **Student Test Attempt System** that allows learners to:
+
+1. View tests assigned to a course
+2. Read test instructions
+3. Attempt MCQ / scenario-based questions
+4. Submit the test
+5. Automatically calculate score
+6. Determine **Pass / Fail**
+7. Store attempt locally (v1)
+8. Unlock certificate eligibility (logic-ready)
+
+---
+
+## CORE PRINCIPLES
+
+* **READ-ONLY CONTENT**
+* **NO ADMIN LOGIC**
+* **SAFE BY DESIGN**
+* **Mock-first, API-ready**
+* **LocalStorage-based attempts (v1)**
+
+---
+
+## ROUTES TO IMPLEMENT
+
+### 1️⃣ Course Tests List
+
+```
+/courses/:courseId/tests
+```
+
+**Purpose**
+
+* Show all tests linked to a course
+
+**Each test card shows:**
+
+* Test title
+* Number of questions
+* Time limit (if any)
+* Passing percentage
+* Status badge:
+
+  * Not Attempted
+  * Passed
+  * Failed
+* CTA:
+
+  * `Start Test` (if not attempted)
+  * `View Result` (if attempted)
+
+---
+
+### 2️⃣ Test Instructions Page
+
+```
+/courses/:courseId/tests/:testId
+```
+
+**Show:**
+
+* Test title & description
+* Instructions (read-only)
+* Number of questions
+* Time limit (if configured)
+* Passing percentage
+* Warning text:
+
+  > “Once started, the test must be completed in one session.”
+
+**CTA**
+
+* `Start Test`
+
+---
+
+### 3️⃣ Test Attempt Page
+
+```
+/courses/:courseId/tests/:testId/attempt
+```
+
+---
+
+## TEST ATTEMPT EXPERIENCE (VERY IMPORTANT)
+
+### UI Layout
+
+* Question counter: `Question 3 of 10`
+* Timer (only if time limit exists)
+* Question card:
+
+  * Question text
+  * Difficulty badge
+  * Question type badge (MCQ / Scenario)
+* Answer options (radio buttons)
+* Navigation:
+
+  * Next
+  * Previous
+* Progress indicator (answered / unanswered)
+
+### Rules
+
+* Only **one option selectable**
+* No hints
+* No explanations shown
+* Prevent refresh warning (`beforeunload`)
+
+---
+
+## SUBMISSION FLOW
+
+### Submit Button
+
+* Disabled until all questions are answered
+* Confirmation modal:
+
+  > “Are you sure you want to submit your test?”
+
+### On Submit
+
+* Auto-calculate:
+
+  * Total questions
+  * Correct answers
+  * Score %
+* Determine:
+
+  * `Passed` if score ≥ passing percentage
+  * `Failed` otherwise
+
+---
+
+## 4️⃣ Test Result Page
+
+```
+/courses/:courseId/tests/:testId/result
+```
+
+**Show:**
+
+* Final score percentage
+* Pass / Fail badge
+* Summary:
+
+  * Correct answers
+  * Incorrect answers
+* Message:
+
+  * Passed → “You are eligible for certification (subject to project completion)”
+  * Failed → “You may retry if allowed by course rules” (retry disabled in v1)
+
+❌ Do NOT show correct answers in v1
+❌ Do NOT allow reattempt in v1
+
+---
+
+## DATA & STATE MANAGEMENT
+
+### LocalStorage Keys
+
+```
+shisya_test_attempts
+```
+
+### Data Shape
+
+```ts
+{
+  testId: string;
+  courseId: string;
+  answers: {
+    questionId: string;
+    selectedOptionId: string;
+  }[];
+  scorePercentage: number;
+  passed: boolean;
+  attemptedAt: string;
+}
+```
+
+---
+
+## MOCK DATA REQUIREMENTS
+
+Add **mock tests** aligned with Admin Test Manager:
+
+* 2–3 tests per course
+* Each test includes:
+
+  * id
+  * title
+  * description
+  * passingPercentage
+  * timeLimit (optional)
+  * questions[]
+
+### Question Structure
+
+```ts
+{
+  id: string;
+  type: "mcq" | "scenario";
+  difficulty: "easy" | "medium" | "hard";
+  questionText: string;
+  options: {
+    id: string;
+    text: string;
+    isCorrect: boolean; // hidden from UI
+  }[];
+}
+```
+
+⚠️ `isCorrect` must **never** be exposed in UI state.
+
+---
+
+## API CONTRACT (FUTURE-READY)
+
+Implement proxy-ready APIs:
+
+```
+GET  /api/courses/:courseId/tests
+GET  /api/tests/:testId
+POST /api/tests/:testId/submit
+```
+
+For now:
+
+* Use mock data
+* Submission stored locally
+* API functions abstracted cleanly
+
+---
+
+## FILE STRUCTURE (MANDATORY)
+
+```
+client/src/
+├── pages/
+│   ├── CourseTests.tsx
+│   ├── TestInstructions.tsx
+│   ├── TestAttempt.tsx
+│   └── TestResult.tsx
+├── components/
+│   ├── test/
+│   │   ├── QuestionCard.tsx
+│   │   ├── OptionItem.tsx
+│   │   ├── TestTimer.tsx
+│   │   └── TestProgress.tsx
+├── lib/
+│   ├── tests.ts
+│   ├── testAttempts.ts
+│   └── api.ts
+├── contexts/
+│   └── TestAttemptContext.tsx
+```
+
+---
+
+## UI / DESIGN SYSTEM RULES
+
+* Use existing SHISYA theme
+* Use Shadcn UI components
+* Clear pass/fail colors:
+
+  * Green = Passed
+  * Red = Failed
+* Mobile responsive
+* Clean spacing, no clutter
+
+---
+
+## QUALITY & SAFETY CHECKS
+
+You MUST ensure:
+
+* No answer leakage
+* No console logs exposing answers
+* Submission is final
+* Refresh warning during test
+* All tests show correct status in course page
+
+---
+
+## OUT OF SCOPE (DO NOT BUILD)
+
+❌ Admin test creation
+❌ Manual grading
+❌ Reattempt logic
+❌ Certificate issuing UI
+❌ Proctoring
+
+---
+
+## FINAL DELIVERABLE
+
+At the end, confirm:
+
+* Student can attempt a test end-to-end
+* Result is calculated correctly
+* Status reflects across course pages
+* System works fully with mock data
+* Ready to connect to Admin backend later
+
+---
+
+### 🔚 END OF MASTER PROMPT
+
+---
+

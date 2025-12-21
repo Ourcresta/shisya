@@ -1,4 +1,4 @@
-import type { Course, Module, Lesson, AINotes, Project } from "@shared/schema";
+import type { Course, Module, Lesson, AINotes, Project, TestWithQuestions } from "@shared/schema";
 
 // Mock courses data for development (until admin backend is deployed)
 export const mockCourses: Course[] = [
@@ -493,4 +493,567 @@ export function getAllProjects(): Record<number, Project> {
     });
   });
   return allProjects;
+}
+
+// Mock Tests Data
+export const mockTests: Record<number, TestWithQuestions[]> = {
+  // Course 1: Web Development
+  1: [
+    {
+      id: 1,
+      courseId: 1,
+      title: "HTML & CSS Fundamentals",
+      description: "Test your understanding of HTML structure, CSS styling, and responsive design principles.",
+      instructions: "Read each question carefully. Select the best answer for each multiple-choice question. You cannot go back once you submit the test.",
+      passingPercentage: 70,
+      timeLimit: 15,
+      questionCount: 5,
+      createdAt: "2024-01-15T10:00:00Z",
+      updatedAt: "2024-01-20T14:30:00Z",
+      questions: [
+        {
+          id: "q1-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "Which HTML tag is used to define the main heading of a document?",
+          options: [
+            { id: "q1-1-a", text: "<header>", isCorrect: false },
+            { id: "q1-1-b", text: "<h1>", isCorrect: true },
+            { id: "q1-1-c", text: "<head>", isCorrect: false },
+            { id: "q1-1-d", text: "<title>", isCorrect: false }
+          ]
+        },
+        {
+          id: "q1-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What does CSS stand for?",
+          options: [
+            { id: "q1-2-a", text: "Computer Style Sheets", isCorrect: false },
+            { id: "q1-2-b", text: "Creative Style System", isCorrect: false },
+            { id: "q1-2-c", text: "Cascading Style Sheets", isCorrect: true },
+            { id: "q1-2-d", text: "Colorful Style Sheets", isCorrect: false }
+          ]
+        },
+        {
+          id: "q1-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "Which CSS property is used to create space between the element's border and its content?",
+          options: [
+            { id: "q1-3-a", text: "margin", isCorrect: false },
+            { id: "q1-3-b", text: "padding", isCorrect: true },
+            { id: "q1-3-c", text: "spacing", isCorrect: false },
+            { id: "q1-3-d", text: "border-spacing", isCorrect: false }
+          ]
+        },
+        {
+          id: "q1-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "Which display value creates a flex container?",
+          options: [
+            { id: "q1-4-a", text: "display: block", isCorrect: false },
+            { id: "q1-4-b", text: "display: inline", isCorrect: false },
+            { id: "q1-4-c", text: "display: flex", isCorrect: true },
+            { id: "q1-4-d", text: "display: grid-flex", isCorrect: false }
+          ]
+        },
+        {
+          id: "q1-5",
+          type: "mcq",
+          difficulty: "hard",
+          questionText: "Which media query correctly targets screens smaller than 768px?",
+          options: [
+            { id: "q1-5-a", text: "@media (min-width: 768px)", isCorrect: false },
+            { id: "q1-5-b", text: "@media (max-width: 768px)", isCorrect: true },
+            { id: "q1-5-c", text: "@media (width < 768px)", isCorrect: false },
+            { id: "q1-5-d", text: "@media screen(768px)", isCorrect: false }
+          ]
+        }
+      ]
+    },
+    {
+      id: 2,
+      courseId: 1,
+      title: "JavaScript Basics",
+      description: "Evaluate your JavaScript knowledge including variables, functions, and DOM manipulation.",
+      instructions: "This test covers JavaScript fundamentals. Take your time and think through each question.",
+      passingPercentage: 70,
+      timeLimit: 20,
+      questionCount: 5,
+      createdAt: "2024-01-16T10:00:00Z",
+      updatedAt: "2024-01-21T14:30:00Z",
+      questions: [
+        {
+          id: "q2-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "Which keyword is used to declare a constant in JavaScript?",
+          options: [
+            { id: "q2-1-a", text: "var", isCorrect: false },
+            { id: "q2-1-b", text: "let", isCorrect: false },
+            { id: "q2-1-c", text: "const", isCorrect: true },
+            { id: "q2-1-d", text: "constant", isCorrect: false }
+          ]
+        },
+        {
+          id: "q2-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What is the correct syntax for an arrow function?",
+          options: [
+            { id: "q2-2-a", text: "function => ()", isCorrect: false },
+            { id: "q2-2-b", text: "() => {}", isCorrect: true },
+            { id: "q2-2-c", text: "=> function()", isCorrect: false },
+            { id: "q2-2-d", text: "arrow() => {}", isCorrect: false }
+          ]
+        },
+        {
+          id: "q2-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "Which method is used to select an element by its ID?",
+          options: [
+            { id: "q2-3-a", text: "document.querySelector('#id')", isCorrect: false },
+            { id: "q2-3-b", text: "document.getElement('id')", isCorrect: false },
+            { id: "q2-3-c", text: "document.getElementById('id')", isCorrect: true },
+            { id: "q2-3-d", text: "document.findById('id')", isCorrect: false }
+          ]
+        },
+        {
+          id: "q2-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What does the 'this' keyword refer to in an arrow function?",
+          options: [
+            { id: "q2-4-a", text: "The function itself", isCorrect: false },
+            { id: "q2-4-b", text: "The global object always", isCorrect: false },
+            { id: "q2-4-c", text: "The enclosing lexical context", isCorrect: true },
+            { id: "q2-4-d", text: "undefined", isCorrect: false }
+          ]
+        },
+        {
+          id: "q2-5",
+          type: "scenario",
+          difficulty: "hard",
+          questionText: "You need to add a click event listener to a button. Which code is correct?",
+          options: [
+            { id: "q2-5-a", text: "button.onClick = function() {}", isCorrect: false },
+            { id: "q2-5-b", text: "button.addEventListener('click', function() {})", isCorrect: true },
+            { id: "q2-5-c", text: "button.on('click', function() {})", isCorrect: false },
+            { id: "q2-5-d", text: "button.listen('click', function() {})", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ],
+  // Course 2: React Fundamentals
+  2: [
+    {
+      id: 3,
+      courseId: 2,
+      title: "React Core Concepts",
+      description: "Test your understanding of React components, props, state, and hooks.",
+      instructions: "This test evaluates your knowledge of React fundamentals. Each question has only one correct answer.",
+      passingPercentage: 75,
+      timeLimit: 25,
+      questionCount: 6,
+      createdAt: "2024-02-01T09:00:00Z",
+      updatedAt: "2024-02-10T11:00:00Z",
+      questions: [
+        {
+          id: "q3-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What is the correct way to create a functional component in React?",
+          options: [
+            { id: "q3-1-a", text: "function MyComponent() { return <div></div> }", isCorrect: true },
+            { id: "q3-1-b", text: "class MyComponent { render() {} }", isCorrect: false },
+            { id: "q3-1-c", text: "const MyComponent = component(<div></div>)", isCorrect: false },
+            { id: "q3-1-d", text: "React.function MyComponent() {}", isCorrect: false }
+          ]
+        },
+        {
+          id: "q3-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "How do you pass a prop called 'name' to a component?",
+          options: [
+            { id: "q3-2-a", text: "<Component props={name} />", isCorrect: false },
+            { id: "q3-2-b", text: "<Component name='value' />", isCorrect: true },
+            { id: "q3-2-c", text: "<Component {name} />", isCorrect: false },
+            { id: "q3-2-d", text: "<Component prop:name='value' />", isCorrect: false }
+          ]
+        },
+        {
+          id: "q3-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What hook is used to manage state in a functional component?",
+          options: [
+            { id: "q3-3-a", text: "useEffect", isCorrect: false },
+            { id: "q3-3-b", text: "useContext", isCorrect: false },
+            { id: "q3-3-c", text: "useState", isCorrect: true },
+            { id: "q3-3-d", text: "useReducer", isCorrect: false }
+          ]
+        },
+        {
+          id: "q3-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What is the purpose of the useEffect hook?",
+          options: [
+            { id: "q3-4-a", text: "To manage component state", isCorrect: false },
+            { id: "q3-4-b", text: "To perform side effects in components", isCorrect: true },
+            { id: "q3-4-c", text: "To create context providers", isCorrect: false },
+            { id: "q3-4-d", text: "To optimize rendering performance", isCorrect: false }
+          ]
+        },
+        {
+          id: "q3-5",
+          type: "mcq",
+          difficulty: "hard",
+          questionText: "What happens when you pass an empty dependency array [] to useEffect?",
+          options: [
+            { id: "q3-5-a", text: "The effect runs on every render", isCorrect: false },
+            { id: "q3-5-b", text: "The effect never runs", isCorrect: false },
+            { id: "q3-5-c", text: "The effect runs only once after initial mount", isCorrect: true },
+            { id: "q3-5-d", text: "The effect runs when props change", isCorrect: false }
+          ]
+        },
+        {
+          id: "q3-6",
+          type: "scenario",
+          difficulty: "hard",
+          questionText: "You have two sibling components that need to share state. What is the recommended approach?",
+          options: [
+            { id: "q3-6-a", text: "Use localStorage to share data", isCorrect: false },
+            { id: "q3-6-b", text: "Lift the state up to the common parent", isCorrect: true },
+            { id: "q3-6-c", text: "Use document.querySelector to access the other component", isCorrect: false },
+            { id: "q3-6-d", text: "Create a global variable", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ],
+  // Course 3: TypeScript
+  3: [
+    {
+      id: 4,
+      courseId: 3,
+      title: "TypeScript Advanced Types",
+      description: "Evaluate your understanding of TypeScript generics, utility types, and type manipulation.",
+      instructions: "This advanced test covers TypeScript type system features. Think carefully about each question.",
+      passingPercentage: 80,
+      timeLimit: 30,
+      questionCount: 5,
+      createdAt: "2024-02-15T08:00:00Z",
+      updatedAt: "2024-02-20T16:00:00Z",
+      questions: [
+        {
+          id: "q4-1",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What utility type makes all properties optional?",
+          options: [
+            { id: "q4-1-a", text: "Required<T>", isCorrect: false },
+            { id: "q4-1-b", text: "Partial<T>", isCorrect: true },
+            { id: "q4-1-c", text: "Optional<T>", isCorrect: false },
+            { id: "q4-1-d", text: "Maybe<T>", isCorrect: false }
+          ]
+        },
+        {
+          id: "q4-2",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "How do you define a generic function in TypeScript?",
+          options: [
+            { id: "q4-2-a", text: "function fn<T>(arg: T): T {}", isCorrect: true },
+            { id: "q4-2-b", text: "function fn(arg: generic): generic {}", isCorrect: false },
+            { id: "q4-2-c", text: "function fn[T](arg: T): T {}", isCorrect: false },
+            { id: "q4-2-d", text: "generic function fn(arg): {}", isCorrect: false }
+          ]
+        },
+        {
+          id: "q4-3",
+          type: "mcq",
+          difficulty: "hard",
+          questionText: "What does Pick<Type, Keys> do?",
+          options: [
+            { id: "q4-3-a", text: "Removes the specified keys from the type", isCorrect: false },
+            { id: "q4-3-b", text: "Creates a type with only the specified keys", isCorrect: true },
+            { id: "q4-3-c", text: "Makes the specified keys optional", isCorrect: false },
+            { id: "q4-3-d", text: "Makes the specified keys required", isCorrect: false }
+          ]
+        },
+        {
+          id: "q4-4",
+          type: "mcq",
+          difficulty: "hard",
+          questionText: "What is the difference between 'interface' and 'type' in TypeScript?",
+          options: [
+            { id: "q4-4-a", text: "They are completely interchangeable", isCorrect: false },
+            { id: "q4-4-b", text: "Interfaces can be merged, types cannot", isCorrect: true },
+            { id: "q4-4-c", text: "Types can extend classes, interfaces cannot", isCorrect: false },
+            { id: "q4-4-d", text: "Interfaces are faster to compile", isCorrect: false }
+          ]
+        },
+        {
+          id: "q4-5",
+          type: "scenario",
+          difficulty: "hard",
+          questionText: "You need a type that excludes null and undefined from T. Which utility type should you use?",
+          options: [
+            { id: "q4-5-a", text: "Required<T>", isCorrect: false },
+            { id: "q4-5-b", text: "NonNullable<T>", isCorrect: true },
+            { id: "q4-5-c", text: "Exclude<T, null>", isCorrect: false },
+            { id: "q4-5-d", text: "Strict<T>", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ],
+  // Course 4: Python
+  4: [
+    {
+      id: 5,
+      courseId: 4,
+      title: "Python Data Science Basics",
+      description: "Test your knowledge of Python, NumPy, and Pandas for data analysis.",
+      instructions: "This test covers Python fundamentals and data science libraries. Select the best answer for each question.",
+      passingPercentage: 70,
+      timeLimit: 20,
+      questionCount: 5,
+      createdAt: "2024-03-01T10:00:00Z",
+      updatedAt: "2024-03-05T12:00:00Z",
+      questions: [
+        {
+          id: "q5-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "Which library is used to create DataFrames in Python?",
+          options: [
+            { id: "q5-1-a", text: "NumPy", isCorrect: false },
+            { id: "q5-1-b", text: "Matplotlib", isCorrect: false },
+            { id: "q5-1-c", text: "Pandas", isCorrect: true },
+            { id: "q5-1-d", text: "SciPy", isCorrect: false }
+          ]
+        },
+        {
+          id: "q5-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "How do you import NumPy with the alias 'np'?",
+          options: [
+            { id: "q5-2-a", text: "import numpy as np", isCorrect: true },
+            { id: "q5-2-b", text: "from numpy import np", isCorrect: false },
+            { id: "q5-2-c", text: "import np from numpy", isCorrect: false },
+            { id: "q5-2-d", text: "use numpy as np", isCorrect: false }
+          ]
+        },
+        {
+          id: "q5-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "Which Pandas method is used to read a CSV file?",
+          options: [
+            { id: "q5-3-a", text: "pd.load_csv()", isCorrect: false },
+            { id: "q5-3-b", text: "pd.read_csv()", isCorrect: true },
+            { id: "q5-3-c", text: "pd.open_csv()", isCorrect: false },
+            { id: "q5-3-d", text: "pd.csv()", isCorrect: false }
+          ]
+        },
+        {
+          id: "q5-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What does df.head() return?",
+          options: [
+            { id: "q5-4-a", text: "The first row of the DataFrame", isCorrect: false },
+            { id: "q5-4-b", text: "The first 5 rows of the DataFrame", isCorrect: true },
+            { id: "q5-4-c", text: "The column names", isCorrect: false },
+            { id: "q5-4-d", text: "The data types of each column", isCorrect: false }
+          ]
+        },
+        {
+          id: "q5-5",
+          type: "mcq",
+          difficulty: "hard",
+          questionText: "Which NumPy function calculates the standard deviation?",
+          options: [
+            { id: "q5-5-a", text: "np.std()", isCorrect: true },
+            { id: "q5-5-b", text: "np.deviation()", isCorrect: false },
+            { id: "q5-5-c", text: "np.stddev()", isCorrect: false },
+            { id: "q5-5-d", text: "np.sd()", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ],
+  // Course 5: Node.js
+  5: [
+    {
+      id: 6,
+      courseId: 5,
+      title: "Node.js & Express Fundamentals",
+      description: "Evaluate your knowledge of Node.js backend development with Express.",
+      instructions: "This test covers Node.js and Express concepts for building backend applications.",
+      passingPercentage: 75,
+      timeLimit: 25,
+      questionCount: 5,
+      createdAt: "2024-03-10T09:00:00Z",
+      updatedAt: "2024-03-15T14:00:00Z",
+      questions: [
+        {
+          id: "q6-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What is Express.js?",
+          options: [
+            { id: "q6-1-a", text: "A database management system", isCorrect: false },
+            { id: "q6-1-b", text: "A web application framework for Node.js", isCorrect: true },
+            { id: "q6-1-c", text: "A frontend JavaScript library", isCorrect: false },
+            { id: "q6-1-d", text: "A testing framework", isCorrect: false }
+          ]
+        },
+        {
+          id: "q6-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "Which HTTP method is used to retrieve data?",
+          options: [
+            { id: "q6-2-a", text: "POST", isCorrect: false },
+            { id: "q6-2-b", text: "GET", isCorrect: true },
+            { id: "q6-2-c", text: "PUT", isCorrect: false },
+            { id: "q6-2-d", text: "DELETE", isCorrect: false }
+          ]
+        },
+        {
+          id: "q6-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What is middleware in Express?",
+          options: [
+            { id: "q6-3-a", text: "A database connection", isCorrect: false },
+            { id: "q6-3-b", text: "Functions that execute during request-response cycle", isCorrect: true },
+            { id: "q6-3-c", text: "A type of HTTP request", isCorrect: false },
+            { id: "q6-3-d", text: "A frontend component", isCorrect: false }
+          ]
+        },
+        {
+          id: "q6-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "How do you access the request body in Express?",
+          options: [
+            { id: "q6-4-a", text: "req.data", isCorrect: false },
+            { id: "q6-4-b", text: "req.body", isCorrect: true },
+            { id: "q6-4-c", text: "req.content", isCorrect: false },
+            { id: "q6-4-d", text: "req.payload", isCorrect: false }
+          ]
+        },
+        {
+          id: "q6-5",
+          type: "scenario",
+          difficulty: "hard",
+          questionText: "You need to handle errors globally in Express. What is the correct middleware signature?",
+          options: [
+            { id: "q6-5-a", text: "app.use((req, res) => {})", isCorrect: false },
+            { id: "q6-5-b", text: "app.use((err, req, res, next) => {})", isCorrect: true },
+            { id: "q6-5-c", text: "app.error((err, res) => {})", isCorrect: false },
+            { id: "q6-5-d", text: "app.catch((err) => {})", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ],
+  // Course 6: AWS
+  6: [
+    {
+      id: 7,
+      courseId: 6,
+      title: "AWS Cloud Fundamentals",
+      description: "Test your knowledge of AWS services, architecture, and best practices.",
+      instructions: "This test covers AWS cloud concepts. Choose the most appropriate answer for each question.",
+      passingPercentage: 75,
+      timeLimit: 30,
+      questionCount: 5,
+      createdAt: "2024-03-20T08:00:00Z",
+      updatedAt: "2024-03-25T10:00:00Z",
+      questions: [
+        {
+          id: "q7-1",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What AWS service is used for object storage?",
+          options: [
+            { id: "q7-1-a", text: "EC2", isCorrect: false },
+            { id: "q7-1-b", text: "RDS", isCorrect: false },
+            { id: "q7-1-c", text: "S3", isCorrect: true },
+            { id: "q7-1-d", text: "Lambda", isCorrect: false }
+          ]
+        },
+        {
+          id: "q7-2",
+          type: "mcq",
+          difficulty: "easy",
+          questionText: "What does EC2 stand for?",
+          options: [
+            { id: "q7-2-a", text: "Elastic Cloud Computing", isCorrect: false },
+            { id: "q7-2-b", text: "Elastic Compute Cloud", isCorrect: true },
+            { id: "q7-2-c", text: "Enterprise Cloud Cluster", isCorrect: false },
+            { id: "q7-2-d", text: "Extended Compute Capacity", isCorrect: false }
+          ]
+        },
+        {
+          id: "q7-3",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "Which AWS service allows you to run code without provisioning servers?",
+          options: [
+            { id: "q7-3-a", text: "EC2", isCorrect: false },
+            { id: "q7-3-b", text: "ECS", isCorrect: false },
+            { id: "q7-3-c", text: "Lambda", isCorrect: true },
+            { id: "q7-3-d", text: "Elastic Beanstalk", isCorrect: false }
+          ]
+        },
+        {
+          id: "q7-4",
+          type: "mcq",
+          difficulty: "medium",
+          questionText: "What is CloudFormation used for?",
+          options: [
+            { id: "q7-4-a", text: "Monitoring application performance", isCorrect: false },
+            { id: "q7-4-b", text: "Infrastructure as Code", isCorrect: true },
+            { id: "q7-4-c", text: "Container orchestration", isCorrect: false },
+            { id: "q7-4-d", text: "Database management", isCorrect: false }
+          ]
+        },
+        {
+          id: "q7-5",
+          type: "scenario",
+          difficulty: "hard",
+          questionText: "You need a fully managed NoSQL database that scales automatically. Which AWS service should you use?",
+          options: [
+            { id: "q7-5-a", text: "RDS", isCorrect: false },
+            { id: "q7-5-b", text: "DynamoDB", isCorrect: true },
+            { id: "q7-5-c", text: "Aurora", isCorrect: false },
+            { id: "q7-5-d", text: "ElastiCache", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// Helper to get all tests as a flat map by test ID
+export function getAllTests(): Record<number, TestWithQuestions> {
+  const allTests: Record<number, TestWithQuestions> = {};
+  Object.values(mockTests).forEach(tests => {
+    tests.forEach(test => {
+      allTests[test.id] = test;
+    });
+  });
+  return allTests;
 }

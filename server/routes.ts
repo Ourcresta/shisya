@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects } from "./mockData";
+import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -314,6 +314,139 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error submitting project:", error);
       res.status(500).json({ error: "Failed to submit project" });
+    }
+  });
+
+  // ============================================
+  // TEST ROUTES
+  // ============================================
+
+  // GET /api/courses/:courseId/tests - Fetch tests for a course
+  app.get("/api/courses/:courseId/tests", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      if (USE_MOCK_DATA) {
+        const tests = mockTests[courseIdNum] || [];
+        // Return tests without questions (summary only)
+        const testsSummary = tests.map(({ questions, ...rest }) => rest);
+        return res.json(testsSummary);
+      }
+
+      const response = await fetchFromAdmin(`/courses/${courseId}/tests`);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to fetch tests" });
+      }
+      const tests = await response.json();
+      res.json(tests);
+    } catch (error) {
+      console.error("Error fetching tests:", error);
+      if (USE_MOCK_DATA) {
+        const courseIdNum = parseInt(req.params.courseId, 10);
+        const tests = mockTests[courseIdNum] || [];
+        const testsSummary = tests.map(({ questions, ...rest }) => rest);
+        return res.json(testsSummary);
+      }
+      res.status(500).json({ error: "Failed to fetch tests" });
+    }
+  });
+
+  // GET /api/tests/:testId - Fetch single test (without correct answers exposed)
+  app.get("/api/tests/:testId", async (req, res) => {
+    try {
+      const { testId } = req.params;
+      const testIdNum = parseInt(testId, 10);
+
+      if (USE_MOCK_DATA) {
+        const allTests = getAllTests();
+        const test = allTests[testIdNum];
+        if (!test) {
+          return res.status(404).json({ error: "Test not found" });
+        }
+        // Strip isCorrect from options before sending to client
+        const safeTest = {
+          ...test,
+          questions: test.questions.map(q => ({
+            ...q,
+            options: q.options.map(({ isCorrect, ...opt }) => opt)
+          }))
+        };
+        return res.json(safeTest);
+      }
+
+      const response = await fetchFromAdmin(`/tests/${testId}`);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Test not found" });
+      }
+      const test = await response.json();
+      res.json(test);
+    } catch (error) {
+      console.error("Error fetching test:", error);
+      res.status(500).json({ error: "Failed to fetch test" });
+    }
+  });
+
+  // POST /api/tests/:testId/submit - Submit test answers and calculate score
+  app.post("/api/tests/:testId/submit", async (req, res) => {
+    try {
+      const { testId } = req.params;
+      const testIdNum = parseInt(testId, 10);
+      const { answers, courseId } = req.body;
+
+      if (!answers || !Array.isArray(answers)) {
+        return res.status(400).json({ error: "Answers are required" });
+      }
+
+      if (USE_MOCK_DATA) {
+        const allTests = getAllTests();
+        const test = allTests[testIdNum];
+        if (!test) {
+          return res.status(404).json({ error: "Test not found" });
+        }
+
+        // Calculate score
+        let correctCount = 0;
+        const totalQuestions = test.questions.length;
+
+        for (const answer of answers) {
+          const question = test.questions.find(q => q.id === answer.questionId);
+          if (question) {
+            const correctOption = question.options.find(o => o.isCorrect);
+            if (correctOption && correctOption.id === answer.selectedOptionId) {
+              correctCount++;
+            }
+          }
+        }
+
+        const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
+        const passed = scorePercentage >= test.passingPercentage;
+
+        return res.json({
+          success: true,
+          result: {
+            testId: testIdNum,
+            courseId: courseId || test.courseId,
+            totalQuestions,
+            correctAnswers: correctCount,
+            scorePercentage,
+            passingPercentage: test.passingPercentage,
+            passed,
+            attemptedAt: new Date().toISOString()
+          }
+        });
+      }
+
+      // For real backend, forward the submission
+      const response = await fetchFromAdmin(`/tests/${testId}/submit`);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to submit test" });
+      }
+      const result = await response.json();
+      res.json(result);
+    } catch (error) {
+      console.error("Error submitting test:", error);
+      res.status(500).json({ error: "Failed to submit test" });
     }
   });
 
