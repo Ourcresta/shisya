@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons } from "./mockData";
+import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects } from "./mockData";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -224,6 +224,96 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching notes:", error);
       res.json(null);
+    }
+  });
+
+  // ============================================
+  // PROJECT ROUTES
+  // ============================================
+
+  // GET /api/courses/:courseId/projects - Fetch projects for a course
+  app.get("/api/courses/:courseId/projects", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      if (USE_MOCK_DATA) {
+        const projects = mockProjects[courseIdNum] || [];
+        return res.json(projects);
+      }
+
+      const response = await fetchFromAdmin(`/courses/${courseId}/projects`);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to fetch projects" });
+      }
+      const projects = await response.json();
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      if (USE_MOCK_DATA) {
+        const courseIdNum = parseInt(req.params.courseId, 10);
+        const projects = mockProjects[courseIdNum] || [];
+        return res.json(projects);
+      }
+      res.status(500).json({ error: "Failed to fetch projects" });
+    }
+  });
+
+  // GET /api/projects/:projectId - Fetch single project
+  app.get("/api/projects/:projectId", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const projectIdNum = parseInt(projectId, 10);
+
+      if (USE_MOCK_DATA) {
+        const allProjects = getAllProjects();
+        const project = allProjects[projectIdNum];
+        if (!project) {
+          return res.status(404).json({ error: "Project not found" });
+        }
+        return res.json(project);
+      }
+
+      const response = await fetchFromAdmin(`/projects/${projectId}`);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Project not found" });
+      }
+      const project = await response.json();
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ error: "Failed to fetch project" });
+    }
+  });
+
+  // POST /api/projects/:projectId/submissions - Submit a project
+  // Note: In production, this would save to admin backend
+  // For now, we just acknowledge the submission (actual storage is in localStorage on client)
+  app.post("/api/projects/:projectId/submissions", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const { githubUrl, liveUrl, notes } = req.body;
+
+      // Validate required fields
+      if (!githubUrl) {
+        return res.status(400).json({ error: "GitHub URL is required" });
+      }
+
+      // In a real implementation, this would save to the database
+      // For now, we acknowledge the submission
+      const submission = {
+        projectId: parseInt(projectId, 10),
+        githubUrl,
+        liveUrl: liveUrl || null,
+        notes: notes || null,
+        submitted: true,
+        submittedAt: new Date().toISOString(),
+      };
+
+      res.json({ success: true, submission });
+    } catch (error) {
+      console.error("Error submitting project:", error);
+      res.status(500).json({ error: "Failed to submit project" });
     }
   });
 

@@ -9,6 +9,8 @@ import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
 import LearnView from "@/pages/LearnView";
 import LessonViewer from "@/pages/LessonViewer";
+import CourseProjects from "@/pages/CourseProjects";
+import ProjectDetail from "@/pages/ProjectDetail";
 
 function Router() {
   return (
@@ -17,6 +19,8 @@ function Router() {
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/courses/:courseId/learn" component={LearnView} />
       <Route path="/courses/:courseId/learn/:lessonId" component={LessonViewer} />
+      <Route path="/courses/:courseId/projects" component={CourseProjects} />
+      <Route path="/courses/:courseId/projects/:projectId" component={ProjectDetail} />
       <Route component={NotFound} />
     </Switch>
   );
