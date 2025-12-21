@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
-import { ArrowRight, CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,13 +119,21 @@ export default function CourseOverview() {
           </Card>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4 flex-wrap">
             <Link href={`/courses/${course.id}/learn`}>
               <Button size="lg" className="px-8 gap-2" data-testid="button-start-learning">
                 <BookOpen className="w-4 h-4" />
                 Start Learning
               </Button>
             </Link>
+            {course.testRequired && (
+              <Link href={`/courses/${course.id}/tests`}>
+                <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-tests">
+                  <ClipboardList className="w-4 h-4" />
+                  View Tests
+                </Button>
+              </Link>
+            )}
             {course.projectRequired && (
               <Link href={`/courses/${course.id}/projects`}>
                 <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-projects">

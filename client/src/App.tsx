@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProgressProvider } from "@/contexts/ProgressContext";
+import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import NotFound from "@/pages/not-found";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -11,6 +12,10 @@ import LearnView from "@/pages/LearnView";
 import LessonViewer from "@/pages/LessonViewer";
 import CourseProjects from "@/pages/CourseProjects";
 import ProjectDetail from "@/pages/ProjectDetail";
+import CourseTests from "@/pages/CourseTests";
+import TestInstructions from "@/pages/TestInstructions";
+import TestAttempt from "@/pages/TestAttempt";
+import TestResult from "@/pages/TestResult";
 
 function Router() {
   return (
@@ -21,6 +26,10 @@ function Router() {
       <Route path="/courses/:courseId/learn/:lessonId" component={LessonViewer} />
       <Route path="/courses/:courseId/projects" component={CourseProjects} />
       <Route path="/courses/:courseId/projects/:projectId" component={ProjectDetail} />
+      <Route path="/courses/:courseId/tests" component={CourseTests} />
+      <Route path="/courses/:courseId/tests/:testId" component={TestInstructions} />
+      <Route path="/courses/:courseId/tests/:testId/attempt" component={TestAttempt} />
+      <Route path="/courses/:courseId/tests/:testId/result" component={TestResult} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -31,8 +40,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ProgressProvider>
-          <Toaster />
-          <Router />
+          <TestAttemptProvider>
+            <Toaster />
+            <Router />
+          </TestAttemptProvider>
         </ProgressProvider>
       </TooltipProvider>
     </QueryClientProvider>
