@@ -1,0 +1,295 @@
+
+
+This completes the **Learn → Project → Test → Certificate** lifecycle cleanly.
+
+
+
+## SHISYA – Certificate Viewer & Verification Page
+
+---
+
+## ROLE & CONTEXT
+
+You are a **Senior Full-Stack Engineer + Senior EdTech Platform Architect**.
+
+You are building **SHISYA**, the **student-facing portal** of the AISiksha ecosystem.
+
+This module handles:
+
+* Certificate viewing (student)
+* Certificate download
+* Public certificate verification via QR / URL
+
+This system connects to:
+
+* SHISYA Learn (progress)
+* SHISYA Projects (submission)
+* SHISYA Tests (pass/fail)
+* AISiksha Admin Certificate Designer (already built)
+
+---
+
+## CORE RULES
+
+✅ Certificates are **AUTO-GENERATED**
+❌ Students cannot edit certificates
+❌ Certificates appear **only when eligibility is met**
+✅ Verification must work **without login**
+
+---
+
+## CERTIFICATE ELIGIBILITY LOGIC (CRITICAL)
+
+A certificate becomes **available ONLY IF**:
+
+1. ✅ All lessons completed
+2. ✅ Required test passed
+3. ✅ Required project submitted
+
+This logic already exists implicitly — now **enforce it visually and functionally**.
+
+---
+
+## ROUTES TO IMPLEMENT
+
+---
+
+### 1️⃣ Student Certificate Dashboard
+
+```
+/certificates
+```
+
+**Purpose**
+
+* Show all certificates earned by the student
+
+**Each certificate card shows:**
+
+* Certificate name
+* Course name
+* Level badge (Beginner / Intermediate / Advanced)
+* Issue date
+* Status badge: `Issued`
+* CTA buttons:
+
+  * `View Certificate`
+  * `Download PDF`
+
+**Empty State**
+
+> “Complete courses to earn certificates.”
+
+---
+
+### 2️⃣ Certificate Viewer (Student)
+
+```
+/certificates/:certificateId
+```
+
+---
+
+## CERTIFICATE VIEWER UI
+
+### Certificate Preview Card
+
+* Student Name
+* Certificate Title
+* Course Name
+* Level
+* Issue Date
+* Skills Validated (tags)
+* Certificate ID (short hash)
+* QR Code (verification link)
+
+### Actions
+
+* `Download PDF`
+* `Copy Verification Link`
+
+---
+
+## 3️⃣ Public Certificate Verification Page 🌐
+
+```
+/verify/:certificateId
+```
+
+🚨 **NO AUTH REQUIRED**
+
+---
+
+## VERIFICATION PAGE CONTENT
+
+### If certificate is VALID:
+
+✅ Green verified badge
+
+> “This certificate is valid and issued by AISiksha”
+
+Display:
+
+* Student Name
+* Course Name
+* Certificate Type
+* Level
+* Issue Date
+* Skills Validated
+* Certificate ID
+* Issued By: AISiksha
+
+### If certificate is INVALID:
+
+❌ Red warning
+
+> “Certificate not found or invalid”
+
+---
+
+## QR CODE BEHAVIOR
+
+* QR code embedded in certificate points to:
+
+```
+https://shisya.siksha.ai/verify/:certificateId
+```
+
+* Use lightweight QR library
+* QR generated dynamically
+
+---
+
+## DATA MANAGEMENT (v1)
+
+### LocalStorage Key
+
+```
+shisya_certificates
+```
+
+### Certificate Data Shape
+
+```ts
+{
+  certificateId: string;
+  studentName: string;
+  courseId: string;
+  courseTitle: string;
+  certificateTitle: string;
+  certificateType: "completion" | "achievement";
+  level: "beginner" | "intermediate" | "advanced";
+  skills: string[];
+  issuedAt: string;
+  verificationUrl: string;
+}
+```
+
+---
+
+## MOCK DATA REQUIREMENTS
+
+Create **realistic issued certificates**:
+
+* 2–3 certificates
+* Linked to completed courses
+* Skills pulled from course + certificate config
+* Random but stable certificate IDs
+
+---
+
+## API CONTRACT (FUTURE READY)
+
+Abstract API calls:
+
+```
+GET /api/certificates
+GET /api/certificates/:id
+GET /api/certificates/verify/:id
+```
+
+For now:
+
+* Use mock + LocalStorage
+* Auto-switch to real API when available
+
+---
+
+## FILE STRUCTURE (MANDATORY)
+
+```
+client/src/
+├── pages/
+│   ├── CertificatesDashboard.tsx
+│   ├── CertificateViewer.tsx
+│   └── CertificateVerify.tsx
+├── components/
+│   ├── certificate/
+│   │   ├── CertificateCard.tsx
+│   │   ├── CertificatePreview.tsx
+│   │   ├── CertificateMeta.tsx
+│   │   └── QRCodeBlock.tsx
+├── lib/
+│   ├── certificates.ts
+│   ├── verification.ts
+│   └── api.ts
+```
+
+---
+
+## UI / DESIGN RULES
+
+* Match SHISYA branding
+* Elegant, professional certificate preview
+* Clear verified / invalid states
+* Mobile friendly
+* Print-ready PDF layout (A4)
+
+---
+
+## PDF DOWNLOAD
+
+* Generate client-side PDF
+* Styled exactly like preview
+* Include:
+
+  * Certificate ID
+  * QR Code
+  * Footer: “Verify at shisya.siksha.ai”
+
+---
+
+## SECURITY & QUALITY
+
+You MUST ensure:
+
+* Certificate IDs are non-guessable
+* Verification page is safe & public
+* No private student data beyond certificate
+* Graceful error handling
+
+---
+
+## OUT OF SCOPE
+
+❌ Admin certificate editing
+❌ Manual certificate issue
+❌ Blockchain (future)
+❌ Revoke logic (future)
+
+---
+
+## FINAL CHECKLIST
+
+Confirm at completion:
+
+* Student sees certificates only when eligible
+* Certificate preview renders correctly
+* PDF download works
+* Verification URL validates certificate
+* Invalid certificates fail safely
+* System works with mock data
+
+ 
+
+

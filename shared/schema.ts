@@ -210,6 +210,22 @@ export const testAttemptSchema = z.object({
 
 export type TestAttempt = z.infer<typeof testAttemptSchema>;
 
+// Certificate Schema
+export const certificateSchema = z.object({
+  certificateId: z.string(),
+  studentName: z.string(),
+  courseId: z.number(),
+  courseTitle: z.string(),
+  certificateTitle: z.string(),
+  certificateType: z.enum(["completion", "achievement"]),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
+  skills: z.array(z.string()),
+  issuedAt: z.string(),
+  verificationUrl: z.string(),
+});
+
+export type Certificate = z.infer<typeof certificateSchema>;
+
 // API Response types
 export interface ApiResponse<T> {
   data: T;

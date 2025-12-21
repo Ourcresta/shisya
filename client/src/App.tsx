@@ -16,6 +16,9 @@ import CourseTests from "@/pages/CourseTests";
 import TestInstructions from "@/pages/TestInstructions";
 import TestAttempt from "@/pages/TestAttempt";
 import TestResult from "@/pages/TestResult";
+import CertificatesDashboard from "@/pages/CertificatesDashboard";
+import CertificateViewer from "@/pages/CertificateViewer";
+import CertificateVerify from "@/pages/CertificateVerify";
 
 function Router() {
   return (
@@ -30,6 +33,9 @@ function Router() {
       <Route path="/courses/:courseId/tests/:testId" component={TestInstructions} />
       <Route path="/courses/:courseId/tests/:testId/attempt" component={TestAttempt} />
       <Route path="/courses/:courseId/tests/:testId/result" component={TestResult} />
+      <Route path="/certificates" component={CertificatesDashboard} />
+      <Route path="/certificates/:certificateId" component={CertificateViewer} />
+      <Route path="/verify/:certificateId" component={CertificateVerify} />
       <Route component={NotFound} />
     </Switch>
   );
