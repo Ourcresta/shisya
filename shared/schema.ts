@@ -83,6 +83,50 @@ export interface CourseProgress {
   completedLessons: LessonProgress[];
 }
 
+// Project Schema
+export const projectSchema = z.object({
+  id: z.number(),
+  courseId: z.number(),
+  title: z.string(),
+  description: z.string().nullable(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+  estimatedHours: z.number().nullable(),
+  skills: z.array(z.string()).nullable(),
+  learningOutcomes: z.array(z.string()).nullable(),
+  requirements: z.object({
+    githubRequired: z.boolean(),
+    liveUrlRequired: z.boolean(),
+    documentationRequired: z.boolean(),
+  }).nullable(),
+  evaluationCriteria: z.array(z.string()).nullable(),
+  createdAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+});
+
+export type Project = z.infer<typeof projectSchema>;
+
+// Project Submission Schema
+export const projectSubmissionSchema = z.object({
+  projectId: z.number(),
+  courseId: z.number(),
+  githubUrl: z.string(),
+  liveUrl: z.string().nullable(),
+  notes: z.string().nullable(),
+  submitted: z.boolean(),
+  submittedAt: z.string().nullable(),
+});
+
+export type ProjectSubmission = z.infer<typeof projectSubmissionSchema>;
+
+// Insert schema for project submission (student action)
+export const insertProjectSubmissionSchema = z.object({
+  githubUrl: z.string().url("Please enter a valid GitHub URL"),
+  liveUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  notes: z.string().optional(),
+});
+
+export type InsertProjectSubmission = z.infer<typeof insertProjectSubmissionSchema>;
+
 // API Response types
 export interface ApiResponse<T> {
   data: T;

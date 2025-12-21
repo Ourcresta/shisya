@@ -1,0 +1,329 @@
+Perfect. Below is a **single, copy-paste ready MASTER REPLIT PROMPT** to build **SHISYA – Student Projects Module** the *correct enterprise way*, aligned 100% with what you’ve already built.
+
+This prompt assumes:
+
+* SHISYA is **READ-ONLY + SUBMISSION only**
+* Admin controls project creation
+* Student only **views + submits**
+
+---
+
+# 🧠 MASTER REPLIT PROMPT
+
+## SHISYA – Student Projects (Student Portal)
+
+---
+
+### 🔹 ROLE & MINDSET (VERY IMPORTANT)
+
+You are a **Senior Full-Stack Engineer + Senior EdTech Architect** building a **student-facing learning portal**.
+
+This module is **NOT an admin editor**.
+This is a **Student (Shisya) Project Submission Experience**.
+
+Think like:
+
+* Coursera Projects
+* Udemy Assignments
+* Internshala / Scaler submissions
+
+Focus on:
+
+* Clarity
+* Simplicity
+* Trust
+* Scalability
+
+---
+
+## 📌 CONTEXT
+
+**Platform Name:** SHISYA
+**Tagline:** Learn. Practice. Prove.
+
+SHISYA is the **learner portal** of AISiksha.
+It **fetches published data** from the AISiksha Admin Course Factory.
+
+Admin has already:
+
+* Created courses
+* Added modules
+* Added lessons
+* Added projects
+* Defined project requirements
+
+Now SHISYA must allow students to:
+
+* View projects
+* Understand requirements
+* Submit project proof
+
+---
+
+## 🎯 OBJECTIVE
+
+Build a **Student Projects Module** inside SHISYA that allows learners to:
+
+1. View course projects
+2. Read project requirements
+3. Submit project links/details
+4. Track submission status
+5. Unlock certificate eligibility later
+
+---
+
+## 🧭 ROUTES TO IMPLEMENT
+
+```
+/courses/:courseId/projects
+/courses/:courseId/projects/:projectId
+```
+
+---
+
+## 🧩 FEATURE BREAKDOWN
+
+### 1️⃣ Course Projects List Page
+
+**Route:**
+`/courses/:courseId/projects`
+
+**UI Requirements:**
+
+* Page title: `Course Projects`
+* Show all projects linked to the course
+* Each project card shows:
+
+  * Project Title
+  * Short Description
+  * Difficulty badge (Beginner / Intermediate / Advanced)
+  * Estimated effort (hours)
+  * Skills covered (badges)
+  * Status badge:
+
+    * Not Submitted
+    * Submitted
+* CTA Button:
+
+  * `View Project` OR `Submit Project`
+
+**Empty State:**
+
+> “No projects available for this course yet.”
+
+---
+
+### 2️⃣ Project Detail & Submission Page
+
+**Route:**
+`/courses/:courseId/projects/:projectId`
+
+---
+
+### 🔹 Project Detail Section (READ-ONLY)
+
+Display:
+
+* Project Title
+* Project Description (rich text)
+* Learning outcomes
+* Requirements checklist:
+
+  * GitHub repository required
+  * Live URL optional
+  * Documentation required
+* Evaluation criteria (read-only)
+* Skills validated
+
+---
+
+### 🔹 Project Submission Section (STUDENT ACTION)
+
+**Submission Form Fields:**
+
+* GitHub Repository URL *(required)*
+* Live Demo URL *(optional)*
+* Notes / Explanation *(textarea)*
+* Checkbox:
+
+  * “I confirm this project is my own work”
+
+**Buttons:**
+
+* `Submit Project`
+* Disabled after successful submission
+
+---
+
+### 🔐 Submission Rules (IMPORTANT)
+
+* Student can submit **only once** (V1)
+* After submission:
+
+  * Form becomes read-only
+  * Status changes to **Submitted**
+* No editing allowed in V1
+* Mentor review comes later (future phase)
+
+---
+
+## 📊 SUBMISSION STATUS STATES
+
+* `Not Submitted`
+* `Submitted`
+* (Future: Approved / Rejected – do NOT implement now)
+
+---
+
+## 🧠 PROGRESS & CERTIFICATE INTEGRATION (LOGIC ONLY)
+
+Add logic hooks (NO UI yet):
+
+* If project is submitted → mark project as completed
+* Expose boolean:
+
+  ```ts
+  projectCompleted: true | false
+  ```
+
+This will be used later for:
+
+* Certificate eligibility
+* Profile achievements
+
+---
+
+## 🔗 API CONTRACT (READ-ONLY)
+
+Use existing proxy pattern.
+
+### Fetch Projects
+
+```
+GET /api/courses/:courseId/projects
+```
+
+### Fetch Project Detail
+
+```
+GET /api/projects/:projectId
+```
+
+### Submit Project (Student Side)
+
+```
+POST /api/projects/:projectId/submissions
+```
+
+Payload:
+
+```json
+{
+  "githubUrl": "",
+  "liveUrl": "",
+  "notes": ""
+}
+```
+
+---
+
+## 🧪 MOCK DATA (MANDATORY)
+
+If `ADMIN_API_BASE` is not available:
+
+* Load mock projects
+* Load mock project details
+* Save submissions in:
+
+  ```
+  localStorage → shisya_project_submissions
+  ```
+
+Structure:
+
+```ts
+{
+  courseId: {
+    projectId: {
+      submitted: true,
+      githubUrl: "",
+      liveUrl: "",
+      notes: "",
+      submittedAt: ""
+    }
+  }
+}
+```
+
+---
+
+## 🧱 FILE STRUCTURE (FOLLOW THIS)
+
+```
+client/src/
+├── pages/
+│   ├── CourseProjects.tsx
+│   ├── ProjectDetail.tsx
+│
+├── components/
+│   ├── project/
+│   │   ├── ProjectCard.tsx
+│   │   ├── ProjectStatusBadge.tsx
+│   │   ├── ProjectSubmissionForm.tsx
+│
+├── lib/
+│   ├── projects.ts
+│   ├── submissions.ts
+│
+├── contexts/
+│   └── ProgressContext.tsx (extend for project completion)
+```
+
+---
+
+## 🎨 UI/UX GUIDELINES
+
+* Follow existing SHISYA design system
+* Use:
+
+  * Shadcn UI
+  * Tailwind
+* Cards with subtle borders
+* Clear status badges
+* Friendly empty states
+* Mobile responsive
+
+---
+
+## 🚫 STRICT NON-GOALS (DO NOT BUILD)
+
+❌ Mentor review UI
+❌ Approval workflow
+❌ File uploads
+❌ Payments
+❌ Certificates download
+❌ Student authentication (use mock user)
+
+---
+
+## ✅ ACCEPTANCE CHECKLIST
+
+Before marking complete, verify:
+
+* Projects list loads correctly
+* Project detail page renders
+* Submission saves and persists
+* Status updates everywhere instantly
+* Refresh does not lose submission
+* Works with mock data
+* Works with real API when available
+
+---
+
+## 🧠 FINAL THINKING INSTRUCTION
+
+Build this as:
+
+> “A calm, confidence-building student experience that proves learning through practice.”
+
+---

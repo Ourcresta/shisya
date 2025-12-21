@@ -1,4 +1,4 @@
-import type { Course, Module, Lesson, AINotes } from "@shared/schema";
+import type { Course, Module, Lesson, AINotes, Project } from "@shared/schema";
 
 // Mock courses data for development (until admin backend is deployed)
 export const mockCourses: Course[] = [
@@ -260,4 +260,237 @@ export function getAllLessons(): Record<number, Lesson> {
     });
   });
   return allLessons;
+}
+
+// Mock Projects Data
+export const mockProjects: Record<number, Project[]> = {
+  // Course 1: Web Development
+  1: [
+    {
+      id: 1,
+      courseId: 1,
+      title: "Personal Portfolio Website",
+      description: "Build a responsive personal portfolio website showcasing your skills, projects, and contact information. This project will demonstrate your understanding of HTML, CSS, and responsive design principles.",
+      difficulty: "beginner",
+      estimatedHours: 8,
+      skills: ["HTML5", "CSS3", "Responsive Design", "Git"],
+      learningOutcomes: [
+        "Create semantic HTML structure for a multi-page website",
+        "Apply CSS styling including Flexbox and Grid layouts",
+        "Implement responsive design with media queries",
+        "Deploy a website to GitHub Pages"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: true
+      },
+      evaluationCriteria: [
+        "Clean and semantic HTML structure",
+        "Responsive layout that works on mobile and desktop",
+        "Consistent styling and visual design",
+        "Code organization and documentation",
+        "Live deployment and accessibility"
+      ],
+      createdAt: "2024-01-15T10:00:00Z",
+      updatedAt: "2024-01-20T14:30:00Z"
+    },
+    {
+      id: 2,
+      courseId: 1,
+      title: "Interactive Quiz Application",
+      description: "Create an interactive quiz application using JavaScript. Users should be able to answer questions, see their score, and restart the quiz.",
+      difficulty: "intermediate",
+      estimatedHours: 6,
+      skills: ["JavaScript", "DOM Manipulation", "Event Handling", "CSS"],
+      learningOutcomes: [
+        "Manipulate DOM elements dynamically with JavaScript",
+        "Handle user interactions and events",
+        "Implement game logic and state management",
+        "Create an engaging user experience"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: false
+      },
+      evaluationCriteria: [
+        "Functional quiz with multiple questions",
+        "Score tracking and display",
+        "Clean and intuitive user interface",
+        "Error-free JavaScript code",
+        "Restart functionality"
+      ],
+      createdAt: "2024-01-16T10:00:00Z",
+      updatedAt: "2024-01-21T14:30:00Z"
+    }
+  ],
+  // Course 2: React Fundamentals
+  2: [
+    {
+      id: 3,
+      courseId: 2,
+      title: "Task Management App",
+      description: "Build a full-featured task management application using React. Implement CRUD operations, filtering, and local storage persistence.",
+      difficulty: "intermediate",
+      estimatedHours: 12,
+      skills: ["React", "Hooks", "State Management", "Local Storage"],
+      learningOutcomes: [
+        "Build a complete React application from scratch",
+        "Implement CRUD operations for tasks",
+        "Use React hooks effectively (useState, useEffect)",
+        "Persist data using localStorage"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: true
+      },
+      evaluationCriteria: [
+        "Create, read, update, and delete tasks",
+        "Filter tasks by status (all, active, completed)",
+        "Persist tasks in localStorage",
+        "Clean component structure",
+        "Responsive design"
+      ],
+      createdAt: "2024-02-01T09:00:00Z",
+      updatedAt: "2024-02-10T11:00:00Z"
+    },
+    {
+      id: 4,
+      courseId: 2,
+      title: "Weather Dashboard",
+      description: "Create a weather dashboard that fetches data from a public API and displays current weather and forecasts for multiple cities.",
+      difficulty: "intermediate",
+      estimatedHours: 10,
+      skills: ["React", "API Integration", "Async/Await", "Data Visualization"],
+      learningOutcomes: [
+        "Integrate third-party APIs in React",
+        "Handle asynchronous data fetching",
+        "Display data in a user-friendly format",
+        "Implement search functionality"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: false
+      },
+      evaluationCriteria: [
+        "Fetch and display weather data",
+        "Search for cities",
+        "Display forecast information",
+        "Handle loading and error states",
+        "Clean and intuitive UI"
+      ],
+      createdAt: "2024-02-05T09:00:00Z",
+      updatedAt: "2024-02-15T11:00:00Z"
+    }
+  ],
+  // Course 4: Python for Data Science
+  4: [
+    {
+      id: 5,
+      courseId: 4,
+      title: "Data Analysis Report",
+      description: "Analyze a real-world dataset using Python, NumPy, and Pandas. Create visualizations and document your findings in a Jupyter notebook.",
+      difficulty: "beginner",
+      estimatedHours: 10,
+      skills: ["Python", "Pandas", "NumPy", "Data Visualization"],
+      learningOutcomes: [
+        "Load and clean data using Pandas",
+        "Perform exploratory data analysis",
+        "Create meaningful visualizations",
+        "Document findings and insights"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: false,
+        documentationRequired: true
+      },
+      evaluationCriteria: [
+        "Data cleaning and preprocessing",
+        "Statistical analysis",
+        "Quality of visualizations",
+        "Insights and conclusions",
+        "Code organization and documentation"
+      ],
+      createdAt: "2024-03-01T10:00:00Z",
+      updatedAt: "2024-03-05T12:00:00Z"
+    }
+  ],
+  // Course 5: Node.js Backend Development
+  5: [
+    {
+      id: 6,
+      courseId: 5,
+      title: "RESTful API Server",
+      description: "Build a complete RESTful API server with Express.js. Implement authentication, database integration, and proper error handling.",
+      difficulty: "advanced",
+      estimatedHours: 15,
+      skills: ["Node.js", "Express", "MongoDB", "REST APIs", "Authentication"],
+      learningOutcomes: [
+        "Design and implement RESTful APIs",
+        "Connect to MongoDB database",
+        "Implement JWT authentication",
+        "Handle errors gracefully"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: true
+      },
+      evaluationCriteria: [
+        "RESTful endpoint design",
+        "Database CRUD operations",
+        "Authentication and authorization",
+        "Error handling",
+        "API documentation"
+      ],
+      createdAt: "2024-03-10T09:00:00Z",
+      updatedAt: "2024-03-15T14:00:00Z"
+    }
+  ],
+  // Course 6: Cloud Architecture with AWS
+  6: [
+    {
+      id: 7,
+      courseId: 6,
+      title: "Serverless Application",
+      description: "Deploy a serverless application using AWS Lambda, API Gateway, and DynamoDB. Implement CI/CD with GitHub Actions.",
+      difficulty: "advanced",
+      estimatedHours: 20,
+      skills: ["AWS Lambda", "API Gateway", "DynamoDB", "CloudFormation", "CI/CD"],
+      learningOutcomes: [
+        "Design serverless architecture",
+        "Deploy Lambda functions",
+        "Configure API Gateway",
+        "Implement infrastructure as code"
+      ],
+      requirements: {
+        githubRequired: true,
+        liveUrlRequired: true,
+        documentationRequired: true
+      },
+      evaluationCriteria: [
+        "Serverless architecture design",
+        "Lambda function implementation",
+        "API Gateway configuration",
+        "CloudFormation templates",
+        "CI/CD pipeline"
+      ],
+      createdAt: "2024-03-20T08:00:00Z",
+      updatedAt: "2024-03-25T10:00:00Z"
+    }
+  ]
+};
+
+// Helper to get all projects as a flat map by project ID
+export function getAllProjects(): Record<number, Project> {
+  const allProjects: Record<number, Project> = {};
+  Object.values(mockProjects).forEach(projects => {
+    projects.forEach(project => {
+      allProjects[project.id] = project;
+    });
+  });
+  return allProjects;
 }
