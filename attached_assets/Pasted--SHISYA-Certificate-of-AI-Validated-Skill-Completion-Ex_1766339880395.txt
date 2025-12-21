@@ -1,0 +1,203 @@
+
+
+# 🎓 SHISYA – Certificate of AI-Validated Skill Completion
+
+**Exact Wireframe (A4 / Landscape)**
+
+---
+
+## 📐 PAGE SETUP
+
+* **Size:** A4 (Landscape)
+* **Margins:** 40px all sides
+* **Background:** Light parchment / off-white
+* **Outer Border:** Thin gold or indigo line (rounded 12px)
+
+---
+
+## 🔝 SECTION 1 — HEADER (Authority Zone)
+
+```
+┌───────────────────────────────────────────────┐
+│   🎓  SHISYA                                   │
+│       AI-Powered Learning & Skill Validation   │
+│                                               │
+│────────────── subtle gradient divider ─────────│
+```
+
+### Specs
+
+* Logo centered (top)
+* Logo size: Medium (not oversized)
+* Subtitle in small caps / letter-spaced
+* Divider line: gradient (blue → violet → gold)
+
+---
+
+## 🏅 SECTION 2 — CERTIFICATE TITLE
+
+```
+CERTIFICATE OF
+AI-VALIDATED SKILL COMPLETION
+```
+
+### Specs
+
+* Font: Serif / Semi-Serif
+* Weight: Bold
+* Alignment: Center
+* Letter spacing: Slight
+* Color: Deep Blue / Charcoal
+
+---
+
+## 👤 SECTION 3 — STUDENT IDENTITY (HERO AREA)
+
+```
+This is to certify that
+
+DEMO STUDENT
+```
+
+### Specs
+
+* Student Name = **Largest text on page**
+* Font: Sans-serif, bold
+* Color: Almost black
+* Optional underline or glow highlight
+
+---
+
+## 📘 SECTION 4 — COURSE DETAILS
+
+```
+has successfully completed and demonstrated
+advanced proficiency in
+
+FULL STACK DEVELOPMENT
+```
+
+### Specs
+
+* Course name: Bold + Accent color
+* Subtitle below course name:
+
+```
+Advanced Level · AI-Guided Learning
+```
+
+---
+
+## 🧠 SECTION 5 — AI VALIDATION BLOCK (CORE DIFFERENTIATOR)
+
+```
+SKILLS VALIDATED THROUGH
+AI Tutor Sessions · Projects · Assessments
+```
+
+### Below this → **Skill Chips Grid**
+
+```
+[ ⚛ React ]   [ 🟢 Node.js ]   [ 🚀 Express ]
+[ 🍃 MongoDB ] [ 🔐 Auth ]     [ 🔌 REST APIs ]
+```
+
+### Specs
+
+* Rounded pill cards
+* Light background
+* Icon + skill name
+* Equal spacing (2 rows max)
+
+---
+
+## 🤖 SECTION 6 — ASSESSMENT & CREDIBILITY (NEW)
+
+```
+ASSESSMENT & VERIFICATION
+✔ AI Tutor-Guided Learning
+✔ Hands-on Project Evaluation
+✔ Automated Skill Benchmarking
+✔ Performance-Based Validation
+```
+
+### Specs
+
+* Left-aligned block
+* Small icons or ticks
+* This section = **trust builder**
+
+---
+
+## 🧾 SECTION 7 — FOOTER (VERIFICATION ZONE)
+
+```
+Issue Date: 18 December 2025
+Certificate ID: CERT-4B8N-Q5RT
+Issued by: shisya.ai
+```
+
+📌 **Right Side (Aligned)**
+
+```
+[ QR CODE ]
+
+Scan to verify
+authenticity
+```
+
+### Specs
+
+* QR links to verification page
+* QR size: 120–140px
+* Small caption below
+
+---
+
+## 🪪 OPTIONAL WATERMARK (VERY SUBTLE)
+
+* Centered
+* Low opacity (3–5%)
+* SHISYA logo or AI circuit pattern
+
+---
+
+## 🎨 COLOR SYSTEM (FINAL)
+
+| Purpose    | Color              |
+| ---------- | ------------------ |
+| Primary    | Deep Indigo / Blue |
+| Accent     | Gold / Violet      |
+| Text       | Charcoal / Black   |
+| Background | Off-white / Ivory  |
+
+---
+
+## ✍️ TYPOGRAPHY RULES
+
+* Titles → Serif / Elegant
+* Names → Strong Sans-Serif
+* Body → Clean Sans-Serif
+* Never mix more than **2 fonts**
+
+---
+
+## 🔐 FUTURE-READY EXTENSIONS (Optional)
+
+* Digital signature hash
+* Blockchain verification badge
+* Tutor performance score
+* Project count badge
+
+---
+
+## 🏆 WHY THIS WIREFRAME WORKS
+
+✔ Looks premium
+✔ Feels credible
+✔ Recruiter-friendly
+✔ AI-first branding
+✔ Easy to auto-generate
+
+This certificate now represents **proof of skill**, not just attendance.
+
