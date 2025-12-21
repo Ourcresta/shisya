@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { useProgress } from "@/hooks/useProgress";
+import { useCourseProgress } from "@/contexts/ProgressContext";
 import type { Lesson, AINotes } from "@shared/schema";
 
 export default function LessonViewer() {
@@ -24,8 +24,8 @@ export default function LessonViewer() {
   const courseIdNum = parseInt(courseId || "0", 10);
   const lessonIdNum = parseInt(lessonId || "0", 10);
 
-  // Use progress hook for reactive state
-  const { isLessonCompleted, toggleLessonComplete } = useProgress(courseIdNum);
+  // Use centralized progress context for reactive state
+  const { isLessonCompleted, toggleLessonComplete } = useCourseProgress(courseIdNum);
   const isCompleted = isLessonCompleted(lessonIdNum);
 
   const { data: lesson, isLoading: lessonLoading, error: lessonError } = useQuery<Lesson>({

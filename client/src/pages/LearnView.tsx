@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useProgress } from "@/hooks/useProgress";
+import { useCourseProgress } from "@/contexts/ProgressContext";
 import type { Course, ModuleWithLessons } from "@shared/schema";
 
 export default function LearnView() {
@@ -29,8 +29,8 @@ export default function LearnView() {
     enabled: !!course,
   });
 
-  // Use the progress hook for reactive updates
-  const { completedCount, isLessonCompleted, refreshProgress } = useProgress(courseIdNum);
+  // Use centralized progress context for reactive updates
+  const { completedCount, isLessonCompleted } = useCourseProgress(courseIdNum);
 
   const isLoading = courseLoading || modulesLoading;
 
@@ -41,9 +41,6 @@ export default function LearnView() {
   // Calculate total lessons
   const totalLessons = modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
   const progressPercent = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
-
-  // Refresh progress when returning to this page
-  // Using visibility change to detect when user returns from lesson viewer
 
   return (
     <Layout fullWidth>
