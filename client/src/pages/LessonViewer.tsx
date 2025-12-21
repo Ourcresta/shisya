@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
 import { 
@@ -17,11 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { 
-  isLessonCompleted, 
-  markLessonComplete, 
-  markLessonIncomplete 
-} from "@/lib/progress";
+import { useProgress } from "@/hooks/useProgress";
 import type { Lesson, AINotes } from "@shared/schema";
 
 export default function LessonViewer() {
@@ -29,7 +24,9 @@ export default function LessonViewer() {
   const courseIdNum = parseInt(courseId || "0", 10);
   const lessonIdNum = parseInt(lessonId || "0", 10);
 
-  const [isCompleted, setIsCompleted] = useState(false);
+  // Use progress hook for reactive state
+  const { isLessonCompleted, toggleLessonComplete } = useProgress(courseIdNum);
+  const isCompleted = isLessonCompleted(lessonIdNum);
 
   const { data: lesson, isLoading: lessonLoading, error: lessonError } = useQuery<Lesson>({
     queryKey: ["/api/lessons", lessonId],
@@ -42,20 +39,8 @@ export default function LessonViewer() {
 
   const isLoading = lessonLoading || notesLoading;
 
-  // Initialize completion state
-  useEffect(() => {
-    if (lesson) {
-      setIsCompleted(isLessonCompleted(courseIdNum, lessonIdNum));
-    }
-  }, [courseIdNum, lessonIdNum, lesson]);
-
-  const toggleComplete = () => {
-    if (isCompleted) {
-      markLessonIncomplete(courseIdNum, lessonIdNum);
-    } else {
-      markLessonComplete(courseIdNum, lessonIdNum);
-    }
-    setIsCompleted(!isCompleted);
+  const handleToggleComplete = () => {
+    toggleLessonComplete(lessonIdNum);
   };
 
   if (lessonError) {
@@ -78,7 +63,7 @@ export default function LessonViewer() {
             </Link>
 
             <Button
-              onClick={toggleComplete}
+              onClick={handleToggleComplete}
               variant={isCompleted ? "secondary" : "default"}
               className="gap-2"
               data-testid="button-mark-complete"
@@ -240,7 +225,7 @@ export default function LessonViewer() {
             </Link>
 
             <Button
-              onClick={toggleComplete}
+              onClick={handleToggleComplete}
               variant={isCompleted ? "secondary" : "default"}
               className="gap-2"
               data-testid="button-mark-complete-bottom"

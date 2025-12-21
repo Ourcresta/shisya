@@ -3,7 +3,7 @@ import { useParams, Link, Redirect } from "wouter";
 import { ChevronRight, Clock, CheckCircle2, Circle, BookOpen, ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { ProgressRing } from "@/components/ui/progress-ring";
@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getCourseProgress, isLessonCompleted } from "@/lib/progress";
+import { useProgress } from "@/hooks/useProgress";
 import type { Course, ModuleWithLessons } from "@shared/schema";
 
 export default function LearnView() {
@@ -29,17 +29,21 @@ export default function LearnView() {
     enabled: !!course,
   });
 
+  // Use the progress hook for reactive updates
+  const { completedCount, isLessonCompleted, refreshProgress } = useProgress(courseIdNum);
+
   const isLoading = courseLoading || modulesLoading;
 
   if (!isLoading && course && course.status !== "published") {
     return <Redirect to="/" />;
   }
 
-  // Calculate total lessons and completed lessons
+  // Calculate total lessons
   const totalLessons = modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
-  const progress = getCourseProgress(courseIdNum);
-  const completedLessons = progress.completedLessons.length;
-  const progressPercent = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+  const progressPercent = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+
+  // Refresh progress when returning to this page
+  // Using visibility change to detect when user returns from lesson viewer
 
   return (
     <Layout fullWidth>
@@ -72,7 +76,7 @@ export default function LearnView() {
                   <ProgressRing progress={progressPercent} size={56} />
                   <div>
                     <p className="text-sm font-medium" data-testid="text-progress">
-                      {completedLessons} / {totalLessons} lessons
+                      {completedCount} / {totalLessons} lessons
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {progressPercent === 100 ? "Completed!" : "In progress"}
@@ -104,6 +108,7 @@ export default function LearnView() {
                         key={module.id} 
                         module={module} 
                         courseId={courseIdNum}
+                        isLessonCompleted={isLessonCompleted}
                       />
                     ))}
                   </Accordion>
@@ -143,11 +148,12 @@ export default function LearnView() {
 interface ModuleAccordionItemProps {
   module: ModuleWithLessons;
   courseId: number;
+  isLessonCompleted: (lessonId: number) => boolean;
 }
 
-function ModuleAccordionItem({ module, courseId }: ModuleAccordionItemProps) {
+function ModuleAccordionItem({ module, courseId, isLessonCompleted }: ModuleAccordionItemProps) {
   const lessons = module.lessons || [];
-  const completedCount = lessons.filter(l => isLessonCompleted(courseId, l.id)).length;
+  const completedCount = lessons.filter(l => isLessonCompleted(l.id)).length;
 
   return (
     <AccordionItem 
@@ -178,7 +184,7 @@ function ModuleAccordionItem({ module, courseId }: ModuleAccordionItemProps) {
               key={lesson.id} 
               lesson={lesson} 
               courseId={courseId}
-              isCompleted={isLessonCompleted(courseId, lesson.id)}
+              isCompleted={isLessonCompleted(lesson.id)}
             />
           ))}
         </ul>
@@ -200,26 +206,25 @@ interface LessonListItemProps {
 function LessonListItem({ lesson, courseId, isCompleted }: LessonListItemProps) {
   return (
     <li>
-      <Link href={`/courses/${courseId}/learn/${lesson.id}`}>
-        <a 
-          className="flex items-center gap-3 px-3 py-2.5 rounded-md hover-elevate active-elevate-2 transition-colors group"
-          data-testid={`link-lesson-${lesson.id}`}
-        >
-          {isCompleted ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-          ) : (
-            <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      <Link 
+        href={`/courses/${courseId}/learn/${lesson.id}`}
+        className="flex items-center gap-3 px-3 py-2.5 rounded-md hover-elevate active-elevate-2 transition-colors group"
+        data-testid={`link-lesson-${lesson.id}`}
+      >
+        {isCompleted ? (
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+        ) : (
+          <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm truncate ${isCompleted ? "text-muted-foreground" : ""}`}>
+            {lesson.title}
+          </p>
+          {lesson.estimatedTime && (
+            <p className="text-xs text-muted-foreground">{lesson.estimatedTime}</p>
           )}
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm truncate ${isCompleted ? "text-muted-foreground" : ""}`}>
-              {lesson.title}
-            </p>
-            {lesson.estimatedTime && (
-              <p className="text-xs text-muted-foreground">{lesson.estimatedTime}</p>
-            )}
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-        </a>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
       </Link>
     </li>
   );

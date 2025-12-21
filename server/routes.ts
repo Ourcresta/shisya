@@ -1,11 +1,20 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons } from "./mockData";
+import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
-const ADMIN_API_BASE = "https://course-factory.ourcresta1.repl.co";
+// Set this environment variable when the admin backend is deployed
+const ADMIN_API_BASE = process.env.ADMIN_API_BASE || "";
+
+// Check if we should use mock data (when admin backend is not available)
+const USE_MOCK_DATA = !ADMIN_API_BASE;
 
 // Helper function to fetch from admin backend
 async function fetchFromAdmin(endpoint: string): Promise<Response> {
+  if (!ADMIN_API_BASE) {
+    throw new Error("Admin API not configured");
+  }
   const url = `${ADMIN_API_BASE}/api${endpoint}`;
   const response = await fetch(url, {
     headers: {
@@ -23,6 +32,12 @@ export async function registerRoutes(
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {
     try {
+      if (USE_MOCK_DATA) {
+        // Return mock published courses
+        const publishedCourses = mockCourses.filter(c => c.status === "published");
+        return res.json(publishedCourses);
+      }
+
       const response = await fetchFromAdmin("/courses");
       if (!response.ok) {
         return res.status(response.status).json({ error: "Failed to fetch courses" });
@@ -35,6 +50,10 @@ export async function registerRoutes(
       res.json(publishedCourses);
     } catch (error) {
       console.error("Error fetching courses:", error);
+      if (USE_MOCK_DATA) {
+        const publishedCourses = mockCourses.filter(c => c.status === "published");
+        return res.json(publishedCourses);
+      }
       res.status(500).json({ error: "Failed to fetch courses" });
     }
   });
@@ -43,6 +62,16 @@ export async function registerRoutes(
   app.get("/api/courses/:courseId", async (req, res) => {
     try {
       const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      if (USE_MOCK_DATA) {
+        const course = mockCourses.find(c => c.id === courseIdNum);
+        if (!course || course.status !== "published") {
+          return res.status(404).json({ error: "Course not found" });
+        }
+        return res.json(course);
+      }
+
       const response = await fetchFromAdmin(`/courses/${courseId}`);
       if (!response.ok) {
         return res.status(response.status).json({ error: "Course not found" });
@@ -63,6 +92,13 @@ export async function registerRoutes(
   app.get("/api/courses/:courseId/modules", async (req, res) => {
     try {
       const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      if (USE_MOCK_DATA) {
+        const modules = mockModules[courseIdNum] || [];
+        return res.json(modules);
+      }
+
       const response = await fetchFromAdmin(`/courses/${courseId}/modules`);
       if (!response.ok) {
         return res.status(response.status).json({ error: "Failed to fetch modules" });
@@ -79,6 +115,16 @@ export async function registerRoutes(
   app.get("/api/courses/:courseId/modules-with-lessons", async (req, res) => {
     try {
       const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      if (USE_MOCK_DATA) {
+        const modules = mockModules[courseIdNum] || [];
+        const modulesWithLessons: ModuleWithLessons[] = modules.map(module => ({
+          ...module,
+          lessons: mockLessons[module.id] || [],
+        }));
+        return res.json(modulesWithLessons);
+      }
       
       // First fetch modules
       const modulesResponse = await fetchFromAdmin(`/courses/${courseId}/modules`);
@@ -111,6 +157,13 @@ export async function registerRoutes(
   app.get("/api/modules/:moduleId/lessons", async (req, res) => {
     try {
       const { moduleId } = req.params;
+      const moduleIdNum = parseInt(moduleId, 10);
+
+      if (USE_MOCK_DATA) {
+        const lessons = mockLessons[moduleIdNum] || [];
+        return res.json(lessons);
+      }
+
       const response = await fetchFromAdmin(`/modules/${moduleId}/lessons`);
       if (!response.ok) {
         return res.status(response.status).json({ error: "Failed to fetch lessons" });
@@ -127,6 +180,17 @@ export async function registerRoutes(
   app.get("/api/lessons/:lessonId", async (req, res) => {
     try {
       const { lessonId } = req.params;
+      const lessonIdNum = parseInt(lessonId, 10);
+
+      if (USE_MOCK_DATA) {
+        const allLessons = getAllLessons();
+        const lesson = allLessons[lessonIdNum];
+        if (!lesson) {
+          return res.status(404).json({ error: "Lesson not found" });
+        }
+        return res.json(lesson);
+      }
+
       const response = await fetchFromAdmin(`/lessons/${lessonId}`);
       if (!response.ok) {
         return res.status(response.status).json({ error: "Lesson not found" });
@@ -143,6 +207,13 @@ export async function registerRoutes(
   app.get("/api/lessons/:lessonId/notes", async (req, res) => {
     try {
       const { lessonId } = req.params;
+      const lessonIdNum = parseInt(lessonId, 10);
+
+      if (USE_MOCK_DATA) {
+        const notes = mockAINotes[lessonIdNum] || null;
+        return res.json(notes);
+      }
+
       const response = await fetchFromAdmin(`/lessons/${lessonId}/notes`);
       if (!response.ok) {
         // Notes might not exist, return null
