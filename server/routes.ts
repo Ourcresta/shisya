@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
+import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -447,6 +448,51 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error submitting test:", error);
       res.status(500).json({ error: "Failed to submit test" });
+    }
+  });
+
+  // ============ LAB ROUTES ============
+
+  // GET /api/courses/:courseId/labs - Fetch labs for a course
+  app.get("/api/courses/:courseId/labs", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const courseIdNum = parseInt(courseId, 10);
+
+      // Labs are currently only in mock data
+      const labs = getCourseLabs(courseIdNum);
+      res.json(labs);
+    } catch (error) {
+      console.error("Error fetching labs:", error);
+      res.status(500).json({ error: "Failed to fetch labs" });
+    }
+  });
+
+  // GET /api/labs/:labId - Fetch single lab
+  app.get("/api/labs/:labId", async (req, res) => {
+    try {
+      const { labId } = req.params;
+      const labIdNum = parseInt(labId, 10);
+
+      const lab = getLab(labIdNum);
+      if (!lab) {
+        return res.status(404).json({ error: "Lab not found" });
+      }
+      res.json(lab);
+    } catch (error) {
+      console.error("Error fetching lab:", error);
+      res.status(500).json({ error: "Failed to fetch lab" });
+    }
+  });
+
+  // GET /api/lessons/all - Fetch all lessons as a map by ID
+  app.get("/api/lessons/all", async (req, res) => {
+    try {
+      const allLessons = getAllLessons();
+      res.json(allLessons);
+    } catch (error) {
+      console.error("Error fetching all lessons:", error);
+      res.status(500).json({ error: "Failed to fetch lessons" });
     }
   });
 

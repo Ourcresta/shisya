@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
-import { ArrowRight, CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen, ClipboardList } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen, ClipboardList, FlaskConical } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -142,6 +142,12 @@ export default function CourseOverview() {
                 </Button>
               </Link>
             )}
+            <Link href={`/courses/${course.id}/labs`}>
+              <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-labs">
+                <FlaskConical className="w-4 h-4" />
+                Practice Labs
+              </Button>
+            </Link>
           </div>
         </div>
       ) : null}
