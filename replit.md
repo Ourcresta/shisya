@@ -25,6 +25,7 @@ client/
 │   │   ├── project/         # ProjectCard, ProjectSubmissionForm, ProjectStatusBadge
 │   │   ├── test/            # QuestionCard, TestTimer, TestProgress
 │   │   ├── certificate/     # CertificateCard, CertificatePreview, QRCodeBlock
+│   │   ├── profile/         # ProfileHeader, ProfileForm, LearningStats, SkillsSection, PortfolioProjects, CertificatesSection
 │   │   └── ui/              # Shadcn components + custom badges
 │   ├── contexts/
 │   │   ├── ProgressContext.tsx      # Centralized lesson progress state
@@ -36,6 +37,7 @@ client/
 │   │   ├── testAttempts.ts  # LocalStorage test attempt tracking
 │   │   ├── certificates.ts  # LocalStorage certificate management
 │   │   ├── eligibility.ts   # Certificate eligibility checking
+│   │   ├── profile.ts       # LocalStorage profile management
 │   │   ├── queryClient.ts   # React Query client
 │   │   └── utils.ts         # Utility functions
 │   ├── pages/
@@ -52,6 +54,8 @@ client/
 │   │   ├── CertificatesDashboard.tsx  # All earned certificates
 │   │   ├── CertificateViewer.tsx      # Single certificate view
 │   │   ├── CertificateVerify.tsx      # Public verification page
+│   │   ├── ProfilePage.tsx      # Private profile with editing
+│   │   ├── PublicProfilePage.tsx      # Public portfolio for recruiters
 │   │   └── not-found.tsx        # 404 page
 │   ├── App.tsx
 │   └── index.css
@@ -77,6 +81,8 @@ shared/
 - `/certificates` - Certificate Dashboard (student's earned certificates)
 - `/certificates/:certificateId` - Certificate Viewer with QR code and PDF download
 - `/verify/:certificateId` - Public Certificate Verification (no auth required)
+- `/profile` - Student Profile (private, editable)
+- `/profile/:username` - Public Portfolio (recruiter-friendly view)
 
 ## API Endpoints (Proxy to Admin Backend)
 Most routes are READ-ONLY proxies to the AISiksha Admin Course Factory:
@@ -117,6 +123,8 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 11. **Certificates Dashboard** - View all earned certificates with issue dates and skills
 12. **Certificate Viewer** - Full certificate display with QR code and PDF download
 13. **Public Verification** - Anyone can verify certificate authenticity via URL/QR code
+14. **Student Profile** - Editable profile with bio, headline, location, and social links
+15. **Public Portfolio** - Shareable portfolio page for recruiters with verified badge, skills, projects, and certificates
 
 ## Design System
 - Fonts: Inter (body), Space Grotesk (headings)
@@ -137,6 +145,7 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - `shisya_project_submissions` - Project submission data per course/project
 - `shisya_test_attempts` - Test attempt data (answers, scores, pass/fail status)
 - `shisya_certificates` - Certificate data with IDs, student info, and verification URLs
+- `shisya_profile` - Student profile with name, username, bio, social links, and visibility settings
 
 ## Test System Design
 - **Security**: Correct answers are NEVER sent to the client. Server strips `isCorrect` flag before sending questions.
@@ -152,3 +161,11 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - **PDF Download**: Client-side PDF generation using html2canvas and jsPDF
 - **Public Verification**: `/verify/:certificateId` is accessible without authentication for certificate validation
 - **Data Shape**: Certificates include studentName, courseId, courseTitle, certificateTitle, level, skills, issuedAt, verificationUrl
+
+## Profile & Portfolio System Design
+- **Private Profile**: Students can edit their profile at `/profile` with full name, username, headline, bio, location, and social links
+- **Public Portfolio**: Shareable at `/profile/:username` with verified badge, learning stats, skills, projects, and certificates
+- **Visibility Toggle**: Students must complete at least 1 course or submit 1 project before making profile public
+- **Skills Auto-Aggregation**: Skills are automatically collected from completed certificates and project submissions (no manual entry)
+- **Learning Stats**: Displays courses completed, projects submitted, tests passed, and certificates earned
+- **Username Requirements**: Lowercase, alphanumeric with hyphens/underscores only (3-30 characters)
