@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -24,33 +25,89 @@ import ProfilePage from "@/pages/ProfilePage";
 import PublicProfilePage from "@/pages/PublicProfilePage";
 import CourseLabs from "@/pages/CourseLabs";
 import LabPractice from "@/pages/LabPractice";
-import SignupPage from "@/pages/SignupPage";
-import LoginPage from "@/pages/LoginPage";
-import VerifyOtpPage from "@/pages/VerifyOtpPage";
+import Login from "@/auth/Login";
+import Signup from "@/auth/Signup";
+import VerifyOtp from "@/auth/VerifyOtp";
+
+function ProtectedLearnView() {
+  return <ProtectedRoute><LearnView /></ProtectedRoute>;
+}
+
+function ProtectedLessonViewer() {
+  return <ProtectedRoute><LessonViewer /></ProtectedRoute>;
+}
+
+function ProtectedCourseProjects() {
+  return <ProtectedRoute><CourseProjects /></ProtectedRoute>;
+}
+
+function ProtectedProjectDetail() {
+  return <ProtectedRoute><ProjectDetail /></ProtectedRoute>;
+}
+
+function ProtectedCourseTests() {
+  return <ProtectedRoute><CourseTests /></ProtectedRoute>;
+}
+
+function ProtectedTestInstructions() {
+  return <ProtectedRoute><TestInstructions /></ProtectedRoute>;
+}
+
+function ProtectedTestAttempt() {
+  return <ProtectedRoute><TestAttempt /></ProtectedRoute>;
+}
+
+function ProtectedTestResult() {
+  return <ProtectedRoute><TestResult /></ProtectedRoute>;
+}
+
+function ProtectedCourseLabs() {
+  return <ProtectedRoute><CourseLabs /></ProtectedRoute>;
+}
+
+function ProtectedLabPractice() {
+  return <ProtectedRoute><LabPractice /></ProtectedRoute>;
+}
+
+function ProtectedCertificatesDashboard() {
+  return <ProtectedRoute><CertificatesDashboard /></ProtectedRoute>;
+}
+
+function ProtectedCertificateViewer() {
+  return <ProtectedRoute><CertificateViewer /></ProtectedRoute>;
+}
+
+function ProtectedProfilePage() {
+  return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
+}
 
 function Router() {
   return (
     <Switch>
+      {/* Public Routes - No Login Required */}
       <Route path="/" component={CourseCatalog} />
-      <Route path="/signup" component={SignupPage} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/verify-otp" component={VerifyOtpPage} />
       <Route path="/courses/:courseId" component={CourseOverview} />
-      <Route path="/courses/:courseId/learn" component={LearnView} />
-      <Route path="/courses/:courseId/learn/:lessonId" component={LessonViewer} />
-      <Route path="/courses/:courseId/projects" component={CourseProjects} />
-      <Route path="/courses/:courseId/projects/:projectId" component={ProjectDetail} />
-      <Route path="/courses/:courseId/tests" component={CourseTests} />
-      <Route path="/courses/:courseId/tests/:testId" component={TestInstructions} />
-      <Route path="/courses/:courseId/tests/:testId/attempt" component={TestAttempt} />
-      <Route path="/courses/:courseId/tests/:testId/result" component={TestResult} />
-      <Route path="/courses/:courseId/labs" component={CourseLabs} />
-      <Route path="/courses/:courseId/labs/:labId" component={LabPractice} />
-      <Route path="/certificates" component={CertificatesDashboard} />
-      <Route path="/certificates/:certificateId" component={CertificateViewer} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />
-      <Route path="/profile" component={ProfilePage} />
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/verify-otp" component={VerifyOtp} />
       <Route path="/profile/:username" component={PublicProfilePage} />
+      
+      {/* Protected Routes - Login Required */}
+      <Route path="/courses/:courseId/learn" component={ProtectedLearnView} />
+      <Route path="/courses/:courseId/learn/:lessonId" component={ProtectedLessonViewer} />
+      <Route path="/courses/:courseId/projects" component={ProtectedCourseProjects} />
+      <Route path="/courses/:courseId/projects/:projectId" component={ProtectedProjectDetail} />
+      <Route path="/courses/:courseId/tests" component={ProtectedCourseTests} />
+      <Route path="/courses/:courseId/tests/:testId" component={ProtectedTestInstructions} />
+      <Route path="/courses/:courseId/tests/:testId/attempt" component={ProtectedTestAttempt} />
+      <Route path="/courses/:courseId/tests/:testId/result" component={ProtectedTestResult} />
+      <Route path="/courses/:courseId/labs" component={ProtectedCourseLabs} />
+      <Route path="/courses/:courseId/labs/:labId" component={ProtectedLabPractice} />
+      <Route path="/certificates" component={ProtectedCertificatesDashboard} />
+      <Route path="/certificates/:certificateId" component={ProtectedCertificateViewer} />
+      <Route path="/profile" component={ProtectedProfilePage} />
+      
       <Route component={NotFound} />
     </Switch>
   );

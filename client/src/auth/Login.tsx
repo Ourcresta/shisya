@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema, type SignupInput } from "@shared/schema";
+import { loginSchema, type LoginInput } from "@shared/schema";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -10,23 +11,27 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
 
-export default function SignupPage() {
+export default function Login() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<SignupInput>({
-    resolver: zodResolver(signupSchema),
+  const redirectTo = new URLSearchParams(search).get("redirect") || "/";
+
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: SignupInput) => {
+  const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -36,23 +41,31 @@ export default function SignupPage() {
       const result = await response.json();
 
       if (!response.ok) {
+        if (result.needsVerification) {
+          toast({
+            title: "Email not verified",
+            description: "Please verify your email to continue",
+          });
+          setLocation(`/verify-otp?email=${encodeURIComponent(data.email)}&redirect=${encodeURIComponent(redirectTo)}`);
+          return;
+        }
         toast({
-          title: "Signup failed",
-          description: result.error || "Failed to create account",
+          title: "Login failed",
+          description: result.error || "Invalid credentials",
           variant: "destructive",
         });
         return;
       }
 
+      login(result.user);
       toast({
-        title: "Verification code sent",
-        description: "Check your email for the verification code",
+        title: "Welcome back!",
+        description: "You have been logged in successfully",
       });
-
-      setLocation(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+      setLocation(redirectTo);
     } catch (error) {
       toast({
-        title: "Signup failed",
+        title: "Login failed",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
@@ -70,9 +83,9 @@ export default function SignupPage() {
               <GraduationCap className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>
-            Join SHISYA and start learning today
+            Log in to continue your learning journey
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,7 +124,7 @@ export default function SignupPage() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                           type="password"
-                          placeholder="At least 8 characters"
+                          placeholder="Enter your password"
                           className="pl-10"
                           data-testid="input-password"
                           {...field}
@@ -126,19 +139,19 @@ export default function SignupPage() {
                 type="submit"
                 className="w-full"
                 disabled={isLoading}
-                data-testid="button-signup"
+                data-testid="button-login"
               >
                 {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Sign Up
+                Log In
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col gap-4 text-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline" data-testid="link-login">
-              Log in
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-primary hover:underline" data-testid="link-signup">
+              Sign up
             </Link>
           </p>
         </CardFooter>

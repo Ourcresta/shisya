@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, KeyRound } from "lucide-react";
 
-export default function VerifyOtpPage() {
+export default function VerifyOtp() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const { login } = useAuth();
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
+  const [redirectTo, setRedirectTo] = useState("/");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -22,8 +23,12 @@ export default function VerifyOtpPage() {
   useEffect(() => {
     const params = new URLSearchParams(search);
     const emailParam = params.get("email");
+    const redirectParam = params.get("redirect");
     if (emailParam) {
       setEmail(emailParam);
+    }
+    if (redirectParam) {
+      setRedirectTo(redirectParam);
     }
   }, [search]);
 
@@ -70,7 +75,7 @@ export default function VerifyOtpPage() {
         title: "Email verified!",
         description: "Your account is now active",
       });
-      setLocation("/");
+      setLocation(redirectTo);
     } catch (error) {
       toast({
         title: "Verification failed",
@@ -169,7 +174,7 @@ export default function VerifyOtpPage() {
             Didn't receive the code?{" "}
             <Button
               variant="ghost"
-              className="p-0 h-auto text-primary hover:underline"
+              className="p-0 h-auto text-primary"
               disabled={isResending || resendCooldown > 0}
               onClick={handleResend}
               data-testid="button-resend"
