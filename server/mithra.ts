@@ -97,8 +97,8 @@ function calculateHelpLevel(context: MithraContext): MithraHelpLevel {
   const courseLevel = context.courseLevel || "intermediate";
   const progress = context.studentProgressSummary;
   
-  if (!progress) {
-    return courseLevel as MithraHelpLevel;
+  if (!progress || !progress.totalLessons) {
+    return "beginner";
   }
 
   const completionRatio = progress.totalLessons > 0 
