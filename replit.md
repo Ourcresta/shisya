@@ -1,223 +1,40 @@
-# SHISYA - Student Portal
+# SHISHYA - Student Portal
 
 ## Overview
-SHISYA is the learner-facing portal of the AISiksha ecosystem. It represents the "Student / Shisya" side of learning - a read-only content consumption portal that fetches data from the AISiksha Admin Course Factory backend.
+SHISHYA is the learner-facing portal of the OurShiksha platform, designed for content consumption. It enables students to browse courses, view modules and lessons, track learning progress, and submit course projects. The platform's vision is to empower learners through a structured and engaging educational experience, facilitating skill development and career readiness.
 
-**App Name:** SHISYA  
-**Tagline:** Learn. Practice. Prove.  
-**Purpose:** Allow students to browse published courses, view modules/lessons, track learning progress, and submit course projects.
+## User Preferences
+I prefer detailed explanations.
+Do not make changes to the `server/` folder unless absolutely necessary for core functionality or security patches.
+I like the use of functional components and hooks in React.
+Please ask before making any major architectural changes or introducing new external dependencies.
+I prefer an iterative development approach, focusing on one feature at a time.
 
-## Tech Stack
-- React + Vite (Frontend)
-- TypeScript
-- Tailwind CSS with Shadcn UI components
-- TanStack React Query for data fetching
-- Express.js (Backend)
-- PostgreSQL + Drizzle ORM (Database)
-- Resend (Email OTP delivery)
-- Session-based authentication with HTTP-only cookies
+## System Architecture
+The SHISHYA student portal is built with a React + Vite frontend, utilizing TypeScript and Tailwind CSS with Shadcn UI for a clean, calm, and student-friendly aesthetic. TanStack React Query handles data fetching from the backend, ensuring efficient state management and caching. The backend is an Express.js application acting primarily as a read-only proxy to the OurShiksha Admin Course Factory, with session-based authentication managed by PostgreSQL and Drizzle ORM.
 
-## Project Structure
-```
-client/
-├── src/
-│   ├── auth/
-│   │   ├── Login.tsx            # Login page with email/password
-│   │   ├── Signup.tsx           # Signup page with email/password
-│   │   ├── VerifyOtp.tsx        # OTP verification page
-│   │   └── ProtectedRoute.tsx   # Route guard component
-│   ├── components/
-│   │   ├── layout/          # Header, Layout
-│   │   ├── course/          # CourseCard, CourseCardSkeleton, EmptyState
-│   │   ├── project/         # ProjectCard, ProjectSubmissionForm, ProjectStatusBadge
-│   │   ├── test/            # QuestionCard, TestTimer, TestProgress
-│   │   ├── certificate/     # CertificateCard, CertificatePreview, QRCodeBlock
-│   │   ├── profile/         # ProfileHeader, ProfileForm, LearningStats, SkillsSection, PortfolioProjects, CertificatesSection
-│   │   └── ui/              # Shadcn components + custom badges
-│   ├── contexts/
-│   │   ├── AuthContext.tsx          # Authentication state management
-│   │   ├── ProgressContext.tsx      # Centralized lesson progress state
-│   │   └── TestAttemptContext.tsx   # Test attempt state management
-│   ├── lib/
-│   │   ├── api.ts           # API fetching utilities
-│   │   ├── progress.ts      # LocalStorage progress tracking
-│   │   ├── submissions.ts   # LocalStorage project submissions
-│   │   ├── testAttempts.ts  # LocalStorage test attempt tracking
-│   │   ├── certificates.ts  # LocalStorage certificate management
-│   │   ├── eligibility.ts   # Certificate eligibility checking
-│   │   ├── profile.ts       # LocalStorage profile management
-│   │   ├── queryClient.ts   # React Query client
-│   │   └── utils.ts         # Utility functions
-│   ├── pages/
-│   │   ├── CourseCatalog.tsx    # Home page - course grid
-│   │   ├── CourseOverview.tsx   # Course details page
-│   │   ├── LearnView.tsx        # Modules & lessons view
-│   │   ├── LessonViewer.tsx     # Individual lesson content
-│   │   ├── CourseProjects.tsx   # Project list for a course
-│   │   ├── ProjectDetail.tsx    # Single project with submission form
-│   │   ├── CourseTests.tsx      # Test list for a course
-│   │   ├── TestInstructions.tsx # Test details and start button
-│   │   ├── TestAttempt.tsx      # Active test-taking interface
-│   │   ├── TestResult.tsx       # Score and pass/fail display
-│   │   ├── CertificatesDashboard.tsx  # All earned certificates
-│   │   ├── CertificateViewer.tsx      # Single certificate view
-│   │   ├── CertificateVerify.tsx      # Public verification page
-│   │   ├── ProfilePage.tsx      # Private profile with editing
-│   │   ├── PublicProfilePage.tsx      # Public portfolio for recruiters
-│   │   └── not-found.tsx        # 404 page
-│   ├── App.tsx
-│   └── index.css
-server/
-├── routes.ts                # API proxy routes to Admin backend
-├── mockData.ts              # Mock data for development (courses, modules, lessons, projects, tests)
-└── ...
-shared/
-└── schema.ts                # TypeScript types and Zod schemas
-```
+**UI/UX Decisions:**
+- **Design System:** Inter font for body, Space Grotesk for headings. Leverages Shadcn UI components for consistency.
+- **Responsiveness:** Fully mobile-responsive design.
+- **Loading States:** Implements skeleton loading for a smooth user experience.
+- **Navigation:** Header navigation adapts based on authentication status, providing access to public and authenticated routes.
+- **Student-first UX:** Prioritizes ease of use and clarity for learners.
 
-## Routes
+**Technical Implementations:**
+- **Authentication:** Features a secure signup and login flow with email/password, OTP verification (via Resend), Bcrypt password hashing, SHA256 OTP hashing, and HTTP-only session cookies with PostgreSQL persistence. Protected routes redirect unauthenticated users.
+- **Progress Tracking:** LocalStorage is used for client-side tracking of lesson completion, project submissions, test attempts, certificates, and lab progress.
+- **Test System:** Correct answers are never sent to the client; scoring is server-side. Tests are one-time attempts with timed assessments and immediate results.
+- **Certificate System:** Auto-generated upon meeting course requirements, with unique IDs, QR codes for public verification, and client-side PDF generation.
+- **Guided Labs:** Browser-based JavaScript execution with security sandboxing, output matching, and code persistence in LocalStorage. Labs can be unlocked based on lesson completion.
+- **Profile & Portfolio:** Students can manage a private editable profile and generate a public shareable portfolio with a verified badge, learning statistics, skills aggregated from completed courses/certificates, projects, and certificates.
 
-### Public Routes (No Login Required)
-- `/` - Course Catalog (home)
-- `/courses/:courseId` - Course Overview
-- `/verify/:certificateId` - Public Certificate Verification
-- `/login` - Login page
-- `/signup` - Signup page
-- `/verify-otp` - OTP verification page
-- `/profile/:username` - Public Portfolio (recruiter-friendly view)
+**Feature Specifications:**
+- **Core Features:** Course Catalog, Course Overview, Student Dashboard, Learn View with Lesson Viewer, Progress Tracking, Course Projects with Submission, Course Tests with Scoring and History, Guided Labs, Certificates Dashboard and Viewer, Public Certificate Verification, Student Profile, and Public Portfolio.
+- **Key Principles:** Read-only content consumption, focus on published courses only, no admin features, graceful error handling, clear separation of public and authenticated routes.
 
-### Protected Routes (Login Required)
-- `/courses/:courseId/learn` - Learn View (modules & lessons)
-- `/courses/:courseId/learn/:lessonId` - Lesson Viewer
-- `/courses/:courseId/projects` - Course Projects list
-- `/courses/:courseId/projects/:projectId` - Project Detail with submission form
-- `/courses/:courseId/tests` - Course Tests list
-- `/courses/:courseId/tests/:testId` - Test Instructions (pre-test view)
-- `/courses/:courseId/tests/:testId/attempt` - Active Test Attempt
-- `/courses/:courseId/tests/:testId/result` - Test Result Display
-- `/courses/:courseId/labs` - Course Labs list (practice exercises)
-- `/courses/:courseId/labs/:labId` - Lab Practice (code editor with output)
-- `/certificates` - Certificate Dashboard (student's earned certificates)
-- `/certificates/:certificateId` - Certificate Viewer with QR code and PDF download
-- `/profile` - Student Profile (private, editable)
-
-## API Endpoints
-
-### Authentication Endpoints
-- `POST /api/auth/signup` - Register with email/password (sends OTP)
-- `POST /api/auth/verify-otp` - Verify OTP and activate account
-- `POST /api/auth/login` - Login with email/password
-- `POST /api/auth/logout` - Logout (destroys session)
-- `GET /api/auth/me` - Get current user (session check)
-- `POST /api/auth/resend-otp` - Resend verification code
-
-### Proxy to Admin Backend
-Most routes are READ-ONLY proxies to the AISiksha Admin Course Factory:
-
-### Course & Lesson Endpoints
-- `GET /api/courses` - Published courses only
-- `GET /api/courses/:courseId` - Single course (published only)
-- `GET /api/courses/:courseId/modules` - Course modules
-- `GET /api/courses/:courseId/modules-with-lessons` - Modules with nested lessons
-- `GET /api/modules/:moduleId/lessons` - Lessons for a module
-- `GET /api/lessons/:lessonId` - Single lesson
-- `GET /api/lessons/:lessonId/notes` - AI notes for a lesson
-
-### Project Endpoints
-- `GET /api/courses/:courseId/projects` - Projects for a course
-- `GET /api/projects/:projectId` - Single project details
-- `POST /api/projects/:projectId/submissions` - Submit a project (stored in localStorage)
-
-### Test Endpoints
-- `GET /api/courses/:courseId/tests` - Tests for a course (summary without questions)
-- `GET /api/tests/:testId` - Single test with questions (correct answers stripped)
-- `POST /api/tests/:testId/submit` - Submit test answers (server calculates score)
-
-## Admin Backend
-Base URL: `https://course-factory.ourcresta1.repl.co`
-
-## Core Features
-1. **Course Catalog** - Browse published courses with cards showing title, level, duration, skills
-2. **Course Overview** - View course details, skills, certificate requirements
-3. **Learn View** - Accordion-style module/lesson navigation with progress tracking
-4. **Lesson Viewer** - View lesson content including objectives, key concepts, AI notes, video links
-5. **Progress Tracking** - Mark lessons complete (stored in LocalStorage)
-6. **Course Projects** - View available projects with difficulty levels, skills, and requirements
-7. **Project Submission** - Submit project work with GitHub URL, live URL, and notes
-8. **Course Tests** - Take timed assessments with MCQ and scenario questions
-9. **Test Scoring** - Immediate score calculation (server-side to prevent cheating)
-10. **Test History** - View past attempt results with pass/fail status
-11. **Certificates Dashboard** - View all earned certificates with issue dates and skills
-12. **Certificate Viewer** - Full certificate display with QR code and PDF download
-13. **Public Verification** - Anyone can verify certificate authenticity via URL/QR code
-14. **Student Profile** - Editable profile with bio, headline, location, and social links
-15. **Public Portfolio** - Shareable portfolio page for recruiters with verified badge, skills, projects, and certificates
-
-## Design System
-- Fonts: Inter (body), Space Grotesk (headings)
-- Uses Shadcn UI components
-- Clean, calm, student-friendly aesthetic
-- Mobile responsive
-- Skeleton loading states throughout
-
-## Key Principles
-- READ-ONLY for content (no editing)
-- Shows ONLY published courses
-- No admin features
-- Student-first UX
-- Graceful error handling
-
-## LocalStorage Keys
-- `shisya_course_progress` - Lesson completion tracking per course
-- `shisya_project_submissions` - Project submission data per course/project
-- `shisya_test_attempts` - Test attempt data (answers, scores, pass/fail status)
-- `shisya_certificates` - Certificate data with IDs, student info, and verification URLs
-- `shisya_profile` - Student profile with name, username, bio, social links, and visibility settings
-- `shisya_lab_progress` - Lab completion status and saved code per course/lab
-
-## Test System Design
-- **Security**: Correct answers are NEVER sent to the client. Server strips `isCorrect` flag before sending questions.
-- **Scoring**: Server calculates score by comparing submitted answers against stored correct answers.
-- **One-Time**: Tests cannot be retaken in this version (once attempted, shows result only).
-- **Timer**: Timed tests show countdown with color-coded warnings (amber < 60s, red < 30s with pulse).
-- **Persistence**: Attempts stored in localStorage for instant access to past results.
-
-## Certificate System Design
-- **Auto-Generated**: Certificates are issued when all requirements are met (lessons complete + test passed + project submitted if required)
-- **Certificate IDs**: 12-character randomly generated codes (format: XXXX-XXXX-XXXX)
-- **QR Codes**: Each certificate includes a QR code linking to its public verification page
-- **PDF Download**: Client-side PDF generation using html2canvas and jsPDF
-- **Public Verification**: `/verify/:certificateId` is accessible without authentication for certificate validation
-- **Data Shape**: Certificates include studentName, courseId, courseTitle, certificateTitle, level, skills, issuedAt, verificationUrl
-
-## Guided Labs System Design
-- **Browser-Based Execution**: JavaScript code runs client-side using Function constructor with security sandboxing
-- **Security Restrictions**: Disables setTimeout, setInterval, fetch, XMLHttpRequest, WebSocket, localStorage, sessionStorage, document, and window access
-- **Output Matching**: Compares actual console output against expected output (normalized whitespace)
-- **Code Persistence**: Auto-saves student code in localStorage while practicing
-- **Lab Unlocking**: Labs can be linked to lessons via lessonId - unlocks when that lesson is completed
-- **Completion Flow**: Run code → Output matches expected → Mark as Completed button appears → Click to save completion
-- **Mock Data**: Course 1 has 8 labs, Course 2 has 6 labs, Course 3 has 3 labs
-- **Difficulty Levels**: beginner, intermediate, advanced
-
-## Authentication System Design
-- **Signup Flow**: User enters email/password → OTP sent via Resend → User verifies OTP → Account activated → Auto-login
-- **Login Flow**: Email + Password → Session created → HTTP-only cookie set
-- **Security Features**:
-  - Bcrypt password hashing (12 rounds)
-  - SHA256 OTP hashing (OTPs never stored in plain text)
-  - HTTP-only session cookies (7-day expiry)
-  - OTP expires in 10 minutes
-  - One active OTP per email
-- **Password Requirements**: Minimum 8 characters, must contain letters and numbers
-- **Route Protection**: ProtectedRoute component redirects unauthenticated users to `/login?redirect={originalPath}`
-- **Session Persistence**: Sessions stored in PostgreSQL, survive server restarts
-- **Header State**: Shows "Log In" button when logged out, user dropdown menu when logged in
-
-## Profile & Portfolio System Design
-- **Private Profile**: Students can edit their profile at `/profile` with full name, username, headline, bio, location, and social links
-- **Public Portfolio**: Shareable at `/profile/:username` with verified badge, learning stats, skills, projects, and certificates
-- **Visibility Toggle**: Students must complete at least 1 course or submit 1 project before making profile public
-- **Skills Auto-Aggregation**: Skills are automatically collected from completed certificates and project submissions (no manual entry)
-- **Learning Stats**: Displays courses completed, projects submitted, tests passed, and certificates earned
-- **Username Requirements**: Lowercase, alphanumeric with hyphens/underscores only (3-30 characters)
+## External Dependencies
+- **OurShiksha Admin Course Factory:** The primary backend source for course content and data (`https://course-factory.ourcresta1.repl.co`).
+- **Resend:** For sending email OTPs during the signup and account verification process.
+- **PostgreSQL:** Database used for session storage and potentially other backend data.
+- **Drizzle ORM:** Used for interacting with the PostgreSQL database.
+- **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
