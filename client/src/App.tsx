@@ -19,6 +19,8 @@ import TestResult from "@/pages/TestResult";
 import CertificatesDashboard from "@/pages/CertificatesDashboard";
 import CertificateViewer from "@/pages/CertificateViewer";
 import CertificateVerify from "@/pages/CertificateVerify";
+import ProfilePage from "@/pages/ProfilePage";
+import PublicProfilePage from "@/pages/PublicProfilePage";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/certificates" component={CertificatesDashboard} />
       <Route path="/certificates/:certificateId" component={CertificateViewer} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />
+      <Route path="/profile" component={ProfilePage} />
+      <Route path="/profile/:username" component={PublicProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

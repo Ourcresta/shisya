@@ -7,7 +7,7 @@ interface SkillsSectionProps {
 }
 
 export default function SkillsSection({ skills, showEmpty = true }: SkillsSectionProps) {
-  const uniqueSkills = [...new Set(skills)].sort();
+  const uniqueSkills = Array.from(new Set(skills)).sort();
 
   if (uniqueSkills.length === 0 && !showEmpty) {
     return null;

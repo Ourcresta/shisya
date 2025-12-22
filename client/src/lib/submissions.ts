@@ -91,8 +91,8 @@ export function getAllSubmissions(): ProjectSubmission[] {
   const store = getSubmissionsStore();
   const submissions: ProjectSubmission[] = [];
   
-  Object.values(store).forEach(courseSubmissions => {
-    Object.values(courseSubmissions).forEach(submission => {
+  Object.values(store).forEach((courseSubmissions) => {
+    Object.values(courseSubmissions as Record<number, ProjectSubmission>).forEach((submission: ProjectSubmission) => {
       if (submission.submitted) {
         submissions.push(submission);
       }

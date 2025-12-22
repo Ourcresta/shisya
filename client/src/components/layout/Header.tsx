@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { BookOpen, GraduationCap, Award } from "lucide-react";
+import { BookOpen, GraduationCap, Award, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
   const [location] = useLocation();
   const isHome = location === "/";
   const isCertificates = location.startsWith("/certificates");
+  const isProfile = location.startsWith("/profile");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -38,6 +39,14 @@ export function Header() {
               <Button variant="ghost" size="sm" data-testid="button-certificates">
                 <Award className="w-4 h-4 mr-2" />
                 Certificates
+              </Button>
+            </Link>
+          )}
+          {!isProfile && (
+            <Link href="/profile">
+              <Button variant="ghost" size="sm" data-testid="button-profile">
+                <User className="w-4 h-4 mr-2" />
+                Profile
               </Button>
             </Link>
           )}
