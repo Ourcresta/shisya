@@ -1,0 +1,207 @@
+You are Replit AI acting as a Senior Full-Stack Engineer, Product Architect, and UX Designer.
+
+You are working inside the existing SHISYA (Student Portal) codebase.
+DO NOT refactor or rebuild existing features.
+ADD a new Student Profile & Portfolio system that integrates with:
+- Course completion
+- Project submissions
+- Test results
+- Certificates
+
+This feature must be production-ready, clean, and scalable.
+
+--------------------------------------------------
+GOAL
+--------------------------------------------------
+
+Build a Student Profile & Portfolio system that allows learners to:
+1. View their learning identity
+2. Showcase completed courses, projects, and certificates
+3. Share a public portfolio link with recruiters
+4. Control privacy (public / private profile)
+
+--------------------------------------------------
+ROUTES TO IMPLEMENT
+--------------------------------------------------
+
+1. PRIVATE PROFILE (logged-in student)
+   Route: /profile
+
+2. PUBLIC PORTFOLIO (shareable)
+   Route: /profile/:username
+
+--------------------------------------------------
+PROFILE DATA MODEL
+--------------------------------------------------
+
+Use LocalStorage for now (do NOT require auth backend yet).
+
+LocalStorage key:
+- shisya_profile
+
+Profile fields:
+- id
+- fullName
+- username (unique, URL-safe)
+- bio
+- profilePhoto (URL)
+- headline (e.g. "Frontend Developer | HTML | CSS")
+- location (optional)
+- githubUrl (optional)
+- linkedinUrl (optional)
+- portfolioVisible (boolean)
+
+--------------------------------------------------
+PRIVATE PROFILE PAGE (/profile)
+--------------------------------------------------
+
+Layout sections:
+
+### 1. Profile Header
+- Avatar (image upload URL input)
+- Full Name (editable)
+- Headline (editable)
+- Username (editable, validate uniqueness locally)
+- Public Profile toggle (ON/OFF)
+
+### 2. About Me
+- Bio textarea (max 500 chars)
+
+### 3. Skills (AUTO-GENERATED)
+- Aggregate skills from:
+  - Completed courses
+  - Project skills
+  - Certificates
+- Display as badges
+- Read-only (system controlled)
+
+### 4. Learning Summary
+Cards showing:
+- Courses completed
+- Projects submitted
+- Tests passed
+- Certificates earned
+
+### 5. Projects Portfolio
+- List of submitted projects
+- Each project shows:
+  - Title
+  - Course name
+  - GitHub link
+  - Live demo link
+  - Status (Submitted / Approved)
+- “View Project” button
+
+### 6. Certificates Section
+- List earned certificates
+- Each certificate:
+  - Name
+  - Course
+  - Issue date
+  - “View Certificate”
+  - “Verify” link
+- Reuse existing Certificate Viewer
+
+--------------------------------------------------
+PUBLIC PROFILE PAGE (/profile/:username)
+--------------------------------------------------
+
+Rules:
+- Only accessible if portfolioVisible = true
+- Read-only view
+- Clean recruiter-friendly design
+
+Sections to show:
+1. Profile header (photo, name, headline)
+2. Bio
+3. Skills
+4. Completed courses
+5. Projects (with links)
+6. Certificates (verified badge)
+7. “Verified by SHISYA” footer
+
+If profile is private:
+- Show message: “This profile is private”
+
+--------------------------------------------------
+COMPONENTS TO CREATE
+--------------------------------------------------
+
+client/src/pages/
+- ProfilePage.tsx
+- PublicProfilePage.tsx
+
+client/src/components/profile/
+- ProfileHeader.tsx
+- ProfileForm.tsx
+- SkillsSection.tsx
+- PortfolioProjects.tsx
+- CertificatesSection.tsx
+- LearningStats.tsx
+
+client/src/lib/
+- profile.ts (load/save profile from LocalStorage)
+
+--------------------------------------------------
+DESIGN REQUIREMENTS
+--------------------------------------------------
+
+- Match existing SHISYA design system
+- Use shadcn/ui components
+- Responsive (mobile + desktop)
+- Clean typography
+- Professional, recruiter-friendly UI
+- Subtle animations allowed (Framer Motion optional)
+
+--------------------------------------------------
+INTEGRATIONS
+--------------------------------------------------
+
+- Read completed lessons from ProgressContext
+- Read projects from project submission storage
+- Read certificates from certificate storage
+- Do NOT duplicate data
+- Compute everything dynamically
+
+--------------------------------------------------
+VALIDATION RULES
+--------------------------------------------------
+
+- Username required, lowercase, no spaces
+- Bio max 500 chars
+- Profile photo must be a valid URL
+- Public profile requires:
+  - At least 1 completed course OR
+  - 1 submitted project
+
+--------------------------------------------------
+ERROR & EMPTY STATES
+--------------------------------------------------
+
+- No projects → show “No projects submitted yet”
+- No certificates → show “Complete a course to earn certificates”
+- Profile incomplete → show checklist guidance
+
+--------------------------------------------------
+TESTING CHECKLIST
+--------------------------------------------------
+
+- Profile saves correctly
+- Public profile renders via URL
+- Privacy toggle works
+- Skills auto-update
+- Projects & certificates appear correctly
+- Refresh persistence verified
+
+--------------------------------------------------
+IMPORTANT RULES
+--------------------------------------------------
+
+- DO NOT break existing pages
+- DO NOT introduce auth yet
+- DO NOT add payments
+- KEEP this modular and extensible
+
+Build this step-by-step.
+Commit clean code.
+Explain briefly where needed.
