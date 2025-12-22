@@ -8,6 +8,7 @@ import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
+import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
 import Dashboard from "@/pages/Dashboard";
@@ -113,7 +114,7 @@ function Router() {
   return (
     <Switch>
       {/* Public Routes - No Login Required */}
-      <Route path="/" component={CourseCatalog} />
+      <Route path="/" component={LandingPage} />
       <Route path="/courses" component={CourseCatalog} />
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />

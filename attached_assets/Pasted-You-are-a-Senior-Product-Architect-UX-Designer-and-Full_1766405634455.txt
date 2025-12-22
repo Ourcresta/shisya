@@ -1,0 +1,196 @@
+You are a Senior Product Architect, UX Designer, and Full-Stack Engineer.
+
+I am building the MAIN LANDING PAGE for the OurShiksha platform.
+This page is the PUBLIC ENTRY POINT for STUDENTS.
+
+LOCKED NAMING:
+Platform: OurShiksha
+Student Portal: Shishya
+AI Tutor Avatar: Mithra
+
+IMPORTANT RULE:
+❌ Do NOT mention Guru or any admin portal anywhere on this page.
+This page is strictly STUDENT-FOCUSED.
+
+------------------------------------------------
+CORE OBJECTIVE
+------------------------------------------------
+
+The OurShiksha Main Page must:
+1. Clearly explain what OurShiksha is
+2. Show the learning journey
+3. Encourage Login / Sign Up
+4. Redirect authenticated users into Shishya
+5. Never expose internal/admin concepts
+
+------------------------------------------------
+ROUTES & FLOW
+------------------------------------------------
+
+Main Page:
+ /
+
+Login:
+ /login
+
+Signup:
+ /signup
+
+Post-login Redirect:
+ /shishya/dashboard
+
+Flow:
+Main Page → Login / Signup → Shishya Dashboard
+
+------------------------------------------------
+MAIN PAGE STRUCTURE
+------------------------------------------------
+
+SECTION 1: HEADER (PUBLIC)
+
+Left:
+- OurShiksha Logo
+
+Right (if NOT logged in):
+- Login
+- Sign Up
+
+Right (if logged in):
+- Go to Shishya
+
+------------------------------------------------
+
+SECTION 2: HERO SECTION
+
+Headline (large, bold):
+Learn. Practice. Prove.
+
+Subheading:
+OurShiksha is a complete skill-learning platform where students
+learn concepts, practice with hands-on labs, build real projects,
+pass assessments, and earn verified certificates.
+
+Primary CTA:
+- Login to Shishya
+
+Secondary CTA:
+- Explore Courses
+
+------------------------------------------------
+
+SECTION 3: HOW OURSHIKSHA WORKS
+
+Display a clear 5-step student journey:
+
+1. Learn
+   Structured lessons designed for clarity
+
+2. Practice
+   Guided labs to build real skills
+
+3. Build
+   Industry-aligned projects
+
+4. Validate
+   Tests and assessments
+
+5. Prove
+   Certificates and portfolio
+
+Each step:
+- Icon
+- One-line explanation
+
+------------------------------------------------
+
+SECTION 4: WHAT STUDENTS GET
+
+Feature grid (student-focused only):
+
+- Structured Courses
+- Guided Labs
+- Real Projects
+- Skill Assessments
+- Verified Certificates
+- Career Portfolio
+- AI Tutor Mithra (Coming Soon)
+
+------------------------------------------------
+
+SECTION 5: COURSE PREVIEW (READ-ONLY)
+
+- Show a few published courses
+- Course title
+- Short description
+- Level badge
+
+Rules:
+- No “Start Learning” here
+- Clicking course → course overview only
+- Learning requires login
+
+------------------------------------------------
+
+SECTION 6: CALL TO ACTION
+
+Text:
+Start your learning journey with OurShiksha today.
+
+Buttons:
+- Login
+- Sign Up
+
+------------------------------------------------
+
+SECTION 7: FOOTER
+
+Include:
+- OurShiksha ©
+- About
+- Privacy Policy
+- Terms of Service
+- Contact
+
+------------------------------------------------
+AUTH-AWARE BEHAVIOR
+------------------------------------------------
+
+If user is NOT logged in:
+- Show Login / Sign Up
+- Any learning CTA → redirect to /login
+
+If user IS logged in:
+- Hide Login / Sign Up
+- Show Go to Shishya button
+- Clicking redirects to /shishya/dashboard
+
+------------------------------------------------
+DESIGN & UX RULES
+------------------------------------------------
+
+- Clean, calm, professional
+- Student-first language
+- No admin terminology
+- No dashboards here
+- Mobile responsive
+- Trust-focused UI
+
+------------------------------------------------
+STRICT CONSTRAINTS
+------------------------------------------------
+
+❌ Do NOT mention Guru
+❌ Do NOT show admin concepts
+❌ Do NOT allow learning without login
+❌ Do NOT mix Shishya layout here
+
+------------------------------------------------
+FINAL EXPECTATION
+------------------------------------------------
+
+A clear, confident, student-facing OurShiksha main page
+with a simple Login → Shishya journey,
+ready for real users, colleges, and scale.
+
+Proceed step by step.
+Focus on clarity and trust.
