@@ -21,7 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { DifficultyBadge, ProjectStatusBadge } from "@/components/project/ProjectStatusBadge";
 import { ProjectSubmissionForm } from "@/components/project/ProjectSubmissionForm";
-import { MithraAvatar } from "@/components/mithra";
 import { 
   getProjectSubmission, 
   isProjectSubmitted, 
@@ -326,18 +325,6 @@ export default function ProjectDetail() {
           </div>
         </div>
       ) : null}
-
-      {project && (
-        <MithraAvatar
-          context={{
-            courseId: courseIdNum,
-            projectId: projectIdNum,
-            pageType: "project",
-            courseTitle: course?.title,
-            projectTitle: project.title,
-          }}
-        />
-      )}
     </Layout>
   );
 }

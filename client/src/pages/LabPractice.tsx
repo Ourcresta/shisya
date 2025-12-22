@@ -8,7 +8,6 @@ import { Header } from "@/components/layout/Header";
 import LabInstructions from "@/components/lab/LabInstructions";
 import CodeEditor from "@/components/lab/CodeEditor";
 import OutputConsole from "@/components/lab/OutputConsole";
-import { MithraAvatar } from "@/components/mithra";
 import { useToast } from "@/hooks/use-toast";
 import { 
   isLabCompleted, 
@@ -263,18 +262,6 @@ export default function LabPractice() {
           </div>
         </div>
       </main>
-
-      {lab && (
-        <MithraAvatar
-          context={{
-            courseId,
-            labId,
-            pageType: "lab",
-            courseTitle: course?.title,
-            labTitle: lab.title,
-          }}
-        />
-      )}
     </div>
   );
 }

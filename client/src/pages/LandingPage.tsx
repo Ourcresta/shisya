@@ -15,7 +15,6 @@ import {
   ClipboardCheck,
   Award,
   Briefcase,
-  Bot,
   ArrowRight,
   LogIn,
   UserPlus,
@@ -58,7 +57,6 @@ const features = [
   { icon: ClipboardCheck, title: "Skill Assessments", description: "Validate your knowledge" },
   { icon: Award, title: "Verified Certificates", description: "Prove your skills" },
   { icon: Briefcase, title: "Career Portfolio", description: "Showcase your work" },
-  { icon: Bot, title: "AI Tutor Mithra", description: "Coming Soon", comingSoon: true },
 ];
 
 function HeroSection() {
