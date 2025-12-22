@@ -8,7 +8,8 @@ import bcrypt from "bcrypt";
 import { sendOtpEmail } from "./resend";
 
 const SALT_ROUNDS = 12;
-const OTP_EXPIRY_MINUTES = 10;
+const OTP_EXPIRY_MINUTES = 5;
+const MAX_OTP_ATTEMPTS = 3;
 const SESSION_EXPIRY_DAYS = 7;
 const COOKIE_NAME = "shishya_session";
 

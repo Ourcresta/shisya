@@ -20,6 +20,7 @@ export const otpCodes = pgTable("otp_codes", {
   otpHash: text("otp_hash").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").notNull().default(false),
+  attempts: integer("attempts").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
