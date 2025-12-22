@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import LabInstructions from "@/components/lab/LabInstructions";
 import CodeEditor from "@/components/lab/CodeEditor";
 import OutputConsole from "@/components/lab/OutputConsole";
+import { MithraAvatar } from "@/components/mithra";
 import { useToast } from "@/hooks/use-toast";
 import { 
   isLabCompleted, 
@@ -16,7 +17,7 @@ import {
   saveLabCode 
 } from "@/lib/labProgress";
 import { executeJavaScript, compareOutput } from "@/lib/labRunner";
-import type { Lab } from "@shared/schema";
+import type { Lab, Course } from "@shared/schema";
 import { 
   ArrowLeft, 
   Play, 
@@ -44,6 +45,11 @@ export default function LabPractice() {
   const { data: lab, isLoading } = useQuery<Lab>({
     queryKey: ["/api/labs", labId],
     enabled: labId > 0,
+  });
+
+  const { data: course } = useQuery<Course>({
+    queryKey: ["/api/courses", courseId.toString()],
+    enabled: courseId > 0,
   });
 
   useEffect(() => {
@@ -257,6 +263,18 @@ export default function LabPractice() {
           </div>
         </div>
       </main>
+
+      {lab && (
+        <MithraAvatar
+          context={{
+            courseId,
+            labId,
+            pageType: "lab",
+            courseTitle: course?.title,
+            labTitle: lab.title,
+          }}
+        />
+      )}
     </div>
   );
 }

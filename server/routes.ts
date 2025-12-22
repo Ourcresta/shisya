@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
+import { registerMithraRoutes } from "./mithra";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -33,6 +34,9 @@ export async function registerRoutes(
   
   // Auth routes
   app.use("/api/auth", authRouter);
+  
+  // Mithra AI Tutor routes
+  registerMithraRoutes(app);
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {

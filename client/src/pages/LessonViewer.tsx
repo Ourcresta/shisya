@@ -17,7 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useCourseProgress } from "@/contexts/ProgressContext";
-import type { Lesson, AINotes } from "@shared/schema";
+import { MithraAvatar } from "@/components/mithra";
+import type { Lesson, AINotes, Course } from "@shared/schema";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -30,6 +31,10 @@ export default function LessonViewer() {
 
   const { data: lesson, isLoading: lessonLoading, error: lessonError } = useQuery<Lesson>({
     queryKey: ["/api/lessons", lessonId],
+  });
+
+  const { data: course } = useQuery<Course>({
+    queryKey: ["/api/courses", courseId],
   });
 
   const { data: aiNotes, isLoading: notesLoading } = useQuery<AINotes | null>({
@@ -245,6 +250,19 @@ export default function LessonViewer() {
           </div>
         </div>
       ) : null}
+
+      {lesson && (
+        <MithraAvatar
+          context={{
+            courseId: courseIdNum,
+            moduleId: lesson.moduleId,
+            lessonId: lessonIdNum,
+            pageType: "lesson",
+            courseTitle: course?.title,
+            lessonTitle: lesson.title,
+          }}
+        />
+      )}
     </Layout>
   );
 }

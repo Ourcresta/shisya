@@ -21,13 +21,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { DifficultyBadge, ProjectStatusBadge } from "@/components/project/ProjectStatusBadge";
 import { ProjectSubmissionForm } from "@/components/project/ProjectSubmissionForm";
+import { MithraAvatar } from "@/components/mithra";
 import { 
   getProjectSubmission, 
   isProjectSubmitted, 
   saveProjectSubmission 
 } from "@/lib/submissions";
 import { apiRequest } from "@/lib/queryClient";
-import type { Project, ProjectSubmission } from "@shared/schema";
+import type { Project, ProjectSubmission, Course } from "@shared/schema";
 
 export default function ProjectDetail() {
   const { courseId, projectId } = useParams<{ courseId: string; projectId: string }>();
@@ -42,6 +43,10 @@ export default function ProjectDetail() {
 
   const { data: project, isLoading, error } = useQuery<Project>({
     queryKey: ["/api/projects", projectId],
+  });
+
+  const { data: course } = useQuery<Course>({
+    queryKey: ["/api/courses", courseId],
   });
 
   const submitMutation = useMutation({
@@ -321,6 +326,18 @@ export default function ProjectDetail() {
           </div>
         </div>
       ) : null}
+
+      {project && (
+        <MithraAvatar
+          context={{
+            courseId: courseIdNum,
+            projectId: projectIdNum,
+            pageType: "project",
+            courseTitle: course?.title,
+            projectTitle: project.title,
+          }}
+        />
+      )}
     </Layout>
   );
 }
