@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
+import { authRouter } from "./auth";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -29,6 +30,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  // Auth routes
+  app.use("/api/auth", authRouter);
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {

@@ -1,38 +1,13 @@
-import { type User, type InsertUser } from "@shared/schema";
+// Storage module - currently using in-memory for mock data
+// Auth data is stored in PostgreSQL via Drizzle ORM
+
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-}
+// This file is kept for compatibility but auth uses the database directly
+export interface IStorage {}
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
+  constructor() {}
 }
 
 export const storage = new MemStorage();

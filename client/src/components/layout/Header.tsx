@@ -1,12 +1,26 @@
 import { Link, useLocation } from "wouter";
-import { BookOpen, GraduationCap, Award, User } from "lucide-react";
+import { BookOpen, GraduationCap, Award, User, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const { user, isLoading, logout } = useAuth();
   const isHome = location === "/";
   const isCertificates = location.startsWith("/certificates");
   const isProfile = location.startsWith("/profile");
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -42,13 +56,43 @@ export function Header() {
               </Button>
             </Link>
           )}
-          {!isProfile && (
-            <Link href="/profile">
-              <Button variant="ghost" size="sm" data-testid="button-profile">
-                <User className="w-4 h-4 mr-2" />
-                Profile
-              </Button>
-            </Link>
+          
+          {!isLoading && (
+            <>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" data-testid="button-user-menu">
+                      <User className="w-4 h-4 mr-2" />
+                      <span className="max-w-[120px] truncate hidden sm:inline">
+                        {user.email}
+                      </span>
+                      <span className="sm:hidden">Account</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center gap-2 cursor-pointer" data-testid="menu-profile">
+                        <User className="w-4 h-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer" data-testid="menu-logout">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link href="/login">
+                  <Button variant="default" size="sm" data-testid="button-login">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Log In
+                  </Button>
+                </Link>
+              )}
+            </>
           )}
         </nav>
       </div>

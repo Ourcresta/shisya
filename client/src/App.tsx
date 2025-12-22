@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import NotFound from "@/pages/not-found";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -23,11 +24,17 @@ import ProfilePage from "@/pages/ProfilePage";
 import PublicProfilePage from "@/pages/PublicProfilePage";
 import CourseLabs from "@/pages/CourseLabs";
 import LabPractice from "@/pages/LabPractice";
+import SignupPage from "@/pages/SignupPage";
+import LoginPage from "@/pages/LoginPage";
+import VerifyOtpPage from "@/pages/VerifyOtpPage";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={CourseCatalog} />
+      <Route path="/signup" component={SignupPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/verify-otp" component={VerifyOtpPage} />
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/courses/:courseId/learn" component={LearnView} />
       <Route path="/courses/:courseId/learn/:lessonId" component={LessonViewer} />
@@ -53,12 +60,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <ProgressProvider>
-          <TestAttemptProvider>
-            <Toaster />
-            <Router />
-          </TestAttemptProvider>
-        </ProgressProvider>
+        <AuthProvider>
+          <ProgressProvider>
+            <TestAttemptProvider>
+              <Toaster />
+              <Router />
+            </TestAttemptProvider>
+          </ProgressProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
