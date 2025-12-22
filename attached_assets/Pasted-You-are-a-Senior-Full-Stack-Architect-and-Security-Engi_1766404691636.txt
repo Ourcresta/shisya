@@ -1,0 +1,158 @@
+You are a Senior Full-Stack Architect and Security Engineer.
+
+I am inside the SHISHYA (Student Portal) codebase of the OurShiksha platform.
+
+Your task is to IMPLEMENT EMAIL OTP VERIFICATION using RESEND
+for the SIGNUP FLOW, integrated cleanly with the existing auth system.
+
+This is a controlled upgrade.
+Do NOT redesign UI unnecessarily.
+Do NOT change route structure.
+Do NOT break password login.
+
+LOCKED NAMES:
+Platform: OurShiksha
+Student Portal: Shishya
+Admin Portal: Guru
+AI Tutor: Mithra
+
+AUTH FLOW GOAL:
+- Signup uses Email + Password + OTP
+- Login uses Email + Password ONLY
+- OTP is required ONLY for signup verification
+
+----------------------------------
+ENVIRONMENT SETUP
+----------------------------------
+
+Add environment variable:
+RESEND_API_KEY=your_resend_key_here
+
+----------------------------------
+OTP RULES
+----------------------------------
+
+- OTP length: 6 digits (numeric)
+- OTP expiry: 5 minutes
+- One active OTP per email
+- OTP must be single-use
+- Hash OTP before storing
+- Clear OTP after verification
+
+----------------------------------
+BACKEND / SERVER LOGIC
+----------------------------------
+
+Create or update auth service with:
+
+POST /auth/send-otp
+- Input: email
+- Generate OTP
+- Hash OTP
+- Store: email, otpHash, expiresAt
+- Send OTP using Resend email
+
+POST /auth/verify-otp
+- Input: email, otp
+- Validate:
+  - OTP exists
+  - Not expired
+  - Hash matches
+- Mark email as verified
+- Delete OTP record
+
+POST /auth/signup
+- Input: email, password
+- Require verified email
+- Hash password
+- Create user
+- Auto-login user
+- Return auth token/session
+
+----------------------------------
+EMAIL TEMPLATE (RESEND)
+----------------------------------
+
+Subject:
+Your OurShiksha Verification Code
+
+Body (clean, professional):
+Hello,
+
+Your verification code for OurShiksha (Shishya) is:
+
+OTP: {{CODE}}
+
+This code expires in 5 minutes.
+Do not share this code with anyone.
+
+— OurShiksha Team
+
+----------------------------------
+FRONTEND FLOW
+----------------------------------
+
+Signup Page:
+1. Email + Password
+2. Click "Send OTP"
+3. Show OTP input screen
+4. Verify OTP
+5. Auto-login
+6. Redirect → /shishya/dashboard
+
+UI rules:
+- Disable resend for 30 seconds
+- Show countdown timer
+- Clear error messages properly
+- Show success + error toasts
+
+----------------------------------
+SECURITY RULES
+----------------------------------
+
+- Never store OTP in plain text
+- Never expose OTP in logs
+- Rate limit OTP requests (basic cooldown)
+- Prevent brute force attempts (3 tries max)
+
+----------------------------------
+INTEGRATION RULES
+----------------------------------
+
+- Must integrate with existing AuthContext
+- Must reuse login() after signup
+- Must persist auth in localStorage
+- Must not affect password login
+
+----------------------------------
+TEST CASES (MANDATORY)
+----------------------------------
+
+- OTP email is sent via Resend
+- Wrong OTP shows error
+- Expired OTP shows error
+- Correct OTP completes signup
+- User auto-lands on /shishya/dashboard
+- Login still works without OTP
+- Refresh keeps user logged in
+
+----------------------------------
+CONSTRAINTS
+----------------------------------
+
+- Do NOT add phone OTP
+- Do NOT add social login
+- Do NOT redesign auth pages
+- Do NOT touch Guru (Admin) portal
+
+----------------------------------
+FINAL EXPECTATION
+----------------------------------
+
+Production-grade email OTP verification
+Secure signup flow
+Clean UX
+No auth leaks
+Fully Resend-ready implementation
+
+Proceed step by step and validate all test cases.
