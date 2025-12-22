@@ -5,8 +5,7 @@ import { mithraConversations, mithraMessages, mithraRequestSchema, type MithraRe
 import { eq, and, desc } from "drizzle-orm";
 
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
