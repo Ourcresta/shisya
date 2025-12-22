@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { getOTPEmailTemplate } from './lib/otp-email';
 import type { OtpPurpose } from '@shared/schema';
 
-const DEFAULT_FROM_EMAIL = 'OurShiksha <onboarding@resend.dev>';
+const DEFAULT_FROM_EMAIL = 'OurShiksha <noreply@mail.dishabrooms.com>';
 
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY;
