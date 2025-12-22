@@ -1,0 +1,204 @@
+In **Shishya (Student Portal)**:
+
+* **Certificates link is visible before login**
+* **Courses are accessible without authentication**
+* **Login button exists but does not gate the app**
+* There is **no student dashboard**, so post-login experience is unclear
+
+This breaks **user mental model**:
+
+> “Am I browsing? Or am I inside my account?”
+
+---
+
+## ✅ Correct Mental Model (LOCK THIS)
+
+We split the experience into **3 clear layers**:
+
+---
+
+# 🧱 LAYER 1 — Master Public Pages (Unauthenticated)
+
+These are **marketing + discovery only**.
+
+### Public Routes (NO LOGIN REQUIRED)
+
+```
+/
+ /courses        → browse published courses
+ /course/:id     → course overview (read-only)
+ /login
+ /signup
+ /verify-otp
+ /certificate/verify/:id   → public certificate verification
+```
+
+### Header (Before Login)
+
+```
+[ OurShiksha Logo ]              [ Login ] [ Sign Up ]
+```
+
+❌ **NO dashboard**
+❌ **NO certificates**
+❌ **NO progress**
+❌ **NO projects**
+❌ **NO tests**
+
+> This is like Udemy / Coursera landing mode.
+
+---
+
+# 🔐 LAYER 2 — Authentication Boundary
+
+Once the user logs in successfully:
+
+* OTP verified (signup)
+* Password verified (login)
+* JWT / session established
+
+👉 **IMMEDIATE REDIRECT TO DASHBOARD**
+
+```
+/login → success → /shishya/dashboard
+```
+
+---
+
+# 🎓 LAYER 3 — Shishya Authenticated Portal (After Login)
+
+This is the **real Shishya**.
+
+---
+
+## 🧭 Shishya Portal Structure (POST-LOGIN)
+
+### Main Layout
+
+```
+┌──────────────────────────────────────┐
+│ OurShiksha | Shishya                  │
+│--------------------------------------│
+│ Dashboard | Learn | Projects | Tests  │
+│ Certificates | Labs | Profile | Logout│
+└──────────────────────────────────────┘
+```
+
+---
+
+## 🏠 Shishya Dashboard (MANDATORY)
+
+**This is what was missing — and you are right to add it.**
+
+### `/shishya/dashboard`
+
+Dashboard should show:
+
+### 1️⃣ Learning Progress
+
+* % course completion
+* Current lesson
+* Resume Learning button
+
+### 2️⃣ Active Courses
+
+* Enrolled courses
+* Status (In Progress / Completed)
+
+### 3️⃣ Pending Actions
+
+* Tests pending
+* Projects not submitted
+* Certificates locked
+
+### 4️⃣ Achievements
+
+* Certificates earned
+* Skills validated
+
+---
+
+## 🔁 Navigation Rules (VERY IMPORTANT)
+
+### Header Logic
+
+| State         | Header Shows                    |
+| ------------- | ------------------------------- |
+| Not logged in | Login / Sign Up                 |
+| Logged in     | Dashboard + Logout              |
+| Logged in     | NO Login button                 |
+| Logged in     | Certificates only inside portal |
+
+---
+
+## 🧪 Certificates — Correct Placement
+
+### ❌ Wrong
+
+```
+Public Header → Certificates
+```
+
+### ✅ Correct
+
+```
+Shishya Portal → Certificates
+```
+
+**Exception (Allowed Public):**
+
+```
+/certificate/verify/:certificateId
+```
+
+This is only for **employers / verification**, not students.
+
+---
+
+## 🧩 Final Correct Route Map
+
+### Public
+
+```
+/
+/courses
+/courses/:id
+/login
+/signup
+/verify-otp
+/certificate/verify/:id
+```
+
+### Auth Required (Shishya)
+
+```
+/shishya/dashboard
+/shishya/learn
+/shishya/learn/:courseId
+/shishya/projects
+/shishya/tests
+/shishya/labs
+/shishya/certificates
+/shishya/profile
+```
+
+---
+
+## 🛡️ Route Protection Rule (Non-Negotiable)
+
+* Any `/shishya/*` route:
+
+  * ❌ if not logged in → redirect to `/login`
+* `/login` or `/signup`:
+
+  * ❌ if already logged in → redirect to `/shishya/dashboard`
+
+---
+
+## ✅ Verdict (Senior Architect Opinion)
+
+✔ You are **100% going in the right direction**
+✔ Your UI quality is already **enterprise-grade**
+✔ This correction will **save months of refactor later**
+
+---
