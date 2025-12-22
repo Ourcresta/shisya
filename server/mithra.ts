@@ -1,7 +1,17 @@
 import type { Express, Response } from "express";
 import OpenAI from "openai";
 import { db } from "./db";
-import { mithraConversations, mithraMessages, mithraRequestSchema, type MithraResponse, type MithraResponseType } from "@shared/schema";
+import { 
+  mithraConversations, 
+  mithraMessages, 
+  mithraRequestSchema, 
+  type MithraResponse, 
+  type MithraResponseType,
+  type MithraHelpLevel,
+  type MithraContext,
+  type StudentProgressSummary,
+  type MithraTurn
+} from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
 
@@ -13,60 +23,113 @@ const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS_PER_MINUTE = 10;
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(userId: string): { allowed: boolean; remaining: number } {
+const misuseTracker = new Map<string, { count: number; lastAttempt: number }>();
+const MISUSE_WINDOW = 5 * 60 * 1000;
+const MISUSE_THRESHOLD = 3;
+
+function checkRateLimit(userId: string): { allowed: boolean; remaining: number; nearLimit: boolean } {
   const now = Date.now();
   const userLimit = rateLimitMap.get(userId);
 
   if (!userLimit || now > userLimit.resetAt) {
     rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return { allowed: true, remaining: MAX_REQUESTS_PER_MINUTE - 1 };
+    return { allowed: true, remaining: MAX_REQUESTS_PER_MINUTE - 1, nearLimit: false };
   }
 
   if (userLimit.count >= MAX_REQUESTS_PER_MINUTE) {
-    return { allowed: false, remaining: 0 };
+    return { allowed: false, remaining: 0, nearLimit: false };
   }
 
   userLimit.count++;
-  return { allowed: true, remaining: MAX_REQUESTS_PER_MINUTE - userLimit.count };
+  const remaining = MAX_REQUESTS_PER_MINUTE - userLimit.count;
+  return { allowed: true, remaining, nearLimit: remaining <= 2 };
 }
 
-const MITHRA_SYSTEM_PROMPT = `You are Mithra, an AI Tutor Avatar for OurShiksha's Shishya student portal.
+const MITHRA_V2_SYSTEM_PROMPT = `You are Mithra, an AI Tutor Avatar for OurShiksha.
 
-CORE IDENTITY:
-- You are a calm, encouraging learning companion
-- You help students understand concepts, practice skills, and think independently
-- You explain calmly, step by step, using simple language
-- You guide — you do not solve
+You behave like a calm senior tutor.
+You explain, guide, and encourage thinking.
+You never give exam answers or full solutions.
 
-STRICT RULES - NEVER VIOLATE:
-1. NEVER give direct answers to test/exam questions
-2. NEVER reveal MCQ correct answers
-3. NEVER write complete code solutions for labs
-4. NEVER provide ready-to-submit project solutions
-5. NEVER bypass the learning process
+Your goal is learning, not speed.
+Your tone is patient, respectful, and clear.
 
-WHAT YOU MUST DO:
-1. Explain concepts in simple, clear language
-2. Break problems into smaller, manageable steps
-3. Give hints that guide thinking, not answers
-4. For labs: provide pseudocode and explain logic, NOT working code
-5. For projects: suggest approaches and architecture, NOT implementations
-6. Ask clarifying questions when needed
-7. Encourage students to try first
+CORE PRINCIPLES:
+1. Guide thinking, never shortcut it
+2. Explain concepts, never reveal answers
+3. Give hints that promote understanding
+4. Adapt your depth to the student's level
+5. Use simple, clear language without emojis or jargon
 
-RESPONSE STYLE:
-- Calm and friendly tone
-- Simple, clear language
-- No emojis
-- No jargon unless necessary
-- End with a reflective question OR a suggested next step
+STRICT GUARDRAILS - NEVER VIOLATE:
+- NEVER give direct answers to test/exam questions
+- NEVER reveal MCQ correct answers
+- NEVER write complete working code for labs
+- NEVER provide ready-to-submit project solutions
+- NEVER bypass the learning process
 
-CONTEXT AWARENESS:
-You will receive context about what the student is currently studying. Always tailor your response to their specific context (course, lesson, lab, or project they're working on).
+ADAPTIVE BEHAVIOR BY HELP LEVEL:
+- BEGINNER: Use more explanation, analogies, simpler language, break into small steps
+- INTERMEDIATE: Balance concepts with structured guidance, moderate detail
+- ADVANCED: Minimal hints, focus on edge cases, strategic thinking, assume prior knowledge
 
-If a student asks something outside the learning context or tries to get direct answers, politely redirect them to learning-focused questions.`;
+SOCRATIC MODE (use when appropriate):
+- Ask guiding questions like "What do you think happens if...?"
+- Prompt thinking instead of just explaining
+- Help students discover answers themselves
+- Balance questioning with explanation (don't overuse)
 
-function detectDisallowedRequest(question: string): boolean {
+PAGE-SPECIFIC RULES:
+- LESSONS: Explain concepts freely, encourage exploration
+- LABS: Provide hints and pseudocode ONLY, never complete working code
+- PROJECTS: Suggest approaches and architecture ONLY, never implementations
+- TEST PREP: Help understand concepts, never reveal actual test answers
+
+RESPONSE ENDING:
+Always end with ONE of these:
+- A reflective question: "Can you explain this in your own words?"
+- A checkpoint: "What part is still unclear?"
+- A next step: "What would you try next?"
+
+If you detect repeated attempts to get direct answers, politely redirect without accusation or shaming.`;
+
+function calculateHelpLevel(context: MithraContext): MithraHelpLevel {
+  const courseLevel = context.courseLevel || "intermediate";
+  const progress = context.studentProgressSummary;
+  
+  if (!progress) {
+    return courseLevel as MithraHelpLevel;
+  }
+
+  const completionRatio = progress.totalLessons > 0 
+    ? progress.lessonsCompleted / progress.totalLessons 
+    : 0;
+  
+  const hasRecentFailures = progress.recentFailures > 0;
+  const stuckOnPage = (progress.timeOnCurrentPage || 0) > 300;
+  const previousTurns = context.previousMithraTurns?.length || 0;
+  const repeatedQuestions = previousTurns > 2;
+
+  if (courseLevel === "beginner") {
+    return "beginner";
+  }
+
+  if (courseLevel === "advanced" && completionRatio > 0.7 && !hasRecentFailures) {
+    return "advanced";
+  }
+
+  if (hasRecentFailures || stuckOnPage || repeatedQuestions || completionRatio < 0.3) {
+    return "beginner";
+  }
+
+  if (completionRatio > 0.5 && !hasRecentFailures) {
+    return courseLevel === "advanced" ? "advanced" : "intermediate";
+  }
+
+  return "intermediate";
+}
+
+function detectMisuse(question: string, userId: string): { isMisuse: boolean; isRepeated: boolean } {
   const disallowedPatterns = [
     /give me the (answer|solution|code)/i,
     /what is the correct (answer|option)/i,
@@ -77,57 +140,157 @@ function detectDisallowedRequest(question: string): boolean {
     /which option is (correct|right)/i,
     /what should i (select|choose)/i,
     /copy.?paste solution/i,
+    /do (it|this) for me/i,
+    /give me full (code|solution)/i,
+    /i need the (exact|complete) (answer|code)/i,
+    /stop (explaining|teaching)/i,
+    /just (give|tell) me/i,
   ];
 
-  return disallowedPatterns.some(pattern => pattern.test(question));
+  const isMisuse = disallowedPatterns.some(pattern => pattern.test(question));
+
+  if (isMisuse) {
+    const now = Date.now();
+    const tracker = misuseTracker.get(userId);
+
+    if (!tracker || now - tracker.lastAttempt > MISUSE_WINDOW) {
+      misuseTracker.set(userId, { count: 1, lastAttempt: now });
+      return { isMisuse: true, isRepeated: false };
+    }
+
+    tracker.count++;
+    tracker.lastAttempt = now;
+    return { isMisuse: true, isRepeated: tracker.count >= MISUSE_THRESHOLD };
+  }
+
+  return { isMisuse: false, isRepeated: false };
 }
 
-function buildContextPrompt(context: any): string {
-  let contextDesc = `The student is currently on a ${context.pageType} page`;
+function buildContextPrompt(context: MithraContext, helpLevel: MithraHelpLevel): string {
+  let contextDesc = `CURRENT CONTEXT:\n`;
+  contextDesc += `- Page type: ${context.pageType}\n`;
+  contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
   
   if (context.courseTitle) {
-    contextDesc += ` for the course "${context.courseTitle}"`;
+    contextDesc += `- Course: "${context.courseTitle}"`;
+    if (context.courseLevel) {
+      contextDesc += ` (${context.courseLevel} level)`;
+    }
+    contextDesc += `\n`;
   }
   
   if (context.lessonTitle) {
-    contextDesc += `, specifically the lesson "${context.lessonTitle}"`;
+    contextDesc += `- Current lesson: "${context.lessonTitle}"\n`;
   }
   
   if (context.labTitle) {
-    contextDesc += `, specifically the lab "${context.labTitle}"`;
+    contextDesc += `- Current lab: "${context.labTitle}"\n`;
   }
   
   if (context.projectTitle) {
-    contextDesc += `, specifically the project "${context.projectTitle}"`;
+    contextDesc += `- Current project: "${context.projectTitle}"\n`;
   }
 
-  contextDesc += ".";
+  const progress = context.studentProgressSummary;
+  if (progress) {
+    contextDesc += `\nSTUDENT PROGRESS:\n`;
+    if (progress.totalLessons > 0) {
+      contextDesc += `- Lessons completed: ${progress.lessonsCompleted}/${progress.totalLessons}\n`;
+    }
+    if (progress.labsCompleted > 0 || progress.totalLabs > 0) {
+      contextDesc += `- Labs completed: ${progress.labsCompleted}/${progress.totalLabs}\n`;
+    }
+    if (progress.recentFailures > 0) {
+      contextDesc += `- Recent struggles: Student has had ${progress.recentFailures} recent failed attempts\n`;
+    }
+  }
 
-  if (context.pageType === "lab") {
-    contextDesc += " Remember: For labs, only provide hints and pseudocode. Never give complete working code.";
-  } else if (context.pageType === "project") {
-    contextDesc += " Remember: For projects, only suggest approaches and architecture. Never write the implementation.";
-  } else if (context.pageType === "test_prep") {
-    contextDesc += " Remember: Help the student prepare by explaining concepts. Never reveal actual test answers.";
+  contextDesc += `\nHELP LEVEL INSTRUCTION:\n`;
+  switch (helpLevel) {
+    case "beginner":
+      contextDesc += `Provide more explanation with analogies. Use simpler language. Break concepts into smaller steps. Be encouraging.`;
+      break;
+    case "intermediate":
+      contextDesc += `Balance concepts with structured guidance. Provide moderate detail. Encourage independent thinking.`;
+      break;
+    case "advanced":
+      contextDesc += `Give minimal hints. Focus on edge cases and strategic thinking. Assume prior knowledge. Challenge the student.`;
+      break;
+  }
+
+  contextDesc += `\n\nPAGE-SPECIFIC REMINDER:\n`;
+  switch (context.pageType) {
+    case "lab":
+      contextDesc += `For labs, only provide hints and pseudocode. NEVER give complete working code.`;
+      break;
+    case "project":
+      contextDesc += `For projects, only suggest approaches and architecture. NEVER write the implementation.`;
+      break;
+    case "test_prep":
+      contextDesc += `Help understand concepts for test preparation. NEVER reveal actual test answers.`;
+      break;
+    default:
+      contextDesc += `Explain concepts freely and encourage exploration.`;
   }
 
   return contextDesc;
+}
+
+function buildConversationMessages(
+  previousTurns: MithraTurn[] | undefined,
+  contextPrompt: string,
+  question: string
+): Array<{ role: "system" | "user" | "assistant"; content: string }> {
+  const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+    { role: "system", content: MITHRA_V2_SYSTEM_PROMPT },
+    { role: "system", content: contextPrompt },
+  ];
+
+  if (previousTurns && previousTurns.length > 0) {
+    const recentTurns = previousTurns.slice(-6);
+    for (const turn of recentTurns) {
+      messages.push({
+        role: turn.role === "user" ? "user" : "assistant",
+        content: turn.content,
+      });
+    }
+  }
+
+  messages.push({ role: "user", content: question });
+
+  return messages;
 }
 
 function determineResponseType(question: string, answer: string): MithraResponseType {
   const lowerQ = question.toLowerCase();
   const lowerA = answer.toLowerCase();
 
-  if (lowerA.includes("i cannot") || lowerA.includes("i'm not able to") || lowerA.includes("not allowed")) {
+  if (lowerA.includes("i cannot") || lowerA.includes("i'm not able to") || lowerA.includes("not allowed") || lowerA.includes("cannot provide")) {
     return "warning";
   }
-  if (lowerQ.includes("hint") || lowerA.includes("hint") || lowerA.includes("try this")) {
+  if (lowerQ.includes("hint") || lowerA.includes("hint") || lowerA.includes("try this") || lowerA.includes("consider trying")) {
     return "hint";
   }
-  if (lowerQ.includes("how") || lowerQ.includes("approach") || lowerA.includes("approach") || lowerA.includes("consider")) {
+  if (lowerQ.includes("how") || lowerQ.includes("approach") || lowerA.includes("approach") || lowerA.includes("you could") || lowerA.includes("one way")) {
     return "guidance";
   }
   return "explanation";
+}
+
+function getMisuseResponse(isRepeated: boolean, helpLevel: MithraHelpLevel): MithraResponse {
+  if (isRepeated) {
+    return {
+      answer: "I notice you're looking for direct answers, but my role is to help you truly understand and learn. Direct answers might seem faster, but they won't help you in the long run. Let's take a different approach - can you tell me which specific concept is confusing you? I can break it down step by step, and I think you'll find that much more helpful.",
+      type: "warning",
+      helpLevel,
+    };
+  }
+
+  return {
+    answer: "I understand you want to move quickly, but I can't provide direct answers or complete solutions. Instead, I can help you understand the concepts so you can solve it yourself. Could you tell me which specific part you're finding challenging? I'll explain it in a way that makes sense to you.",
+    type: "warning",
+    helpLevel,
+  };
 }
 
 export function registerMithraRoutes(app: Express): void {
@@ -154,28 +317,23 @@ export function registerMithraRoutes(app: Express): void {
         return res.status(403).json({ error: "Context mismatch" });
       }
 
-      if (detectDisallowedRequest(question)) {
-        const warningResponse: MithraResponse = {
-          answer: "I understand you want help, but I cannot provide direct answers or complete solutions. My role is to help you learn and think independently. Could you tell me which specific concept you're finding challenging? I would be happy to explain it step by step.",
-          type: "warning"
-        };
+      const helpLevel = calculateHelpLevel(context);
 
+      const misuseCheck = detectMisuse(question, userId);
+      if (misuseCheck.isMisuse) {
+        const warningResponse = getMisuseResponse(misuseCheck.isRepeated, helpLevel);
         await saveConversation(userId, context.courseId, context.pageType, question, warningResponse);
-
         return res.json(warningResponse);
       }
 
-      const contextPrompt = buildContextPrompt(context);
+      const contextPrompt = buildContextPrompt(context, helpLevel);
+      const messages = buildConversationMessages(context.previousMithraTurns, contextPrompt, question);
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1-mini",
-        messages: [
-          { role: "system", content: MITHRA_SYSTEM_PROMPT },
-          { role: "system", content: contextPrompt },
-          { role: "user", content: question }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
+        messages,
+        max_tokens: 400,
+        temperature: 0.3,
       });
 
       const answer = completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
@@ -183,12 +341,19 @@ export function registerMithraRoutes(app: Express): void {
 
       const response: MithraResponse = {
         answer,
-        type: responseType
+        type: responseType,
+        helpLevel,
       };
 
       await saveConversation(userId, context.courseId, context.pageType, question, response);
 
-      res.json(response);
+      const responseWithMeta = {
+        ...response,
+        remaining: rateCheck.remaining,
+        nearLimit: rateCheck.nearLimit,
+      };
+
+      res.json(responseWithMeta);
 
     } catch (error) {
       console.error("Mithra API error:", error);
@@ -270,6 +435,7 @@ async function saveConversation(
         role: "assistant",
         content: response.answer,
         responseType: response.type,
+        helpLevel: response.helpLevel,
       }
     ]);
   } catch (error) {

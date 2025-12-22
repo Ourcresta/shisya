@@ -472,7 +472,7 @@ export interface AuthUser {
   emailVerified: boolean;
 }
 
-// ============ MITHRA AI TUTOR SCHEMAS ============
+// ============ MITHRA AI TUTOR SCHEMAS (v2) ============
 
 // Mithra conversations table
 export const mithraConversations = pgTable("mithra_conversations", {
@@ -490,6 +490,7 @@ export const mithraMessages = pgTable("mithra_messages", {
   role: varchar("role", { length: 10 }).notNull(),
   content: text("content").notNull(),
   responseType: varchar("response_type", { length: 20 }),
+  helpLevel: varchar("help_level", { length: 20 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -497,7 +498,33 @@ export const mithraMessages = pgTable("mithra_messages", {
 export const MITHRA_ALLOWED_PAGES = ["lesson", "lab", "project", "test_prep"] as const;
 export type MithraAllowedPage = typeof MITHRA_ALLOWED_PAGES[number];
 
-// Mithra request context schema
+// Mithra help levels for adaptive tutoring
+export const MITHRA_HELP_LEVELS = ["beginner", "intermediate", "advanced"] as const;
+export type MithraHelpLevel = typeof MITHRA_HELP_LEVELS[number];
+
+// Student progress summary for learning-aware responses
+export const studentProgressSummarySchema = z.object({
+  lessonsCompleted: z.number().default(0),
+  totalLessons: z.number().default(0),
+  labsCompleted: z.number().default(0),
+  totalLabs: z.number().default(0),
+  testsPassed: z.number().default(0),
+  projectsSubmitted: z.number().default(0),
+  recentFailures: z.number().default(0),
+  timeOnCurrentPage: z.number().optional(),
+});
+
+export type StudentProgressSummary = z.infer<typeof studentProgressSummarySchema>;
+
+// Previous Mithra conversation turn for session memory
+export const mithraTurnSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string(),
+});
+
+export type MithraTurn = z.infer<typeof mithraTurnSchema>;
+
+// Mithra request context schema (v2 enhanced)
 export const mithraContextSchema = z.object({
   studentId: z.string(),
   courseId: z.number(),
@@ -507,9 +534,12 @@ export const mithraContextSchema = z.object({
   projectId: z.number().optional(),
   pageType: z.enum(["lesson", "lab", "project", "test_prep"]),
   courseTitle: z.string().optional(),
+  courseLevel: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   lessonTitle: z.string().optional(),
   labTitle: z.string().optional(),
   projectTitle: z.string().optional(),
+  studentProgressSummary: studentProgressSummarySchema.optional(),
+  previousMithraTurns: z.array(mithraTurnSchema).optional(),
 });
 
 export type MithraContext = z.infer<typeof mithraContextSchema>;
@@ -526,10 +556,11 @@ export type MithraRequest = z.infer<typeof mithraRequestSchema>;
 export const MITHRA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "warning"] as const;
 export type MithraResponseType = typeof MITHRA_RESPONSE_TYPES[number];
 
-// Mithra response interface
+// Mithra response interface (v2 with help level)
 export interface MithraResponse {
   answer: string;
   type: MithraResponseType;
+  helpLevel: MithraHelpLevel;
 }
 
 // Mithra table types
