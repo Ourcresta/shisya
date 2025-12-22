@@ -1,0 +1,246 @@
+
+\
+
+# 🔐 MASTER REPLIT PROMPT
+
+## Fix Navigation + Auth Gating for **OurShiksha – Shishya Student Portal**
+
+---
+
+You are a **Senior Full-Stack Architect + Senior Security Engineer + Senior UX Engineer**.
+
+Your task is to **FIX AUTHENTICATION FLOW, NAVIGATION, AND ROUTE PROTECTION** for the **Shishya (Student Portal)** of **OurShiksha**.
+
+This is a **FOUNDATIONAL FIX**.
+Do NOT add new features.
+ONLY restructure navigation, routing, and auth gating correctly.
+
+---
+
+## 🔒 CORE PRINCIPLE (MUST FOLLOW)
+
+**Shishya is a PRIVATE student portal.**
+Only authenticated users may access it.
+
+Public users can ONLY:
+
+* Browse courses
+* View course overviews
+* Login / Signup
+* Verify certificates
+
+---
+
+## 🧱 REQUIRED ARCHITECTURE
+
+### 1️⃣ Route Groups (MANDATORY)
+
+#### 🔓 Public Routes (NO AUTH REQUIRED)
+
+```
+/
+ /courses
+ /courses/:courseId
+ /login
+ /signup
+ /verify-otp
+ /certificate/verify/:certificateId
+```
+
+#### 🔐 Protected Routes (AUTH REQUIRED)
+
+```
+/shishya/dashboard
+/shishya/learn
+/shishya/learn/:courseId
+/shishya/learn/:courseId/:lessonId
+/shishya/projects
+/shishya/projects/:projectId
+/shishya/tests
+/shishya/tests/:testId
+/shishya/labs
+/shishya/certificates
+/shishya/profile
+```
+
+---
+
+## 🔑 AUTHENTICATION RULES (STRICT)
+
+### If NOT logged in:
+
+* Accessing `/shishya/*` → **REDIRECT to `/login`**
+* Certificates page MUST NOT be visible
+
+### If logged in:
+
+* Accessing `/login`, `/signup`, `/verify-otp` → **REDIRECT to `/shishya/dashboard`**
+
+---
+
+## 🧠 AUTH STATE
+
+Implement a **global AuthContext** with:
+
+* `user`
+* `isAuthenticated`
+* `loading`
+* `login()`
+* `logout()`
+
+Persist auth state using:
+
+* `localStorage` (JWT or session token)
+
+---
+
+## 🛡️ Route Protection Implementation
+
+### Create:
+
+```
+components/auth/ProtectedRoute.tsx
+```
+
+Behavior:
+
+* If `loading` → show spinner
+* If NOT authenticated → redirect to `/login`
+* Else → render children
+
+Wrap ALL `/shishya/*` routes with `ProtectedRoute`.
+
+---
+
+## 🧭 NAVIGATION FIX (CRITICAL)
+
+### Public Header (Before Login)
+
+```
+[ OurShiksha Logo ]                     [ Login ] [ Sign Up ]
+```
+
+❌ Do NOT show:
+
+* Dashboard
+* Certificates
+* Profile
+* Logout
+
+---
+
+### Authenticated Header (After Login)
+
+```
+[ OurShiksha | Shishya ]
+
+Dashboard | Learn | Projects | Tests | Labs | Certificates | Profile | Logout
+```
+
+❌ Do NOT show:
+
+* Login
+* Signup
+
+---
+
+## 🏠 SHISHYA DASHBOARD (POST-LOGIN HOME)
+
+### Route:
+
+```
+/shishya/dashboard
+```
+
+Redirect here **IMMEDIATELY after login success**.
+
+Dashboard should display:
+
+* Resume Learning (current course/lesson)
+* Course progress summary
+* Pending tests/projects
+* Certificates earned (count only)
+
+---
+
+## 🔄 LOGIN FLOW (PASSWORD)
+
+1. User submits email + password
+2. Validate credentials
+3. Save auth token
+4. Update AuthContext
+5. Redirect → `/shishya/dashboard`
+
+---
+
+## 🔐 SIGNUP FLOW (OTP + PASSWORD)
+
+1. User submits email + password
+2. Send OTP (mock or Resend-ready)
+3. Verify OTP
+4. Create account
+5. Auto-login user
+6. Redirect → `/shishya/dashboard`
+
+---
+
+## 🧾 CERTIFICATE VISIBILITY RULE
+
+### ❌ REMOVE from Public Header:
+
+```
+Certificates
+```
+
+### ✅ Allowed:
+
+* `/certificate/verify/:id` → public verification page
+* `/shishya/certificates` → authenticated users only
+
+---
+
+## 🧪 TEST CASES (MUST PASS)
+
+* Open `/shishya/dashboard` when logged out → redirected to `/login`
+* Login → redirected to dashboard
+* Reload page → stays logged in
+* Logout → clears auth + redirects to `/`
+* Logged-in user opens `/login` → redirected to dashboard
+* Public user CANNOT see Certificates menu
+
+---
+
+## 🧹 CLEANUP TASKS
+
+* Remove duplicate headers
+* Remove auth-related UI leaks
+* Ensure consistent layout separation:
+
+  * `PublicLayout`
+  * `ShishyaLayout`
+
+---
+
+## 🚫 IMPORTANT CONSTRAINTS
+
+* Do NOT change backend APIs
+* Do NOT change course logic
+* Do NOT rename routes
+* Do NOT add AI features
+* ONLY fix auth, routing, navigation, and redirects
+
+---
+
+## ✅ FINAL OUTPUT EXPECTED
+
+* Clean public vs private separation
+* Secure Shishya portal
+* Correct navigation behavior
+* Dashboard as the true post-login home
+* No auth leaks
+
+---
+
+### 🔒 Treat this as **production-grade authentication architecture**.
+
+Proceed carefully, implement step-by-step, and validate all test cases.

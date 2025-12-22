@@ -14,7 +14,7 @@ export default function VerifyOtp() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
-  const [redirectTo, setRedirectTo] = useState("/");
+  const [redirectTo, setRedirectTo] = useState("/shisya/dashboard");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);

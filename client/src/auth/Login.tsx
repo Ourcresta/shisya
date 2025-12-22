@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useSearch } from "wouter";
+import { Link, useLocation, useSearch, Redirect } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@shared/schema";
@@ -10,15 +10,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const search = useSearch();
-  const { login } = useAuth();
+  const { user, isLoading: authLoading, login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const redirectTo = new URLSearchParams(search).get("redirect") || "/";
+  const redirectTo = new URLSearchParams(search).get("redirect") || "/shisya/dashboard";
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -73,6 +74,28 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <div className="flex justify-center">
+              <Skeleton className="h-12 w-12 rounded-full" />
+            </div>
+            <Skeleton className="h-6 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Redirect to="/shisya/dashboard" />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
