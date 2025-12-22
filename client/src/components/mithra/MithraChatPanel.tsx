@@ -6,9 +6,9 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, X, Sparkles } from "lucide-react";
+import { Loader2, Send, X, Sparkles, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { MithraAllowedPage, MithraResponse, MithraResponseType } from "@shared/schema";
+import type { MithraAllowedPage, MithraResponseType, MithraHelpLevel, StudentProgressSummary, MithraTurn } from "@shared/schema";
 
 interface MithraContext {
   courseId: number;
@@ -18,15 +18,27 @@ interface MithraContext {
   projectId?: number;
   pageType: MithraAllowedPage;
   courseTitle?: string;
+  courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
   labTitle?: string;
   projectTitle?: string;
+  studentProgressSummary?: StudentProgressSummary;
 }
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   type?: MithraResponseType;
+  helpLevel?: MithraHelpLevel;
+}
+
+interface MithraApiResponse {
+  answer: string;
+  type: MithraResponseType;
+  helpLevel: MithraHelpLevel;
+  remaining?: number;
+  nearLimit?: boolean;
+  error?: string;
 }
 
 interface MithraChatPanelProps {
@@ -34,7 +46,7 @@ interface MithraChatPanelProps {
   onClose: () => void;
 }
 
-function getResponseTypeBadge(type: MithraResponseType): { label: string; variant: "default" | "secondary" | "outline" } {
+function getResponseTypeBadge(type: MithraResponseType): { label: string; variant: "default" | "secondary" | "outline" | "destructive" } {
   switch (type) {
     case "explanation":
       return { label: "Explanation", variant: "secondary" };
@@ -43,9 +55,22 @@ function getResponseTypeBadge(type: MithraResponseType): { label: string; varian
     case "guidance":
       return { label: "Guidance", variant: "secondary" };
     case "warning":
-      return { label: "Notice", variant: "default" };
+      return { label: "Notice", variant: "destructive" };
     default:
       return { label: "Response", variant: "secondary" };
+  }
+}
+
+function getHelpLevelLabel(level: MithraHelpLevel): string {
+  switch (level) {
+    case "beginner":
+      return "Detailed";
+    case "intermediate":
+      return "Balanced";
+    case "advanced":
+      return "Concise";
+    default:
+      return "";
   }
 }
 
@@ -53,6 +78,8 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [remainingRequests, setRemainingRequests] = useState<number | null>(null);
+  const [nearLimit, setNearLimit] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -66,21 +93,40 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
     inputRef.current?.focus();
   }, []);
 
+  const getPreviousTurns = (): MithraTurn[] => {
+    return messages.slice(-6).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+  };
+
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
       const response = await apiRequest("POST", "/api/mithra/ask", {
         context: {
           studentId: user?.id,
           ...context,
+          previousMithraTurns: getPreviousTurns(),
         },
         question,
       });
-      return await response.json() as MithraResponse;
+      return await response.json() as MithraApiResponse;
     },
     onSuccess: (data) => {
+      if (data.remaining !== undefined) {
+        setRemainingRequests(data.remaining);
+      }
+      if (data.nearLimit !== undefined) {
+        setNearLimit(data.nearLimit);
+      }
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.answer, type: data.type },
+        { 
+          role: "assistant", 
+          content: data.answer, 
+          type: data.type,
+          helpLevel: data.helpLevel,
+        },
       ]);
     },
     onError: (error: any) => {
@@ -135,12 +181,20 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
           size="icon"
           variant="ghost"
           onClick={onClose}
-          className="h-8 w-8"
           data-testid="button-mithra-close"
         >
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
+
+      {nearLimit && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b text-amber-600 dark:text-amber-400">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <p className="text-xs">
+            {remainingRequests} questions remaining this minute
+          </p>
+        </div>
+      )}
 
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-80 p-4" ref={scrollRef}>
@@ -148,10 +202,16 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
             <div className="text-center text-muted-foreground py-8">
               <Sparkles className="h-8 w-8 mx-auto mb-3 opacity-50" />
               <p className="text-sm mb-2">Hi, I am Mithra, your learning companion.</p>
-              <p className="text-xs">
-                Ask me to explain concepts, give hints, or guide your thinking.
+              <p className="text-xs mb-4">
+                I explain concepts, give hints, and guide your thinking.
                 I am here to help you learn, not to solve for you.
               </p>
+              <div className="text-xs space-y-1">
+                <p className="font-medium">Try asking:</p>
+                <p className="italic">"Can you explain this concept?"</p>
+                <p className="italic">"I am stuck on this step. Any hints?"</p>
+                <p className="italic">"What approach should I take?"</p>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -169,13 +229,19 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
                     data-testid={`message-${message.role}-${index}`}
                   >
                     {message.role === "assistant" && message.type && (
-                      <div className="mb-1">
+                      <div className="flex items-center gap-2 mb-1">
                         <Badge 
                           variant={getResponseTypeBadge(message.type).variant}
                           className="text-xs"
+                          data-testid={`badge-response-type-${index}`}
                         >
                           {getResponseTypeBadge(message.type).label}
                         </Badge>
+                        {message.helpLevel && (
+                          <span className="text-xs text-muted-foreground" data-testid={`text-help-level-${index}`}>
+                            {getHelpLevelLabel(message.helpLevel)}
+                          </span>
+                        )}
                       </div>
                     )}
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -185,7 +251,10 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
               {askMutation.isPending && (
                 <div className="flex justify-start">
                   <div className="bg-muted rounded-lg px-4 py-3">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">Thinking...</span>
+                    </div>
                   </div>
                 </div>
               )}

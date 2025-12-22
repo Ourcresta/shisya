@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, X, Lock } from "lucide-react";
 import { MithraChatPanel } from "./MithraChatPanel";
-import type { MithraAllowedPage } from "@shared/schema";
+import type { MithraAllowedPage, StudentProgressSummary } from "@shared/schema";
 
 interface MithraContext {
   courseId: number;
@@ -12,9 +12,11 @@ interface MithraContext {
   projectId?: number;
   pageType: MithraAllowedPage;
   courseTitle?: string;
+  courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
   labTitle?: string;
   projectTitle?: string;
+  studentProgressSummary?: StudentProgressSummary;
 }
 
 interface MithraAvatarProps {
@@ -25,13 +27,15 @@ interface MithraAvatarProps {
 
 export function MithraAvatar({ context, disabled = false, disabledMessage }: MithraAvatarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   if (disabled) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
         <div 
           className="relative"
-          title={disabledMessage || "Mithra is unavailable"}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
         >
           <Button
             size="icon"
@@ -40,13 +44,15 @@ export function MithraAvatar({ context, disabled = false, disabledMessage }: Mit
             className="h-14 w-14 rounded-full shadow-lg opacity-50 cursor-not-allowed"
             data-testid="button-mithra-avatar-disabled"
           >
-            <MessageCircle className="h-6 w-6" />
+            <Lock className="h-5 w-5" />
           </Button>
-          {disabledMessage && (
-            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-popover border rounded-md shadow-md text-sm text-muted-foreground whitespace-nowrap max-w-[200px]">
-              {disabledMessage}
-            </div>
-          )}
+          <div 
+            className={`absolute bottom-full right-0 mb-2 px-3 py-2 bg-popover border rounded-md shadow-md text-sm text-muted-foreground whitespace-nowrap max-w-[200px] transition-opacity ${
+              showTooltip ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            {disabledMessage || "Mithra is unavailable"}
+          </div>
         </div>
       </div>
     );
