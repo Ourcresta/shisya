@@ -1,5 +1,17 @@
 import { Link, useLocation } from "wouter";
-import { BookOpen, GraduationCap, Award, User, LogOut, LogIn, LayoutDashboard, FileText, ClipboardCheck, Beaker, UserPlus } from "lucide-react";
+import { 
+  BookOpen, 
+  GraduationCap, 
+  Award, 
+  User, 
+  LogOut, 
+  LogIn, 
+  LayoutDashboard, 
+  FolderKanban,
+  ClipboardCheck, 
+  FlaskConical, 
+  UserPlus 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -29,16 +41,35 @@ export function Header() {
             <GraduationCap className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-              SHISHYA
-            </span>
-            <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
-              Learn. Practice. Prove.
-            </span>
+            {user ? (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+                    OurShiksha
+                  </span>
+                  <span className="text-muted-foreground">|</span>
+                  <span className="text-lg font-semibold text-primary" style={{ fontFamily: "var(--font-display)" }}>
+                    Shishya
+                  </span>
+                </div>
+                <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
+                  Student Portal
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+                  OurShiksha
+                </span>
+                <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
+                  Learn. Practice. Prove.
+                </span>
+              </>
+            )}
           </div>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2">
           {!isLoading && (
             <>
               {user ? (
@@ -46,24 +77,26 @@ export function Header() {
                   {!location.startsWith("/shishya/dashboard") && (
                     <Link href="/shishya/dashboard">
                       <Button variant="ghost" size="sm" data-testid="button-dashboard">
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
+                        <LayoutDashboard className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">Dashboard</span>
                       </Button>
                     </Link>
                   )}
-                  {!isHome && (
+                  
+                  {!isHome && !location.startsWith("/courses") && (
                     <Link href="/courses">
                       <Button variant="ghost" size="sm" data-testid="button-courses">
-                        <BookOpen className="w-4 h-4 mr-2" />
+                        <BookOpen className="w-4 h-4 sm:mr-2" />
                         <span className="hidden sm:inline">Courses</span>
                       </Button>
                     </Link>
                   )}
+                  
                   {!location.startsWith("/shishya/certificates") && (
                     <Link href="/shishya/certificates">
                       <Button variant="ghost" size="sm" data-testid="button-certificates">
-                        <Award className="w-4 h-4 mr-2" />
-                        <span className="hidden sm:inline">Certificates</span>
+                        <Award className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden md:inline">Certificates</span>
                       </Button>
                     </Link>
                   )}
@@ -71,11 +104,10 @@ export function Header() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" data-testid="button-user-menu">
-                        <User className="w-4 h-4 mr-2" />
-                        <span className="max-w-[120px] truncate hidden sm:inline">
+                        <User className="w-4 h-4 sm:mr-2" />
+                        <span className="max-w-[100px] truncate hidden sm:inline">
                           {user.email.split('@')[0]}
                         </span>
-                        <span className="sm:hidden">Me</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">

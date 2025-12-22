@@ -1,0 +1,112 @@
+You are a Senior Full-Stack Architect, Security Engineer, and UX Lead.
+
+I am already inside the SHISHYA (Student Portal) codebase of the OurShiksha platform.
+
+Your task is to FIX AUTHENTICATION, NAVIGATION, ROUTE PROTECTION, AND DASHBOARD ENTRY.
+This is a foundational security and UX fix. Do NOT add new features. Do NOT change backend APIs.
+Only restructure auth flow, layouts, routes, redirects, and menu visibility.
+
+LOCKED NAMES:
+Platform: OurShiksha
+Student Portal: Shishya
+Admin Portal: Guru
+AI Tutor: Mithra
+
+CORE RULE:
+Shishya is a PRIVATE portal. Any route under /shishya/* must require authentication.
+
+PUBLIC ROUTES (no auth):
+/
+ /courses
+ /courses/:courseId
+ /login
+ /signup
+ /verify-otp
+ /certificate/verify/:certificateId
+
+PROTECTED ROUTES (auth required):
+/shishya/dashboard
+/shishya/learn
+/shishya/learn/:courseId
+/shishya/learn/:courseId/:lessonId
+/shishya/projects
+/shishya/projects/:projectId
+/shishya/tests
+/shishya/tests/:testId
+/shishya/labs
+/shishya/certificates
+/shishya/profile
+
+AUTH STATE:
+Create a global AuthContext with:
+user, isAuthenticated, loading, login(), signup(), verifyOtp(), logout()
+Persist auth using localStorage.
+Restore auth on app load.
+
+ROUTE GUARD:
+Create components/auth/ProtectedRoute.tsx
+If loading → spinner
+If not authenticated → redirect to /login
+Wrap ALL /shishya/* routes with ProtectedRoute.
+
+LAYOUTS:
+Create two layouts:
+PublicLayout → landing, courses, login, signup
+ShishyaLayout → dashboard and all /shishya/* routes
+Never mix headers.
+
+NAVIGATION RULES:
+
+PUBLIC HEADER (not logged in):
+[ OurShiksha Logo ]        [ Login ] [ Sign Up ]
+
+Do NOT show:
+Dashboard, Certificates, Profile, Logout
+
+AUTHENTICATED HEADER:
+[ OurShiksha | Shishya ]
+Dashboard | Learn | Projects | Tests | Labs | Certificates | Profile | Logout
+
+Do NOT show:
+Login, Sign Up
+
+DASHBOARD:
+Route: /shishya/dashboard
+This is the ONLY post-login landing page.
+After login OR signup+OTP → redirect here.
+If logged-in user opens /login or /signup → redirect here.
+
+LOGIN FLOW:
+Email + Password → validate → save token → update AuthContext → redirect to /shishya/dashboard
+
+SIGNUP FLOW:
+Email + Password → send OTP (mock/Resend-ready) → verify OTP → create account → auto-login → redirect to /shishya/dashboard
+
+CERTIFICATES:
+Remove Certificates from public header.
+Only allow:
+Public: /certificate/verify/:id
+Private: /shishya/certificates
+
+TEST CASES (must pass):
+- Logged-out user opening /shishya/dashboard redirects to /login
+- Login redirects to dashboard
+- Reload preserves login
+- Logout clears auth and redirects to /
+- Logged-in user opening /login redirects to dashboard
+- Public users never see Certificates menu
+
+CONSTRAINTS:
+Do NOT rename routes.
+Do NOT add AI features.
+Do NOT modify course logic.
+ONLY fix auth, routing, layouts, navigation, and redirects.
+
+FINAL RESULT:
+Secure Shishya portal
+Clean public vs private separation
+Dashboard as true home
+No auth leaks
+Production-grade authentication architecture
+
+Proceed step by step and validate all cases.
