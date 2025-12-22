@@ -1,0 +1,263 @@
+You are Replit AI acting as a Senior Full-Stack Engineer,
+Senior EdTech Architect, and Learning Experience Designer.
+
+You are working inside the existing SHISYA (Student Portal) project.
+
+DO NOT refactor existing modules (Learn, Projects, Tests, Certificates, Profile).
+ADD a new module called **Guided Labs** that fits naturally into the SHISYA learning flow.
+
+--------------------------------------------------
+CORE PHILOSOPHY (VERY IMPORTANT)
+--------------------------------------------------
+
+Guided Labs are:
+- PRACTICE-oriented
+- COURSE-SCOPED
+- LINKED to lessons or modules
+- NON-COMPETITIVE
+- JOB-SKILL focused
+
+This is NOT:
+❌ A LeetCode clone
+❌ Competitive programming
+❌ Ranking / leaderboards
+
+This IS:
+✅ “Practice what you just learned”
+✅ Guided, confidence-building labs
+✅ Preparation for projects
+
+--------------------------------------------------
+WHERE LABS FIT IN SHISYA
+--------------------------------------------------
+
+Learn (Theory)
+ → Guided Labs (Practice)
+   → Projects (Apply)
+     → Tests (Validate)
+       → Certificate (Prove)
+         → Profile (Show)
+
+--------------------------------------------------
+ROUTES TO IMPLEMENT
+--------------------------------------------------
+
+1. Course Labs List
+   /courses/:courseId/labs
+
+2. Lab Detail & Practice
+   /courses/:courseId/labs/:labId
+
+--------------------------------------------------
+LAB DATA MODEL (MVP)
+--------------------------------------------------
+
+Each Lab has:
+- id
+- courseId
+- moduleId (optional)
+- lessonId (optional)
+- title
+- description
+- difficulty (Beginner / Intermediate / Advanced)
+- instructions (step-by-step)
+- starterCode
+- expectedOutput (string or array)
+- language (ONLY "javascript" for MVP)
+- status (locked / available)
+- estimatedTime (minutes)
+
+--------------------------------------------------
+PAGE 1: COURSE LABS LIST
+--------------------------------------------------
+
+Route:
+/courses/:courseId/labs
+
+UI:
+- Page title: “Practice Labs”
+- Description: “Hands-on practice to strengthen your understanding”
+
+Each Lab Card shows:
+- Lab title
+- Difficulty badge
+- Estimated time
+- Linked lesson/module
+- Status badge:
+  - Locked (if lesson not completed)
+  - Available
+  - Completed
+- CTA:
+  - “Start Lab”
+  - “View Solution” (only after completion)
+
+Empty State:
+“No labs available for this course yet.”
+
+--------------------------------------------------
+LAB UNLOCKING RULES (IMPORTANT)
+--------------------------------------------------
+
+- Labs are LOCKED until:
+  - Related lesson is marked completed
+- Completed labs remain unlocked
+- Lab completion tracked per student
+
+--------------------------------------------------
+PAGE 2: LAB PRACTICE PAGE
+--------------------------------------------------
+
+Route:
+/courses/:courseId/labs/:labId
+
+Layout (2-column on desktop):
+
+LEFT PANEL:
+- Lab title
+- Difficulty
+- Instructions (step-by-step)
+- Input / Output description
+- Expected output (hidden until run)
+
+RIGHT PANEL:
+- Code editor
+- Language badge: JavaScript
+- Buttons:
+  - Run Code
+  - Reset Code
+  - Mark as Completed (enabled after correct output)
+
+--------------------------------------------------
+CODE EXECUTION (MVP STRATEGY)
+--------------------------------------------------
+
+MVP Execution Rules:
+- Support ONLY JavaScript
+- Use safe browser-based execution:
+  - new Function()
+  - console output capture
+- No server-side execution
+- No file system access
+- No external libraries
+
+Execution Flow:
+1. Student writes code
+2. Clicks “Run Code”
+3. Output printed in console panel
+4. Compare output with expectedOutput
+5. If match → allow “Mark as Completed”
+
+--------------------------------------------------
+COMPLETION & PROGRESS TRACKING
+--------------------------------------------------
+
+Use LocalStorage (MVP):
+
+Key:
+shisya_lab_progress
+
+Structure:
+{
+  courseId: {
+    labId: {
+      completed: true,
+      completedAt: timestamp
+    }
+  }
+}
+
+Completion Effects:
+- Lab marked “Completed”
+- Unlocks next labs (if any)
+- Reflected in Course progress UI (optional badge)
+
+--------------------------------------------------
+MOCK DATA REQUIREMENTS
+--------------------------------------------------
+
+Create sample labs:
+- 6–8 labs per course
+- Mix of difficulties
+- Example labs:
+  - Variables & Output
+  - Functions
+  - Arrays
+  - Loops
+  - Objects
+  - Simple algorithms
+
+Each lab must include:
+- Clear instructions
+- Working starter code
+- Expected output
+
+--------------------------------------------------
+FILE STRUCTURE (MANDATORY)
+--------------------------------------------------
+
+client/src/
+├── pages/
+│   ├── CourseLabs.tsx
+│   └── LabPractice.tsx
+├── components/
+│   ├── lab/
+│   │   ├── LabCard.tsx
+│   │   ├── LabInstructions.tsx
+│   │   ├── CodeEditor.tsx
+│   │   ├── OutputConsole.tsx
+│   │   └── LabStatusBadge.tsx
+├── lib/
+│   ├── labs.ts
+│   ├── labRunner.ts
+│   └── labProgress.ts
+
+--------------------------------------------------
+UX / DESIGN RULES
+--------------------------------------------------
+
+- Match existing SHISYA design system
+- Calm, distraction-free interface
+- No ads, no clutter
+- Clear feedback messages:
+  - “Output matched!”
+  - “Try again – output does not match”
+- Mobile view:
+  - Stack panels vertically
+
+--------------------------------------------------
+OUT OF SCOPE (DO NOT BUILD NOW)
+--------------------------------------------------
+
+❌ Multi-language support
+❌ Advanced test cases
+❌ AI hints
+❌ Code plagiarism checks
+❌ Leaderboards
+❌ Certifications directly from labs
+
+--------------------------------------------------
+QUALITY & SAFETY RULES
+--------------------------------------------------
+
+- Sanitize code execution
+- Prevent infinite loops (basic timeout)
+- Never expose expectedOutput before execution
+- No console leaks across labs
+
+--------------------------------------------------
+DEFINITION OF DONE
+--------------------------------------------------
+
+Guided Labs MVP is DONE when:
+
+✔ Student can see course labs
+✔ Labs unlock after lesson completion
+✔ Student can write & run code
+✔ Output is validated
+✔ Lab can be marked completed
+✔ Progress persists after refresh
+✔ Clean integration with SHISYA flow
+
+Build incrementally.
+Keep code modular.
+Explain assumptions briefly where needed.

@@ -256,6 +256,38 @@ export const insertProfileSchema = studentProfileSchema.omit({
 
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 
+// Lab Schema (Guided Labs Module)
+export const labSchema = z.object({
+  id: z.number(),
+  courseId: z.number(),
+  moduleId: z.number().nullable(),
+  lessonId: z.number().nullable(),
+  title: z.string(),
+  description: z.string(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+  instructions: z.array(z.string()),
+  starterCode: z.string(),
+  expectedOutput: z.string(),
+  language: z.literal("javascript"),
+  status: z.enum(["locked", "available"]),
+  estimatedTime: z.number(), // in minutes
+  orderIndex: z.number(),
+});
+
+export type Lab = z.infer<typeof labSchema>;
+
+// Lab Progress (stored in localStorage)
+export interface LabProgress {
+  labId: number;
+  completed: boolean;
+  completedAt: string | null;
+  userCode: string | null;
+}
+
+export interface CourseLabProgress {
+  [labId: number]: LabProgress;
+}
+
 // API Response types
 export interface ApiResponse<T> {
   data: T;
