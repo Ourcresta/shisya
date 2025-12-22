@@ -78,6 +78,8 @@ shared/
 - `/courses/:courseId/tests/:testId` - Test Instructions (pre-test view)
 - `/courses/:courseId/tests/:testId/attempt` - Active Test Attempt
 - `/courses/:courseId/tests/:testId/result` - Test Result Display
+- `/courses/:courseId/labs` - Course Labs list (practice exercises)
+- `/courses/:courseId/labs/:labId` - Lab Practice (code editor with output)
 - `/certificates` - Certificate Dashboard (student's earned certificates)
 - `/certificates/:certificateId` - Certificate Viewer with QR code and PDF download
 - `/verify/:certificateId` - Public Certificate Verification (no auth required)
@@ -146,6 +148,7 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - `shisya_test_attempts` - Test attempt data (answers, scores, pass/fail status)
 - `shisya_certificates` - Certificate data with IDs, student info, and verification URLs
 - `shisya_profile` - Student profile with name, username, bio, social links, and visibility settings
+- `shisya_lab_progress` - Lab completion status and saved code per course/lab
 
 ## Test System Design
 - **Security**: Correct answers are NEVER sent to the client. Server strips `isCorrect` flag before sending questions.
@@ -161,6 +164,16 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - **PDF Download**: Client-side PDF generation using html2canvas and jsPDF
 - **Public Verification**: `/verify/:certificateId` is accessible without authentication for certificate validation
 - **Data Shape**: Certificates include studentName, courseId, courseTitle, certificateTitle, level, skills, issuedAt, verificationUrl
+
+## Guided Labs System Design
+- **Browser-Based Execution**: JavaScript code runs client-side using Function constructor with security sandboxing
+- **Security Restrictions**: Disables setTimeout, setInterval, fetch, XMLHttpRequest, WebSocket, localStorage, sessionStorage, document, and window access
+- **Output Matching**: Compares actual console output against expected output (normalized whitespace)
+- **Code Persistence**: Auto-saves student code in localStorage while practicing
+- **Lab Unlocking**: Labs can be linked to lessons via lessonId - unlocks when that lesson is completed
+- **Completion Flow**: Run code → Output matches expected → Mark as Completed button appears → Click to save completion
+- **Mock Data**: Course 1 has 8 labs, Course 2 has 6 labs, Course 3 has 3 labs
+- **Difficulty Levels**: beginner, intermediate, advanced
 
 ## Profile & Portfolio System Design
 - **Private Profile**: Students can edit their profile at `/profile` with full name, username, headline, bio, location, and social links
