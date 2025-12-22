@@ -108,7 +108,7 @@ export default function CertificateViewer() {
           <p className="text-muted-foreground mb-4">
             The certificate you're looking for doesn't exist.
           </p>
-          <Link href="/certificates">
+          <Link href="/shisya/certificates">
             <Button>Back to Certificates</Button>
           </Link>
         </Card>
@@ -120,7 +120,7 @@ export default function CertificateViewer() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <div className="mb-6">
-          <Link href="/certificates">
+          <Link href="/shisya/certificates">
             <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back">
               <ArrowLeft className="w-4 h-4" />
               Back to Certificates

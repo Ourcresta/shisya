@@ -65,7 +65,7 @@ export function ProjectCard({ project, courseId, isSubmitted }: ProjectCardProps
       </CardContent>
 
       <CardFooter>
-        <Link href={`/courses/${courseId}/projects/${project.id}`} className="w-full">
+        <Link href={`/shisya/projects/${courseId}/${project.id}`} className="w-full">
           <Button 
             className="w-full gap-2" 
             variant={isSubmitted ? "secondary" : "default"}

@@ -65,13 +65,13 @@ export default function CertificateCard({ certificate }: CertificateCardProps) {
         )}
 
         <div className="flex gap-2 pt-2 flex-wrap">
-          <Link href={`/certificates/${certificate.certificateId}`}>
+          <Link href={`/shisya/certificates/${certificate.certificateId}`}>
             <Button className="gap-2" data-testid={`button-view-cert-${certificate.certificateId}`}>
               <ExternalLink className="w-4 h-4" />
               View Certificate
             </Button>
           </Link>
-          <Link href={`/certificates/${certificate.certificateId}`}>
+          <Link href={`/shisya/certificates/${certificate.certificateId}`}>
             <Button variant="outline" className="gap-2" data-testid={`button-download-${certificate.certificateId}`}>
               <Download className="w-4 h-4" />
               Download PDF

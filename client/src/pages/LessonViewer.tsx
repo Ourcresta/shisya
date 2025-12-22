@@ -44,7 +44,7 @@ export default function LessonViewer() {
   };
 
   if (lessonError) {
-    return <Redirect to={`/courses/${courseId}/learn`} />;
+    return <Redirect to={`/shisya/learn/${courseId}`} />;
   }
 
   return (
@@ -55,7 +55,7 @@ export default function LessonViewer() {
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Navigation */}
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <Link href={`/courses/${courseId}/learn`}>
+            <Link href={`/shisya/learn/${courseId}`}>
               <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Course
@@ -217,7 +217,7 @@ export default function LessonViewer() {
 
           {/* Bottom Actions */}
           <div className="flex items-center justify-between flex-wrap gap-4 pt-4 pb-8">
-            <Link href={`/courses/${courseId}/learn`}>
+            <Link href={`/shisya/learn/${courseId}`}>
               <Button variant="outline" className="gap-2" data-testid="button-back-bottom">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Course

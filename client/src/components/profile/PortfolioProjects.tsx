@@ -109,7 +109,7 @@ export default function PortfolioProjects({
 
                     {!isPublicView && (
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/courses/${project.courseId}/projects/${project.projectId}`} data-testid={`link-view-project-${project.projectId}`}>
+                        <Link href={`/shisya/projects/${project.courseId}/${project.projectId}`} data-testid={`link-view-project-${project.projectId}`}>
                           View
                         </Link>
                       </Button>

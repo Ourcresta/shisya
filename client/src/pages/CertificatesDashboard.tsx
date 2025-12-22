@@ -49,7 +49,7 @@ export default function CertificatesDashboard() {
               <p className="text-muted-foreground mb-4">
                 Complete courses to earn certificates.
               </p>
-              <Link href="/">
+              <Link href="/courses">
                 <Button>Browse Courses</Button>
               </Link>
             </CardContent>
