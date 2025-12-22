@@ -1,0 +1,217 @@
+You are Replit AI acting as a Senior Full-Stack Engineer and Security Architect.
+
+You are working inside the existing SHISYA (Student Portal) project.
+
+Your task is to implement a secure, production-ready authentication system using:
+- Email + Password
+- OTP verification via Resend
+- Session-based authentication
+
+DO NOT refactor existing learning modules.
+ADD authentication cleanly and minimally.
+
+--------------------------------------------------
+AUTH REQUIREMENTS
+--------------------------------------------------
+
+Signup:
+- Email
+- Password
+- OTP verification (email)
+
+Signin:
+- Email
+- Password
+
+OTP is used ONLY for:
+- Email verification
+- Password reset (optional placeholder)
+
+--------------------------------------------------
+TECH STACK & SERVICES
+--------------------------------------------------
+
+Email Service:
+- Resend (API-based email sending)
+
+Backend:
+- Existing Express server
+- PostgreSQL / SQLite / Replit DB (choose simplest available)
+
+Security:
+- bcrypt for password hashing
+- crypto for OTP generation
+- HttpOnly cookies for session
+
+--------------------------------------------------
+DATABASE SCHEMA
+--------------------------------------------------
+
+Create User table:
+
+users:
+- id (uuid)
+- email (unique)
+- password_hash
+- email_verified (boolean)
+- created_at
+
+otp_codes:
+- id
+- user_id
+- otp_code (hashed)
+- expires_at
+- used (boolean)
+
+sessions:
+- id
+- user_id
+- created_at
+- expires_at
+
+--------------------------------------------------
+API ENDPOINTS
+--------------------------------------------------
+
+POST /api/auth/signup
+- email
+- password
+→ creates user (email_verified = false)
+→ generates OTP
+→ sends OTP via Resend
+
+POST /api/auth/verify-otp
+- email
+- otp
+→ verifies OTP
+→ marks email_verified = true
+
+POST /api/auth/login
+- email
+- password
+→ verifies credentials
+→ creates session
+
+POST /api/auth/logout
+→ clears session
+
+GET /api/auth/me
+→ returns logged-in user (if session valid)
+
+--------------------------------------------------
+OTP LOGIC (IMPORTANT)
+--------------------------------------------------
+
+- OTP length: 6 digits
+- Valid for: 10 minutes
+- Store OTP as HASHED value
+- One-time use only
+
+--------------------------------------------------
+RESEND EMAIL TEMPLATE
+--------------------------------------------------
+
+Subject:
+"Verify your SHISYA account"
+
+Body:
+"Your verification code is: {{OTP}}
+This code is valid for 10 minutes."
+
+--------------------------------------------------
+FRONTEND PAGES
+--------------------------------------------------
+
+Create these pages:
+
+/signup
+/login
+/verify-otp
+
+Signup Page:
+- Email input
+- Password input
+- Submit → sends OTP
+
+Verify OTP Page:
+- OTP input
+- Verify button
+- Resend OTP (rate limited)
+
+Login Page:
+- Email input
+- Password input
+
+--------------------------------------------------
+ROUTE PROTECTION
+--------------------------------------------------
+
+- Protect:
+  /profile
+  /labs
+  /projects
+  /tests
+  /certificates
+
+- Redirect unauthenticated users to /login
+
+--------------------------------------------------
+SESSION HANDLING
+--------------------------------------------------
+
+- Use HttpOnly cookie
+- Session expiry: 7 days
+- Auto-refresh session on activity
+
+--------------------------------------------------
+MIGRATION FROM LOCALSTORAGE (IMPORTANT)
+--------------------------------------------------
+
+On first successful login:
+- Read existing LocalStorage data:
+  - progress
+  - lab completions
+  - project submissions
+  - test attempts
+  - certificates
+- Persist to database
+- Clear LocalStorage
+
+--------------------------------------------------
+SECURITY RULES
+--------------------------------------------------
+
+- Never store plain passwords
+- Never log OTPs
+- Rate-limit OTP requests
+- Prevent brute-force login
+- Validate email format
+
+--------------------------------------------------
+OUT OF SCOPE (DO NOT BUILD)
+--------------------------------------------------
+
+❌ Social login
+❌ MFA
+❌ Admin auth
+❌ Payments
+
+--------------------------------------------------
+TESTING CHECKLIST
+--------------------------------------------------
+
+- Signup → OTP email received
+- Invalid OTP rejected
+- OTP expiry enforced
+- Login works after verification
+- Protected routes blocked when logged out
+- Session persists across refresh
+- Logout clears session
+
+--------------------------------------------------
+FINAL INSTRUCTION
+--------------------------------------------------
+
+Build this step-by-step.
+Explain assumptions briefly.
+Keep code modular and secure.
