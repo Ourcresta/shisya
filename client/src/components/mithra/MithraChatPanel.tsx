@@ -68,17 +68,14 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
 
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest<MithraResponse>("/api/mithra/ask", {
-        method: "POST",
-        body: JSON.stringify({
-          context: {
-            studentId: user?.id,
-            ...context,
-          },
-          question,
-        }),
+      const response = await apiRequest("POST", "/api/mithra/ask", {
+        context: {
+          studentId: user?.id,
+          ...context,
+        },
+        question,
       });
-      return response;
+      return await response.json() as MithraResponse;
     },
     onSuccess: (data) => {
       setMessages((prev) => [

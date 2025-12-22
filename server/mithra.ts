@@ -1,8 +1,9 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Response } from "express";
 import OpenAI from "openai";
 import { db } from "./db";
 import { mithraConversations, mithraMessages, mithraRequestSchema, type MithraResponse, type MithraResponseType } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { requireAuth, type AuthenticatedRequest } from "./auth";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -130,13 +131,9 @@ function determineResponseType(question: string, answer: string): MithraResponse
 }
 
 export function registerMithraRoutes(app: Express): void {
-  app.post("/api/mithra/ask", async (req: Request, res: Response) => {
+  app.post("/api/mithra/ask", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      const userId = req.session.userId;
+      const userId = req.user!.id;
 
       const rateCheck = checkRateLimit(userId);
       if (!rateCheck.allowed) {
@@ -199,13 +196,9 @@ export function registerMithraRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/mithra/history", async (req: Request, res: Response) => {
+  app.get("/api/mithra/history", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      const userId = req.session.userId;
+      const userId = req.user!.id;
       const courseId = parseInt(req.query.courseId as string, 10);
       const pageType = req.query.pageType as string;
 

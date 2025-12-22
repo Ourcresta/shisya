@@ -27,6 +27,7 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **Certificate System:** Auto-generated upon meeting course requirements, with unique IDs, QR codes for public verification, and client-side PDF generation.
 - **Guided Labs:** Browser-based JavaScript execution with security sandboxing, output matching, and code persistence in LocalStorage. Labs can be unlocked based on lesson completion.
 - **Profile & Portfolio:** Students can manage a private editable profile and generate a public shareable portfolio with a verified badge, learning statistics, skills aggregated from completed courses/certificates, projects, and certificates.
+- **Mithra AI Tutor:** Context-aware AI assistant integrated into lesson, lab, and project pages. Uses OpenAI's gpt-4.1-mini model with strict guardrails to never give direct answers - only explanations, hints, and guidance. Rate-limited to 10 requests/minute per student. Backend endpoint at POST /api/mithra/ask. Appears as floating avatar button in bottom-right corner. Conversation history stored in PostgreSQL.
 
 **Feature Specifications:**
 - **Core Features:** Landing Page, Course Catalog, Course Overview, Student Dashboard, Learn View with Lesson Viewer, Progress Tracking, Course Projects with Submission, Course Tests with Scoring and History, Guided Labs, Certificates Dashboard and Viewer, Public Certificate Verification, Student Profile, and Public Portfolio.

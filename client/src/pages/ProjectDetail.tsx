@@ -27,12 +27,15 @@ import {
   saveProjectSubmission 
 } from "@/lib/submissions";
 import { apiRequest } from "@/lib/queryClient";
+import { MithraAvatar } from "@/components/mithra";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Project, ProjectSubmission, Course } from "@shared/schema";
 
 export default function ProjectDetail() {
   const { courseId, projectId } = useParams<{ courseId: string; projectId: string }>();
   const courseIdNum = parseInt(courseId || "0", 10);
   const projectIdNum = parseInt(projectId || "0", 10);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Track submission state locally for immediate UI updates
@@ -325,6 +328,19 @@ export default function ProjectDetail() {
           </div>
         </div>
       ) : null}
+
+      {/* Mithra AI Tutor Avatar */}
+      {user && project && (
+        <MithraAvatar
+          context={{
+            courseId: courseIdNum,
+            projectId: projectIdNum,
+            pageType: "project",
+            courseTitle: course?.title,
+            projectTitle: project.title,
+          }}
+        />
+      )}
     </Layout>
   );
 }

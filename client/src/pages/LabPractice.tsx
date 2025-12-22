@@ -16,6 +16,8 @@ import {
   saveLabCode 
 } from "@/lib/labProgress";
 import { executeJavaScript, compareOutput } from "@/lib/labRunner";
+import { MithraAvatar } from "@/components/mithra";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Lab, Course } from "@shared/schema";
 import { 
   ArrowLeft, 
@@ -30,6 +32,7 @@ export default function LabPractice() {
   const [, params] = useRoute("/shishya/labs/:courseId/:labId");
   const courseId = params?.courseId ? parseInt(params.courseId, 10) : 0;
   const labId = params?.labId ? parseInt(params.labId, 10) : 0;
+  const { user } = useAuth();
 
   const { toast } = useToast();
   
@@ -262,6 +265,19 @@ export default function LabPractice() {
           </div>
         </div>
       </main>
+
+      {/* Mithra AI Tutor Avatar */}
+      {user && lab && (
+        <MithraAvatar
+          context={{
+            courseId,
+            labId,
+            pageType: "lab",
+            courseTitle: course?.title,
+            labTitle: lab.title,
+          }}
+        />
+      )}
     </div>
   );
 }

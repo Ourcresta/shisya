@@ -17,12 +17,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useCourseProgress } from "@/contexts/ProgressContext";
+import { MithraAvatar } from "@/components/mithra";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const courseIdNum = parseInt(courseId || "0", 10);
   const lessonIdNum = parseInt(lessonId || "0", 10);
+  const { user } = useAuth();
 
   // Use centralized progress context for reactive state
   const { isLessonCompleted, toggleLessonComplete } = useCourseProgress(courseIdNum);
@@ -249,6 +252,19 @@ export default function LessonViewer() {
           </div>
         </div>
       ) : null}
+
+      {/* Mithra AI Tutor Avatar */}
+      {user && lesson && (
+        <MithraAvatar
+          context={{
+            courseId: courseIdNum,
+            lessonId: lessonIdNum,
+            pageType: "lesson",
+            courseTitle: course?.title,
+            lessonTitle: lesson.title,
+          }}
+        />
+      )}
     </Layout>
   );
 }
