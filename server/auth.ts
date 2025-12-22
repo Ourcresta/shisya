@@ -121,24 +121,55 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
     }
 
     const user = userResult[0];
-    const otpHash = hashOtp(otp);
 
-    // Find valid OTP
-    const otpResult = await db.select().from(otpCodes).where(
+    // Find the most recent unused OTP for this user that hasn't expired
+    const latestOtpResult = await db.select().from(otpCodes).where(
       and(
         eq(otpCodes.userId, user.id),
-        eq(otpCodes.otpHash, otpHash),
         eq(otpCodes.used, false),
         gt(otpCodes.expiresAt, new Date())
       )
     ).limit(1);
 
-    if (otpResult.length === 0) {
-      return res.status(400).json({ error: "Invalid or expired verification code" });
+    if (latestOtpResult.length === 0) {
+      return res.status(400).json({ error: "No active verification code. Please request a new one." });
+    }
+
+    const latestOtp = latestOtpResult[0];
+
+    // Check if max attempts exceeded
+    if (latestOtp.attempts >= MAX_OTP_ATTEMPTS) {
+      // Mark OTP as used (locked out)
+      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, latestOtp.id));
+      return res.status(400).json({ 
+        error: "Too many failed attempts. Please request a new verification code.",
+        locked: true
+      });
+    }
+
+    // Verify the OTP hash
+    const otpHash = hashOtp(otp);
+    if (latestOtp.otpHash !== otpHash) {
+      // Increment attempts
+      await db.update(otpCodes).set({ 
+        attempts: latestOtp.attempts + 1 
+      }).where(eq(otpCodes.id, latestOtp.id));
+      
+      const remainingAttempts = MAX_OTP_ATTEMPTS - (latestOtp.attempts + 1);
+      if (remainingAttempts <= 0) {
+        return res.status(400).json({ 
+          error: "Too many failed attempts. Please request a new verification code.",
+          locked: true
+        });
+      }
+      
+      return res.status(400).json({ 
+        error: `Invalid verification code. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`
+      });
     }
 
     // Mark OTP as used
-    await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, otpResult[0].id));
+    await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, latestOtp.id));
 
     // Mark email as verified
     await db.update(users).set({ emailVerified: true }).where(eq(users.id, user.id));
