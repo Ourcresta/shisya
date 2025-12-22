@@ -77,3 +77,14 @@ export function clearAllTestAttempts(): void {
     console.error("Failed to clear all test attempts:", error);
   }
 }
+
+export function getAllPassedTests(): TestAttempt[] {
+  const attempts = getTestAttempts();
+  return Object.values(attempts)
+    .filter(attempt => attempt.passed)
+    .sort((a, b) => new Date(b.attemptedAt).getTime() - new Date(a.attemptedAt).getTime());
+}
+
+export function getPassedTestsCount(): number {
+  return getAllPassedTests().length;
+}
