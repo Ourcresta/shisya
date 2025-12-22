@@ -472,3 +472,67 @@ export interface AuthUser {
   emailVerified: boolean;
 }
 
+// ============ MITHRA AI TUTOR SCHEMAS ============
+
+// Mithra conversations table
+export const mithraConversations = pgTable("mithra_conversations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  courseId: integer("course_id").notNull(),
+  pageType: varchar("page_type", { length: 20 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Mithra messages table
+export const mithraMessages = pgTable("mithra_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => mithraConversations.id),
+  role: varchar("role", { length: 10 }).notNull(),
+  content: text("content").notNull(),
+  responseType: varchar("response_type", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Mithra allowed page types
+export const MITHRA_ALLOWED_PAGES = ["lesson", "lab", "project", "test_prep"] as const;
+export type MithraAllowedPage = typeof MITHRA_ALLOWED_PAGES[number];
+
+// Mithra request context schema
+export const mithraContextSchema = z.object({
+  studentId: z.string(),
+  courseId: z.number(),
+  moduleId: z.number().optional(),
+  lessonId: z.number().optional(),
+  labId: z.number().optional(),
+  projectId: z.number().optional(),
+  pageType: z.enum(["lesson", "lab", "project", "test_prep"]),
+  courseTitle: z.string().optional(),
+  lessonTitle: z.string().optional(),
+  labTitle: z.string().optional(),
+  projectTitle: z.string().optional(),
+});
+
+export type MithraContext = z.infer<typeof mithraContextSchema>;
+
+// Mithra request schema
+export const mithraRequestSchema = z.object({
+  context: mithraContextSchema,
+  question: z.string().min(1, "Question is required").max(500, "Question too long"),
+});
+
+export type MithraRequest = z.infer<typeof mithraRequestSchema>;
+
+// Mithra response types
+export const MITHRA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "warning"] as const;
+export type MithraResponseType = typeof MITHRA_RESPONSE_TYPES[number];
+
+// Mithra response interface
+export interface MithraResponse {
+  answer: string;
+  type: MithraResponseType;
+}
+
+// Mithra table types
+export type MithraConversation = typeof mithraConversations.$inferSelect;
+export type MithraMessage = typeof mithraMessages.$inferSelect;
+
