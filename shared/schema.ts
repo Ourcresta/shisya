@@ -226,6 +226,36 @@ export const certificateSchema = z.object({
 
 export type Certificate = z.infer<typeof certificateSchema>;
 
+// Student Profile Schema
+export const studentProfileSchema = z.object({
+  id: z.string(),
+  fullName: z.string().min(1, "Full name is required"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be less than 30 characters")
+    .regex(/^[a-z0-9_-]+$/, "Username must be lowercase with no spaces"),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+  profilePhoto: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  headline: z.string().max(100, "Headline must be less than 100 characters").optional(),
+  location: z.string().optional(),
+  githubUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  linkedinUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  portfolioVisible: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type StudentProfile = z.infer<typeof studentProfileSchema>;
+
+// Insert schema for creating/updating profile
+export const insertProfileSchema = studentProfileSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+
 // API Response types
 export interface ApiResponse<T> {
   data: T;

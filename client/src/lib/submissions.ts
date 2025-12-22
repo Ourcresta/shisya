@@ -85,3 +85,21 @@ export function areAllProjectsSubmitted(courseId: number, totalProjects: number)
   if (totalProjects === 0) return false;
   return getSubmittedProjectsCount(courseId) >= totalProjects;
 }
+
+// Get all submissions across all courses
+export function getAllSubmissions(): ProjectSubmission[] {
+  const store = getSubmissionsStore();
+  const submissions: ProjectSubmission[] = [];
+  
+  Object.values(store).forEach(courseSubmissions => {
+    Object.values(courseSubmissions).forEach(submission => {
+      if (submission.submitted) {
+        submissions.push(submission);
+      }
+    });
+  });
+  
+  return submissions.sort((a, b) => 
+    new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime()
+  );
+}
