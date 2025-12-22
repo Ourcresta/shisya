@@ -13,7 +13,21 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// OTP codes table for email verification
+// OTP logs table for email verification with purpose tracking
+export const otpLogs = pgTable("otp_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  contactType: varchar("contact_type", { length: 10 }).notNull().default("email"),
+  destination: varchar("destination", { length: 255 }).notNull(),
+  otpHash: text("otp_hash").notNull(),
+  purpose: varchar("purpose", { length: 20 }).notNull(),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumedAt: timestamp("consumed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Keep old otpCodes for backward compatibility during migration
 export const otpCodes = pgTable("otp_codes", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
@@ -110,12 +124,18 @@ export const userProfiles = pgTable("user_profiles", {
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
+export const insertOtpLogSchema = createInsertSchema(otpLogs).omit({ id: true, createdAt: true });
 export const insertSessionSchema = createInsertSchema(sessions).omit({ createdAt: true });
+
+// OTP Purpose enum
+export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
+export type OtpPurpose = typeof OTP_PURPOSES[number];
 
 // Types from database
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type OtpCode = typeof otpCodes.$inferSelect;
+export type OtpLog = typeof otpLogs.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type UserLabProgress = typeof userLabProgress.$inferSelect;
