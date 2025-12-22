@@ -10,8 +10,12 @@ import { sendOtpEmail } from "./resend";
 const SALT_ROUNDS = 12;
 const OTP_EXPIRY_MINUTES = 5;
 const MAX_OTP_ATTEMPTS = 3;
+const OTP_RESEND_COOLDOWN_SECONDS = 30;
 const SESSION_EXPIRY_DAYS = 7;
 const COOKIE_NAME = "shishya_session";
+
+// In-memory rate limiting for OTP resend (email -> last request timestamp)
+const resendCooldowns = new Map<string, number>();
 
 function hashOtp(otp: string): string {
   return createHash("sha256").update(otp).digest("hex");
@@ -336,6 +340,20 @@ authRouter.post("/resend-otp", async (req: Request, res: Response) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    // Check rate limiting
+    const lastResend = resendCooldowns.get(normalizedEmail);
+    const now = Date.now();
+    if (lastResend) {
+      const timeSinceLastResend = (now - lastResend) / 1000;
+      if (timeSinceLastResend < OTP_RESEND_COOLDOWN_SECONDS) {
+        const remainingSeconds = Math.ceil(OTP_RESEND_COOLDOWN_SECONDS - timeSinceLastResend);
+        return res.status(429).json({ 
+          error: `Please wait ${remainingSeconds} seconds before requesting a new code.`,
+          retryAfter: remainingSeconds
+        });
+      }
+    }
+
     // Find user
     const userResult = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
     if (userResult.length === 0) {
@@ -364,6 +382,9 @@ authRouter.post("/resend-otp", async (req: Request, res: Response) => {
 
     // Send OTP email
     await sendOtpEmail(normalizedEmail, otp);
+
+    // Update rate limiting
+    resendCooldowns.set(normalizedEmail, now);
 
     res.json({ message: "Verification code sent" });
   } catch (error) {
