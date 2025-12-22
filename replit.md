@@ -12,13 +12,20 @@ SHISYA is the learner-facing portal of the AISiksha ecosystem. It represents the
 - TypeScript
 - Tailwind CSS with Shadcn UI components
 - TanStack React Query for data fetching
-- Express.js (Backend proxy)
-- LocalStorage for progress tracking and project submissions
+- Express.js (Backend)
+- PostgreSQL + Drizzle ORM (Database)
+- Resend (Email OTP delivery)
+- Session-based authentication with HTTP-only cookies
 
 ## Project Structure
 ```
 client/
 ├── src/
+│   ├── auth/
+│   │   ├── Login.tsx            # Login page with email/password
+│   │   ├── Signup.tsx           # Signup page with email/password
+│   │   ├── VerifyOtp.tsx        # OTP verification page
+│   │   └── ProtectedRoute.tsx   # Route guard component
 │   ├── components/
 │   │   ├── layout/          # Header, Layout
 │   │   ├── course/          # CourseCard, CourseCardSkeleton, EmptyState
@@ -28,6 +35,7 @@ client/
 │   │   ├── profile/         # ProfileHeader, ProfileForm, LearningStats, SkillsSection, PortfolioProjects, CertificatesSection
 │   │   └── ui/              # Shadcn components + custom badges
 │   ├── contexts/
+│   │   ├── AuthContext.tsx          # Authentication state management
 │   │   ├── ProgressContext.tsx      # Centralized lesson progress state
 │   │   └── TestAttemptContext.tsx   # Test attempt state management
 │   ├── lib/
@@ -68,8 +76,17 @@ shared/
 ```
 
 ## Routes
+
+### Public Routes (No Login Required)
 - `/` - Course Catalog (home)
 - `/courses/:courseId` - Course Overview
+- `/verify/:certificateId` - Public Certificate Verification
+- `/login` - Login page
+- `/signup` - Signup page
+- `/verify-otp` - OTP verification page
+- `/profile/:username` - Public Portfolio (recruiter-friendly view)
+
+### Protected Routes (Login Required)
 - `/courses/:courseId/learn` - Learn View (modules & lessons)
 - `/courses/:courseId/learn/:lessonId` - Lesson Viewer
 - `/courses/:courseId/projects` - Course Projects list
@@ -82,11 +99,19 @@ shared/
 - `/courses/:courseId/labs/:labId` - Lab Practice (code editor with output)
 - `/certificates` - Certificate Dashboard (student's earned certificates)
 - `/certificates/:certificateId` - Certificate Viewer with QR code and PDF download
-- `/verify/:certificateId` - Public Certificate Verification (no auth required)
 - `/profile` - Student Profile (private, editable)
-- `/profile/:username` - Public Portfolio (recruiter-friendly view)
 
-## API Endpoints (Proxy to Admin Backend)
+## API Endpoints
+
+### Authentication Endpoints
+- `POST /api/auth/signup` - Register with email/password (sends OTP)
+- `POST /api/auth/verify-otp` - Verify OTP and activate account
+- `POST /api/auth/login` - Login with email/password
+- `POST /api/auth/logout` - Logout (destroys session)
+- `GET /api/auth/me` - Get current user (session check)
+- `POST /api/auth/resend-otp` - Resend verification code
+
+### Proxy to Admin Backend
 Most routes are READ-ONLY proxies to the AISiksha Admin Course Factory:
 
 ### Course & Lesson Endpoints
@@ -174,6 +199,20 @@ Base URL: `https://course-factory.ourcresta1.repl.co`
 - **Completion Flow**: Run code → Output matches expected → Mark as Completed button appears → Click to save completion
 - **Mock Data**: Course 1 has 8 labs, Course 2 has 6 labs, Course 3 has 3 labs
 - **Difficulty Levels**: beginner, intermediate, advanced
+
+## Authentication System Design
+- **Signup Flow**: User enters email/password → OTP sent via Resend → User verifies OTP → Account activated → Auto-login
+- **Login Flow**: Email + Password → Session created → HTTP-only cookie set
+- **Security Features**:
+  - Bcrypt password hashing (12 rounds)
+  - SHA256 OTP hashing (OTPs never stored in plain text)
+  - HTTP-only session cookies (7-day expiry)
+  - OTP expires in 10 minutes
+  - One active OTP per email
+- **Password Requirements**: Minimum 8 characters, must contain letters and numbers
+- **Route Protection**: ProtectedRoute component redirects unauthenticated users to `/login?redirect={originalPath}`
+- **Session Persistence**: Sessions stored in PostgreSQL, survive server restarts
+- **Header State**: Shows "Log In" button when logged out, user dropdown menu when logged in
 
 ## Profile & Portfolio System Design
 - **Private Profile**: Students can edit their profile at `/profile` with full name, username, headline, bio, location, and social links
