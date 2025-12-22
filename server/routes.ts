@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
+import { registerMithraRoutes } from "./mithra";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory backend URL
@@ -499,6 +500,9 @@ export async function registerRoutes(
       res.status(500).json({ error: "Failed to fetch lessons" });
     }
   });
+
+  // ============ MITHRA AI TUTOR ROUTES ============
+  registerMithraRoutes(app);
 
   return httpServer;
 }
