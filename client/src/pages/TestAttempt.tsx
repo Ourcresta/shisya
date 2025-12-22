@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuestionCard from "@/components/test/QuestionCard";
 import TestTimer from "@/components/test/TestTimer";
 import TestProgress from "@/components/test/TestProgress";
+import { MithraAvatar } from "@/components/mithra/MithraAvatar";
 import type { TestWithQuestionsUI, TestAttemptAnswer } from "@shared/schema";
 import { useTestAttempts } from "@/contexts/TestAttemptContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -273,6 +274,16 @@ export default function TestAttempt() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MithraAvatar
+        context={{
+          courseId: parseInt(courseId!, 10),
+          pageType: "lesson",
+          courseTitle: test.title,
+        }}
+        disabled={true}
+        disabledMessage="Mithra is unavailable during tests"
+      />
     </div>
   );
 }
