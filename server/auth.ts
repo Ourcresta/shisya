@@ -1,29 +1,28 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { db } from "./db";
-import { users, otpCodes, sessions } from "@shared/schema";
+import { users, sessions } from "@shared/schema";
 import { signupSchema, loginSchema, verifyOtpSchema } from "@shared/schema";
+import type { OtpPurpose } from "@shared/schema";
 import { eq, and, gt } from "drizzle-orm";
-import { randomUUID, createHash, randomBytes } from "crypto";
+import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
 import { sendOtpEmail } from "./resend";
+import { 
+  generateOTP, 
+  OTP_CONFIG 
+} from "./lib/otp-utils";
+import { 
+  createOTPRecord, 
+  verifyOTPRecord, 
+  invalidatePreviousOTPs,
+  checkResendCooldown,
+  updateResendCooldown,
+  getUserByEmail
+} from "./lib/otp-db";
 
 const SALT_ROUNDS = 12;
-const OTP_EXPIRY_MINUTES = 5;
-const MAX_OTP_ATTEMPTS = 3;
-const OTP_RESEND_COOLDOWN_SECONDS = 30;
 const SESSION_EXPIRY_DAYS = 7;
 const COOKIE_NAME = "shishya_session";
-
-// In-memory rate limiting for OTP resend (email -> last request timestamp)
-const resendCooldowns = new Map<string, number>();
-
-function hashOtp(otp: string): string {
-  return createHash("sha256").update(otp).digest("hex");
-}
-
-function generateOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 export interface AuthenticatedRequest extends Request {
   user?: { id: string; email: string; emailVerified: boolean };
@@ -41,40 +40,38 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 
     const { email, password } = validation.data;
     const normalizedEmail = email.toLowerCase().trim();
+    const purpose: OtpPurpose = "signup";
 
-    // Check if user exists
-    const existingUser = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
-    if (existingUser.length > 0) {
-      // If user exists but not verified, allow re-signup (resend OTP)
-      if (!existingUser[0].emailVerified) {
-        const otp = generateOtp();
-        const otpHash = hashOtp(otp);
-        const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const existingUser = await getUserByEmail(normalizedEmail);
+    
+    if (existingUser) {
+      if (!existingUser.emailVerified) {
+        const cooldownCheck = checkResendCooldown(normalizedEmail);
+        if (!cooldownCheck.allowed) {
+          return res.status(429).json({ 
+            error: `Please wait ${cooldownCheck.remainingSeconds} seconds before requesting a new code.`,
+            retryAfter: cooldownCheck.remainingSeconds
+          });
+        }
 
-        // Mark old OTPs as used
-        await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.userId, existingUser[0].id));
-
-        // Create new OTP
-        await db.insert(otpCodes).values({
-          userId: existingUser[0].id,
-          otpHash,
-          expiresAt,
-          used: false,
-        });
-
-        // Send OTP email
-        await sendOtpEmail(normalizedEmail, otp);
-
+        await invalidatePreviousOTPs(normalizedEmail, purpose);
+        const otp = generateOTP();
+        await createOTPRecord(existingUser.id, "email", normalizedEmail, otp, purpose);
+        
+        const emailSent = await sendOtpEmail(normalizedEmail, otp, purpose);
+        if (!emailSent) {
+          console.error("Failed to send OTP email to:", normalizedEmail);
+        }
+        
+        updateResendCooldown(normalizedEmail);
         return res.json({ message: "Verification code sent to your email" });
       }
       return res.status(400).json({ error: "Email already registered" });
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-
-    // Create user
     const userId = randomUUID();
+    
     await db.insert(users).values({
       id: userId,
       email: normalizedEmail,
@@ -82,24 +79,15 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
       emailVerified: false,
     });
 
-    // Generate and store OTP
-    const otp = generateOtp();
-    const otpHash = hashOtp(otp);
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const otp = generateOTP();
+    await createOTPRecord(userId, "email", normalizedEmail, otp, purpose);
 
-    await db.insert(otpCodes).values({
-      userId,
-      otpHash,
-      expiresAt,
-      used: false,
-    });
-
-    // Send OTP email
-    const emailSent = await sendOtpEmail(normalizedEmail, otp);
+    const emailSent = await sendOtpEmail(normalizedEmail, otp, purpose);
     if (!emailSent) {
       console.error("Failed to send OTP email to:", normalizedEmail);
     }
 
+    updateResendCooldown(normalizedEmail);
     res.json({ message: "Verification code sent to your email" });
   } catch (error) {
     console.error("Signup error:", error);
@@ -117,68 +105,24 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
 
     const { email, otp } = validation.data;
     const normalizedEmail = email.toLowerCase().trim();
+    const purpose: OtpPurpose = "signup";
 
-    // Find user
-    const userResult = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
-    if (userResult.length === 0) {
+    const user = await getUserByEmail(normalizedEmail);
+    if (!user) {
       return res.status(400).json({ error: "Invalid email or verification code" });
     }
 
-    const user = userResult[0];
-
-    // Find the most recent unused OTP for this user that hasn't expired
-    const latestOtpResult = await db.select().from(otpCodes).where(
-      and(
-        eq(otpCodes.userId, user.id),
-        eq(otpCodes.used, false),
-        gt(otpCodes.expiresAt, new Date())
-      )
-    ).limit(1);
-
-    if (latestOtpResult.length === 0) {
-      return res.status(400).json({ error: "No active verification code. Please request a new one." });
-    }
-
-    const latestOtp = latestOtpResult[0];
-
-    // Check if max attempts exceeded
-    if (latestOtp.attempts >= MAX_OTP_ATTEMPTS) {
-      // Mark OTP as used (locked out)
-      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, latestOtp.id));
+    const verifyResult = await verifyOTPRecord(normalizedEmail, otp, purpose);
+    
+    if (!verifyResult.valid) {
       return res.status(400).json({ 
-        error: "Too many failed attempts. Please request a new verification code.",
-        locked: true
+        error: verifyResult.message,
+        locked: verifyResult.locked
       });
     }
 
-    // Verify the OTP hash
-    const otpHash = hashOtp(otp);
-    if (latestOtp.otpHash !== otpHash) {
-      // Increment attempts
-      await db.update(otpCodes).set({ 
-        attempts: latestOtp.attempts + 1 
-      }).where(eq(otpCodes.id, latestOtp.id));
-      
-      const remainingAttempts = MAX_OTP_ATTEMPTS - (latestOtp.attempts + 1);
-      if (remainingAttempts <= 0) {
-        return res.status(400).json({ 
-          error: "Too many failed attempts. Please request a new verification code.",
-          locked: true
-        });
-      }
-      
-      return res.status(400).json({ 
-        error: `Invalid verification code. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`
-      });
-    }
-
-    // Mark OTP as used
-    await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, latestOtp.id));
-
-    // Mark email as verified
     await db.update(users).set({ emailVerified: true }).where(eq(users.id, user.id));
 
-    // Create session
     const sessionId = randomUUID();
     const expiresAt = new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
@@ -188,7 +132,6 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
       expiresAt,
     });
 
-    // Set session cookie
     res.cookie(COOKIE_NAME, sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -221,26 +164,20 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     const { email, password } = validation.data;
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Find user
-    const userResult = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
-    if (userResult.length === 0) {
+    const user = await getUserByEmail(normalizedEmail);
+    if (!user) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const user = userResult[0];
-
-    // Check password
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    // Check if email is verified
     if (!user.emailVerified) {
       return res.status(400).json({ error: "Please verify your email first", needsVerification: true });
     }
 
-    // Create session
     const sessionId = randomUUID();
     const expiresAt = new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
@@ -250,7 +187,6 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       expiresAt,
     });
 
-    // Set session cookie
     res.cookie(COOKIE_NAME, sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -296,7 +232,6 @@ authRouter.get("/me", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    // Find session
     const sessionResult = await db.select().from(sessions).where(
       and(
         eq(sessions.id, sessionId),
@@ -309,7 +244,6 @@ authRouter.get("/me", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Session expired" });
     }
 
-    // Find user
     const userResult = await db.select().from(users).where(eq(users.id, sessionResult[0].userId)).limit(1);
     if (userResult.length === 0) {
       res.clearCookie(COOKIE_NAME);
@@ -339,57 +273,95 @@ authRouter.post("/resend-otp", async (req: Request, res: Response) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    const purpose: OtpPurpose = "signup";
 
-    // Check rate limiting
-    const lastResend = resendCooldowns.get(normalizedEmail);
-    const now = Date.now();
-    if (lastResend) {
-      const timeSinceLastResend = (now - lastResend) / 1000;
-      if (timeSinceLastResend < OTP_RESEND_COOLDOWN_SECONDS) {
-        const remainingSeconds = Math.ceil(OTP_RESEND_COOLDOWN_SECONDS - timeSinceLastResend);
-        return res.status(429).json({ 
-          error: `Please wait ${remainingSeconds} seconds before requesting a new code.`,
-          retryAfter: remainingSeconds
-        });
-      }
+    const cooldownCheck = checkResendCooldown(normalizedEmail);
+    if (!cooldownCheck.allowed) {
+      return res.status(429).json({ 
+        error: `Please wait ${cooldownCheck.remainingSeconds} seconds before requesting a new code.`,
+        retryAfter: cooldownCheck.remainingSeconds
+      });
     }
 
-    // Find user
-    const userResult = await db.select().from(users).where(eq(users.email, normalizedEmail)).limit(1);
-    if (userResult.length === 0) {
+    const user = await getUserByEmail(normalizedEmail);
+    if (!user) {
       return res.status(400).json({ error: "Email not found" });
     }
 
-    const user = userResult[0];
     if (user.emailVerified) {
       return res.status(400).json({ error: "Email already verified" });
     }
 
-    // Mark old OTPs as used
-    await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.userId, user.id));
+    await invalidatePreviousOTPs(normalizedEmail, purpose);
 
-    // Generate new OTP
-    const otp = generateOtp();
-    const otpHash = hashOtp(otp);
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const otp = generateOTP();
+    await createOTPRecord(user.id, "email", normalizedEmail, otp, purpose);
 
-    await db.insert(otpCodes).values({
-      userId: user.id,
-      otpHash,
-      expiresAt,
-      used: false,
-    });
+    const emailSent = await sendOtpEmail(normalizedEmail, otp, purpose);
+    if (!emailSent) {
+      console.error("Failed to send OTP email to:", normalizedEmail);
+    }
 
-    // Send OTP email
-    await sendOtpEmail(normalizedEmail, otp);
-
-    // Update rate limiting
-    resendCooldowns.set(normalizedEmail, now);
-
+    updateResendCooldown(normalizedEmail);
     res.json({ message: "Verification code sent" });
   } catch (error) {
     console.error("Resend OTP error:", error);
     res.status(500).json({ error: "Failed to resend code" });
+  }
+});
+
+// POST /api/auth/send-otp (generic endpoint for any purpose)
+authRouter.post("/send-otp", async (req: Request, res: Response) => {
+  try {
+    const { email, purpose } = req.body;
+    
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    
+    const validPurposes: OtpPurpose[] = ["signup", "login", "forgot_password", "verify_email"];
+    if (!purpose || !validPurposes.includes(purpose)) {
+      return res.status(400).json({ error: "Invalid purpose" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const otpPurpose = purpose as OtpPurpose;
+
+    const cooldownCheck = checkResendCooldown(normalizedEmail);
+    if (!cooldownCheck.allowed) {
+      return res.status(429).json({ 
+        error: `Please wait ${cooldownCheck.remainingSeconds} seconds before requesting a new code.`,
+        retryAfter: cooldownCheck.remainingSeconds
+      });
+    }
+
+    const user = await getUserByEmail(normalizedEmail);
+
+    if (otpPurpose === "signup" && user) {
+      if (user.emailVerified) {
+        return res.status(409).json({ error: "Email already registered" });
+      }
+    }
+
+    if (["login", "forgot_password", "verify_email"].includes(otpPurpose) && !user) {
+      return res.status(404).json({ error: "Email not found" });
+    }
+
+    await invalidatePreviousOTPs(normalizedEmail, otpPurpose);
+
+    const otp = generateOTP();
+    await createOTPRecord(user?.id || null, "email", normalizedEmail, otp, otpPurpose);
+
+    const emailSent = await sendOtpEmail(normalizedEmail, otp, otpPurpose);
+    if (!emailSent) {
+      return res.status(500).json({ error: "Failed to send verification email" });
+    }
+
+    updateResendCooldown(normalizedEmail);
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({ error: "Failed to send OTP" });
   }
 });
 
