@@ -1,6 +1,6 @@
 import type { CourseProgress, LessonProgress } from "@shared/schema";
 
-const PROGRESS_KEY = "shisya_progress";
+const PROGRESS_KEY = "shishya_progress";
 
 function getStoredProgress(): Record<number, CourseProgress> {
   try {

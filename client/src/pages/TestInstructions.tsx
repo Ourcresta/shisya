@@ -26,7 +26,7 @@ export default function TestInstructions() {
   const isLoading = courseLoading || testLoading;
 
   const handleStartTest = () => {
-    navigate(`/shisya/tests/${courseId}/${testId}/attempt`);
+    navigate(`/shishya/tests/${courseId}/${testId}/attempt`);
   };
 
   if (isLoading) {
@@ -56,7 +56,7 @@ export default function TestInstructions() {
           <FileQuestion className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-medium mb-2">Test Not Found</h2>
           <p className="text-muted-foreground mb-4">The test you're looking for doesn't exist.</p>
-          <Link href={`/shisya/tests/${courseId}`}>
+          <Link href={`/shishya/tests/${courseId}`}>
             <Button>Back to Tests</Button>
           </Link>
         </Card>
@@ -68,7 +68,7 @@ export default function TestInstructions() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <div className="mb-6">
-          <Link href={`/shisya/tests/${courseId}`}>
+          <Link href={`/shishya/tests/${courseId}`}>
             <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back">
               <ArrowLeft className="w-4 h-4" />
               Back to Tests
@@ -167,7 +167,7 @@ export default function TestInstructions() {
                   Start Test
                 </Button>
               ) : (
-                <Link href={`/shisya/tests/${courseId}/${testId}/result`}>
+                <Link href={`/shishya/tests/${courseId}/${testId}/result`}>
                   <Button variant="outline" className="w-full" size="lg" data-testid="button-view-result">
                     View Your Result
                   </Button>

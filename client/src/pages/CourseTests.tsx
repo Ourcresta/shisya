@@ -80,13 +80,13 @@ function TestCard({ test, courseId }: { test: Test; courseId: string }) {
 
         <div className="pt-2">
           {status === "not_attempted" ? (
-            <Link href={`/shisya/tests/${courseId}/${test.id}`}>
+            <Link href={`/shishya/tests/${courseId}/${test.id}`}>
               <Button className="w-full" data-testid={`button-start-test-${test.id}`}>
                 Start Test
               </Button>
             </Link>
           ) : (
-            <Link href={`/shisya/tests/${courseId}/${test.id}/result`}>
+            <Link href={`/shishya/tests/${courseId}/${test.id}/result`}>
               <Button variant="outline" className="w-full" data-testid={`button-view-result-${test.id}`}>
                 View Result
               </Button>

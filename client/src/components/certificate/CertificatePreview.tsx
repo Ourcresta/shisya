@@ -39,7 +39,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
             className="text-2xl font-bold text-indigo-700 dark:text-indigo-300 tracking-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            SHISYA
+            SHISHYA
           </span>
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">
@@ -162,7 +162,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
                 Issued by
               </div>
               <div className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                shisya.ai
+                shishya.ai
               </div>
             </div>
           </div>

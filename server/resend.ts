@@ -43,9 +43,9 @@ export async function sendOtpEmail(toEmail: string, otp: string): Promise<boolea
     const { client, fromEmail } = await getUncachableResendClient();
     
     const result = await client.emails.send({
-      from: fromEmail || 'SHISYA <noreply@shisya.app>',
+      from: fromEmail || 'SHISHYA <noreply@shishya.app>',
       to: toEmail,
-      subject: 'Verify your SHISYA account',
+      subject: 'Verify your SHISHYA account',
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #333;">Verify your email</h2>

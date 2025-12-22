@@ -70,14 +70,14 @@ export default function LabCard({ lab, courseId, isCompleted, isLocked, linkedLe
               Complete linked lesson to unlock
             </Button>
           ) : isCompleted ? (
-            <Link href={`/shisya/labs/${courseId}/${lab.id}`}>
+            <Link href={`/shishya/labs/${courseId}/${lab.id}`}>
               <Button variant="outline" className="w-full" data-testid={`button-lab-view-${lab.id}`}>
                 <Eye className="w-4 h-4 mr-2" />
                 View Solution
               </Button>
             </Link>
           ) : (
-            <Link href={`/shisya/labs/${courseId}/${lab.id}`}>
+            <Link href={`/shishya/labs/${courseId}/${lab.id}`}>
               <Button className="w-full" data-testid={`button-lab-start-${lab.id}`}>
                 <Play className="w-4 h-4 mr-2" />
                 Start Lab

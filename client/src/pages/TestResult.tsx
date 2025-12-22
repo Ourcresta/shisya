@@ -53,7 +53,7 @@ export default function TestResult() {
           <p className="text-muted-foreground mb-4">
             You haven't attempted this test yet.
           </p>
-          <Link href={`/shisya/tests/${courseId}/${testId}`}>
+          <Link href={`/shishya/tests/${courseId}/${testId}`}>
             <Button>View Test</Button>
           </Link>
         </Card>
@@ -68,7 +68,7 @@ export default function TestResult() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <div className="mb-6">
-          <Link href={`/shisya/tests/${courseId}`}>
+          <Link href={`/shishya/tests/${courseId}`}>
             <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back">
               <ArrowLeft className="w-4 h-4" />
               Back to Tests
@@ -182,7 +182,7 @@ export default function TestResult() {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Link href={`/shisya/tests/${courseId}`} className="flex-1">
+              <Link href={`/shishya/tests/${courseId}`} className="flex-1">
                 <Button variant="outline" className="w-full" data-testid="button-back-tests">
                   View All Tests
                 </Button>

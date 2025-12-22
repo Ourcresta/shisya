@@ -1,6 +1,6 @@
 import type { StudentProfile, InsertProfile } from "@shared/schema";
 
-const STORAGE_KEY = "shisya_profile";
+const STORAGE_KEY = "shishya_profile";
 
 function generateProfileId(): string {
   return `prof_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;

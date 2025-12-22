@@ -30,7 +30,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   // Listen to storage events for cross-tab sync
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "shisya_progress") {
+      if (e.key === "shishya_progress") {
         refreshProgress();
       }
     };

@@ -95,7 +95,7 @@ function AuthRedirect({ children }: { children: React.ReactNode }) {
   }
   
   if (user) {
-    return <Redirect to="/shisya/dashboard" />;
+    return <Redirect to="/shishya/dashboard" />;
   }
   
   return <>{children}</>;
@@ -122,21 +122,21 @@ function Router() {
       <Route path="/verify-otp" component={VerifyOtp} />
       <Route path="/profile/:username" component={PublicProfilePage} />
       
-      {/* Shisya Portal - Login Required */}
-      <Route path="/shisya/dashboard" component={ProtectedDashboard} />
-      <Route path="/shisya/learn/:courseId" component={ProtectedLearnView} />
-      <Route path="/shisya/learn/:courseId/:lessonId" component={ProtectedLessonViewer} />
-      <Route path="/shisya/projects/:courseId" component={ProtectedCourseProjects} />
-      <Route path="/shisya/projects/:courseId/:projectId" component={ProtectedProjectDetail} />
-      <Route path="/shisya/tests/:courseId" component={ProtectedCourseTests} />
-      <Route path="/shisya/tests/:courseId/:testId" component={ProtectedTestInstructions} />
-      <Route path="/shisya/tests/:courseId/:testId/attempt" component={ProtectedTestAttempt} />
-      <Route path="/shisya/tests/:courseId/:testId/result" component={ProtectedTestResult} />
-      <Route path="/shisya/labs/:courseId" component={ProtectedCourseLabs} />
-      <Route path="/shisya/labs/:courseId/:labId" component={ProtectedLabPractice} />
-      <Route path="/shisya/certificates" component={ProtectedCertificatesDashboard} />
-      <Route path="/shisya/certificates/:certificateId" component={ProtectedCertificateViewer} />
-      <Route path="/shisya/profile" component={ProtectedProfilePage} />
+      {/* Shishya Portal - Login Required */}
+      <Route path="/shishya/dashboard" component={ProtectedDashboard} />
+      <Route path="/shishya/learn/:courseId" component={ProtectedLearnView} />
+      <Route path="/shishya/learn/:courseId/:lessonId" component={ProtectedLessonViewer} />
+      <Route path="/shishya/projects/:courseId" component={ProtectedCourseProjects} />
+      <Route path="/shishya/projects/:courseId/:projectId" component={ProtectedProjectDetail} />
+      <Route path="/shishya/tests/:courseId" component={ProtectedCourseTests} />
+      <Route path="/shishya/tests/:courseId/:testId" component={ProtectedTestInstructions} />
+      <Route path="/shishya/tests/:courseId/:testId/attempt" component={ProtectedTestAttempt} />
+      <Route path="/shishya/tests/:courseId/:testId/result" component={ProtectedTestResult} />
+      <Route path="/shishya/labs/:courseId" component={ProtectedCourseLabs} />
+      <Route path="/shishya/labs/:courseId/:labId" component={ProtectedLabPractice} />
+      <Route path="/shishya/certificates" component={ProtectedCertificatesDashboard} />
+      <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
+      <Route path="/shishya/profile" component={ProtectedProfilePage} />
       
       <Route component={NotFound} />
     </Switch>

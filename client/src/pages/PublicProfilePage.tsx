@@ -258,7 +258,7 @@ export default function PublicProfilePage() {
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <GraduationCap className="w-4 h-4" />
             <span>Verified by</span>
-            <span className="font-semibold text-foreground">SHISYA</span>
+            <span className="font-semibold text-foreground">SHISHYA</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             AI-Powered Learning & Skill Validation

@@ -1,6 +1,6 @@
 import type { LabProgress, CourseLabProgress } from "@shared/schema";
 
-const STORAGE_KEY = "shisya_lab_progress";
+const STORAGE_KEY = "shishya_lab_progress";
 
 interface LabProgressStore {
   [courseId: number]: CourseLabProgress;

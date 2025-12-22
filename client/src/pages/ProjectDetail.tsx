@@ -73,7 +73,7 @@ export default function ProjectDetail() {
   const submission = localSubmission || getProjectSubmission(courseIdNum, projectIdNum);
 
   if (error) {
-    return <Redirect to={`/shisya/projects/${courseId}`} />;
+    return <Redirect to={`/shishya/projects/${courseId}`} />;
   }
 
   return (
@@ -83,7 +83,7 @@ export default function ProjectDetail() {
       ) : project ? (
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Navigation */}
-          <Link href={`/shisya/projects/${courseId}`}>
+          <Link href={`/shishya/projects/${courseId}`}>
             <Button variant="ghost" size="sm" className="gap-2 -ml-2" data-testid="button-back">
               <ArrowLeft className="w-4 h-4" />
               Back to Projects
@@ -312,7 +312,7 @@ export default function ProjectDetail() {
 
           {/* Bottom Navigation */}
           <div className="pb-8">
-            <Link href={`/shisya/projects/${courseId}`}>
+            <Link href={`/shishya/projects/${courseId}`}>
               <Button variant="outline" className="gap-2" data-testid="button-back-bottom">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Projects

@@ -1,6 +1,6 @@
 import type { TestAttempt, TestAttemptAnswer } from "@shared/schema";
 
-const STORAGE_KEY = "shisya_test_attempts";
+const STORAGE_KEY = "shishya_test_attempts";
 
 export interface TestAttemptStore {
   [testId: number]: TestAttempt;

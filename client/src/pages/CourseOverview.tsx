@@ -120,14 +120,14 @@ export default function CourseOverview() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4 flex-wrap">
-            <Link href={`/shisya/learn/${course.id}`}>
+            <Link href={`/shishya/learn/${course.id}`}>
               <Button size="lg" className="px-8 gap-2" data-testid="button-start-learning">
                 <BookOpen className="w-4 h-4" />
                 Start Learning
               </Button>
             </Link>
             {course.testRequired && (
-              <Link href={`/shisya/tests/${course.id}`}>
+              <Link href={`/shishya/tests/${course.id}`}>
                 <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-tests">
                   <ClipboardList className="w-4 h-4" />
                   View Tests
@@ -135,14 +135,14 @@ export default function CourseOverview() {
               </Link>
             )}
             {course.projectRequired && (
-              <Link href={`/shisya/projects/${course.id}`}>
+              <Link href={`/shishya/projects/${course.id}`}>
                 <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-projects">
                   <FolderKanban className="w-4 h-4" />
                   View Projects
                 </Button>
               </Link>
             )}
-            <Link href={`/shisya/labs/${course.id}`}>
+            <Link href={`/shishya/labs/${course.id}`}>
               <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-labs">
                 <FlaskConical className="w-4 h-4" />
                 Practice Labs

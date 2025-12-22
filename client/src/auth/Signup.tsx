@@ -19,7 +19,7 @@ export default function Signup() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const redirectTo = new URLSearchParams(search).get("redirect") || "/shisya/dashboard";
+  const redirectTo = new URLSearchParams(search).get("redirect") || "/shishya/dashboard";
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -86,7 +86,7 @@ export default function Signup() {
   }
 
   if (user) {
-    return <Redirect to="/shisya/dashboard" />;
+    return <Redirect to="/shishya/dashboard" />;
   }
 
   return (
@@ -100,7 +100,7 @@ export default function Signup() {
           </div>
           <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
           <CardDescription>
-            Join SHISYA and start learning today
+            Join SHISHYA and start learning today
           </CardDescription>
         </CardHeader>
         <CardContent>

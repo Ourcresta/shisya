@@ -1,6 +1,6 @@
 import type { Certificate } from "@shared/schema";
 
-const STORAGE_KEY = "shisya_certificates";
+const STORAGE_KEY = "shishya_certificates";
 
 export interface CertificateStore {
   [certificateId: string]: Certificate;

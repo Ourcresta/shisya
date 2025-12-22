@@ -14,7 +14,7 @@ export function Header() {
   const [location, setLocation] = useLocation();
   const { user, isLoading, logout } = useAuth();
   const isHome = location === "/" || location === "/courses";
-  const isShisyaPortal = location.startsWith("/shisya");
+  const isShishyaPortal = location.startsWith("/shishya");
 
   const handleLogout = async () => {
     await logout();
@@ -24,13 +24,13 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
-        <Link href={user ? "/shisya/dashboard" : "/"} className="flex items-center gap-2 group" data-testid="link-home">
+        <Link href={user ? "/shishya/dashboard" : "/"} className="flex items-center gap-2 group" data-testid="link-home">
           <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-              SHISYA
+              SHISHYA
             </span>
             <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
               Learn. Practice. Prove.
@@ -43,8 +43,8 @@ export function Header() {
             <>
               {user ? (
                 <>
-                  {!location.startsWith("/shisya/dashboard") && (
-                    <Link href="/shisya/dashboard">
+                  {!location.startsWith("/shishya/dashboard") && (
+                    <Link href="/shishya/dashboard">
                       <Button variant="ghost" size="sm" data-testid="button-dashboard">
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -59,8 +59,8 @@ export function Header() {
                       </Button>
                     </Link>
                   )}
-                  {!location.startsWith("/shisya/certificates") && (
-                    <Link href="/shisya/certificates">
+                  {!location.startsWith("/shishya/certificates") && (
+                    <Link href="/shishya/certificates">
                       <Button variant="ghost" size="sm" data-testid="button-certificates">
                         <Award className="w-4 h-4 mr-2" />
                         <span className="hidden sm:inline">Certificates</span>
@@ -80,7 +80,7 @@ export function Header() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>
-                        <Link href="/shisya/profile" className="flex items-center gap-2 cursor-pointer" data-testid="menu-profile">
+                        <Link href="/shishya/profile" className="flex items-center gap-2 cursor-pointer" data-testid="menu-profile">
                           <User className="w-4 h-4" />
                           Profile
                         </Link>

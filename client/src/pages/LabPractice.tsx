@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 export default function LabPractice() {
-  const [, params] = useRoute("/shisya/labs/:courseId/:labId");
+  const [, params] = useRoute("/shishya/labs/:courseId/:labId");
   const courseId = params?.courseId ? parseInt(params.courseId, 10) : 0;
   const labId = params?.labId ? parseInt(params.labId, 10) : 0;
 
@@ -150,7 +150,7 @@ export default function LabPractice() {
           <p className="text-muted-foreground mb-6">
             This lab doesn't exist or may have been removed.
           </p>
-          <Link href={`/shisya/labs/${courseId}`}>
+          <Link href={`/shishya/labs/${courseId}`}>
             <Button data-testid="button-back-to-labs">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Labs
@@ -166,7 +166,7 @@ export default function LabPractice() {
       <Header />
       <main className="max-w-7xl mx-auto px-4 py-6" data-testid="lab-practice-page">
         <div className="flex items-center justify-between mb-6">
-          <Link href={`/shisya/labs/${courseId}`}>
+          <Link href={`/shishya/labs/${courseId}`}>
             <Button variant="ghost" size="sm" data-testid="button-back">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Labs

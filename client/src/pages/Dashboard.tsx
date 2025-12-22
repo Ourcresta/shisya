@@ -176,7 +176,7 @@ export default function Dashboard() {
                           {course.completedLessons} of {course.totalLessons} lessons completed
                         </p>
                       </div>
-                      <Link href={`/shisya/learn/${course.id}`}>
+                      <Link href={`/shishya/learn/${course.id}`}>
                         <Button size="sm" data-testid={`button-resume-${course.id}`}>
                           <Play className="w-4 h-4 mr-2" />
                           Resume
@@ -230,13 +230,13 @@ export default function Dashboard() {
                         <span className="font-medium">{course.title}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link href={`/shisya/tests/${course.id}`}>
+                        <Link href={`/shishya/tests/${course.id}`}>
                           <Button variant="outline" size="sm">
                             <ClipboardCheck className="w-4 h-4 mr-2" />
                             Test
                           </Button>
                         </Link>
-                        <Link href={`/shisya/projects/${course.id}`}>
+                        <Link href={`/shishya/projects/${course.id}`}>
                           <Button variant="outline" size="sm">
                             <FileText className="w-4 h-4 mr-2" />
                             Project
@@ -298,7 +298,7 @@ export default function Dashboard() {
                     {allCertificates.slice(0, 3).map((cert: any) => (
                       <Link 
                         key={cert.certificateId} 
-                        href={`/shisya/certificates/${cert.certificateId}`}
+                        href={`/shishya/certificates/${cert.certificateId}`}
                         className="block"
                       >
                         <div className="flex items-center gap-3 p-3 rounded-lg border hover-elevate cursor-pointer">
@@ -312,7 +312,7 @@ export default function Dashboard() {
                         </div>
                       </Link>
                     ))}
-                    <Link href="/shisya/certificates">
+                    <Link href="/shishya/certificates">
                       <Button variant="ghost" size="sm" className="w-full">
                         View All Certificates
                       </Button>
@@ -338,7 +338,7 @@ export default function Dashboard() {
                   Reinforce your learning with hands-on coding exercises.
                 </p>
                 {inProgressCourses.length > 0 ? (
-                  <Link href={`/shisya/labs/${inProgressCourses[0].id}`}>
+                  <Link href={`/shishya/labs/${inProgressCourses[0].id}`}>
                     <Button variant="outline" className="w-full">
                       <Beaker className="w-4 h-4 mr-2" />
                       Open Labs

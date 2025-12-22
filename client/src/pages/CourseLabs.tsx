@@ -11,7 +11,7 @@ import type { Lab, Course, Lesson } from "@shared/schema";
 import { ArrowLeft, FlaskConical, BookOpen } from "lucide-react";
 
 export default function CourseLabs() {
-  const [, params] = useRoute("/shisya/labs/:courseId");
+  const [, params] = useRoute("/shishya/labs/:courseId");
   const courseId = params?.courseId ? parseInt(params.courseId, 10) : 0;
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -148,7 +148,7 @@ export default function CourseLabs() {
               <p className="text-muted-foreground mb-4">
                 No practice labs have been created for this course yet.
               </p>
-              <Link href={`/shisya/learn/${courseId}`}>
+              <Link href={`/shishya/learn/${courseId}`}>
                 <Button variant="outline" data-testid="button-go-learn">
                   Continue Learning
                 </Button>

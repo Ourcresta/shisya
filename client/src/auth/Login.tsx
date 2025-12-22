@@ -19,7 +19,7 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const redirectTo = new URLSearchParams(search).get("redirect") || "/shisya/dashboard";
+  const redirectTo = new URLSearchParams(search).get("redirect") || "/shishya/dashboard";
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -94,7 +94,7 @@ export default function Login() {
   }
 
   if (user) {
-    return <Redirect to="/shisya/dashboard" />;
+    return <Redirect to="/shishya/dashboard" />;
   }
 
   return (

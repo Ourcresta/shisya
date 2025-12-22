@@ -1,6 +1,6 @@
 import type { ProjectSubmission } from "@shared/schema";
 
-const STORAGE_KEY = "shisya_project_submissions";
+const STORAGE_KEY = "shishya_project_submissions";
 
 interface SubmissionsStore {
   [courseId: number]: {

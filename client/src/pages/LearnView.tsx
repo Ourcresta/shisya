@@ -204,7 +204,7 @@ function LessonListItem({ lesson, courseId, isCompleted }: LessonListItemProps) 
   return (
     <li>
       <Link 
-        href={`/shisya/learn/${courseId}/${lesson.id}`}
+        href={`/shishya/learn/${courseId}/${lesson.id}`}
         className="flex items-center gap-3 px-3 py-2.5 rounded-md hover-elevate active-elevate-2 transition-colors group"
         data-testid={`link-lesson-${lesson.id}`}
       >

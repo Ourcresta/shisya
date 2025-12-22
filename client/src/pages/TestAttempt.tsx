@@ -58,7 +58,7 @@ export default function TestAttempt() {
           data.result.scorePercentage,
           data.result.passed
         );
-        navigate(`/shisya/tests/${courseId}/${testId}/result`);
+        navigate(`/shishya/tests/${courseId}/${testId}/result`);
       }
     },
     onError: () => {
@@ -74,7 +74,7 @@ export default function TestAttempt() {
   const status = testId ? getStatus(parseInt(testId, 10)) : "not_attempted";
   useEffect(() => {
     if (status !== "not_attempted") {
-      navigate(`/shisya/tests/${courseId}/${testId}/result`);
+      navigate(`/shishya/tests/${courseId}/${testId}/result`);
     }
   }, [status, courseId, testId, navigate]);
 
@@ -164,7 +164,7 @@ export default function TestAttempt() {
           <AlertTriangle className="w-12 h-12 mx-auto text-amber-500 mb-4" />
           <h2 className="text-xl font-medium mb-2">Test Unavailable</h2>
           <p className="text-muted-foreground mb-4">This test cannot be loaded.</p>
-          <Link href={`/shisya/tests/${courseId}`}>
+          <Link href={`/shishya/tests/${courseId}`}>
             <Button>Back to Tests</Button>
           </Link>
         </Card>

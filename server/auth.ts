@@ -10,7 +10,7 @@ import { sendOtpEmail } from "./resend";
 const SALT_ROUNDS = 12;
 const OTP_EXPIRY_MINUTES = 10;
 const SESSION_EXPIRY_DAYS = 7;
-const COOKIE_NAME = "shisya_session";
+const COOKIE_NAME = "shishya_session";
 
 function hashOtp(otp: string): string {
   return createHash("sha256").update(otp).digest("hex");
