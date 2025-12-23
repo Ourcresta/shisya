@@ -10,173 +10,193 @@ interface CertificatePreviewProps {
 
 export default function CertificatePreview({ certificate, forPrint = false }: CertificatePreviewProps) {
   const levelLabel = certificate.level.charAt(0).toUpperCase() + certificate.level.slice(1);
-  const academicYear = new Date(certificate.issuedAt).getFullYear();
-  const completionMonth = format(new Date(certificate.issuedAt), "MMMM yyyy");
+  const completionMonth = format(new Date(certificate.issuedAt), "MMMM yyyy").toUpperCase();
 
   return (
     <div 
       id="certificate-preview" 
-      className="relative overflow-hidden bg-white p-6 md:p-8 lg:p-10 aspect-[1.414/1] flex flex-col"
+      className="relative bg-white aspect-[1.414/1]"
       style={{ 
-        background: "#fff",
-        boxShadow: forPrint ? "none" : "0 4px 20px rgba(0,0,0,0.1)"
+        boxShadow: forPrint ? "none" : "0 4px 20px rgba(0,0,0,0.15)"
       }}
       data-testid="certificate-preview"
     >
-      <div className="absolute inset-3 border-2 border-slate-800 pointer-events-none" />
-      <div className="absolute inset-4 border border-slate-400 pointer-events-none" />
-
       <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center"
-        aria-hidden="true"
-      >
-        <img src={ourShikshaSeal} alt="" className="w-[400px] h-[400px] object-contain" />
-      </div>
+        className="absolute inset-0"
+        style={{
+          background: `
+            linear-gradient(90deg, #5b8fb9 0%, #5b8fb9 8px, transparent 8px),
+            linear-gradient(90deg, transparent calc(100% - 8px), #5b8fb9 calc(100% - 8px)),
+            linear-gradient(0deg, #5b8fb9 0%, #5b8fb9 8px, transparent 8px),
+            linear-gradient(0deg, transparent calc(100% - 8px), #5b8fb9 calc(100% - 8px))
+          `
+        }}
+      />
+      
+      <div 
+        className="absolute"
+        style={{
+          top: '12px',
+          left: '12px',
+          right: '12px',
+          bottom: '12px',
+          border: '2px solid #5b8fb9'
+        }}
+      />
 
-      <div className="text-center mb-4 relative z-10">
-        <h1 
-          className="text-2xl md:text-3xl font-bold text-slate-800 tracking-wide uppercase"
-          style={{ fontFamily: "serif" }}
+      <div className="absolute inset-0 p-8 md:p-10 flex flex-col">
+        
+        <div 
+          className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center"
+          aria-hidden="true"
         >
-          OUR SHIKSHA
-        </h1>
-        <div className="text-sm text-slate-600 tracking-widest uppercase mt-1" style={{ fontFamily: "serif" }}>
-          AI Powered Learning Platform
+          <img src={ourShikshaSeal} alt="" className="w-[350px] h-[350px] object-contain" />
         </div>
-        <div className="mt-3 w-full h-[1px] bg-slate-400" />
-      </div>
 
-      <div className="text-center mb-4 relative z-10">
-        <h2 
-          className="text-lg md:text-xl font-bold text-slate-700 tracking-[0.15em] uppercase"
-          style={{ fontFamily: "serif" }}
-        >
-          Course Completion Certificate
-        </h2>
-      </div>
-
-      <div className="text-right mb-3 relative z-10">
-        <span className="text-sm text-slate-600" style={{ fontFamily: "serif" }}>Folio No. : </span>
-        <span className="font-mono text-sm text-slate-800" data-testid="text-cert-id">{certificate.certificateId}</span>
-      </div>
-
-      <div className="mb-4 relative z-10 text-slate-700 text-sm leading-relaxed" style={{ fontFamily: "serif" }}>
-        <p className="italic text-center mb-3">
-          This is to certify that the undermentioned candidate has qualified for the award of
-        </p>
-        <p className="text-center font-medium text-slate-800 mb-1">
-          Course Completion through
-        </p>
-        <p className="text-center text-lg font-bold text-slate-900 uppercase tracking-wide mb-2">
-          OUR SHIKSHA AI POWERED LEARNING PLATFORM
-        </p>
-        <p className="italic text-center text-sm">
-          as detailed below :
-        </p>
-      </div>
-
-      <div className="flex-1 relative z-10 space-y-2 px-4 md:px-12" style={{ fontFamily: "serif" }}>
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Name</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="font-semibold text-slate-900 uppercase" data-testid="text-student-name">
-              {certificate.studentName}
-            </span>
+        <div className="text-center mb-4 relative z-10">
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <img 
+              src={ourShikshaSeal} 
+              alt="OurShiksha" 
+              className="w-16 h-16 object-contain"
+            />
+          </div>
+          <h1 
+            className="text-2xl md:text-3xl font-bold text-slate-800 tracking-wide"
+            style={{ fontFamily: "serif" }}
+          >
+            OUR SHIKSHA
+          </h1>
+          <div 
+            className="text-sm text-slate-600 tracking-wider mt-1"
+            style={{ fontFamily: "serif" }}
+          >
+            CHENNAI - 600 025
           </div>
         </div>
 
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Register No.</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="font-mono text-slate-800">{certificate.certificateId}</span>
-          </div>
+        <div className="text-center mb-4 relative z-10">
+          <h2 
+            className="text-base md:text-lg font-bold text-blue-800 tracking-[0.15em] uppercase"
+            style={{ fontFamily: "serif" }}
+          >
+            Course Completion Certificate
+          </h2>
         </div>
 
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Course</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="font-semibold text-slate-900 uppercase" data-testid="text-course-title">
-              {certificate.courseTitle}
-            </span>
-          </div>
+        <div className="text-right mb-3 relative z-10">
+          <span className="text-sm text-slate-700" style={{ fontFamily: "serif" }}>Folio No. : </span>
+          <span className="text-sm text-slate-800" data-testid="text-cert-id">{certificate.certificateId}</span>
         </div>
 
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Level</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="text-slate-800 uppercase">{levelLabel}</span>
-          </div>
+        <div className="mb-4 relative z-10 text-slate-700" style={{ fontFamily: "serif" }}>
+          <p className="italic text-sm mb-3">
+            This is to certify that the undermentioned candidate has qualified for the award of
+          </p>
+          <p className="text-sm mb-1">Course through :</p>
+          <p className="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 ml-4">
+            OUR SHIKSHA AI POWERED LEARNING PLATFORM
+          </p>
+          <p className="italic text-sm">
+            an autonomous online learning platform as detailed below :
+          </p>
         </div>
 
-        {certificate.skills.length > 0 && (
+        <div className="flex-1 relative z-10 space-y-2 text-sm" style={{ fontFamily: "serif" }}>
           <div className="flex">
-            <div className="w-44 text-sm text-slate-600 italic">Skills Acquired</div>
-            <div className="flex-1 text-sm">
+            <div className="w-36 text-slate-700 italic">Name</div>
+            <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="text-slate-800 uppercase">{certificate.skills.join(", ")}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Month & Year of<br/>Completion</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="font-medium text-slate-800 uppercase">{completionMonth.toUpperCase()}</span>
-          </div>
-        </div>
-
-        <div className="flex">
-          <div className="w-44 text-sm text-slate-600 italic">Classification</div>
-          <div className="flex-1 text-sm">
-            <span className="mr-2">:</span>
-            <span className="font-bold text-slate-900 uppercase">PASSED</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-auto pt-4 relative z-10">
-        <div className="flex items-end justify-between gap-4">
-          <div className="text-left" style={{ fontFamily: "serif" }}>
-            <div className="text-sm text-slate-700 font-medium mb-1">
-              Chennai
-            </div>
-            <div className="text-sm text-slate-600">
-              <span className="italic">Date : </span>
-              <span className="font-medium" data-testid="text-issue-date">
-                {format(new Date(certificate.issuedAt), "dd-MMM-yy").toUpperCase()}
+              <span className="font-medium text-slate-900 uppercase" data-testid="text-student-name">
+                {certificate.studentName}
               </span>
             </div>
           </div>
 
-          <div className="text-center flex flex-col items-center">
-            <img 
-              src={ourShikshaSeal} 
-              alt="OurShiksha Official Seal" 
-              className="w-24 h-24 object-contain"
-            />
+          <div className="flex">
+            <div className="w-36 text-slate-700 italic">Register No.</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="text-slate-800">{certificate.certificateId}</span>
+            </div>
           </div>
 
-          <div className="text-center flex flex-col items-center">
-            <QRCodeBlock url={certificate.verificationUrl} size={80} />
-            <div className="mt-2 pt-1" style={{ fontFamily: "serif" }}>
-              <div className="text-xs font-medium text-slate-700">Director of Certifications</div>
-              <div className="text-[10px] text-slate-500 italic">OurShiksha</div>
+          <div className="flex">
+            <div className="w-36 text-slate-700 italic">Course</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="font-medium text-slate-900 uppercase" data-testid="text-course-title">
+                {certificate.courseTitle}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-36 text-slate-700 italic">Level/<br/>Specialization</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="text-slate-800 uppercase">{levelLabel.toUpperCase()}</span>
+              {certificate.skills.length > 0 && (
+                <span className="text-slate-800 uppercase"> - {certificate.skills.slice(0, 3).join(", ")}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-36 text-slate-700 italic">Month & Year of<br/>Passing</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="font-medium text-slate-800">{completionMonth}</span>
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-36 text-slate-700 italic">Classification</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="font-bold text-slate-900">FIRST CLASS</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="text-center mt-3 pt-2 border-t border-slate-300 relative z-10" style={{ fontFamily: "serif" }}>
-        <div className="text-[10px] text-slate-500 italic">
-          Issued by OurShiksha – Learn. Practice. Prove.
-        </div>
-        <div className="text-[9px] text-slate-400 mt-1">
-          Verify this certificate at: {certificate.verificationUrl}
+        <div className="mt-auto pt-4 relative z-10">
+          <div className="flex items-end justify-between">
+            <div style={{ fontFamily: "serif" }}>
+              <div className="text-sm text-blue-700 font-medium">
+                Chennai - 600 025
+              </div>
+              <div className="text-sm text-slate-700">
+                <span className="text-blue-700">Date : </span>
+                <span data-testid="text-issue-date">
+                  {format(new Date(certificate.issuedAt), "dd-MMM-yy").toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center flex flex-col items-center">
+              <div className="relative">
+                <div 
+                  className="w-20 h-20 rounded-full border-2 border-blue-800 flex items-center justify-center bg-white"
+                  style={{ boxShadow: "0 0 0 1px #ccc" }}
+                >
+                  <div className="text-center text-blue-900">
+                    <div className="text-[7px] font-medium">Controller of Examinations</div>
+                    <div className="text-[9px] font-bold">Chennai</div>
+                    <div className="text-[8px]">600 025</div>
+                    <div className="text-[6px] mt-0.5">OurShiksha</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center flex flex-col items-center">
+              <QRCodeBlock url={certificate.verificationUrl} size={70} />
+              <div className="mt-1 pt-1 border-t border-slate-400" style={{ fontFamily: "serif" }}>
+                <div className="text-xs text-slate-700">Controller of Examinations</div>
+                <div className="text-[10px] text-slate-500">i/c</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
