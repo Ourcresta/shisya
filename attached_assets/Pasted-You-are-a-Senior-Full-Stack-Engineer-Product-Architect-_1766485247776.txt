@@ -1,0 +1,175 @@
+You are a Senior Full-Stack Engineer, Product Architect, and Security-aware FinTech Engineer.
+
+Your task is to design and implement a COMPLETE CREDIT-BASED ENROLLMENT SYSTEM
+for the Shishya (Student Portal) of the OurShiksha platform.
+
+This system must allow students to enroll in courses using Learning Credits (points),
+similar to a recharge wallet system.
+
+────────────────────────────────────────
+CORE CONCEPT
+────────────────────────────────────────
+• Currency name: Learning Credits
+• Internal mapping: 1 Credit ≈ ₹1 (do NOT expose INR everywhere)
+• Credits are stored per user
+• Courses have a configurable credit cost (set by Admin / Guru)
+• Enrollment deducts credits
+• First-time users receive 500 FREE credits
+
+────────────────────────────────────────
+FUNCTIONAL REQUIREMENTS
+────────────────────────────────────────
+
+1️⃣ USER CREDIT WALLET
+• Each user has:
+  - credit_balance (number)
+  - credit_history (earn, spend, bonus)
+• On first signup:
+  - Automatically grant 500 credits (WELCOME_BONUS)
+  - Mark bonus as non-refundable and non-transferable
+
+2️⃣ COURSE PRICING (READ-ONLY IN SHISHYA)
+• Each course must have:
+  - credit_cost (number)
+  - is_free (boolean override)
+• Credit cost is fetched from Admin backend API
+• If credit_cost = 0 → course is free
+
+3️⃣ COURSE CARD UI (IMPORTANT)
+Modify course cards to show:
+• “Cost: 120 Credits” badge
+• If user already enrolled → show “Continue Learning”
+• If not enrolled:
+  - Show “Enroll with Credits” button
+
+4️⃣ ENROLLMENT FLOW
+When user clicks “Enroll with Credits”:
+
+STEP 1: Check authentication
+• If not logged in → redirect to login
+
+STEP 2: Check credit balance
+• If credits < course.credit_cost:
+  - Show modal:
+    “Insufficient Credits”
+    Button: “Buy Credits” (future placeholder)
+• Do NOT enroll
+
+STEP 3: Confirmation Modal
+Show modal:
+• Course Name
+• Credit Cost
+• Current Balance
+• Balance After Enrollment
+Buttons:
+• Confirm Enrollment
+• Cancel
+
+STEP 4: Deduct Credits
+• Deduct credit_cost from user balance
+• Create credit transaction:
+  - type: "DEBIT"
+  - reason: "COURSE_ENROLLMENT"
+  - reference: courseId
+• Enroll user into course
+• Update UI instantly
+
+5️⃣ CREDIT TRANSACTION LOG
+Maintain transaction records:
+• id
+• user_id
+• amount (+ / -)
+• type: BONUS | DEBIT | CREDIT
+• description
+• created_at
+
+6️⃣ USER DASHBOARD UPDATES
+On Shishya Dashboard show:
+• Current Credit Balance (top card)
+• Credits Earned
+• Credits Spent
+• Quick action: “Browse Courses”
+
+7️⃣ LOCAL STORAGE + API STRATEGY
+• Use backend as source of truth
+• Cache credit balance in localStorage for fast UI
+• Sync on:
+  - Login
+  - Enrollment
+  - Page refresh
+
+LocalStorage Keys:
+• shishya_user
+• shishya_credits
+• shishya_enrollments
+
+8️⃣ API ENDPOINTS (EXPECTED)
+Implement or mock these endpoints:
+
+GET    /api/user/credits
+POST   /api/user/credits/bonus
+POST   /api/user/credits/deduct
+GET    /api/courses
+POST   /api/enrollments
+
+If backend unavailable:
+• Use mock data
+• Clearly mark MOCK_MODE = true
+
+9️⃣ SECURITY & GUARDRAILS
+• Never allow negative credit balance
+• Prevent double enrollment
+• Validate credit deduction on backend
+• Do NOT trust frontend values
+• Protect enrollment APIs with auth middleware
+
+────────────────────────────────────────
+UI / UX RULES
+────────────────────────────────────────
+• Clean confirmation modals
+• No silent deductions
+• Always show updated balance
+• Disable enroll button if insufficient credits
+• Use badges: FREE / PAID / ENROLLED
+
+────────────────────────────────────────
+TECH STACK (MATCH EXISTING)
+────────────────────────────────────────
+Frontend:
+• React + TypeScript
+• Tailwind CSS
+• Shadcn UI
+• TanStack React Query
+• Context API (CreditContext)
+
+Backend:
+• Express.js
+• Simple in-memory store or DB
+• JWT auth middleware
+
+────────────────────────────────────────
+DELIVERABLES
+────────────────────────────────────────
+• CreditContext (global state)
+• EnrollmentService
+• CreditService
+• Enrollment confirmation modal
+• Updated CourseCard component
+• Dashboard credit widgets
+• Mock data fallback
+• Clear comments and clean code
+
+────────────────────────────────────────
+SUCCESS CRITERIA
+────────────────────────────────────────
+✔ User can see credit balance
+✔ User can enroll using credits
+✔ Credits deduct correctly
+✔ Enrollment is blocked without credits
+✔ UI updates instantly
+✔ No security loopholes
+
+Build this as PRODUCTION-READY code.
+Do NOT simplify logic.
+Do NOT skip validation.
+Think like a real EdTech + FinTech system.

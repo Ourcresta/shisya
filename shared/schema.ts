@@ -121,11 +121,47 @@ export const userProfiles = pgTable("user_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// User credits table - Learning Credits wallet
+export const userCredits = pgTable("user_credits", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id).unique(),
+  balance: integer("balance").notNull().default(0),
+  totalEarned: integer("total_earned").notNull().default(0),
+  totalSpent: integer("total_spent").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Credit transactions table - transaction history
+export const creditTransactions = pgTable("credit_transactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  amount: integer("amount").notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // BONUS, DEBIT, CREDIT
+  reason: varchar("reason", { length: 50 }).notNull(), // WELCOME_BONUS, COURSE_ENROLLMENT, REFUND, etc.
+  description: text("description"),
+  referenceId: integer("reference_id"), // courseId or other reference
+  balanceAfter: integer("balance_after").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Course enrollments table
+export const courseEnrollments = pgTable("course_enrollments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  courseId: integer("course_id").notNull(),
+  creditsPaid: integer("credits_paid").notNull().default(0),
+  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
 export const insertOtpLogSchema = createInsertSchema(otpLogs).omit({ id: true, createdAt: true });
 export const insertSessionSchema = createInsertSchema(sessions).omit({ createdAt: true });
+export const insertUserCreditsSchema = createInsertSchema(userCredits).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({ id: true, createdAt: true });
+export const insertCourseEnrollmentSchema = createInsertSchema(courseEnrollments).omit({ id: true, enrolledAt: true });
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -143,6 +179,12 @@ export type UserTestAttempt = typeof userTestAttempts.$inferSelect;
 export type UserProjectSubmission = typeof userProjectSubmissions.$inferSelect;
 export type UserCertificate = typeof userCertificates.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
+export type UserCredits = typeof userCredits.$inferSelect;
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+export type CourseEnrollment = typeof courseEnrollments.$inferSelect;
+export type InsertUserCredits = z.infer<typeof insertUserCreditsSchema>;
+export type InsertCreditTransaction = z.infer<typeof insertCreditTransactionSchema>;
+export type InsertCourseEnrollment = z.infer<typeof insertCourseEnrollmentSchema>;
 
 // ============ ZOD SCHEMAS (for mock data and API validation) ============
 
@@ -157,11 +199,30 @@ export const courseSchema = z.object({
   status: z.enum(["draft", "published", "archived"]),
   testRequired: z.boolean().nullable(),
   projectRequired: z.boolean().nullable(),
+  creditCost: z.number().nullable().default(0),
+  isFree: z.boolean().nullable().default(true),
   createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
 });
 
 export type Course = z.infer<typeof courseSchema>;
+
+// Credit transaction types
+export const CREDIT_TRANSACTION_TYPES = ["BONUS", "DEBIT", "CREDIT"] as const;
+export type CreditTransactionType = typeof CREDIT_TRANSACTION_TYPES[number];
+
+export const CREDIT_REASONS = [
+  "WELCOME_BONUS",
+  "COURSE_ENROLLMENT",
+  "REFUND",
+  "PURCHASE",
+  "REWARD",
+  "REFERRAL",
+] as const;
+export type CreditReason = typeof CREDIT_REASONS[number];
+
+// Welcome bonus amount
+export const WELCOME_BONUS_CREDITS = 500;
 
 // Module Schema
 export const moduleSchema = z.object({
