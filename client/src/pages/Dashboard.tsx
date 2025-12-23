@@ -21,10 +21,12 @@ import {
   FolderOpen,
   Trophy,
   Zap,
-  Code2
+  Code2,
+  Coins
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCredits } from "@/contexts/CreditContext";
 import { getCourseProgress } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getTestAttempts } from "@/lib/testAttempts";
@@ -53,6 +55,7 @@ function getMotivationalMessage(inProgress: number, completed: number): string {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { balance, isLoading: creditsLoading } = useCredits();
 
   const { data: courses = [], isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -108,6 +111,13 @@ export default function Dashboard() {
 
   const stats = [
     {
+      title: "Credits",
+      value: creditsLoading ? "..." : balance,
+      icon: Coins,
+      color: "text-amber-500",
+      href: "/courses",
+    },
+    {
       title: "In Progress",
       value: inProgressCourses.length,
       icon: BookOpen,
@@ -125,7 +135,7 @@ export default function Dashboard() {
       title: "Certificates",
       value: totalCertificates,
       icon: Award,
-      color: "text-amber-500",
+      color: "text-yellow-500",
       href: "/shishya/certificates",
     },
     {
@@ -221,7 +231,7 @@ export default function Dashboard() {
 
         {/* ZONE 2: Learning Snapshot (Metrics) */}
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8"
           variants={staggerContainer}
           initial="initial"
           animate="animate"
