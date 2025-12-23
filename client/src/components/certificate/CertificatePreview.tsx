@@ -60,7 +60,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           className="absolute top-6 left-6 z-20"
         >
           <img 
-            src={ChatGPT_Image_Dec_23__2025__10_28_31_PM} 
+            src={ourShikshaStamp} 
             alt="OurShiksha Seal" 
             className="w-40 h-40 object-contain"
           />
