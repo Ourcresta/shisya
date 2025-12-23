@@ -7,13 +7,11 @@ import {
   LogOut, 
   LogIn, 
   LayoutDashboard, 
-  FolderKanban,
-  ClipboardCheck, 
-  FlaskConical, 
   UserPlus 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,6 +122,8 @@ export function Header() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  
+                  <ThemeSwitcher />
                 </>
               ) : (
                 <>
@@ -147,6 +147,8 @@ export function Header() {
                       Sign Up
                     </Button>
                   </Link>
+                  
+                  <ThemeSwitcher />
                 </>
               )}
             </>

@@ -19,7 +19,7 @@ const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
 export function ThemeSwitcher() {
   const { themeColor, themeMode, resolvedMode, setThemeColor, setThemeMode } = useTheme();
 
-  const currentModeIcon = themeMode === "system" ? Monitor : resolvedMode === "dark" ? Moon : Sun;
+  const CurrentModeIcon = themeMode === "system" ? Monitor : resolvedMode === "dark" ? Moon : Sun;
 
   return (
     <DropdownMenu>
@@ -31,7 +31,7 @@ export function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex items-center gap-2">
-          <currentModeIcon className="h-4 w-4" />
+          <CurrentModeIcon className="h-4 w-4" />
           Appearance
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/LandingPage";
@@ -147,16 +148,18 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ProgressProvider>
-            <TestAttemptProvider>
-              <Toaster />
-              <Router />
-            </TestAttemptProvider>
-          </ProgressProvider>
-        </AuthProvider>
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <AuthProvider>
+            <ProgressProvider>
+              <TestAttemptProvider>
+                <Toaster />
+                <Router />
+              </TestAttemptProvider>
+            </ProgressProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
