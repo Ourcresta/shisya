@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FolderGit2, ChevronRight, Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { getCourseProgress } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
 import type { Course, Project, ProjectSubmission } from "@shared/schema";
 
@@ -37,12 +36,8 @@ export default function AllProjectsPage() {
         submissionMap[`${sub.courseId}-${sub.projectId}`] = sub;
       });
 
-      const enrolledCourses = courses.filter((course) => {
-        const progress = getCourseProgress(course.id);
-        return progress.completedLessons.length > 0;
-      });
-
-      const projectPromises = enrolledCourses.map(async (course) => {
+      // Show projects from all published courses
+      const projectPromises = courses.map(async (course) => {
         try {
           const response = await fetch(`/api/courses/${course.id}/projects`);
           if (!response.ok) return [];
@@ -103,7 +98,7 @@ export default function AllProjectsPage() {
       <div className="space-y-6" data-testid="all-projects-page">
         <PageHeader
           title="All Projects"
-          description="View and submit projects from all your enrolled courses"
+          description="View and submit projects from all available courses"
           icon={FolderGit2}
         />
 
@@ -127,8 +122,8 @@ export default function AllProjectsPage() {
         ) : allProjects.length === 0 ? (
           <EmptyState
             icon={FolderGit2}
-            title="No Projects Yet"
-            description="Start learning courses to unlock projects. Projects help you apply what you learn."
+            title="No Projects Available"
+            description="There are no projects available at the moment. Check back later!"
             action={{
               label: "Browse Courses",
               onClick: () => setLocation("/courses"),
