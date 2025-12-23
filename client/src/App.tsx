@@ -33,6 +33,8 @@ import LabPractice from "@/pages/LabPractice";
 import AllProjectsPage from "@/pages/AllProjectsPage";
 import AllTestsPage from "@/pages/AllTestsPage";
 import AllLabsPage from "@/pages/AllLabsPage";
+import Marksheet from "@/pages/Marksheet";
+import MarksheetVerify from "@/pages/MarksheetVerify";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
@@ -109,6 +111,10 @@ function ProtectedAllLabsPage() {
   return <ProtectedRoute><AllLabsPage /></ProtectedRoute>;
 }
 
+function ProtectedMarksheet() {
+  return <ProtectedRoute><Marksheet /></ProtectedRoute>;
+}
+
 function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -140,6 +146,7 @@ function Router() {
       <Route path="/courses" component={CourseCatalog} />
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />
+      <Route path="/verify/marksheet/:marksheetId" component={MarksheetVerify} />
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
       <Route path="/verify-otp" component={VerifyOtp} />
@@ -161,6 +168,7 @@ function Router() {
       <Route path="/shishya/labs" component={ProtectedAllLabsPage} />
       <Route path="/shishya/labs/:courseId" component={ProtectedCourseLabs} />
       <Route path="/shishya/labs/:courseId/:labId" component={ProtectedLabPractice} />
+      <Route path="/shishya/marksheet" component={ProtectedMarksheet} />
       <Route path="/shishya/certificates" component={ProtectedCertificatesDashboard} />
       <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
