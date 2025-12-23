@@ -1,0 +1,198 @@
+You are a Senior Full-Stack Engineer, System Architect, Academic LMS Expert, 
+and Security-First Product Designer.
+
+Your task is to design and implement a UNIVERSITY-GRADE
+MARKSHEET + FINAL CERTIFICATE SYSTEM for OurShiksha.
+
+This system must feel like:
+• Anna University / Autonomous College mark sheets
+• Official, verifiable, structured, and employer-ready
+• Digitally signed and QR-verifiable
+
+DO NOT build mock UI only.
+Build REAL data models, flows, and logic.
+
+══════════════════════════════════════
+🎯 SYSTEM GOAL
+══════════════════════════════════════
+
+Create TWO core academic documents:
+
+1️⃣ CONSOLIDATED MARKSHEET (Student Level)
+2️⃣ FINAL COMPLETION CERTIFICATE (Program Level)
+
+══════════════════════════════════════
+🧩 DATA SOURCES (Already Existing)
+══════════════════════════════════════
+
+You MUST integrate with existing OurShiksha systems:
+
+• Courses
+• Modules
+• Lessons
+• Tests (score, passing %)
+• Projects (submitted / approved)
+• Certificates (course-level)
+• Student profile
+• Credit / Points system
+
+══════════════════════════════════════
+📄 PART 1 — CONSOLIDATED MARKSHEET
+══════════════════════════════════════
+
+Build a **dynamic academic marksheet** per student.
+
+🔹 Layout (University-Style):
+
+HEADER:
+• OurShiksha Logo
+• “OFFICIAL ACADEMIC MARKSHEET”
+• Academic Year / Batch
+• Unique Marksheet ID
+• QR Code (verification URL)
+
+STUDENT DETAILS:
+• Full Name
+• Student ID / Roll No
+• Email
+• Enrollment Date
+• Program Name
+
+TABULAR SECTION (CORE):
+
+Columns:
+| S.No | Course Code | Course Name | Credits | Test Score | Project | Status |
+
+Rules:
+• Credits come from course credit pricing
+• Test Score = percentage
+• Project = Submitted / Approved
+• Status = Pass / Fail
+
+BOTTOM SUMMARY:
+• Total Credits Earned
+• Total Courses Completed
+• CGPA-LIKE SCORE (normalized 10-point scale)
+• Classification:
+  - Distinction (≥75%)
+  - First Class (60–74%)
+  - Pass (40–59%)
+
+SIGNATURE ZONE:
+• “Controller of Examinations – OurShiksha”
+• Digital Signature Hash
+• Date of Issue
+
+══════════════════════════════════════
+🎓 PART 2 — FINAL COMPLETION CERTIFICATE
+══════════════════════════════════════
+
+Generate ONLY when:
+✔ All mandatory courses completed
+✔ All required tests passed
+✔ All required projects approved
+✔ Minimum credit threshold reached
+
+CERTIFICATE CONTENT:
+
+• Certificate Title:
+  “Certificate of Program Completion”
+
+• Body Text (Formal Academic Tone):
+  “This is to certify that <Student Name> has successfully completed
+   the <Program Name> offered by OurShiksha,
+   having fulfilled all academic requirements.”
+
+• Program Details:
+  - Program Name
+  - Duration
+  - Total Credits
+  - Completion Date
+
+• Performance Summary:
+  - Overall Score
+  - Classification
+
+• Verification:
+  - Unique Certificate ID
+  - QR Code (public verification page)
+
+• Signatures:
+  - Program Director
+  - OurShiksha Authority Seal
+
+══════════════════════════════════════
+🔐 VERIFICATION SYSTEM (MANDATORY)
+══════════════════════════════════════
+
+Create a public route:
+
+/verify/:documentId
+
+This page must:
+• Show student name
+• Show document type (Marksheet / Certificate)
+• Show issue date
+• Show authenticity status (VALID / INVALID)
+
+NO AUTH REQUIRED for verification.
+
+══════════════════════════════════════
+🗂 DATABASE SCHEMA (REQUIRED)
+══════════════════════════════════════
+
+Create tables:
+
+• marksheets
+• marksheet_entries
+• final_certificates
+• academic_scores
+• verification_logs
+
+Ensure:
+• Immutable issued documents
+• Versioning if regenerated
+• Audit trail
+
+══════════════════════════════════════
+🖥 ADMIN (GURU) CONTROLS
+══════════════════════════════════════
+
+Admin can:
+• View student academic summary
+• Approve final certificate issuance
+• Revoke / regenerate documents
+• Set grading thresholds
+
+Admin CANNOT:
+• Edit marks after certificate issuance
+
+══════════════════════════════════════
+🧑‍🎓 STUDENT (SHISHYA) VIEW
+══════════════════════════════════════
+
+Student can:
+• View marksheet
+• Download PDF
+• View certificate
+• Share verification link
+
+══════════════════════════════════════
+📤 OUTPUT REQUIREMENTS
+══════════════════════════════════════
+
+You MUST deliver:
+
+1. Database schema
+2. API routes
+3. Business logic
+4. PDF layout structure (HTML → PDF)
+5. Verification page
+6. Role-based access control
+7. Error handling & edge cases
+
+DO NOT skip steps.
+DO NOT simplify logic.
+Build this as a REAL academic system.
+
+Begin implementation now.

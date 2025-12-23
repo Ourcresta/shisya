@@ -22,7 +22,8 @@ import {
   Trophy,
   Zap,
   Code2,
-  Coins
+  Coins,
+  GraduationCap
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -152,6 +153,7 @@ export default function Dashboard() {
     { title: "Projects", icon: FolderOpen, href: "/shishya/projects" },
     { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests" },
     { title: "Labs", icon: Code2, href: "/shishya/labs" },
+    { title: "Marksheet", icon: GraduationCap, href: "/shishya/marksheet" },
     { title: "Certificates", icon: Award, href: "/shishya/certificates" },
     { title: "Portfolio", icon: User, href: "/shishya/profile/portfolio-preview" },
   ];

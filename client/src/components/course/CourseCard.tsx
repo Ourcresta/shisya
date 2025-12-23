@@ -1,7 +1,8 @@
 import { Link } from "wouter";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Coins } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { LevelBadge } from "@/components/ui/level-badge";
 import { DurationBadge } from "@/components/ui/duration-badge";
 import { SkillTag } from "@/components/ui/skill-tag";
@@ -29,6 +30,26 @@ export function CourseCard({ course }: CourseCardProps) {
         </div>
         <div className="absolute top-3 left-3">
           <LevelBadge level={course.level} />
+        </div>
+        <div className="absolute top-3 right-3">
+          {course.isFree ? (
+            <Badge 
+              variant="secondary" 
+              className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 border-0"
+              data-testid={`badge-free-${course.id}`}
+            >
+              Free
+            </Badge>
+          ) : (
+            <Badge 
+              variant="secondary" 
+              className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 border-0"
+              data-testid={`badge-credits-${course.id}`}
+            >
+              <Coins className="w-3 h-3 mr-1" />
+              {course.creditCost || 0}
+            </Badge>
+          )}
         </div>
       </div>
 
