@@ -15,6 +15,9 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 
 **UI/UX Decisions:**
 - **Design System:** Inter font for body, Space Grotesk for headings. Leverages Shadcn UI components for consistency.
+- **Multi-Theme System:** 6 curated color palettes (Default, Ocean, Forest, Sunset, Midnight, Rose) with light/dark/system mode support. ThemeSwitcher in header. Theme persisted to localStorage.
+- **Micro-Animations:** Framer Motion used for staggered card reveals, page transitions, and subtle UI feedback. Animation variants in `client/src/lib/animations.ts`.
+- **Modular Components:** Reusable UI components including PageHeader, StatCard, EmptyState, LoadingPage for consistent design patterns.
 - **Responsiveness:** Fully mobile-responsive design.
 - **Loading States:** Implements skeleton loading for a smooth user experience.
 - **Navigation:** Header navigation adapts based on authentication status, providing access to public and authenticated routes.
