@@ -40,3 +40,7 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **PostgreSQL:** Database used for session storage and potentially other backend data.
 - **Drizzle ORM:** Used for interacting with the PostgreSQL database.
 - **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
+
+## Documentation Files
+- **document.md:** Comprehensive project documentation with full feature specs, routes, database schema, and deployment guide.
+- **env.example:** Template for environment variables (copy to .env and fill in values).
