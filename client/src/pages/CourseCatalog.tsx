@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
 import { CourseCard } from "@/components/course/CourseCard";
 import { CourseCardSkeleton } from "@/components/course/CourseCardSkeleton";
 import { EmptyState } from "@/components/course/EmptyState";
+import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import type { Course } from "@shared/schema";
 
 export default function CourseCatalog() {
@@ -14,7 +16,12 @@ export default function CourseCatalog() {
     <Layout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-4">
+        <motion.div 
+          className="text-center max-w-2xl mx-auto space-y-4"
+          variants={slideUp}
+          initial="initial"
+          animate="animate"
+        >
           <h1 
             className="text-3xl md:text-4xl font-bold"
             style={{ fontFamily: "var(--font-display)" }}
@@ -25,7 +32,7 @@ export default function CourseCatalog() {
           <p className="text-muted-foreground text-lg">
             Discover structured learning paths designed to help you master new skills at your own pace.
           </p>
-        </div>
+        </motion.div>
 
         {/* Course Grid */}
         {isLoading ? (
@@ -45,14 +52,19 @@ export default function CourseCatalog() {
         ) : !courses || courses.length === 0 ? (
           <EmptyState />
         ) : (
-          <div 
+          <motion.div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             data-testid="grid-courses"
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
           >
             {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <motion.div key={course.id} variants={staggerItem}>
+                <CourseCard course={course} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </Layout>

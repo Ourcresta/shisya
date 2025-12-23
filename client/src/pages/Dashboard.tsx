@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
   TrendingUp,
   Beaker
 } from "lucide-react";
+import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCourseProgress, getCompletedLessonsCount } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
@@ -131,23 +133,37 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
           {stats.map((stat) => (
-            <Card key={stat.title} data-testid={`stat-${stat.title.toLowerCase().replace(/\s+/g, '-')}`}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
+            <motion.div key={stat.title} variants={staggerItem}>
+              <Card data-testid={`stat-${stat.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.title}</p>
+                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-muted/50">
+                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                    </div>
                   </div>
-                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          variants={slideUp}
+          initial="initial"
+          animate="animate"
+        >
           <div className="lg:col-span-2 space-y-6">
             {inProgressCourses.length > 0 && (
               <Card>
@@ -352,7 +368,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </motion.div>
       </div>
     </Layout>
   );
