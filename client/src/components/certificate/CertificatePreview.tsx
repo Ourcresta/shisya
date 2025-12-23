@@ -54,15 +54,17 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           <img src={ourShikshaStamp} alt="" className="w-[320px] h-[320px] object-contain" />
         </div>
 
+        <div 
+          className="absolute top-6 left-6 z-20"
+        >
+          <img 
+            src={ourShikshaStamp} 
+            alt="OurShiksha Seal" 
+            className="w-24 h-24 object-contain"
+          />
+        </div>
+
         <div className="text-center mb-3 relative z-10">
-          <div className="flex items-center justify-center mb-2">
-            <img 
-              src={ourShikshaStamp} 
-              alt="OurShiksha" 
-              className="w-14 h-14 object-contain"
-              style={{ filter: "grayscale(30%)" }}
-            />
-          </div>
           <h1 
             className="text-2xl md:text-3xl font-bold tracking-[0.1em] uppercase"
             style={{ color: "#1e3a5f" }}
@@ -178,46 +180,21 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           </div>
         </div>
 
-        <div className="mt-auto pt-4 relative z-10">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="text-sm font-medium" style={{ color: "#1e3a5f" }}>
-                Chennai – 600 025
+        <div 
+          className="absolute bottom-6 right-6 z-20 flex items-end gap-4"
+        >
+          <div className="text-right">
+            <div className="mb-6"></div>
+            <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "130px" }}>
+              <div className="text-xs font-medium" style={{ color: "#1e3a5f" }}>
+                Director of Certifications
               </div>
-              <div className="text-sm" style={{ color: "#4a5568" }}>
-                <span style={{ color: "#1e3a5f" }}>Date : </span>
-                <span data-testid="text-issue-date">
-                  {format(new Date(certificate.issuedAt), "dd-MMM-yyyy").toUpperCase()}
-                </span>
-              </div>
-            </div>
-
-            <div className="text-center flex flex-col items-center">
-              <img 
-                src={ourShikshaStamp} 
-                alt="Official Seal" 
-                className="w-20 h-20 object-contain"
-                style={{ filter: "grayscale(20%)" }}
-              />
-            </div>
-
-            <div className="text-right">
-              <div className="mb-8"></div>
-              <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "140px" }}>
-                <div className="text-xs font-medium" style={{ color: "#1e3a5f" }}>
-                  Director of Certifications
-                </div>
-                <div className="text-[10px]" style={{ color: "#4a5568" }}>
-                  OUR SHIKSHA
-                </div>
+              <div className="text-[10px]" style={{ color: "#4a5568" }}>
+                OUR SHIKSHA
               </div>
             </div>
           </div>
-        </div>
-
-        <div 
-          className="absolute bottom-6 right-6 z-20"
-        >
+          
           <div className="flex flex-col items-center">
             <QRCodeBlock url={certificate.verificationUrl} size={60} />
             <div className="text-[8px] mt-1 text-center" style={{ color: "#4a5568" }}>
