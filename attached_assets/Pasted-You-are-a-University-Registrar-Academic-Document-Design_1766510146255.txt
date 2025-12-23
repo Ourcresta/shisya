@@ -1,0 +1,98 @@
+You are a University Registrar, Academic Document Designer,
+and Senior Full-Stack Engineer.
+
+Your task is to redesign the OurShiksha certificate PDF and UI
+to match Indian university provisional certificates
+(Anna University / State Board style).
+
+ABSOLUTE RULES (NON-NEGOTIABLE):
+- NO gradients
+- White background only
+- Print-safe (must look correct in B/W)
+- Academic tone, not corporate
+- Serif fonts only
+
+CERTIFICATE TYPES:
+Support two types via backend flag:
+- COURSE_COMPLETION
+- PROGRAM_COMPLETION
+
+LAYOUT SPECIFICATION:
+
+1. Background:
+   - Pure white
+   - Single strong outer border (navy blue)
+   - Optional thin inner margin line
+   - No shadows, no gradients
+
+2. Header (Centered):
+   - Academic seal/emblem at top
+   - OUR SHIKSHA (large serif)
+   - Subtext: "Established Learning Authority"
+   - Location: Chennai – 600 025
+
+3. Certificate Title:
+   - Render ONCE only
+   - "COURSE COMPLETION CERTIFICATE"
+     OR
+     "PROGRAM COMPLETION CERTIFICATE"
+   - Uppercase, bold serif, centered
+
+4. Body Text:
+   - Formal academic wording
+   - Use:
+     "This is to certify that the undermentioned candidate
+      has successfully completed the requirements prescribed
+      for the award of"
+
+5. Course / Program Name:
+   - Centered
+   - Larger font than body
+   - Distinct spacing
+
+6. Candidate Details:
+   - Two-column table
+   - Center aligned
+   - Even spacing
+   - Fields:
+     Name
+     Registration No.
+     Course / Program
+     Level
+     Specialization
+     Month & Year of Completion
+     Classification
+
+7. Watermark:
+   - Academic seal watermark
+   - Opacity 4–6%
+   - Positioned behind content
+   - Must NOT reduce text readability
+
+8. Footer:
+   - Left: Place & Date
+   - Right: Signature block:
+     Line
+     Director of Certifications
+     OUR SHIKSHA
+   - Official seal near signature
+
+9. Verification:
+   - QR code bottom-right
+   - Text:
+     "This certificate is digitally verifiable"
+   - QR links to /verify/:certificateId
+
+TECHNICAL:
+- Same layout for UI preview and PDF export
+- A4 size (landscape)
+- Certificate ID immutable
+- Verification endpoint mandatory
+
+DO NOT:
+- Add marketing language
+- Add gradients
+- Add animations
+- Modernize excessively
+
+Think like a university registrar, not a startup designer.
