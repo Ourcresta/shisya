@@ -128,6 +128,7 @@ function Router() {
       <Route path="/signup" component={SignupPage} />
       <Route path="/verify-otp" component={VerifyOtp} />
       <Route path="/profile/:username" component={PublicProfilePage} />
+      <Route path="/portfolio/:username" component={PublicProfilePage} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
