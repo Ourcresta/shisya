@@ -48,7 +48,12 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **Key Principles:** Read-only content consumption, focus on published courses only, no admin features, graceful error handling, clear separation of public and authenticated routes.
 
 ## External Dependencies
-- **OurShiksha Admin Course Factory:** The primary backend source for course content and data (`https://course-factory.ourcresta1.repl.co`).
+- **AISiksha Admin Course Factory:** The primary backend source for course content and data. Configured via environment variables:
+  - `AISIKSHA_ADMIN_URL`: The base URL of the Admin Course Factory
+  - `AISIKSHA_API_KEY`: API key for authentication (stored as secret)
+  - All API requests include `X-API-Key` header for authentication
+  - Endpoints used: `/api/public/courses`, `/api/public/courses/:id`, `/api/public/courses/:id/tests`, `/api/public/courses/:id/projects`, `/api/public/courses/:id/labs`
+  - Graceful fallback to mock data when Admin API is unavailable
 - **Resend:** For sending email OTPs during the signup and account verification process.
 - **PostgreSQL:** Database used for session storage and potentially other backend data.
 - **Drizzle ORM:** Used for interacting with the PostgreSQL database.

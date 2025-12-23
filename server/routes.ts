@@ -133,13 +133,18 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/courses/${courseId}/modules`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch modules" });
+        console.log(`[AISiksha] Modules API failed, using mock data for course ${courseId}`);
+        const modules = mockModules[courseIdNum] || [];
+        return res.json(modules);
       }
-      const modules = await response.json();
+      const data = await response.json();
+      const modules = data.modules || data;
       res.json(modules);
     } catch (error) {
       console.error("Error fetching modules:", error);
-      res.status(500).json({ error: "Failed to fetch modules" });
+      const courseIdNum = parseInt(req.params.courseId, 10);
+      const modules = mockModules[courseIdNum] || [];
+      return res.json(modules);
     }
   });
 
@@ -149,31 +154,41 @@ export async function registerRoutes(
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
-      if (USE_MOCK_DATA) {
+      // Helper to return mock data
+      const getMockModulesWithLessons = () => {
         const modules = mockModules[courseIdNum] || [];
-        const modulesWithLessons: ModuleWithLessons[] = modules.map(module => ({
+        return modules.map(module => ({
           ...module,
           lessons: mockLessons[module.id] || [],
         }));
-        return res.json(modulesWithLessons);
+      };
+
+      if (USE_MOCK_DATA) {
+        return res.json(getMockModulesWithLessons());
       }
       
       // First fetch modules
       const modulesResponse = await fetchFromAdmin(`/courses/${courseId}/modules`);
       if (!modulesResponse.ok) {
-        return res.status(modulesResponse.status).json({ error: "Failed to fetch modules" });
+        console.log(`[AISiksha] Modules-with-lessons API failed, using mock data for course ${courseId}`);
+        return res.json(getMockModulesWithLessons());
       }
-      const modules = await modulesResponse.json();
+      const modulesData = await modulesResponse.json();
+      const modules = modulesData.modules || modulesData;
       
       // Then fetch lessons for each module
       const modulesWithLessons = await Promise.all(
         (modules || []).map(async (module: any) => {
           try {
             const lessonsResponse = await fetchFromAdmin(`/modules/${module.id}/lessons`);
-            const lessons = lessonsResponse.ok ? await lessonsResponse.json() : [];
+            if (!lessonsResponse.ok) {
+              return { ...module, lessons: mockLessons[module.id] || [] };
+            }
+            const lessonsData = await lessonsResponse.json();
+            const lessons = lessonsData.lessons || lessonsData;
             return { ...module, lessons: lessons || [] };
           } catch {
-            return { ...module, lessons: [] };
+            return { ...module, lessons: mockLessons[module.id] || [] };
           }
         })
       );
@@ -181,7 +196,13 @@ export async function registerRoutes(
       res.json(modulesWithLessons);
     } catch (error) {
       console.error("Error fetching modules with lessons:", error);
-      res.status(500).json({ error: "Failed to fetch modules with lessons" });
+      const courseIdNum = parseInt(req.params.courseId, 10);
+      const modules = mockModules[courseIdNum] || [];
+      const modulesWithLessons = modules.map(module => ({
+        ...module,
+        lessons: mockLessons[module.id] || [],
+      }));
+      return res.json(modulesWithLessons);
     }
   });
 
@@ -198,13 +219,18 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/modules/${moduleId}/lessons`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch lessons" });
+        console.log(`[AISiksha] Lessons API failed, using mock data for module ${moduleId}`);
+        const lessons = mockLessons[moduleIdNum] || [];
+        return res.json(lessons);
       }
-      const lessons = await response.json();
+      const data = await response.json();
+      const lessons = data.lessons || data;
       res.json(lessons);
     } catch (error) {
       console.error("Error fetching lessons:", error);
-      res.status(500).json({ error: "Failed to fetch lessons" });
+      const moduleIdNum = parseInt(req.params.moduleId, 10);
+      const lessons = mockLessons[moduleIdNum] || [];
+      return res.json(lessons);
     }
   });
 
@@ -225,12 +251,25 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/lessons/${lessonId}`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Lesson not found" });
+        console.log(`[AISiksha] Lesson API failed, using mock data for lesson ${lessonId}`);
+        const allLessons = getAllLessons();
+        const lesson = allLessons[lessonIdNum];
+        if (!lesson) {
+          return res.status(404).json({ error: "Lesson not found" });
+        }
+        return res.json(lesson);
       }
-      const lesson = await response.json();
+      const data = await response.json();
+      const lesson = data.lesson || data;
       res.json(lesson);
     } catch (error) {
       console.error("Error fetching lesson:", error);
+      const lessonIdNum = parseInt(req.params.lessonId, 10);
+      const allLessons = getAllLessons();
+      const lesson = allLessons[lessonIdNum];
+      if (lesson) {
+        return res.json(lesson);
+      }
       res.status(500).json({ error: "Failed to fetch lesson" });
     }
   });
@@ -276,18 +315,18 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/courses/${courseId}/projects`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch projects" });
-      }
-      const projects = await response.json();
-      res.json(projects);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      if (USE_MOCK_DATA) {
-        const courseIdNum = parseInt(req.params.courseId, 10);
+        console.log(`[AISiksha] Projects API failed, using mock data for course ${courseId}`);
         const projects = mockProjects[courseIdNum] || [];
         return res.json(projects);
       }
-      res.status(500).json({ error: "Failed to fetch projects" });
+      const data = await response.json();
+      const projects = data.projects || data;
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      const courseIdNum = parseInt(req.params.courseId, 10);
+      const projects = mockProjects[courseIdNum] || [];
+      return res.json(projects);
     }
   });
 
@@ -308,12 +347,25 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/projects/${projectId}`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Project not found" });
+        console.log(`[AISiksha] Project API failed, using mock data for project ${projectId}`);
+        const allProjects = getAllProjects();
+        const project = allProjects[projectIdNum];
+        if (!project) {
+          return res.status(404).json({ error: "Project not found" });
+        }
+        return res.json(project);
       }
-      const project = await response.json();
+      const data = await response.json();
+      const project = data.project || data;
       res.json(project);
     } catch (error) {
       console.error("Error fetching project:", error);
+      const projectIdNum = parseInt(req.params.projectId, 10);
+      const allProjects = getAllProjects();
+      const project = allProjects[projectIdNum];
+      if (project) {
+        return res.json(project);
+      }
       res.status(500).json({ error: "Failed to fetch project" });
     }
   });
@@ -359,28 +411,30 @@ export async function registerRoutes(
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
-      if (USE_MOCK_DATA) {
+      // Helper to get mock tests summary
+      const getMockTestsSummary = () => {
         const tests = mockTests[courseIdNum] || [];
-        // Return tests without questions (summary only)
-        const testsSummary = tests.map(({ questions, ...rest }) => rest);
-        return res.json(testsSummary);
+        return tests.map(({ questions, ...rest }) => rest);
+      };
+
+      if (USE_MOCK_DATA) {
+        return res.json(getMockTestsSummary());
       }
 
       const response = await fetchFromAdmin(`/courses/${courseId}/tests`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch tests" });
+        console.log(`[AISiksha] Tests API failed, using mock data for course ${courseId}`);
+        return res.json(getMockTestsSummary());
       }
-      const tests = await response.json();
+      const data = await response.json();
+      const tests = data.tests || data;
       res.json(tests);
     } catch (error) {
       console.error("Error fetching tests:", error);
-      if (USE_MOCK_DATA) {
-        const courseIdNum = parseInt(req.params.courseId, 10);
-        const tests = mockTests[courseIdNum] || [];
-        const testsSummary = tests.map(({ questions, ...rest }) => rest);
-        return res.json(testsSummary);
-      }
-      res.status(500).json({ error: "Failed to fetch tests" });
+      const courseIdNum = parseInt(req.params.courseId, 10);
+      const tests = mockTests[courseIdNum] || [];
+      const testsSummary = tests.map(({ questions, ...rest }) => rest);
+      return res.json(testsSummary);
     }
   });
 
@@ -390,13 +444,46 @@ export async function registerRoutes(
       const { testId } = req.params;
       const testIdNum = parseInt(testId, 10);
 
-      if (USE_MOCK_DATA) {
+      // Helper to get safe mock test
+      const getSafeMockTest = () => {
         const allTests = getAllTests();
         const test = allTests[testIdNum];
-        if (!test) {
+        if (!test) return null;
+        return {
+          ...test,
+          questions: test.questions.map(q => ({
+            ...q,
+            options: q.options.map(({ isCorrect, ...opt }) => opt)
+          }))
+        };
+      };
+
+      if (USE_MOCK_DATA) {
+        const safeTest = getSafeMockTest();
+        if (!safeTest) {
           return res.status(404).json({ error: "Test not found" });
         }
-        // Strip isCorrect from options before sending to client
+        return res.json(safeTest);
+      }
+
+      const response = await fetchFromAdmin(`/tests/${testId}`);
+      if (!response.ok) {
+        console.log(`[AISiksha] Test API failed, using mock data for test ${testId}`);
+        const safeTest = getSafeMockTest();
+        if (!safeTest) {
+          return res.status(404).json({ error: "Test not found" });
+        }
+        return res.json(safeTest);
+      }
+      const data = await response.json();
+      const test = data.test || data;
+      res.json(test);
+    } catch (error) {
+      console.error("Error fetching test:", error);
+      const testIdNum = parseInt(req.params.testId, 10);
+      const allTests = getAllTests();
+      const test = allTests[testIdNum];
+      if (test) {
         const safeTest = {
           ...test,
           questions: test.questions.map(q => ({
@@ -406,15 +493,6 @@ export async function registerRoutes(
         };
         return res.json(safeTest);
       }
-
-      const response = await fetchFromAdmin(`/tests/${testId}`);
-      if (!response.ok) {
-        return res.status(response.status).json({ error: "Test not found" });
-      }
-      const test = await response.json();
-      res.json(test);
-    } catch (error) {
-      console.error("Error fetching test:", error);
       res.status(500).json({ error: "Failed to fetch test" });
     }
   });
