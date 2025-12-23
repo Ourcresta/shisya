@@ -1,0 +1,231 @@
+You are a Senior Academic Systems Architect,
+University Certification Designer,
+Security Engineer, and PDF Generation Expert.
+
+Your task is to build a SINGLE, UNIFIED
+ACADEMIC CERTIFICATE SYSTEM for OurShiksha
+that can generate TWO TYPES of certificates:
+
+1) PROGRAM COMPLETION CERTIFICATE
+2) COURSE COMPLETION CERTIFICATE
+
+This must feel equivalent to a REAL university-issued certificate
+(like Anna University / autonomous colleges),
+not a badge or marketing document.
+
+══════════════════════════════════════
+🎯 CORE PRINCIPLE
+══════════════════════════════════════
+
+One certificate engine.
+Two certificate types.
+Shared layout DNA.
+Different academic authority levels.
+
+Certificate Type is controlled by:
+certificate_type = "PROGRAM" | "COURSE"
+
+══════════════════════════════════════
+📜 CERTIFICATE TYPES & MEANING
+══════════════════════════════════════
+
+1️⃣ PROGRAM COMPLETION CERTIFICATE
+→ Awarded when a learner completes an ENTIRE PROGRAM
+   (multiple courses + projects + assessments)
+
+2️⃣ COURSE COMPLETION CERTIFICATE
+→ Awarded when a learner completes a SINGLE COURSE
+   within or outside a program
+
+══════════════════════════════════════
+✅ ELIGIBILITY RULES (STRICT)
+══════════════════════════════════════
+
+COURSE COMPLETION CERTIFICATE:
+✔ All lessons in the course completed
+✔ Required tests passed
+✔ Required projects approved
+✔ Course marked as completed
+✔ Certificate enabled by Admin (Guru)
+
+PROGRAM COMPLETION CERTIFICATE:
+✔ ALL required courses completed
+✔ ALL mandatory projects approved
+✔ Minimum aggregate score achieved
+✔ Program marked as completed
+✔ Program certificate enabled by Admin
+
+If ANY rule fails → certificate remains LOCKED.
+
+══════════════════════════════════════
+📄 CERTIFICATE HEADER (DYNAMIC)
+══════════════════════════════════════
+
+Top Center Heading MUST be:
+
+IF certificate_type = "PROGRAM":
+→ "PROGRAM COMPLETION CERTIFICATE"
+
+IF certificate_type = "COURSE":
+→ "COURSE COMPLETION CERTIFICATE"
+
+Below Heading:
+• OurShiksha Logo
+• Official academic subtitle
+• Subtle watermark seal
+
+══════════════════════════════════════
+🧾 CERTIFICATE BODY (FORMAL ACADEMIC TONE)
+══════════════════════════════════════
+
+"This is to certify that the undermentioned candidate
+has successfully fulfilled all academic requirements
+prescribed by OurShiksha and is hereby awarded the"
+
+IF PROGRAM:
+→ "<Program Name>"
+
+IF COURSE:
+→ "<Course Name>"
+
+Additional wording must reflect academic rigor,
+not casual or marketing language.
+
+══════════════════════════════════════
+📊 DETAILS SECTION (TYPE-SPECIFIC)
+══════════════════════════════════════
+
+COMMON FIELDS:
+• Student Full Name
+• Student ID / Register No
+• Academic Year / Batch
+• Mode: Online / Hybrid
+
+COURSE CERTIFICATE ADDITIONAL FIELDS:
+• Course Name
+• Course Level
+• Course Duration (Hours)
+• Credits Earned
+• Completion Date
+• Result Status (Passed)
+
+PROGRAM CERTIFICATE ADDITIONAL FIELDS:
+• Program Name
+• Program Duration
+• Total Credits Earned
+• Classification (Distinction / First Class / Pass)
+• Program Completion Date
+
+══════════════════════════════════════
+🔐 VERIFICATION & AUTHENTICITY
+══════════════════════════════════════
+
+Each certificate must include:
+
+• Unique Certificate ID
+• QR Code linking to:
+  /verify/certificate/:certificateId
+
+Verification Page (Public):
+• Certificate Type
+• Student Name
+• Course / Program Name
+• Issue Date
+• Status: VALID / REVOKED
+• Issuing Authority: OurShiksha
+
+No login required for verification.
+
+══════════════════════════════════════
+🖊 SIGNATURE & AUTHORITY SECTION
+══════════════════════════════════════
+
+Bottom Right:
+• Authorized Academic Signatory
+• Digital Signature
+• Official Seal
+
+Bottom Left:
+• Place of Issue
+• Date of Issue
+
+Footer Text:
+"Issued by OurShiksha – Learn. Practice. Prove."
+
+══════════════════════════════════════
+🗂 DATABASE DESIGN (MANDATORY)
+══════════════════════════════════════
+
+Table: certificates
+- id
+- certificate_id (public)
+- certificate_type (PROGRAM | COURSE)
+- student_id
+- course_id (nullable)
+- program_id (nullable)
+- issued_at
+- status (active / revoked)
+- verification_hash
+
+Table: certificate_events
+- certificate_id
+- action (issued / verified / revoked)
+- timestamp
+
+Certificates MUST be immutable after issuance.
+
+══════════════════════════════════════
+🖥 ADMIN (GURU) CONTROLS
+══════════════════════════════════════
+
+Admin can:
+• Enable / disable certificate per course/program
+• View issued certificates
+• Revoke certificate (with reason)
+
+Admin CANNOT:
+• Edit certificate content after issue
+
+══════════════════════════════════════
+🧑‍🎓 STUDENT (SHISHYA) EXPERIENCE
+══════════════════════════════════════
+
+Student can:
+• View certificate
+• Download PDF
+• Share verification link
+• See locked state with eligibility checklist
+
+══════════════════════════════════════
+📤 TECHNICAL REQUIREMENTS
+══════════════════════════════════════
+
+• HTML → PDF generation
+• Print-quality layout (A4)
+• Serif academic typography
+• Secure certificate IDs
+• Role-based access control
+
+══════════════════════════════════════
+🚫 DO NOT
+══════════════════════════════════════
+
+✗ Do not auto-issue certificates
+✗ Do not mix program & course data
+✗ Do not allow manual edits
+✗ Do not expose internal IDs
+
+══════════════════════════════════════
+📦 FINAL OUTPUT REQUIRED
+══════════════════════════════════════
+
+1. Unified certificate engine
+2. Program & course certificate templates
+3. Verification system
+4. Admin controls
+5. Student access & PDF download
+
+Build this exactly like a university-grade
+academic certification system.
+
+Begin implementation now.
