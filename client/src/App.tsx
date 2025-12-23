@@ -29,6 +29,8 @@ import PublicProfilePage from "@/pages/PublicProfilePage";
 import PortfolioPreviewPage from "@/pages/PortfolioPreviewPage";
 import CourseLabs from "@/pages/CourseLabs";
 import LabPractice from "@/pages/LabPractice";
+import AllProjectsPage from "@/pages/AllProjectsPage";
+import AllTestsPage from "@/pages/AllTestsPage";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
@@ -93,6 +95,14 @@ function ProtectedPortfolioPreview() {
   return <ProtectedRoute><PortfolioPreviewPage /></ProtectedRoute>;
 }
 
+function ProtectedAllProjectsPage() {
+  return <ProtectedRoute><AllProjectsPage /></ProtectedRoute>;
+}
+
+function ProtectedAllTestsPage() {
+  return <ProtectedRoute><AllTestsPage /></ProtectedRoute>;
+}
+
 function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -134,8 +144,10 @@ function Router() {
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
       <Route path="/shishya/learn/:courseId" component={ProtectedLearnView} />
       <Route path="/shishya/learn/:courseId/:lessonId" component={ProtectedLessonViewer} />
+      <Route path="/shishya/projects" component={ProtectedAllProjectsPage} />
       <Route path="/shishya/projects/:courseId" component={ProtectedCourseProjects} />
       <Route path="/shishya/projects/:courseId/:projectId" component={ProtectedProjectDetail} />
+      <Route path="/shishya/tests" component={ProtectedAllTestsPage} />
       <Route path="/shishya/tests/:courseId" component={ProtectedCourseTests} />
       <Route path="/shishya/tests/:courseId/:testId" component={ProtectedTestInstructions} />
       <Route path="/shishya/tests/:courseId/:testId/attempt" component={ProtectedTestAttempt} />

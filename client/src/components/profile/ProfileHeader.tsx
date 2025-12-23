@@ -2,15 +2,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { MapPin, Github, Linkedin, ExternalLink, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { MapPin, Github, Linkedin, ExternalLink, Eye, EyeOff, Copy, Check, Camera } from "lucide-react";
 import type { StudentProfile } from "@shared/schema";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProfileHeaderProps {
   profile: StudentProfile;
   editable?: boolean;
   onToggleVisibility?: (visible: boolean) => void;
+  onPhotoChange?: (photoUrl: string) => void;
   canMakePublic?: boolean;
 }
 
@@ -18,10 +19,12 @@ export default function ProfileHeader({
   profile, 
   editable = false, 
   onToggleVisibility,
+  onPhotoChange,
   canMakePublic = true
 }: ProfileHeaderProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initials = profile.fullName
     .split(" ")
@@ -42,14 +45,80 @@ export default function ProfileHeader({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handlePhotoClick = () => {
+    if (editable && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image under 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (onPhotoChange) {
+        onPhotoChange(base64);
+        toast({
+          title: "Photo updated",
+          description: "Your profile photo has been updated",
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center" data-testid="profile-header">
-      <Avatar className="w-20 h-20 sm:w-24 sm:h-24 border-2 border-border">
-        <AvatarImage src={profile.profilePhoto || undefined} alt={profile.fullName} />
-        <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative group">
+        <Avatar 
+          className={`w-20 h-20 sm:w-24 sm:h-24 border-2 border-border ${editable ? "cursor-pointer" : ""}`}
+          onClick={handlePhotoClick}
+        >
+          <AvatarImage src={profile.profilePhoto || undefined} alt={profile.fullName} />
+          <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        {editable && (
+          <>
+            <div 
+              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              onClick={handlePhotoClick}
+              data-testid="button-upload-photo"
+            >
+              <Camera className="w-6 h-6 text-white" />
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+              data-testid="input-photo-upload"
+            />
+          </>
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
         <h1 

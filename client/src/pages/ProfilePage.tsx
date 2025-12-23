@@ -184,6 +184,10 @@ export default function ProfilePage() {
                   profile={profile} 
                   editable 
                   onToggleVisibility={handleToggleVisibility}
+                  onPhotoChange={(photoUrl) => {
+                    const updated = updateProfile({ profilePhoto: photoUrl });
+                    if (updated) setProfile(updated);
+                  }}
                   canMakePublic={canGoPublic}
                 />
               </CardContent>
