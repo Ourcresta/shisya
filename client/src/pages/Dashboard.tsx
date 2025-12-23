@@ -20,7 +20,8 @@ import {
   User,
   FolderOpen,
   Trophy,
-  Zap
+  Zap,
+  Code2
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -140,6 +141,7 @@ export default function Dashboard() {
     { title: "Courses", icon: BookOpen, href: "/courses" },
     { title: "Projects", icon: FolderOpen, href: "/shishya/projects" },
     { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests" },
+    { title: "Labs", icon: Code2, href: "/shishya/labs" },
     { title: "Certificates", icon: Award, href: "/shishya/certificates" },
     { title: "Portfolio", icon: User, href: "/shishya/profile/portfolio-preview" },
   ];
