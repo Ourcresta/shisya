@@ -3,6 +3,8 @@ import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
 import ourShikshaStamp from "@assets/ourshiksha-circular-stamp.png";
 
+import ChatGPT_Image_Dec_23__2025__10_28_31_PM from "@assets/ChatGPT Image Dec 23, 2025, 10_28_31 PM.png";
+
 interface CertificatePreviewProps {
   certificate: Certificate;
   forPrint?: boolean;
@@ -36,7 +38,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           `
         }}
       />
-      
       <div 
         className="absolute"
         style={{
@@ -48,7 +49,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           backgroundColor: "#ffffff"
         }}
       />
-
       <div className="absolute inset-0 p-10 md:p-12 flex flex-col" style={{ backgroundColor: "transparent" }}>
         
         <div 
@@ -62,7 +62,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           className="absolute top-6 left-6 z-20"
         >
           <img 
-            src={ourShikshaStamp} 
+            src={ChatGPT_Image_Dec_23__2025__10_28_31_PM} 
             alt="OurShiksha Seal" 
             className="w-40 h-40 object-contain"
           />
