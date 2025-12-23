@@ -15,7 +15,8 @@ import { getAllCertificates, initializeMockCertificates } from "@/lib/certificat
 import { getAllSubmissions } from "@/lib/submissions";
 import { getPassedTestsCount } from "@/lib/testAttempts";
 import type { StudentProfile, Certificate, ProjectSubmission } from "@shared/schema";
-import { User, Settings, Pencil, AlertCircle } from "lucide-react";
+import { User, Settings, Pencil, AlertCircle, Eye } from "lucide-react";
+import { Link } from "wouter";
 
 interface ProjectWithDetails extends ProjectSubmission {
   projectTitle?: string;
@@ -154,18 +155,26 @@ export default function ProfilePage() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8" data-testid="profile-page">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
             <h1 className="text-2xl font-bold">My Profile</h1>
-            <TabsList>
-              <TabsTrigger value="overview" data-testid="tab-overview">
-                <User className="w-4 h-4 mr-2" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="edit" data-testid="tab-edit">
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link href="/shishya/profile/portfolio-preview">
+                <Button variant="outline" size="sm" data-testid="button-preview-portfolio">
+                  <Eye className="w-4 h-4 mr-2" />
+                  Preview Portfolio
+                </Button>
+              </Link>
+              <TabsList>
+                <TabsTrigger value="overview" data-testid="tab-overview">
+                  <User className="w-4 h-4 mr-2" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="edit" data-testid="tab-edit">
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
 
           <TabsContent value="overview" className="space-y-6 mt-0">

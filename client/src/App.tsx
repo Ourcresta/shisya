@@ -26,6 +26,7 @@ import CertificateViewer from "@/pages/CertificateViewer";
 import CertificateVerify from "@/pages/CertificateVerify";
 import ProfilePage from "@/pages/ProfilePage";
 import PublicProfilePage from "@/pages/PublicProfilePage";
+import PortfolioPreviewPage from "@/pages/PortfolioPreviewPage";
 import CourseLabs from "@/pages/CourseLabs";
 import LabPractice from "@/pages/LabPractice";
 import Login from "@/auth/Login";
@@ -88,6 +89,10 @@ function ProtectedProfilePage() {
   return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
 }
 
+function ProtectedPortfolioPreview() {
+  return <ProtectedRoute><PortfolioPreviewPage /></ProtectedRoute>;
+}
+
 function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -139,6 +144,7 @@ function Router() {
       <Route path="/shishya/certificates" component={ProtectedCertificatesDashboard} />
       <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
+      <Route path="/shishya/profile/portfolio-preview" component={ProtectedPortfolioPreview} />
       
       <Route component={NotFound} />
     </Switch>
