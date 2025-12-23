@@ -1,9 +1,7 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaStamp from "@assets/ourshiksha-circular-stamp.png";
-
-import ChatGPT_Image_Dec_23__2025__10_28_31_PM from "@assets/ChatGPT Image Dec 23, 2025, 10_28_31 PM.png";
+import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
