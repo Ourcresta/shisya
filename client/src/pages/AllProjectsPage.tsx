@@ -2,17 +2,21 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FolderGit2, ChevronRight, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { FolderGit2, Clock, CheckCircle2, AlertCircle, Lock, BookOpen } from "lucide-react";
+import { getCourseProgress } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
-import type { Course, Project, ProjectSubmission } from "@shared/schema";
+import type { Course, Project, ProjectSubmission, Module } from "@shared/schema";
 
 interface ProjectWithCourse extends Project {
   courseName: string;
+  courseId: number;
+  isLocked: boolean;
+  courseProgress: number;
   submission?: ProjectSubmission;
 }
 
@@ -36,15 +40,35 @@ export default function AllProjectsPage() {
         submissionMap[`${sub.courseId}-${sub.projectId}`] = sub;
       });
 
-      // Show projects from all published courses
       const projectPromises = courses.map(async (course) => {
         try {
-          const response = await fetch(`/api/courses/${course.id}/projects`);
-          if (!response.ok) return [];
-          const projects: Project[] = await response.json();
+          // Fetch projects and modules in parallel
+          const [projectsRes, modulesRes] = await Promise.all([
+            fetch(`/api/courses/${course.id}/projects`),
+            fetch(`/api/courses/${course.id}/modules-with-lessons`),
+          ]);
+
+          if (!projectsRes.ok) return [];
+
+          const projects: Project[] = await projectsRes.json();
+          const modules: Module[] = modulesRes.ok ? await modulesRes.json() : [];
+
+          // Calculate total lessons and completion
+          const totalLessons = modules.reduce(
+            (acc, mod) => acc + ((mod as any).lessons?.length || 0),
+            0
+          );
+          const progress = getCourseProgress(course.id);
+          const completedLessons = progress.completedLessons.length;
+          const courseProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+          const isCourseComplete = totalLessons > 0 && completedLessons >= totalLessons;
+
           return projects.map((project) => ({
             ...project,
+            courseId: course.id,
             courseName: course.title,
+            isLocked: !isCourseComplete,
+            courseProgress,
             submission: submissionMap[`${course.id}-${project.id}`],
           }));
         } catch {
@@ -63,18 +87,31 @@ export default function AllProjectsPage() {
 
   const isLoading = coursesLoading || isLoadingProjects;
 
+  const handleProjectClick = (project: ProjectWithCourse) => {
+    if (project.isLocked) return;
+    setLocation(`/shishya/projects/${project.courseId}/${project.id}`);
+  };
+
   const getStatusBadge = (project: ProjectWithCourse) => {
+    if (project.isLocked) {
+      return (
+        <Badge variant="secondary" className="gap-1">
+          <Lock className="w-3 h-3" />
+          Locked
+        </Badge>
+      );
+    }
     if (project.submission?.submitted) {
       return (
-        <Badge variant="default" className="bg-green-600 text-white">
-          <CheckCircle2 className="w-3 h-3 mr-1" />
+        <Badge variant="default" className="bg-green-600 text-white gap-1">
+          <CheckCircle2 className="w-3 h-3" />
           Submitted
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary">
-        <AlertCircle className="w-3 h-3 mr-1" />
+      <Badge variant="secondary" className="gap-1">
+        <AlertCircle className="w-3 h-3" />
         Pending
       </Badge>
     );
@@ -98,27 +135,25 @@ export default function AllProjectsPage() {
       <div className="space-y-6" data-testid="all-projects-page">
         <PageHeader
           title="All Projects"
-          description="View and submit projects from all available courses"
+          description="View and submit projects from all available courses. Complete courses to unlock projects."
           icon={FolderGit2}
         />
 
         {isLoading ? (
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="p-4 flex items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded-lg" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-48" />
-                      <Skeleton className="h-3 w-32" />
-                    </div>
-                    <Skeleton className="h-6 w-20" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i}>
+                <CardHeader className="pb-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-6 w-24" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : allProjects.length === 0 ? (
           <EmptyState
             icon={FolderGit2}
@@ -130,54 +165,62 @@ export default function AllProjectsPage() {
             }}
           />
         ) : (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FolderGit2 className="w-5 h-5" />
-                Projects ({allProjects.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {allProjects.map((project) => (
-                  <div
-                    key={`${project.courseId}-${project.id}`}
-                    className="p-4 flex items-center gap-4 hover-elevate cursor-pointer transition-colors"
-                    onClick={() => setLocation(`/shishya/projects/${project.courseId}/${project.id}`)}
-                    data-testid={`row-project-${project.id}`}
-                  >
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <FolderGit2 className="w-6 h-6 text-primary" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate" data-testid={`text-project-title-${project.id}`}>
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {project.courseName}
-                      </p>
-                    </div>
-
-                    <div className="hidden sm:flex items-center gap-2">
-                      {getDifficultyBadge(project.difficulty)}
-                      {project.estimatedHours && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {project.estimatedHours}h
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      {getStatusBadge(project)}
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allProjects.map((project) => (
+              <Card
+                key={`${project.courseId}-${project.id}`}
+                className={`relative overflow-visible transition-all ${
+                  project.isLocked
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover-elevate cursor-pointer"
+                }`}
+                onClick={() => handleProjectClick(project)}
+                data-testid={`card-project-${project.id}`}
+              >
+                {project.isLocked && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center border">
+                      <Lock className="w-4 h-4 text-muted-foreground" />
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                )}
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base truncate" data-testid={`text-project-title-${project.id}`}>
+                        {project.title}
+                      </CardTitle>
+                      <CardDescription className="truncate mt-1">
+                        {project.courseName}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    {getDifficultyBadge(project.difficulty)}
+                    {project.estimatedHours && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {project.estimatedHours}h
+                      </span>
+                    )}
+                  </div>
+
+                  {project.isLocked && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md p-2">
+                      <BookOpen className="w-3 h-3 shrink-0" />
+                      <span>Complete course to unlock ({project.courseProgress}% done)</span>
+                    </div>
+                  )}
+
+                  <div className="pt-1">
+                    {getStatusBadge(project)}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </Layout>
