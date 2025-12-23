@@ -99,8 +99,6 @@ export function Header() {
                     </Link>
                   )}
                   
-                  <ThemeSwitcher />
-                  
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" data-testid="button-user-menu">
@@ -124,6 +122,8 @@ export function Header() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  
+                  <ThemeSwitcher />
                 </>
               ) : (
                 <>
