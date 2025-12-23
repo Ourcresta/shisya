@@ -35,6 +35,13 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 **Feature Specifications:**
 - **Core Features:** Landing Page, Course Catalog, Course Overview, Student Dashboard, Learn View with Lesson Viewer, Progress Tracking, Course Projects with Submission, Course Tests with Scoring and History, Guided Labs, Certificates Dashboard and Viewer, Public Certificate Verification, Student Profile, and Public Portfolio.
 - **Landing Page:** Comprehensive homepage at "/" with 7 sections - Hero, Journey (5-step learning path), Features (7 cards), Course Preview (fetches real courses), CTA, and Footer. Auth-aware CTAs show Login/Signup for guests or "Go to Shishya" for authenticated users.
+- **Enhanced Dashboard:** Restructured with 5 clear zones for optimal UX:
+  - Zone 1 (Welcome & Status): Personalized greeting, Learning Status Badge (Beginner/Intermediate/Advanced), motivational subtitle, Quick Links to key sections
+  - Zone 2 (Learning Snapshot): 4 clickable metric cards - In Progress, Completed, Certificates, Tests Passed
+  - Zone 3 (Primary Action): Smart CTA logic - Continue Learning (if active course), Start Learning (if new), or Complete Pending Actions (if blockers exist)
+  - Zone 4 (Pending Actions): Checklist-style cards showing tests to take and projects to submit, with "All caught up!" empty state
+  - Zone 5 (Achievements): Recent Certificates with links and Skills Gained from completed courses
+- **Portfolio Preview System:** Private preview at `/shishya/profile/portfolio-preview` shows students how their portfolio appears to recruiters. Public portfolios accessible at `/profile/:username` and `/portfolio/:username` with OurShiksha branding and verification links.
 - **Key Principles:** Read-only content consumption, focus on published courses only, no admin features, graceful error handling, clear separation of public and authenticated routes.
 
 ## External Dependencies
