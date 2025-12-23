@@ -1,0 +1,194 @@
+You are a Senior Product Manager, Senior UX Designer,
+Senior Frontend Engineer, Senior Backend Engineer,
+and Senior Learning Platform Architect.
+
+You are working inside the STUDENT PORTAL called **Shishya**
+for the **OurShiksha** platform.
+
+Your task is to ENHANCE and RESTRUCTURE the
+**Shishya Student Dashboard** so it becomes:
+
+• Clear
+• Motivational
+• Action-driven
+• Resume / outcome oriented
+• Scalable for future AI features (Mithra)
+
+==================================================
+GOAL OF DASHBOARD
+==================================================
+
+The dashboard must answer these questions
+within 5 seconds:
+
+1. Where am I in my learning journey?
+2. What should I do next?
+3. What have I achieved?
+4. What is blocking my progress?
+5. How close am I to certification / portfolio?
+
+==================================================
+DASHBOARD INFORMATION ARCHITECTURE
+==================================================
+
+The dashboard must be structured into
+**5 clear zones** (top → bottom).
+
+--------------------------------------------------
+ZONE 1: WELCOME & STATUS (TOP BAR)
+--------------------------------------------------
+
+Show:
+• Welcome message with student name
+• Short motivational subtitle
+  (e.g. “Keep going — you’re building real skills”)
+
+Add:
+• Learning Status Badge:
+  - Beginner / Intermediate / Advanced
+• Profile completion indicator (optional)
+
+--------------------------------------------------
+ZONE 2: LEARNING SNAPSHOT (METRICS)
+--------------------------------------------------
+
+Display 4 clean metric cards:
+
+• Courses In Progress
+• Courses Completed
+• Certificates Earned
+• Tests Passed
+
+Rules:
+• Big numbers
+• Small icons
+• Clickable → navigates to detail pages
+• No empty clutter (show zero state clearly)
+
+--------------------------------------------------
+ZONE 3: PRIMARY ACTION (MOST IMPORTANT)
+--------------------------------------------------
+
+This is the MOST IMPORTANT section.
+
+Logic:
+• If student has active course → show “Continue Learning”
+• If no active course → show “Start Learning”
+• If blocked → show “Complete Pending Actions”
+
+Card content:
+• Course name (if any)
+• Progress indicator
+• CTA button:
+  - Continue Learning
+  - Browse Courses
+
+--------------------------------------------------
+ZONE 4: PENDING ACTIONS (BLOCKERS)
+--------------------------------------------------
+
+Purpose:
+Show what is PREVENTING progress or certification.
+
+Display as checklist-style cards:
+
+• Tests to take
+• Projects to submit
+• Labs pending (future)
+
+Rules:
+• Highlight urgency
+• Each item clickable
+• Empty state should say:
+  “You’re all caught up 🎉”
+
+--------------------------------------------------
+ZONE 5: ACHIEVEMENTS & PROOF
+--------------------------------------------------
+
+Split into 2 cards:
+
+A. Recent Certificates
+• Certificate title
+• Issue date
+• “View Certificate” link
+
+B. Skills Gained (Optional)
+• Skill tags earned via courses/projects
+• Only verified skills shown
+
+--------------------------------------------------
+OPTIONAL SIDEBAR / QUICK LINKS
+--------------------------------------------------
+
+Add quick links (top right or sidebar):
+
+• Courses
+• Projects
+• Tests
+• Certificates
+• Portfolio Preview
+
+==================================================
+DESIGN & UX RULES
+==================================================
+
+• Clean spacing
+• No overcrowding
+• Mobile-friendly
+• Neutral professional colors
+• Icons used sparingly
+• Clear CTAs
+• Zero confusion
+
+==================================================
+DATA RULES
+==================================================
+
+Dashboard data must come ONLY from:
+• Enrolled courses
+• Course progress
+• Test attempts
+• Project submissions
+• Issued certificates
+
+NO fake stats.
+NO hardcoded demo logic in prod.
+
+==================================================
+EMPTY STATES (VERY IMPORTANT)
+==================================================
+
+For new users:
+• Encourage learning
+• Show next steps
+• No dead screens
+
+Example:
+“You haven’t started yet — your journey begins here.”
+
+==================================================
+OUT OF SCOPE (DO NOT ADD)
+==================================================
+
+❌ Editing profile
+❌ Resume builder
+❌ AI chat inside dashboard (future Mithra)
+❌ Notifications system
+❌ Payments
+
+==================================================
+FINAL EXPECTATION
+==================================================
+
+The dashboard must feel like:
+
+“A calm, intelligent command center
+for a student’s skill journey.”
+
+It should guide,
+not overwhelm.
+
+Build with clarity.
+Build with intent.
+Build for scale.
