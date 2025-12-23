@@ -147,8 +147,6 @@ export function Header() {
                       Sign Up
                     </Button>
                   </Link>
-                  
-                  <ThemeSwitcher />
                 </>
               )}
             </>
