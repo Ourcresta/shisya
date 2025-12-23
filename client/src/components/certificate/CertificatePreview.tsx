@@ -1,7 +1,7 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaSeal from "@assets/ourshiksha-seal.png";
+import ourShikshaStamp from "@assets/ourshiksha-circular-stamp.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
@@ -17,7 +17,8 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
       id="certificate-preview" 
       className="relative bg-white aspect-[1.414/1]"
       style={{ 
-        boxShadow: forPrint ? "none" : "0 4px 20px rgba(0,0,0,0.15)"
+        boxShadow: forPrint ? "none" : "0 4px 20px rgba(0,0,0,0.15)",
+        fontFamily: "'Times New Roman', 'Libre Baskerville', serif"
       }}
       data-testid="certificate-preview"
     >
@@ -25,10 +26,10 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
         className="absolute inset-0"
         style={{
           background: `
-            linear-gradient(90deg, #5b8fb9 0%, #5b8fb9 8px, transparent 8px),
-            linear-gradient(90deg, transparent calc(100% - 8px), #5b8fb9 calc(100% - 8px)),
-            linear-gradient(0deg, #5b8fb9 0%, #5b8fb9 8px, transparent 8px),
-            linear-gradient(0deg, transparent calc(100% - 8px), #5b8fb9 calc(100% - 8px))
+            linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
+            linear-gradient(90deg, transparent calc(100% - 10px), #1e3a5f calc(100% - 10px)),
+            linear-gradient(0deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
+            linear-gradient(0deg, transparent calc(100% - 10px), #1e3a5f calc(100% - 10px))
           `
         }}
       />
@@ -36,165 +37,191 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
       <div 
         className="absolute"
         style={{
-          top: '12px',
-          left: '12px',
-          right: '12px',
-          bottom: '12px',
-          border: '2px solid #5b8fb9'
+          top: '16px',
+          left: '16px',
+          right: '16px',
+          bottom: '16px',
+          border: '1px solid #1e3a5f'
         }}
       />
 
-      <div className="absolute inset-0 p-8 md:p-10 flex flex-col">
+      <div className="absolute inset-0 p-10 md:p-12 flex flex-col">
         
         <div 
-          className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none flex items-center justify-center"
           aria-hidden="true"
         >
-          <img src={ourShikshaSeal} alt="" className="w-[350px] h-[350px] object-contain" />
+          <img src={ourShikshaStamp} alt="" className="w-[320px] h-[320px] object-contain" />
         </div>
 
-        <div className="text-center mb-4 relative z-10">
-          <div className="flex items-center justify-center gap-4 mb-2">
+        <div className="text-center mb-3 relative z-10">
+          <div className="flex items-center justify-center mb-2">
             <img 
-              src={ourShikshaSeal} 
+              src={ourShikshaStamp} 
               alt="OurShiksha" 
-              className="w-16 h-16 object-contain"
+              className="w-14 h-14 object-contain"
+              style={{ filter: "grayscale(30%)" }}
             />
           </div>
           <h1 
-            className="text-2xl md:text-3xl font-bold text-slate-800 tracking-wide"
-            style={{ fontFamily: "serif" }}
+            className="text-2xl md:text-3xl font-bold tracking-[0.1em] uppercase"
+            style={{ color: "#1e3a5f" }}
           >
             OUR SHIKSHA
           </h1>
           <div 
-            className="text-sm text-slate-600 tracking-wider mt-1"
-            style={{ fontFamily: "serif" }}
+            className="text-xs tracking-[0.2em] uppercase mt-1"
+            style={{ color: "#4a5568" }}
           >
-            CHENNAI - 600 025
+            Established Learning Authority
+          </div>
+          <div 
+            className="text-sm mt-1"
+            style={{ color: "#2d3748" }}
+          >
+            Chennai – 600 025
           </div>
         </div>
 
-        <div className="text-center mb-4 relative z-10">
+        <div className="text-center mb-3 relative z-10">
           <h2 
-            className="text-base md:text-lg font-bold text-blue-800 tracking-[0.15em] uppercase"
-            style={{ fontFamily: "serif" }}
+            className="text-lg md:text-xl font-bold tracking-[0.15em] uppercase"
+            style={{ color: "#1e3a5f" }}
           >
             Course Completion Certificate
           </h2>
         </div>
 
-        <div className="text-right mb-3 relative z-10">
-          <span className="text-sm text-slate-700" style={{ fontFamily: "serif" }}>Folio No. : </span>
-          <span className="text-sm text-slate-800" data-testid="text-cert-id">{certificate.certificateId}</span>
+        <div className="text-right mb-2 relative z-10">
+          <span className="text-sm" style={{ color: "#4a5568" }}>Folio No. : </span>
+          <span className="text-sm font-medium" style={{ color: "#1e3a5f" }} data-testid="text-cert-id">
+            {certificate.certificateId}
+          </span>
         </div>
 
-        <div className="mb-4 relative z-10 text-slate-700" style={{ fontFamily: "serif" }}>
-          <p className="italic text-sm mb-3">
-            This is to certify that the undermentioned candidate has qualified for the award of
+        <div className="mb-3 relative z-10" style={{ color: "#2d3748" }}>
+          <p className="italic text-sm mb-2">
+            This is to certify that the undermentioned candidate has successfully completed the requirements
+            prescribed by OUR SHIKSHA and is hereby awarded the
           </p>
-          <p className="text-sm mb-1">Course through :</p>
-          <p className="text-base font-bold text-slate-900 uppercase tracking-wide mb-3 ml-4">
-            OUR SHIKSHA AI POWERED LEARNING PLATFORM
+          <p className="text-center text-base font-bold uppercase tracking-wide mb-2" style={{ color: "#1e3a5f" }}>
+            Course Completion Certificate
           </p>
-          <p className="italic text-sm">
-            an autonomous online learning platform as detailed below :
+          <p className="italic text-sm text-center">
+            as detailed below :
           </p>
         </div>
 
-        <div className="flex-1 relative z-10 space-y-2 text-sm" style={{ fontFamily: "serif" }}>
+        <div className="flex-1 relative z-10 space-y-1.5 text-sm" style={{ color: "#2d3748" }}>
           <div className="flex">
-            <div className="w-36 text-slate-700 italic">Name</div>
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Name</div>
             <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="font-medium text-slate-900 uppercase" data-testid="text-student-name">
+              <span className="font-semibold uppercase" style={{ color: "#1e3a5f" }} data-testid="text-student-name">
                 {certificate.studentName}
               </span>
             </div>
           </div>
 
           <div className="flex">
-            <div className="w-36 text-slate-700 italic">Register No.</div>
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Registration No.</div>
             <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="text-slate-800">{certificate.certificateId}</span>
+              <span style={{ color: "#1e3a5f" }}>{certificate.certificateId}</span>
             </div>
           </div>
 
           <div className="flex">
-            <div className="w-36 text-slate-700 italic">Course</div>
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Course</div>
             <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="font-medium text-slate-900 uppercase" data-testid="text-course-title">
+              <span className="font-semibold uppercase" style={{ color: "#1e3a5f" }} data-testid="text-course-title">
                 {certificate.courseTitle}
               </span>
             </div>
           </div>
 
           <div className="flex">
-            <div className="w-36 text-slate-700 italic">Level/<br/>Specialization</div>
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Level</div>
             <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="text-slate-800 uppercase">{levelLabel.toUpperCase()}</span>
-              {certificate.skills.length > 0 && (
-                <span className="text-slate-800 uppercase"> - {certificate.skills.slice(0, 3).join(", ")}</span>
-              )}
+              <span className="uppercase" style={{ color: "#1e3a5f" }}>{levelLabel.toUpperCase()}</span>
+            </div>
+          </div>
+
+          {certificate.skills.length > 0 && (
+            <div className="flex">
+              <div className="w-40 italic" style={{ color: "#4a5568" }}>Specialization</div>
+              <div className="flex-1">
+                <span className="mr-2">:</span>
+                <span className="uppercase" style={{ color: "#1e3a5f" }}>
+                  {certificate.skills.slice(0, 3).join(", ")}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex">
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Month & Year of<br/>Completion</div>
+            <div className="flex-1">
+              <span className="mr-2">:</span>
+              <span className="font-medium" style={{ color: "#1e3a5f" }}>{completionMonth}</span>
             </div>
           </div>
 
           <div className="flex">
-            <div className="w-36 text-slate-700 italic">Month & Year of<br/>Passing</div>
+            <div className="w-40 italic" style={{ color: "#4a5568" }}>Classification</div>
             <div className="flex-1">
               <span className="mr-2">:</span>
-              <span className="font-medium text-slate-800">{completionMonth}</span>
-            </div>
-          </div>
-
-          <div className="flex">
-            <div className="w-36 text-slate-700 italic">Classification</div>
-            <div className="flex-1">
-              <span className="mr-2">:</span>
-              <span className="font-bold text-slate-900">FIRST CLASS</span>
+              <span className="font-bold" style={{ color: "#1e3a5f" }}>FIRST CLASS</span>
             </div>
           </div>
         </div>
 
         <div className="mt-auto pt-4 relative z-10">
           <div className="flex items-end justify-between">
-            <div style={{ fontFamily: "serif" }}>
-              <div className="text-sm text-blue-700 font-medium">
-                Chennai - 600 025
+            <div>
+              <div className="text-sm font-medium" style={{ color: "#1e3a5f" }}>
+                Chennai – 600 025
               </div>
-              <div className="text-sm text-slate-700">
-                <span className="text-blue-700">Date : </span>
+              <div className="text-sm" style={{ color: "#4a5568" }}>
+                <span style={{ color: "#1e3a5f" }}>Date : </span>
                 <span data-testid="text-issue-date">
-                  {format(new Date(certificate.issuedAt), "dd-MMM-yy").toUpperCase()}
+                  {format(new Date(certificate.issuedAt), "dd-MMM-yyyy").toUpperCase()}
                 </span>
               </div>
             </div>
 
             <div className="text-center flex flex-col items-center">
-              <div className="relative">
-                <div 
-                  className="w-20 h-20 rounded-full border-2 border-blue-800 flex items-center justify-center bg-white"
-                  style={{ boxShadow: "0 0 0 1px #ccc" }}
-                >
-                  <div className="text-center text-blue-900">
-                    <div className="text-[7px] font-medium">Controller of Examinations</div>
-                    <div className="text-[9px] font-bold">Chennai</div>
-                    <div className="text-[8px]">600 025</div>
-                    <div className="text-[6px] mt-0.5">OurShiksha</div>
-                  </div>
+              <img 
+                src={ourShikshaStamp} 
+                alt="Official Seal" 
+                className="w-20 h-20 object-contain"
+                style={{ filter: "grayscale(20%)" }}
+              />
+            </div>
+
+            <div className="text-right">
+              <div className="mb-8"></div>
+              <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "140px" }}>
+                <div className="text-xs font-medium" style={{ color: "#1e3a5f" }}>
+                  Director of Certifications
+                </div>
+                <div className="text-[10px]" style={{ color: "#4a5568" }}>
+                  OUR SHIKSHA
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="text-center flex flex-col items-center">
-              <QRCodeBlock url={certificate.verificationUrl} size={70} />
-              <div className="mt-1 pt-1 border-t border-slate-400" style={{ fontFamily: "serif" }}>
-                <div className="text-xs text-slate-700">Controller of Examinations</div>
-                <div className="text-[10px] text-slate-500">i/c</div>
-              </div>
+        <div 
+          className="absolute bottom-6 right-6 z-20"
+        >
+          <div className="flex flex-col items-center">
+            <QRCodeBlock url={certificate.verificationUrl} size={60} />
+            <div className="text-[8px] mt-1 text-center" style={{ color: "#4a5568" }}>
+              Scan to Verify
             </div>
           </div>
         </div>
