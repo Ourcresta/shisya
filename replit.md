@@ -55,6 +55,14 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
   - Zone 4 (Pending Actions): Checklist-style cards showing tests to take and projects to submit, with "All caught up!" empty state
   - Zone 5 (Achievements): Recent Certificates with links and Skills Gained from completed courses
 - **Portfolio Preview System:** Private preview at `/shishya/profile/portfolio-preview` shows students how their portfolio appears to recruiters. Public portfolios accessible at `/profile/:username` and `/portfolio/:username` with OurShiksha branding and verification links.
+- **Academic Marksheet System:** University-style consolidated grade sheet at `/shishya/marksheet` showing:
+  - Student details header with marksheet ID and QR code for verification
+  - Table with all courses: S.No, Course Code, Course Name, Credits, Test Score, Grade, Project Status, Pass/Fail
+  - Grade calculation (O/A+/A/B+/B/C/F) based on test scores
+  - Summary section: Total Credits Earned, Courses Passed, CGPA (10-point scale), Classification (Distinction/First Class/Pass)
+  - PDF download with university-style formatting
+  - Public verification at `/verify/marksheet/:marksheetId`
+- **Course Card Credit Display:** Course catalog cards show "Free" badge (green) or credit cost badge (amber with coin icon) in top-right corner
 - **Key Principles:** Read-only content consumption, focus on published courses only, no admin features, graceful error handling, clear separation of public and authenticated routes.
 
 ## External Dependencies
