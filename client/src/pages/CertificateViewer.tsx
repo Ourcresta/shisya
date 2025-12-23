@@ -53,9 +53,12 @@ export default function CertificateViewer() {
     setDownloading(true);
     try {
       const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         backgroundColor: "#ffffff",
+        logging: false,
+        allowTaint: true,
+        removeContainer: true,
       });
       
       const imgData = canvas.toDataURL("image/png");

@@ -15,8 +15,9 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
   return (
     <div 
       id="certificate-preview" 
-      className="relative bg-white aspect-[1.414/1]"
+      className="relative aspect-[1.414/1]"
       style={{ 
+        backgroundColor: "#ffffff",
         boxShadow: forPrint ? "none" : "0 4px 20px rgba(0,0,0,0.15)",
         fontFamily: "'Times New Roman', 'Libre Baskerville', serif"
       }}
@@ -25,7 +26,9 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
       <div 
         className="absolute inset-0"
         style={{
+          backgroundColor: "#ffffff",
           background: `
+            #ffffff
             linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
             linear-gradient(90deg, transparent calc(100% - 10px), #1e3a5f calc(100% - 10px)),
             linear-gradient(0deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
@@ -41,11 +44,12 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           left: '16px',
           right: '16px',
           bottom: '16px',
-          border: '1px solid #1e3a5f'
+          border: '1px solid #1e3a5f',
+          backgroundColor: "#ffffff"
         }}
       />
 
-      <div className="absolute inset-0 p-10 md:p-12 flex flex-col">
+      <div className="absolute inset-0 p-10 md:p-12 flex flex-col" style={{ backgroundColor: "transparent" }}>
         
         <div 
           className="absolute inset-0 opacity-[0.05] pointer-events-none flex items-center justify-center"
@@ -60,7 +64,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           <img 
             src={ourShikshaStamp} 
             alt="OurShiksha Seal" 
-            className="w-24 h-24 object-contain"
+            className="w-32 h-32 object-contain"
           />
         </div>
 
@@ -179,9 +183,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
         <div className="mt-auto relative z-10">
           <div className="flex items-end justify-between">
             <div>
-              <div className="text-sm font-medium" style={{ color: "#1e3a5f" }}>
-                Chennai – 600 025
-              </div>
               <div className="text-sm" style={{ color: "#4a5568" }}>
                 <span style={{ color: "#1e3a5f" }}>Date : </span>
                 <span data-testid="text-issue-date">
@@ -194,8 +195,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
               <img 
                 src={ourShikshaStamp} 
                 alt="Official Seal" 
-                className="w-16 h-16 object-contain"
-                style={{ opacity: 0.9 }}
+                className="w-20 h-20 object-contain"
               />
               
               <div className="text-right">
