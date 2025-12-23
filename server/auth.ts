@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { db } from "./db";
-import { users, sessions } from "@shared/schema";
+import { users, sessions, userCredits, creditTransactions, WELCOME_BONUS_CREDITS } from "@shared/schema";
 import { signupSchema, loginSchema, verifyOtpSchema } from "@shared/schema";
 import type { OtpPurpose } from "@shared/schema";
 import { eq, and, gt } from "drizzle-orm";
@@ -123,6 +123,41 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
 
     await db.update(users).set({ emailVerified: true }).where(eq(users.id, user.id));
 
+    // Grant welcome bonus credits to new users
+    try {
+      // Check if user already has credits (shouldn't happen for new users)
+      const existingCredits = await db
+        .select()
+        .from(userCredits)
+        .where(eq(userCredits.userId, user.id))
+        .limit(1);
+
+      if (existingCredits.length === 0) {
+        // Create credits wallet with welcome bonus
+        await db.insert(userCredits).values({
+          userId: user.id,
+          balance: WELCOME_BONUS_CREDITS,
+          totalEarned: WELCOME_BONUS_CREDITS,
+          totalSpent: 0,
+        });
+
+        // Record the welcome bonus transaction
+        await db.insert(creditTransactions).values({
+          userId: user.id,
+          amount: WELCOME_BONUS_CREDITS,
+          type: "BONUS",
+          reason: "WELCOME_BONUS",
+          description: "Welcome bonus for new users",
+          balanceAfter: WELCOME_BONUS_CREDITS,
+        });
+
+        console.log(`[Credits] Welcome bonus of ${WELCOME_BONUS_CREDITS} credits granted to user ${user.id}`);
+      }
+    } catch (creditsError) {
+      console.error("Error granting welcome bonus:", creditsError);
+      // Don't fail signup if credits fail - they can be applied later
+    }
+
     const sessionId = randomUUID();
     const expiresAt = new Date(Date.now() + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
@@ -146,6 +181,7 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
         email: user.email,
         emailVerified: true,
       },
+      welcomeBonus: WELCOME_BONUS_CREDITS,
     });
   } catch (error) {
     console.error("Verify OTP error:", error);

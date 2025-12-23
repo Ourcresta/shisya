@@ -4,6 +4,7 @@ import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mock
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
 import { registerMithraRoutes } from "./mithra";
+import { creditsRouter } from "./credits";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -41,6 +42,10 @@ export async function registerRoutes(
   
   // Auth routes
   app.use("/api/auth", authRouter);
+  
+  // Credits and enrollments routes
+  app.use("/api/user/credits", creditsRouter);
+  app.use("/api", creditsRouter);
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {
