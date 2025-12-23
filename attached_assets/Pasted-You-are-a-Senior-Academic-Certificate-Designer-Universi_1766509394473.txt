@@ -1,0 +1,77 @@
+You are a Senior Academic Certificate Designer, 
+University Registrar, and Full-Stack Engineer.
+
+Redesign the existing OurShiksha certificate UI and PDF 
+to match a formal Indian university provisional certificate style.
+
+GOALS:
+- Academic credibility > modern aesthetics
+- Print-first design
+- Tamper-resistant & verifiable
+
+CERTIFICATE TYPES:
+Support two types via backend flag:
+1. COURSE COMPLETION CERTIFICATE
+2. PROGRAM COMPLETION CERTIFICATE
+
+LAYOUT REQUIREMENTS:
+1. Header (Centered):
+   - University-style seal/emblem (grayscale)
+   - "OUR SHIKSHA"
+   - Subtext: "Established Learning Authority"
+   - Location: Chennai – 600 025
+   - Serif font with letter spacing
+
+2. Certificate Title:
+   - Dynamically render based on certificate_type
+   - Large serif font, uppercase, centered
+
+3. Body Text (Formal Academic Language):
+   - No marketing words
+   - Use “undermentioned candidate”
+   - Use “has successfully completed the requirements prescribed”
+
+4. Candidate Details:
+   - Render as a two-column academic table
+   - Fields:
+     Name
+     Registration No
+     Course / Program
+     Level
+     Specialization
+     Duration
+     Month & Year of Completion
+     Classification
+
+5. Footer:
+   - Left: Place & Date
+   - Center: Watermark seal (opacity 5–8%)
+   - Right: Signature block:
+     "Director of Certifications – OUR SHIKSHA"
+
+6. Verification:
+   - QR code linked to /verify/:certificateId
+   - Text indicating digital verification
+
+DESIGN SYSTEM:
+- Fonts: Playfair Display / Libre Baskerville / Cinzel
+- Colors: Navy Blue, Charcoal, Academic Gold accents
+- Borders: Single strong outer border, subtle inner margin
+- No shadows, no gradients
+
+TECHNICAL:
+- Same layout for UI preview and PDF export
+- A4 size (landscape)
+- PDF must be print-safe
+- Certificate ID immutable
+- QR + verification endpoint mandatory
+
+OUTPUT:
+- Updated Certificate React component
+- Print-optimized PDF layout
+- Responsive preview view
+- Clean academic typography
+
+Do not simplify.
+Do not modernize excessively.
+Think like a university registrar, not a startup designer.
