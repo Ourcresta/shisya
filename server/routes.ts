@@ -6,26 +6,33 @@ import { authRouter } from "./auth";
 import { registerMithraRoutes } from "./mithra";
 import type { ModuleWithLessons } from "@shared/schema";
 
-// AISiksha Admin Course Factory backend URL
-// Set this environment variable when the admin backend is deployed
-const ADMIN_API_BASE = process.env.ADMIN_API_BASE || "";
+// AISiksha Admin Course Factory configuration
+const AISIKSHA_ADMIN_URL = process.env.AISIKSHA_ADMIN_URL || "";
+const AISIKSHA_API_KEY = process.env.AISIKSHA_API_KEY || "";
 
 // Check if we should use mock data (when admin backend is not available)
-const USE_MOCK_DATA = !ADMIN_API_BASE;
+const USE_MOCK_DATA = !AISIKSHA_ADMIN_URL || !AISIKSHA_API_KEY;
 
-// Helper function to fetch from admin backend
+// Helper function to fetch from AISiksha Admin API
 async function fetchFromAdmin(endpoint: string): Promise<Response> {
-  if (!ADMIN_API_BASE) {
-    throw new Error("Admin API not configured");
+  if (!AISIKSHA_ADMIN_URL || !AISIKSHA_API_KEY) {
+    throw new Error("AISiksha Admin API not configured");
   }
-  const url = `${ADMIN_API_BASE}/api${endpoint}`;
+  const url = `${AISIKSHA_ADMIN_URL}/api/public${endpoint}`;
+  console.log(`[AISiksha] Fetching: ${url}`);
   const response = await fetch(url, {
     headers: {
       "Accept": "application/json",
+      "X-API-Key": AISIKSHA_API_KEY,
     },
   });
   return response;
 }
+
+// Log configuration status on startup
+console.log(`[AISiksha] Admin URL configured: ${!!AISIKSHA_ADMIN_URL}`);
+console.log(`[AISiksha] API Key configured: ${!!AISIKSHA_API_KEY}`);
+console.log(`[AISiksha] Using mock data: ${USE_MOCK_DATA}`);
 
 export async function registerRoutes(
   httpServer: Server,
@@ -46,25 +53,29 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin("/courses");
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch courses" });
+        console.error(`[AISiksha] Failed to fetch courses: ${response.status}`);
+        // Fallback to mock data
+        const publishedCourses = mockCourses.filter(c => c.status === "published");
+        return res.json(publishedCourses);
       }
-      const courses = await response.json();
+      const data = await response.json();
+      // API returns { success: true, courses: [...] }
+      const courses = data.courses || data;
       // Filter to only show published courses
       const publishedCourses = Array.isArray(courses) 
         ? courses.filter((c: any) => c.status === "published")
         : [];
+      console.log(`[AISiksha] Fetched ${publishedCourses.length} published courses`);
       res.json(publishedCourses);
     } catch (error) {
       console.error("Error fetching courses:", error);
-      if (USE_MOCK_DATA) {
-        const publishedCourses = mockCourses.filter(c => c.status === "published");
-        return res.json(publishedCourses);
-      }
-      res.status(500).json({ error: "Failed to fetch courses" });
+      // Fallback to mock data
+      const publishedCourses = mockCourses.filter(c => c.status === "published");
+      return res.json(publishedCourses);
     }
   });
 
-  // GET /api/courses/:courseId - Fetch single course
+  // GET /api/courses/:courseId - Fetch single course with full content
   app.get("/api/courses/:courseId", async (req, res) => {
     try {
       const { courseId } = req.params;
@@ -80,16 +91,31 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/courses/${courseId}`);
       if (!response.ok) {
-        return res.status(response.status).json({ error: "Course not found" });
+        console.error(`[AISiksha] Failed to fetch course ${courseId}: ${response.status}`);
+        // Fallback to mock data
+        const course = mockCourses.find(c => c.id === courseIdNum);
+        if (!course || course.status !== "published") {
+          return res.status(404).json({ error: "Course not found" });
+        }
+        return res.json(course);
       }
-      const course = await response.json();
+      const data = await response.json();
+      // API returns { success: true, course: {...} }
+      const course = data.course || data;
       // Only return if published
       if (course.status !== "published") {
         return res.status(404).json({ error: "Course not found" });
       }
+      console.log(`[AISiksha] Fetched course: ${course.title}`);
       res.json(course);
     } catch (error) {
       console.error("Error fetching course:", error);
+      // Fallback to mock data
+      const courseIdNum = parseInt(req.params.courseId, 10);
+      const course = mockCourses.find(c => c.id === courseIdNum);
+      if (course && course.status === "published") {
+        return res.json(course);
+      }
       res.status(500).json({ error: "Failed to fetch course" });
     }
   });

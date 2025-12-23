@@ -40,3 +40,8 @@ waitForPort = 5000
 
 [agent]
 integrations = ["resend:1.0.0", "javascript_openai_ai_integrations:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+AISIKSHA_ADMIN_URL = "https://db050753-70df-44c9-8785-7ab6fe741fd1-00-34cllu3yq8z.worf.replit.dev"
