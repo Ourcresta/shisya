@@ -38,9 +38,19 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **Centralized Tests Page:** `/shishya/tests` displays all tests from all enrolled courses in a modular table format with course name, test title, duration, passing percentage, status (Not Attempted/Passed/Failed with score), and clickable rows for navigation to test details.
 - **Profile Photo Upload:** Students can upload a profile photo by hovering over their avatar on the profile page and clicking the camera icon. Supports image files up to 2MB, stored as base64 in localStorage.
 - **Landing Page:** Comprehensive homepage at "/" with 7 sections - Hero, Journey (5-step learning path), Features (7 cards), Course Preview (fetches real courses), CTA, and Footer. Auth-aware CTAs show Login/Signup for guests or "Go to Shishya" for authenticated users.
+- **Credit-Based Enrollment System:** Students use Learning Credits to enroll in courses:
+  - 500 credits welcome bonus granted automatically upon signup/email verification
+  - Free courses (isFree: true) have no credit cost
+  - Paid courses deduct credits upon enrollment
+  - Dashboard displays credit balance in Zone 2 metrics
+  - Course Overview page shows credit cost badges and enrollment status
+  - Enrollment modal confirms cost before deducting credits
+  - Database tables: user_credits (balance tracking), credit_transactions (history), course_enrollments (enrollment records)
+  - API endpoints: GET /api/user/credits, POST /api/user/credits/enrollments, GET /api/user/credits/enrollments/check/:courseId
+  - CreditContext provides global state for credits and enrollment functions
 - **Enhanced Dashboard:** Restructured with 5 clear zones for optimal UX:
   - Zone 1 (Welcome & Status): Personalized greeting, Learning Status Badge (Beginner/Intermediate/Advanced), motivational subtitle, Quick Links to key sections
-  - Zone 2 (Learning Snapshot): 4 clickable metric cards - In Progress, Completed, Certificates, Tests Passed
+  - Zone 2 (Learning Snapshot): 5 clickable metric cards - Credits, In Progress, Completed, Certificates, Tests Passed
   - Zone 3 (Primary Action): Smart CTA logic - Continue Learning (if active course), Start Learning (if new), or Complete Pending Actions (if blockers exist)
   - Zone 4 (Pending Actions): Checklist-style cards showing tests to take and projects to submit, with "All caught up!" empty state
   - Zone 5 (Achievements): Recent Certificates with links and Skills Gained from completed courses
