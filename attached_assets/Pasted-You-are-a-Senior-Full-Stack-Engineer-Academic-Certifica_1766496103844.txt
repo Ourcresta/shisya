@@ -1,0 +1,167 @@
+You are a Senior Full-Stack Engineer, Academic Certification Architect,
+Security-First System Designer, and PDF Rendering Expert.
+
+Your task is to design and implement a
+COURSE COMPLETION CERTIFICATE SYSTEM
+for the OurShiksha platform.
+
+This certificate represents the successful completion
+of a SINGLE COURSE (not a full program).
+
+This must feel like a REAL academic certificate,
+not a badge or marketing PDF.
+
+══════════════════════════════════════
+🎯 OBJECTIVE
+══════════════════════════════════════
+
+Generate a verifiable, immutable, downloadable
+Course Completion Certificate
+for students who complete a course successfully.
+
+══════════════════════════════════════
+✅ ELIGIBILITY RULES (STRICT)
+══════════════════════════════════════
+
+A Course Completion Certificate can be generated ONLY IF:
+
+✔ All lessons in the course are completed  
+✔ Required tests are passed (as defined in course settings)  
+✔ Required projects are submitted and approved  
+✔ Course status = COMPLETED  
+✔ Certificate is enabled in Admin (Guru) portal  
+
+If any condition fails → certificate must remain LOCKED.
+
+══════════════════════════════════════
+📄 CERTIFICATE CONTENT (ACADEMIC FORMAT)
+══════════════════════════════════════
+
+HEADER:
+• OurShiksha Logo
+• “OFFICIAL COURSE COMPLETION CERTIFICATE”
+• Subtle watermark (OurShiksha seal)
+
+MAIN BODY TEXT (Formal Tone):
+“This is to certify that <Student Full Name>
+has successfully completed the course
+<Course Name>
+offered by OurShiksha,
+having fulfilled all academic requirements.”
+
+COURSE DETAILS SECTION:
+• Course Name
+• Course Level (Beginner / Intermediate / Advanced)
+• Course Duration (hours)
+• Credits Earned
+• Completion Date
+
+PERFORMANCE SUMMARY:
+• Test Score (percentage, if applicable)
+• Project Status (Approved / Not Required)
+• Overall Status: PASSED
+
+CERTIFICATE METADATA:
+• Unique Certificate ID
+• Issue Date
+• Academic Year / Batch
+
+SIGNATURE ZONE:
+• Authorized Signatory – OurShiksha
+• Digital Seal / Stamp
+• “Issued by OurShiksha – Learn. Practice. Prove.”
+
+══════════════════════════════════════
+🔐 VERIFICATION SYSTEM (MANDATORY)
+══════════════════════════════════════
+
+Generate a QR Code on the certificate that links to:
+
+/verify/certificate/:certificateId
+
+Public verification page must show:
+• Student Name
+• Course Name
+• Issue Date
+• Certificate Status (VALID / REVOKED)
+• Issued by OurShiksha
+
+NO LOGIN REQUIRED for verification.
+
+══════════════════════════════════════
+🗂 DATABASE DESIGN (REQUIRED)
+══════════════════════════════════════
+
+Create tables:
+
+• course_certificates
+  - id
+  - student_id
+  - course_id
+  - certificate_id (public)
+  - issued_at
+  - status (active / revoked)
+  - verification_hash
+
+• certificate_logs
+  - certificate_id
+  - action (issued / viewed / revoked)
+  - timestamp
+
+Certificates MUST be immutable after issuance.
+
+══════════════════════════════════════
+🖥 ADMIN (GURU) CONTROLS
+══════════════════════════════════════
+
+Admin can:
+• Enable / disable certificate for a course
+• View issued certificates
+• Revoke certificate (with reason)
+• Re-issue only if revoked
+
+Admin CANNOT:
+• Modify issued certificate content
+
+══════════════════════════════════════
+🧑‍🎓 STUDENT (SHISHYA) VIEW
+══════════════════════════════════════
+
+Student can:
+• View certificate
+• Download certificate as PDF
+• Share verification link
+• See locked state if not eligible
+
+══════════════════════════════════════
+📤 TECHNICAL REQUIREMENTS
+══════════════════════════════════════
+
+• Generate certificate using HTML → PDF
+• Consistent layout across devices
+• Secure, non-guessable certificate IDs
+• Role-based access control
+• Graceful error handling
+
+══════════════════════════════════════
+🚫 DO NOT
+══════════════════════════════════════
+
+✗ Do NOT generate certificates automatically without checks  
+✗ Do NOT allow editing after issue  
+✗ Do NOT expose internal IDs publicly  
+
+══════════════════════════════════════
+📦 FINAL OUTPUT REQUIRED
+══════════════════════════════════════
+
+1. Database schema
+2. API endpoints
+3. Certificate generation logic
+4. Verification page
+5. Student + Admin UI integration
+6. PDF layout structure
+
+Build this as a REAL academic certification system.
+
+Start implementation now.
