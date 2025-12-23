@@ -1,21 +1,62 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link, Redirect } from "wouter";
-import { ArrowRight, CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen, ClipboardList, FlaskConical } from "lucide-react";
+import { useParams, Link, Redirect, useLocation } from "wouter";
+import { CheckCircle2, XCircle, Target, Award, FolderKanban, BookOpen, ClipboardList, FlaskConical, Coins, Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { LevelBadge } from "@/components/ui/level-badge";
 import { DurationBadge } from "@/components/ui/duration-badge";
 import { SkillTag } from "@/components/ui/skill-tag";
+import { EnrollmentModal } from "@/components/EnrollmentModal";
+import { useCredits } from "@/contexts/CreditContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Course } from "@shared/schema";
 
 export default function CourseOverview() {
   const { courseId } = useParams<{ courseId: string }>();
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const { checkEnrollment, enrollments, isLoadingEnrollments } = useCredits();
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [checkingEnrollment, setCheckingEnrollment] = useState(false);
   
   const { data: course, isLoading, error } = useQuery<Course>({
     queryKey: ["/api/courses", courseId],
   });
+
+  useEffect(() => {
+    const checkUserEnrollment = async () => {
+      if (user && courseId) {
+        setCheckingEnrollment(true);
+        const result = await checkEnrollment(parseInt(courseId, 10));
+        setIsEnrolled(result.enrolled);
+        setCheckingEnrollment(false);
+      }
+    };
+    checkUserEnrollment();
+  }, [user, courseId, checkEnrollment, enrollments]);
+
+  const handleEnrollmentSuccess = () => {
+    setIsEnrolled(true);
+    setLocation(`/shishya/learn/${courseId}`);
+  };
+
+  const handleStartLearning = () => {
+    if (!user) {
+      setLocation("/login");
+      return;
+    }
+    
+    if (isEnrolled) {
+      setLocation(`/shishya/learn/${courseId}`);
+    } else {
+      setShowEnrollModal(true);
+    }
+  };
 
   if (error) {
     return <Redirect to="/" />;
@@ -36,6 +77,21 @@ export default function CourseOverview() {
             <div className="flex flex-wrap items-center gap-3">
               <LevelBadge level={course.level} />
               <DurationBadge duration={course.duration} />
+              {course.isFree ? (
+                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" data-testid="badge-free-course">
+                  Free Course
+                </Badge>
+              ) : course.creditCost ? (
+                <Badge variant="secondary" className="gap-1" data-testid="badge-credit-cost">
+                  <Coins className="h-3 w-3" />
+                  {course.creditCost} Credits
+                </Badge>
+              ) : null}
+              {isEnrolled && (
+                <Badge variant="secondary" className="bg-primary/10 text-primary" data-testid="badge-enrolled">
+                  Enrolled
+                </Badge>
+              )}
             </div>
             
             <h1 
@@ -120,13 +176,21 @@ export default function CourseOverview() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4 flex-wrap">
-            <Link href={`/shishya/learn/${course.id}`}>
-              <Button size="lg" className="px-8 gap-2" data-testid="button-start-learning">
+            <Button 
+              size="lg" 
+              className="px-8 gap-2" 
+              onClick={handleStartLearning}
+              disabled={checkingEnrollment}
+              data-testid="button-start-learning"
+            >
+              {checkingEnrollment ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
                 <BookOpen className="w-4 h-4" />
-                Start Learning
-              </Button>
-            </Link>
-            {course.testRequired && (
+              )}
+              {isEnrolled ? "Continue Learning" : "Start Learning"}
+            </Button>
+            {course.testRequired && isEnrolled && (
               <Link href={`/shishya/tests/${course.id}`}>
                 <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-tests">
                   <ClipboardList className="w-4 h-4" />
@@ -134,7 +198,7 @@ export default function CourseOverview() {
                 </Button>
               </Link>
             )}
-            {course.projectRequired && (
+            {course.projectRequired && isEnrolled && (
               <Link href={`/shishya/projects/${course.id}`}>
                 <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-projects">
                   <FolderKanban className="w-4 h-4" />
@@ -142,13 +206,22 @@ export default function CourseOverview() {
                 </Button>
               </Link>
             )}
-            <Link href={`/shishya/labs/${course.id}`}>
-              <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-labs">
-                <FlaskConical className="w-4 h-4" />
-                Practice Labs
-              </Button>
-            </Link>
+            {isEnrolled && (
+              <Link href={`/shishya/labs/${course.id}`}>
+                <Button size="lg" variant="outline" className="px-8 gap-2" data-testid="button-view-labs">
+                  <FlaskConical className="w-4 h-4" />
+                  Practice Labs
+                </Button>
+              </Link>
+            )}
           </div>
+
+          <EnrollmentModal
+            course={course}
+            open={showEnrollModal}
+            onOpenChange={setShowEnrollModal}
+            onEnrollmentSuccess={handleEnrollmentSuccess}
+          />
         </div>
       ) : null}
     </Layout>

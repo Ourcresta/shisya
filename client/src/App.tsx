@@ -7,6 +7,7 @@ import { ProgressProvider } from "@/contexts/ProgressContext";
 import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CreditProvider } from "@/contexts/CreditContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/LandingPage";
@@ -176,12 +177,14 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <ProgressProvider>
-              <TestAttemptProvider>
-                <Toaster />
-                <Router />
-              </TestAttemptProvider>
-            </ProgressProvider>
+            <CreditProvider>
+              <ProgressProvider>
+                <TestAttemptProvider>
+                  <Toaster />
+                  <Router />
+                </TestAttemptProvider>
+              </ProgressProvider>
+            </CreditProvider>
           </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
