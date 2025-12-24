@@ -1,0 +1,109 @@
+You are a Senior Product Designer, UX Engineer,
+and Monetization Architect.
+
+Your task is to ENHANCE the Shishya Courses UI
+to CLEARLY DISPLAY COURSE POINT COST
+and INTEGRATE IT with the credit-based enrollment system.
+
+--------------------------------------------------
+🎯 OBJECTIVE
+--------------------------------------------------
+
+Students must immediately understand:
+• How many points a course costs
+• Whether the course is free or paid
+• Whether they can enroll with their current balance
+
+No ambiguity is allowed.
+
+--------------------------------------------------
+📍 UI PLACEMENT (LOCK THIS)
+--------------------------------------------------
+
+On each Course Card:
+
+1️⃣ TOP-RIGHT BADGE
+• Show:
+  - "Free" OR
+  - "🪙 <points> Points"
+
+2️⃣ CTA BUTTON (Dynamic)
+• If course is free:
+  → "Start Learning"
+
+• If paid AND user has enough points:
+  → "Enroll for <points> Points"
+
+• If paid AND insufficient points:
+  → Disabled button
+  → Text: "Insufficient Points"
+
+--------------------------------------------------
+🧠 USER CONTEXT LOGIC
+--------------------------------------------------
+
+You MUST consider:
+• User’s current point balance
+• Enrollment status
+
+Logic:
+• If already enrolled → "Continue Learning"
+• If not enrolled → Show pricing CTA
+
+--------------------------------------------------
+🎨 DESIGN RULES
+--------------------------------------------------
+
+• Points badge must be subtle
+• Do NOT overpower the course title
+• Badge color:
+  - Green = Free
+  - Blue = Affordable
+  - Red = Insufficient
+
+• Mobile responsive
+• No layout shift
+
+--------------------------------------------------
+⚙️ TECHNICAL REQUIREMENTS
+--------------------------------------------------
+
+Frontend:
+• React + TypeScript
+• CourseCard component enhancement
+• Use existing credit state from user context
+
+Data:
+• course.pointsRequired
+• user.pointsBalance
+• user.enrolledCourses
+
+--------------------------------------------------
+🧪 TEST CASES (MANDATORY)
+--------------------------------------------------
+
+✔ Free course shows "Free"
+✔ Paid course shows exact points
+✔ User with enough points sees enroll CTA
+✔ User with insufficient points sees disabled CTA
+✔ Enrolled course shows "Continue Learning"
+✔ UI works on mobile and desktop
+
+--------------------------------------------------
+🚫 DO NOT
+--------------------------------------------------
+
+✗ Do NOT hide pricing
+✗ Do NOT require click to see cost
+✗ Do NOT auto-enroll
+✗ Do NOT confuse Free vs Paid
+
+--------------------------------------------------
+✅ FINAL UX PRINCIPLE
+--------------------------------------------------
+
+A student should know in **2 seconds**:
+“Can I take this course or not?”
+
+Make the decision obvious.
+Make the action simple.
