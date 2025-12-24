@@ -38,6 +38,10 @@ import MarksheetVerify from "@/pages/MarksheetVerify";
 import Wallet from "@/pages/Wallet";
 import MyLearnings from "@/pages/MyLearnings";
 import Pricing from "@/pages/Pricing";
+import About from "@/pages/About";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
+import Contact from "@/pages/Contact";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
@@ -155,6 +159,10 @@ function Router() {
       {/* Public Routes - No Login Required */}
       <Route path="/" component={LandingPage} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/about" component={About} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/contact" component={Contact} />
       <Route path="/courses" component={CourseCatalog} />
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />

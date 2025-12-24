@@ -174,7 +174,7 @@ function FeaturesSection() {
           {features.map((feature) => (
             <Card
               key={feature.title}
-              className={`relative ${feature.comingSoon ? "opacity-75" : ""}`}
+              className="relative"
               data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
             >
               <CardContent className="pt-6">
@@ -189,11 +189,6 @@ function FeaturesSection() {
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
                 </div>
-                {feature.comingSoon && (
-                  <Badge variant="secondary" className="absolute top-3 right-3 text-xs">
-                    Coming Soon
-                  </Badge>
-                )}
               </CardContent>
             </Card>
           ))}
@@ -374,18 +369,21 @@ function Footer() {
             </span>
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors" data-testid="link-about">
+            <Link href="/" className="hover:text-foreground transition-colors" data-testid="link-home">
+              Home
+            </Link>
+            <Link href="/about" className="hover:text-foreground transition-colors" data-testid="link-about">
               About
-            </a>
-            <a href="#" className="hover:text-foreground transition-colors" data-testid="link-privacy">
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-foreground transition-colors" data-testid="link-terms">
+            </Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">
               Terms of Service
-            </a>
-            <a href="#" className="hover:text-foreground transition-colors" data-testid="link-contact">
+            </Link>
+            <Link href="/contact" className="hover:text-foreground transition-colors" data-testid="link-contact">
               Contact
-            </a>
+            </Link>
           </nav>
           <p className="text-sm text-muted-foreground" data-testid="text-copyright">
             OurShiksha {currentYear}
