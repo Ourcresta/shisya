@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   BookOpen, 
   GraduationCap, 
@@ -9,8 +10,11 @@ import {
   LayoutDashboard, 
   UserPlus,
   Coins,
-  Sparkles
+  Sparkles,
+  Search,
+  X
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/contexts/CreditContext";
@@ -37,6 +41,8 @@ const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
 
 export function Header() {
   const [location, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { user, isLoading, logout } = useAuth();
   const { balance, isLoading: creditsLoading } = useCredits();
   const { themeMode, themeColor, setThemeMode, setThemeColor, resolvedMode } = useTheme();
@@ -49,10 +55,19 @@ export function Header() {
     setLocation("/");
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setLocation(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setIsSearchOpen(false);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex h-16 items-center justify-between gap-4">
-        <Link href={user ? "/shishya/dashboard" : "/"} className="flex items-center gap-2 group" data-testid="link-home">
+        <Link href={user ? "/shishya/dashboard" : "/"} className="flex items-center gap-2 group shrink-0" data-testid="link-home">
           <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground">
             <GraduationCap className="w-5 h-5" />
           </div>
@@ -85,7 +100,32 @@ export function Header() {
           </div>
         </Link>
 
+        {/* Search Bar */}
+        <div className="flex-1 max-w-md mx-4 hidden md:block">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 h-9 bg-muted/50 border-transparent focus:border-border focus:bg-background"
+              data-testid="input-search"
+            />
+          </form>
+        </div>
+
         <nav className="flex items-center gap-1 sm:gap-2">
+          {/* Mobile Search Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            data-testid="button-search-toggle"
+          >
+            {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+          </Button>
           {!isLoading && (
             <>
               {user ? (
@@ -258,6 +298,24 @@ export function Header() {
           )}
         </nav>
       </div>
+      
+      {/* Mobile Search Overlay */}
+      {isSearchOpen && (
+        <div className="md:hidden border-t bg-background p-3">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 h-10 w-full"
+              autoFocus
+              data-testid="input-search-mobile"
+            />
+          </form>
+        </div>
+      )}
     </header>
   );
 }
