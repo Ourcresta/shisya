@@ -1,0 +1,154 @@
+You are a Senior Product Architect, UX Designer,
+and FinTech-style Wallet System Engineer.
+
+Your task is to BUILD a PRODUCTION-READY
+Points Wallet UI for the SHISHYA Student Portal.
+
+This wallet represents the student’s learning credits
+used to enroll in paid courses.
+
+--------------------------------------------------
+🎯 OBJECTIVE
+--------------------------------------------------
+
+Students must clearly see:
+• How many points they have
+• How points were earned
+• How points were spent
+• How to recharge / get more points
+
+The wallet must feel TRUSTED, SIMPLE, and CLEAR.
+
+--------------------------------------------------
+📍 ROUTING (LOCK THIS)
+--------------------------------------------------
+
+Route:
+  /shishya/wallet
+
+Navigation:
+• Add “Wallet” item in the top navbar
+• Show current balance as:
+  🪙 340 Points (clickable)
+
+--------------------------------------------------
+🧱 WALLET PAGE STRUCTURE
+--------------------------------------------------
+
+SECTION 1️⃣ — Wallet Summary (Hero Card)
+
+• Large Points Balance:
+  “🪙 340 Points Available”
+
+• Subtext:
+  “Use points to enroll in premium courses”
+
+• Primary CTA:
+  [ Get More Points ]
+
+--------------------------------------------------
+SECTION 2️⃣ — Quick Actions
+
+Buttons:
+• ➕ Get More Points
+• 🎓 Browse Courses
+• 📜 View Certificates
+
+--------------------------------------------------
+SECTION 3️⃣ — Points Usage History
+
+Table / Card List with columns:
+• Date
+• Description
+• Type (Credit / Debit)
+• Points (+ / −)
+• Balance After
+
+Examples:
+• +500  → Welcome Bonus
+• −120  → React Fundamentals
+• −200  → Advanced TypeScript
+
+--------------------------------------------------
+SECTION 4️⃣ — Earning Rules (Info Box)
+
+Static info:
+• 🎁 500 points free on signup
+• 🎓 Points used to enroll in courses
+• ❌ Points are non-transferable
+• 🔒 Points cannot be withdrawn
+
+--------------------------------------------------
+🎨 DESIGN SYSTEM
+--------------------------------------------------
+
+• Clean card-based layout
+• FinTech-inspired (wallet, not gaming)
+• Colors:
+  - Primary: Brand blue
+  - Positive: Green
+  - Negative: Red
+• Mobile-first
+• No clutter
+
+--------------------------------------------------
+🧠 DATA & STATE REQUIREMENTS
+--------------------------------------------------
+
+User object must include:
+• pointsBalance
+• walletTransactions[]
+
+Transaction model:
+• id
+• type: CREDIT | DEBIT
+• source (Signup / Course / Admin)
+• points
+• date
+• balanceAfter
+
+--------------------------------------------------
+⚙️ TECHNICAL REQUIREMENTS
+--------------------------------------------------
+
+Frontend:
+• React + TypeScript
+• WalletContext / UserContext
+• Reusable components:
+  - WalletSummaryCard
+  - WalletHistoryTable
+  - PointsBadge
+
+Backend (API-ready):
+• GET /wallet
+• GET /wallet/transactions
+
+--------------------------------------------------
+🧪 TEST CASES (MANDATORY)
+--------------------------------------------------
+
+✔ New user sees 500 free points
+✔ Course enrollment deducts points
+✔ Wallet updates immediately after deduction
+✔ History shows correct balance
+✔ Wallet UI works on mobile
+✔ Zero-point state handled gracefully
+
+--------------------------------------------------
+🚫 DO NOT
+--------------------------------------------------
+
+✗ Do NOT mix wallet logic with courses UI
+✗ Do NOT auto-recharge
+✗ Do NOT allow negative balance
+✗ Do NOT hide transaction history
+
+--------------------------------------------------
+✅ PRODUCT PRINCIPLE
+--------------------------------------------------
+
+If users TRUST the wallet,
+they will SPEND points confidently.
+
+Make it feel like money.
+Make it feel fair.

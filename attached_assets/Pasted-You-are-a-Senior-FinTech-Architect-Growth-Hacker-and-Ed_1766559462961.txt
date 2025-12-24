@@ -1,0 +1,223 @@
+You are a Senior FinTech Architect,
+Growth Hacker,
+and EdTech Platform Engineer.
+
+Your task is to EXTEND the existing
+“Buy Credits (₹₹₹)” system
+by adding:
+
+1) Voucher Codes
+2) Gift Credit Boxes
+
+This must be secure, auditable,
+and production-ready.
+
+--------------------------------------------------
+🎯 BUSINESS GOAL
+--------------------------------------------------
+
+• Increase conversions
+• Enable gifting learning
+• Enable promotions & referrals
+• Create festive / corporate sales use-cases
+
+--------------------------------------------------
+📍 ROUTES (LOCK)
+--------------------------------------------------
+
+/shishya/wallet
+/shishya/wallet/buy
+/shishya/wallet/redeem
+/shishya/wallet/gift
+
+--------------------------------------------------
+🪙 WALLET ENHANCEMENT
+--------------------------------------------------
+
+Wallet now supports:
+• Paid Credits
+• Voucher Credits
+• Gift Credits
+
+Transaction source must track:
+• Recharge
+• Voucher
+• Gift Received
+
+--------------------------------------------------
+🎟️ PART 1 — VOUCHER SYSTEM
+--------------------------------------------------
+
+### Voucher Concept
+• Admin-generated codes
+• Fixed points or bonus %
+• Limited usage
+• Optional expiry
+
+Examples:
+• WELCOME500 → +500 points
+• NEWYEAR10 → +10% bonus
+• FESTIVE1000 → +1000 points
+
+--------------------------------------------------
+### Voucher Redeem UI
+
+Location:
+• Wallet page
+• Redeem section
+
+UI:
+• Input: Voucher Code
+• Button: Redeem
+• Show success/failure toast
+
+--------------------------------------------------
+### Voucher Validation Rules
+
+✔ Code exists
+✔ Not expired
+✔ Not already redeemed by user
+✔ Usage limit not exceeded
+
+--------------------------------------------------
+### Voucher Credit Logic
+
+On success:
+• Create CREDIT transaction
+• source = "Voucher"
+• points added
+• mark voucher as redeemed
+
+--------------------------------------------------
+📦 PART 2 — GIFT CREDIT BOXES
+--------------------------------------------------
+
+### Gift Box Concept
+
+A Gift Box is a prepaid credit pack
+that can be sent to another user.
+
+Examples:
+🎁 Learning Starter – 500 Points
+🎁 Skill Booster – 1000 Points
+🎁 Pro Career Box – 2500 Points
+
+--------------------------------------------------
+### Gift Purchase Flow
+
+1. Buyer selects Gift Box
+2. Pays via Razorpay
+3. Enters recipient email / phone
+4. Gift created in backend
+5. Gift notification sent
+
+--------------------------------------------------
+### Gift Claim Flow
+
+Recipient:
+• Sees “You received a Gift 🎉”
+• Clicks Claim
+• Points added to wallet
+• Gift marked as claimed
+
+--------------------------------------------------
+📊 GIFT STATUS STATES
+--------------------------------------------------
+
+• CREATED
+• SENT
+• CLAIMED
+• EXPIRED
+
+--------------------------------------------------
+🧠 DATA MODELS
+--------------------------------------------------
+
+Voucher:
+• code
+• points / bonusPercent
+• expiryDate
+• maxUsage
+• usedCount
+• isActive
+
+VoucherRedemption:
+• userId
+• voucherCode
+• redeemedAt
+
+GiftBox:
+• id
+• senderId
+• recipientContact
+• points
+• paymentId
+• status
+• createdAt
+• claimedAt
+
+WalletTransaction (extend):
+• type: CREDIT
+• source: Recharge | Voucher | Gift
+• referenceId
+
+--------------------------------------------------
+⚙️ BACKEND APIs
+--------------------------------------------------
+
+POST /wallet/redeem-voucher
+POST /wallet/create-gift
+POST /wallet/claim-gift
+GET  /wallet/gifts
+GET  /wallet/vouchers (public metadata)
+
+--------------------------------------------------
+🔐 SECURITY & ABUSE PREVENTION
+--------------------------------------------------
+
+✔ One voucher per user (configurable)
+✔ Server-side validation only
+✔ Rate-limit voucher attempts
+✔ Prevent self-gifting exploit
+✔ Immutable transaction ledger
+
+--------------------------------------------------
+🎨 UX RULES
+--------------------------------------------------
+
+• Festive, celebratory UI
+• Clear credit source labels
+• Confetti / success animation on gift claim
+• Always show updated balance
+
+--------------------------------------------------
+🧪 TEST CASES (MANDATORY)
+--------------------------------------------------
+
+✔ Voucher redeems only once
+✔ Expired voucher rejected
+✔ Gift credited only once
+✔ Wrong user cannot claim gift
+✔ Wallet balance updates correctly
+✔ Payment failure creates no gift
+✔ History logs source correctly
+
+--------------------------------------------------
+🚫 DO NOT
+--------------------------------------------------
+
+✗ Do not allow manual wallet edits
+✗ Do not allow negative credits
+✗ Do not hide source of credits
+✗ Do not allow voucher reuse
+
+--------------------------------------------------
+✅ FINAL PRODUCT RESULT
+--------------------------------------------------
+
+Shishya now supports:
+• Paid credits
+• Free promotional credits
+• Gifted learning
+• Corporate & festive sales
+• Viral referrals

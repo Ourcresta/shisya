@@ -57,7 +57,7 @@ export function CourseCard({ course }: CourseCardProps) {
           className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 border-0"
           data-testid={`badge-credits-${course.id}`}
         >
-          <Coins className="w-3 h-3 mr-1" />
+          <Coins className="w-3 h-3 mr-1 text-amber-500" />
           {creditCost}
         </Badge>
       );
@@ -70,7 +70,7 @@ export function CourseCard({ course }: CourseCardProps) {
           className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 border-0"
           data-testid={`badge-credits-${course.id}`}
         >
-          <Coins className="w-3 h-3 mr-1" />
+          <Coins className="w-3 h-3 mr-1 text-amber-500" />
           {creditCost}
         </Badge>
       );
@@ -82,7 +82,7 @@ export function CourseCard({ course }: CourseCardProps) {
         className="bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 border-0"
         data-testid={`badge-insufficient-${course.id}`}
       >
-        <Coins className="w-3 h-3 mr-1" />
+        <Coins className="w-3 h-3 mr-1 text-amber-500" />
         {creditCost}
       </Badge>
     );
@@ -124,7 +124,7 @@ export function CourseCard({ course }: CourseCardProps) {
             className="w-full"
             data-testid={`button-view-course-${course.id}`}
           >
-            <Coins className="w-4 h-4 mr-2" />
+            <Coins className="w-4 h-4 mr-2 text-amber-500" />
             Enroll for {creditCost} Points
           </Button>
         </Link>
@@ -138,7 +138,7 @@ export function CourseCard({ course }: CourseCardProps) {
             className="w-full group-hover:bg-primary/90"
             data-testid={`button-enroll-${course.id}`}
           >
-            <Coins className="w-4 h-4 mr-2" />
+            <Coins className="w-4 h-4 mr-2 text-amber-500" />
             Enroll for {creditCost} Points
           </Button>
         </Link>

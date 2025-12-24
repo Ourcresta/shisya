@@ -117,7 +117,7 @@ export default function Dashboard() {
       value: creditsLoading ? "..." : balance,
       icon: Coins,
       color: "text-amber-500",
-      href: "/courses",
+      href: "/shishya/wallet",
     },
     {
       title: "In Progress",

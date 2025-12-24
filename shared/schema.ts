@@ -154,6 +154,41 @@ export const courseEnrollments = pgTable("course_enrollments", {
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
 });
 
+// Vouchers table
+export const vouchers = pgTable("vouchers", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  points: integer("points").notNull(),
+  bonusPercent: integer("bonus_percent").default(0),
+  maxUsage: integer("max_usage").default(1),
+  usedCount: integer("used_count").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Voucher redemptions table
+export const voucherRedemptions = pgTable("voucher_redemptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  voucherCode: varchar("voucher_code", { length: 50 }).notNull(),
+  pointsReceived: integer("points_received").notNull(),
+  redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
+});
+
+// Gift boxes table
+export const giftBoxes = pgTable("gift_boxes", {
+  id: serial("id").primaryKey(),
+  senderId: varchar("sender_id", { length: 36 }).notNull().references(() => users.id),
+  recipientEmail: varchar("recipient_email", { length: 255 }).notNull(),
+  points: integer("points").notNull(),
+  paymentId: varchar("payment_id", { length: 100 }),
+  status: varchar("status", { length: 20 }).notNull().default("CREATED"),
+  claimedBy: varchar("claimed_by", { length: 36 }).references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  claimedAt: timestamp("claimed_at"),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
@@ -162,6 +197,9 @@ export const insertSessionSchema = createInsertSchema(sessions).omit({ createdAt
 export const insertUserCreditsSchema = createInsertSchema(userCredits).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({ id: true, createdAt: true });
 export const insertCourseEnrollmentSchema = createInsertSchema(courseEnrollments).omit({ id: true, enrolledAt: true });
+export const insertVoucherSchema = createInsertSchema(vouchers).omit({ id: true, createdAt: true });
+export const insertVoucherRedemptionSchema = createInsertSchema(voucherRedemptions).omit({ id: true, redeemedAt: true });
+export const insertGiftBoxSchema = createInsertSchema(giftBoxes).omit({ id: true, createdAt: true });
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -185,6 +223,12 @@ export type CourseEnrollment = typeof courseEnrollments.$inferSelect;
 export type InsertUserCredits = z.infer<typeof insertUserCreditsSchema>;
 export type InsertCreditTransaction = z.infer<typeof insertCreditTransactionSchema>;
 export type InsertCourseEnrollment = z.infer<typeof insertCourseEnrollmentSchema>;
+export type Voucher = typeof vouchers.$inferSelect;
+export type VoucherRedemption = typeof voucherRedemptions.$inferSelect;
+export type GiftBox = typeof giftBoxes.$inferSelect;
+export type InsertVoucher = z.infer<typeof insertVoucherSchema>;
+export type InsertVoucherRedemption = z.infer<typeof insertVoucherRedemptionSchema>;
+export type InsertGiftBox = z.infer<typeof insertGiftBoxSchema>;
 
 // ============ ZOD SCHEMAS (for mock data and API validation) ============
 

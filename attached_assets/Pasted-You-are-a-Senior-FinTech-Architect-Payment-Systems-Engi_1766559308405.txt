@@ -1,0 +1,181 @@
+You are a Senior FinTech Architect,
+Payment Systems Engineer,
+and EdTech Product Designer.
+
+Your task is to BUILD a COMPLETE
+“Buy Credits (₹₹₹)” system
+for the SHISHYA Student Portal.
+
+This system converts real money (INR)
+into platform Points (Credits)
+used to enroll in courses.
+
+--------------------------------------------------
+🎯 PRODUCT GOAL
+--------------------------------------------------
+
+• Simple recharge like mobile top-up
+• Clear INR → Points conversion
+• Trust-building payment flow
+• Wallet updates instantly after payment
+
+--------------------------------------------------
+📍 ROUTING (LOCK THIS)
+--------------------------------------------------
+
+Primary Routes:
+• /shishya/wallet
+• /shishya/wallet/buy
+
+--------------------------------------------------
+🧱 BUY CREDITS PAGE STRUCTURE
+--------------------------------------------------
+
+SECTION 1️⃣ — Header
+
+Title:
+  “Buy Learning Credits”
+
+Subtitle:
+  “Recharge your wallet to unlock premium courses”
+
+--------------------------------------------------
+SECTION 2️⃣ — Credit Packs (Predefined)
+
+Display cards with pricing:
+
+🪙 Starter Pack  
+• ₹500 → 500 Points  
+• Best for beginners
+
+🪙 Pro Pack  
+• ₹1000 → 1100 Points  
+• +10% bonus
+
+🪙 Power Pack  
+• ₹2000 → 2300 Points  
+• +15% bonus (Recommended)
+
+Each card shows:
+• INR price
+• Points received
+• Bonus badge
+• [ Buy Now ] CTA
+
+--------------------------------------------------
+SECTION 3️⃣ — Custom Recharge (Optional)
+
+• Input INR amount
+• Show live conversion:
+  ₹X → Y Points
+• Minimum: ₹500
+• Conversion rule:
+  1 INR = 1 Point
+
+--------------------------------------------------
+SECTION 4️⃣ — Payment Gateway Integration
+
+Use Razorpay (India-first, production-ready)
+
+Flow:
+1. User selects pack
+2. Clicks Buy Now
+3. Razorpay Checkout opens
+4. Payment success callback
+5. Points credited instantly
+6. Wallet updated
+7. Transaction logged
+
+--------------------------------------------------
+🪙 WALLET UPDATE LOGIC
+--------------------------------------------------
+
+On successful payment:
+• Add CREDIT transaction
+• Update pointsBalance
+• Mark source = "Recharge"
+• Store paymentId, orderId
+
+--------------------------------------------------
+📊 TRANSACTION HISTORY
+--------------------------------------------------
+
+Wallet history must show:
+• Date
+• “Recharge via Razorpay”
+• +Points credited
+• Payment reference ID
+
+--------------------------------------------------
+🔐 SECURITY & VALIDATION
+--------------------------------------------------
+
+• Never trust frontend amount
+• Verify payment signature server-side
+• Credit points ONLY after verification
+• Prevent replay attacks
+• Handle duplicate callbacks safely
+
+--------------------------------------------------
+🧠 DATA MODELS
+--------------------------------------------------
+
+WalletTransaction:
+• id
+• userId
+• type: CREDIT
+• source: Recharge
+• points
+• inrAmount
+• paymentGateway
+• paymentId
+• status
+• createdAt
+
+--------------------------------------------------
+⚙️ BACKEND APIs
+--------------------------------------------------
+
+POST /wallet/create-order
+POST /wallet/verify-payment
+GET  /wallet
+GET  /wallet/transactions
+
+--------------------------------------------------
+🎨 UX PRINCIPLES
+--------------------------------------------------
+
+• FinTech-like clarity
+• No dark patterns
+• Always show balance before & after
+• Clear success confirmation
+• Friendly failure messages
+
+--------------------------------------------------
+🧪 TEST CASES (MANDATORY)
+--------------------------------------------------
+
+✔ Successful payment credits points
+✔ Wallet balance updates instantly
+✔ Failed payment credits NOTHING
+✔ Duplicate callbacks handled safely
+✔ Transaction history accurate
+✔ Mobile checkout works
+✔ Refresh does NOT duplicate credits
+
+--------------------------------------------------
+🚫 DO NOT
+--------------------------------------------------
+
+✗ Do NOT auto-credit without verification
+✗ Do NOT allow negative balances
+✗ Do NOT hide INR → Points mapping
+✗ Do NOT allow admin-less crediting
+
+--------------------------------------------------
+✅ PRODUCT PHILOSOPHY
+--------------------------------------------------
+
+Points must feel like MONEY.
+Payments must feel SAFE.
+Learning must feel WORTH IT.

@@ -4,9 +4,12 @@ import {
   userCredits, 
   creditTransactions, 
   courseEnrollments,
+  vouchers,
+  voucherRedemptions,
+  giftBoxes,
   WELCOME_BONUS_CREDITS 
 } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, lt, gt, isNull, or } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
 
 export const creditsRouter = Router();
@@ -284,5 +287,129 @@ creditsRouter.get("/enrollments/check/:courseId", requireAuth, async (req: Authe
   } catch (error) {
     console.error("Error checking enrollment:", error);
     res.status(500).json({ error: "Failed to check enrollment" });
+  }
+});
+
+// POST /api/wallet/redeem-voucher - Redeem a voucher code
+creditsRouter.post("/redeem-voucher", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { code } = req.body;
+
+    if (!code || typeof code !== "string") {
+      return res.status(400).json({ error: "Voucher code is required" });
+    }
+
+    const voucherCode = code.trim().toUpperCase();
+
+    // Find the voucher
+    const [voucher] = await db
+      .select()
+      .from(vouchers)
+      .where(eq(vouchers.code, voucherCode))
+      .limit(1);
+
+    if (!voucher) {
+      return res.status(400).json({ error: "Invalid voucher code" });
+    }
+
+    // Check if voucher is active
+    if (!voucher.isActive) {
+      return res.status(400).json({ error: "This voucher is no longer active" });
+    }
+
+    // Check expiry
+    if (voucher.expiryDate && new Date(voucher.expiryDate) < new Date()) {
+      return res.status(400).json({ error: "This voucher has expired" });
+    }
+
+    // Check usage limit
+    if (voucher.maxUsage && voucher.usedCount >= voucher.maxUsage) {
+      return res.status(400).json({ error: "This voucher has reached its usage limit" });
+    }
+
+    // Check if user already redeemed this voucher
+    const existingRedemption = await db
+      .select()
+      .from(voucherRedemptions)
+      .where(
+        and(
+          eq(voucherRedemptions.userId, userId),
+          eq(voucherRedemptions.voucherCode, voucherCode)
+        )
+      )
+      .limit(1);
+
+    if (existingRedemption.length > 0) {
+      return res.status(400).json({ error: "You have already redeemed this voucher" });
+    }
+
+    // Calculate points with bonus
+    let pointsToAdd = voucher.points;
+    if (voucher.bonusPercent && voucher.bonusPercent > 0) {
+      pointsToAdd = Math.floor(voucher.points * (1 + voucher.bonusPercent / 100));
+    }
+
+    // Get current balance
+    const [credits] = await db
+      .select()
+      .from(userCredits)
+      .where(eq(userCredits.userId, userId))
+      .limit(1);
+
+    const currentBalance = credits?.balance || 0;
+    const newBalance = currentBalance + pointsToAdd;
+
+    // Update user credits
+    if (credits) {
+      await db
+        .update(userCredits)
+        .set({
+          balance: newBalance,
+          totalEarned: credits.totalEarned + pointsToAdd,
+          updatedAt: new Date(),
+        })
+        .where(eq(userCredits.userId, userId));
+    } else {
+      await db.insert(userCredits).values({
+        userId,
+        balance: pointsToAdd,
+        totalEarned: pointsToAdd,
+        totalSpent: 0,
+      });
+    }
+
+    // Record transaction
+    await db.insert(creditTransactions).values({
+      userId,
+      amount: pointsToAdd,
+      type: "CREDIT",
+      reason: "VOUCHER",
+      description: `Redeemed voucher: ${voucherCode}`,
+      balanceAfter: newBalance,
+    });
+
+    // Record redemption
+    await db.insert(voucherRedemptions).values({
+      userId,
+      voucherCode,
+      pointsReceived: pointsToAdd,
+    });
+
+    // Update voucher usage count
+    await db
+      .update(vouchers)
+      .set({ usedCount: voucher.usedCount + 1 })
+      .where(eq(vouchers.id, voucher.id));
+
+    res.json({
+      success: true,
+      points: pointsToAdd,
+      newBalance,
+      message: `${pointsToAdd} points have been added to your wallet!`,
+    });
+  } catch (error) {
+    console.error("Error redeeming voucher:", error);
+    res.status(500).json({ error: "Failed to redeem voucher" });
   }
 });
