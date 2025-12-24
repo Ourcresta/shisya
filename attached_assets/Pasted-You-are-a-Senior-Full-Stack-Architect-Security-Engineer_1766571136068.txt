@@ -1,0 +1,213 @@
+You are a Senior Full-Stack Architect, Security Engineer, and SaaS Product Designer.
+
+Context:
+We are building SHISHYA, the student portal of the OURSHIKSHA platform.
+The system has TWO applications:
+
+1) GURU (Admin Portal + Backend APIs)
+   - Source of truth for courses, pricing, credits, plans, certificates, rules
+   - Exposes PUBLIC APIs protected via X-API-Key
+
+2) SHISHYA (Student Portal)
+   - Learner-facing application
+   - MUST be READ-ONLY with respect to business rules
+   - MUST consume and enforce rules defined by GURU
+
+IMPORTANT PRINCIPLE (NON-NEGOTIABLE):
+❗ Guru controls everything
+❗ Shishya only fetches, displays, and enforces
+❗ No pricing, coins, plans, or feature rules are hardcoded in Shishya
+
+------------------------------------------------
+GOAL
+------------------------------------------------
+Build a COMPLETE, PRODUCTION-READY SHISHYA PORTAL that supports:
+- Course browsing and enrollment
+- Learning (lessons, labs, tests, projects)
+- AI tutor (Mithra)
+- Credits & wallet
+- Subscriptions & payments
+- Certificates & marksheets
+- Notifications
+- Public portfolio
+- FULL integration with Guru Admin APIs
+- Secure, scalable, admin-driven behavior
+
+------------------------------------------------
+TECH STACK (FIXED)
+------------------------------------------------
+Frontend:
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + Shadcn UI
+- Framer Motion
+- TanStack React Query
+- Wouter (routing)
+
+Backend:
+- Node.js + Express + TypeScript
+- PostgreSQL (Neon / Replit)
+- Drizzle ORM
+- Session-based auth (http-only cookies)
+
+Integrations:
+- Guru Admin APIs (X-API-Key)
+- OpenAI (Mithra) — backend only
+- Razorpay (payments)
+- Resend (emails)
+
+------------------------------------------------
+ARCHITECTURE (MANDATORY)
+------------------------------------------------
+
+Shishya Frontend
+   ↓ (session auth)
+Shishya Backend (Proxy / Gatekeeper)
+   ↓ (X-API-Key)
+Guru Public APIs
+
+Rules:
+- Frontend NEVER calls Guru directly
+- Backend handles:
+  - API authentication
+  - Caching
+  - Error handling
+  - Fallbacks
+  - Security
+
+------------------------------------------------
+CORE MODULES TO IMPLEMENT
+------------------------------------------------
+
+1) AUTHENTICATION
+- Signup with email + password
+- OTP verification via email
+- Login with session cookies
+- Logout
+- Session expiry handling
+- Welcome bonus credits (from Guru config)
+
+2) PRICING & SUBSCRIPTIONS (ADMIN-DRIVEN)
+- Pricing page fetches plans from Guru API
+- Show:
+  - Free / Basic / Pro / Elite
+  - Coins per month
+  - Features per plan
+  - “Get FREE X Coins” (dynamic)
+- NO hardcoded values
+- Upgrade button redirects to payment
+- After payment → refresh subscription state
+
+3) WALLET & CREDITS
+- Fetch balance from backend
+- Credit deductions ONLY via backend
+- Transaction history
+- Coin packs via Razorpay
+- Voucher redemption
+- Daily rewards (if enabled by admin)
+
+4) COURSE SYSTEM (FROM GURU)
+- Browse published courses
+- Course details (modules, lessons, labs, tests, projects)
+- Enrollment logic:
+  - Free course → enroll
+  - Paid course → deduct credits
+- Progress tracking (local + backend sync)
+
+5) LEARNING EXPERIENCE
+- Lesson viewer (video/text)
+- Practice labs:
+  - Sandboxed execution
+  - Validation logic
+  - Progressive hints
+- Tests:
+  - Timed
+  - Server-side evaluation
+  - One-attempt enforcement
+- Projects:
+  - Submission forms
+  - Status tracking
+
+6) AI TUTOR — MITHRA
+- Available in lessons, labs, projects, test-prep
+- NEVER available during active tests
+- Uses backend OpenAI calls
+- Credit deduction per query
+- Socratic guidance only (no direct answers)
+
+7) CERTIFICATES & MARKSHEETS
+- Certificate requirements fetched from Guru
+- Track completion progress
+- Generate certificate when eligible
+- PDF generation
+- Public verification URLs
+- Academic marksheet with CGPA
+
+8) NOTIFICATIONS
+- Bell icon in header
+- Poll backend every 30–60 seconds
+- Notification types:
+  - Enrollment
+  - Test results
+  - Certificate issued
+  - Credits added
+  - Admin announcements
+- Mark read / read-all
+
+9) PROFILE & PORTFOLIO
+- Editable student profile
+- Skills auto-aggregated from completed courses
+- Certificates & projects
+- Public portfolio URL
+- Verified badge
+
+------------------------------------------------
+SECURITY RULES (CRITICAL)
+------------------------------------------------
+- No secrets in frontend
+- No pricing logic in frontend
+- No coin deduction in frontend
+- JWT / session validation everywhere
+- Rate limiting on AI and payments
+- Admin API key NEVER exposed
+- Input validation on all endpoints
+
+------------------------------------------------
+ENVIRONMENT VARIABLES
+------------------------------------------------
+DATABASE_URL
+SESSION_SECRET
+AISIKSHA_ADMIN_URL
+AISIKSHA_API_KEY
+OPENAI_API_KEY
+RESEND_API_KEY
+RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET
+
+------------------------------------------------
+DEPLOYMENT TARGET
+------------------------------------------------
+- Replit Reserved VM (always-on)
+- OR AWS EC2 (t3.micro)
+- HTTPS enabled
+- Production env separation
+- Logging & monitoring enabled
+
+------------------------------------------------
+OUTPUT EXPECTATION
+------------------------------------------------
+Generate:
+1) Full frontend pages & components
+2) Backend APIs (proxy + business logic)
+3) Database schema (Drizzle)
+4) API integration layer with Guru
+5) Feature gating logic
+6) Secure payment flow
+7) Notification system
+8) Folder structure
+9) README explaining architecture & flows
+
+Think like a SaaS founder.
+Enforce admin control strictly.
+Design for scale and security.
+Deliver clean, production-ready code.
