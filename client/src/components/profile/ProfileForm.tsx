@@ -1,9 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -14,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, AtSign, FileText, MapPin, Link as LinkIcon, Github, Linkedin, Image } from "lucide-react";
+import { User, AtSign, FileText, MapPin, Link as LinkIcon, Github, Linkedin, Image, Check, X, Loader2 } from "lucide-react";
 import type { StudentProfile } from "@shared/schema";
 
 const profileFormSchema = z.object({
@@ -33,6 +35,13 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+interface UsernameCheckResult {
+  available: boolean;
+  valid: boolean;
+  message: string;
+  suggestions: string[];
+}
+
 interface ProfileFormProps {
   profile: StudentProfile;
   onSave: (values: ProfileFormValues) => void;
@@ -40,6 +49,10 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ profile, onSave, isPending = false }: ProfileFormProps) {
+  const [usernameStatus, setUsernameStatus] = useState<UsernameCheckResult | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -55,6 +68,58 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
   });
 
   const bioLength = form.watch("bio")?.length || 0;
+  const currentUsername = form.watch("username");
+
+  // Debounced username check
+  const checkUsername = useCallback(async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameStatus(null);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Don't check if it's the same as current profile username
+    if (username === profile.username) {
+      setUsernameStatus({
+        available: true,
+        valid: true,
+        message: "This is your current username",
+        suggestions: []
+      });
+      setShowSuggestions(false);
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const response = await fetch(`/api/username/check/${encodeURIComponent(username)}`);
+      if (response.ok) {
+        const result: UsernameCheckResult = await response.json();
+        setUsernameStatus(result);
+        setShowSuggestions(!result.available && result.suggestions.length > 0);
+      }
+    } catch (error) {
+      console.error("Error checking username:", error);
+    } finally {
+      setCheckingUsername(false);
+    }
+  }, [profile.username]);
+
+  // Debounce username check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentUsername) {
+        checkUsername(currentUsername);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentUsername, checkUsername]);
+
+  const handleSelectSuggestion = (suggestion: string) => {
+    form.setValue("username", suggestion);
+    setShowSuggestions(false);
+  };
 
   return (
     <Form {...form}>
@@ -88,14 +153,49 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <div className="flex items-center">
-                      <span className="text-muted-foreground mr-1">@</span>
-                      <Input placeholder="username" {...field} data-testid="input-username" />
+                    <div className="relative">
+                      <div className="flex items-center">
+                        <span className="text-muted-foreground mr-1">@</span>
+                        <Input placeholder="username" {...field} data-testid="input-username" />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          {checkingUsername && (
+                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                          )}
+                          {!checkingUsername && usernameStatus && usernameStatus.valid && (
+                            usernameStatus.available ? (
+                              <Check className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <X className="w-4 h-4 text-destructive" />
+                            )
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </FormControl>
-                  <FormDescription>
-                    Used for your public profile URL
+                  <FormDescription className="flex items-center gap-2">
+                    <span>Used for your public profile URL</span>
+                    {usernameStatus && !usernameStatus.available && usernameStatus.valid && (
+                      <span className="text-destructive text-xs">{usernameStatus.message}</span>
+                    )}
                   </FormDescription>
+                  {showSuggestions && usernameStatus?.suggestions && usernameStatus.suggestions.length > 0 && (
+                    <div className="mt-2 p-3 rounded-md bg-muted/50 border" data-testid="username-suggestions">
+                      <p className="text-sm text-muted-foreground mb-2">Try one of these available usernames:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {usernameStatus.suggestions.map((suggestion) => (
+                          <Badge
+                            key={suggestion}
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => handleSelectSuggestion(suggestion)}
+                            data-testid={`suggestion-${suggestion}`}
+                          >
+                            @{suggestion}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

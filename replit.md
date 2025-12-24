@@ -38,6 +38,7 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **Centralized Projects Page:** `/shishya/projects` displays all projects from all enrolled courses in a modular table format with course name, project title, difficulty badge, status (Pending/Submitted), and clickable rows for navigation to project details.
 - **Centralized Tests Page:** `/shishya/tests` displays all tests from all enrolled courses in a modular table format with course name, test title, duration, passing percentage, status (Not Attempted/Passed/Failed with score), and clickable rows for navigation to test details.
 - **Profile Photo Upload:** Students can upload a profile photo by hovering over their avatar on the profile page and clicking the camera icon. Supports image files up to 2MB, stored as base64 in localStorage.
+- **Username Suggestion Box:** When editing profile username, the system checks availability in real-time via `GET /api/username/check/:username`. Shows checkmark for available, X for taken, with 4 clickable alternative suggestions when username is taken.
 - **Landing Page:** Comprehensive homepage at "/" with 7 sections - Hero, Journey (5-step learning path), Features (7 cards), Course Preview (fetches real courses), CTA, and Footer. Auth-aware CTAs show Login/Signup for guests or "Go to Shishya" for authenticated users.
 - **Credit-Based Enrollment System:** Students use Learning Credits to enroll in courses:
   - 500 credits welcome bonus granted automatically upon signup/email verification

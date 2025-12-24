@@ -8,6 +8,9 @@ import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
 import { sendGenericEmail } from "./resend";
+import { db } from "./db";
+import { userProfiles } from "@shared/schema";
+import { eq, like, or } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -120,6 +123,92 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error sending contact form:", error);
       res.status(500).json({ error: "Failed to send message. Please try again later." });
+    }
+  });
+
+  // ============ USERNAME CHECK ROUTE ============
+
+  // GET /api/username/check/:username - Check username availability and get suggestions
+  app.get("/api/username/check/:username", async (req, res) => {
+    try {
+      const { username } = req.params;
+      const currentUserId = req.query.currentUserId as string | undefined;
+
+      // Validate username format
+      const usernameRegex = /^[a-z0-9_-]+$/;
+      if (!usernameRegex.test(username) || username.length < 3 || username.length > 30) {
+        return res.json({
+          available: false,
+          valid: false,
+          message: "Username must be 3-30 characters, lowercase letters, numbers, hyphens, and underscores only",
+          suggestions: []
+        });
+      }
+
+      // Check if username exists in database
+      const existing = await db.select({ id: userProfiles.id, userId: userProfiles.userId })
+        .from(userProfiles)
+        .where(eq(userProfiles.username, username))
+        .limit(1);
+
+      // If current user owns this username, it's available for them
+      if (existing.length > 0 && currentUserId && existing[0].userId === currentUserId) {
+        return res.json({
+          available: true,
+          valid: true,
+          message: "This is your current username",
+          suggestions: []
+        });
+      }
+
+      const isAvailable = existing.length === 0;
+
+      if (isAvailable) {
+        return res.json({
+          available: true,
+          valid: true,
+          message: "Username is available",
+          suggestions: []
+        });
+      }
+
+      // Generate suggestions when username is taken
+      const baseName = username.replace(/[0-9_-]+$/, ""); // Remove trailing numbers/special chars
+      const suggestions: string[] = [];
+      const candidateSuffixes = [
+        Math.floor(Math.random() * 900) + 100,
+        new Date().getFullYear() % 100,
+        Math.floor(Math.random() * 90) + 10,
+        "_dev",
+        "_pro",
+        Math.floor(Math.random() * 9000) + 1000,
+      ];
+
+      for (const suffix of candidateSuffixes) {
+        const candidate = `${baseName}${suffix}`;
+        if (candidate.length <= 30) {
+          // Check if candidate is available
+          const candidateExists = await db.select({ id: userProfiles.id })
+            .from(userProfiles)
+            .where(eq(userProfiles.username, candidate))
+            .limit(1);
+          
+          if (candidateExists.length === 0) {
+            suggestions.push(candidate);
+            if (suggestions.length >= 4) break;
+          }
+        }
+      }
+
+      return res.json({
+        available: false,
+        valid: true,
+        message: "Username is already taken",
+        suggestions
+      });
+    } catch (error) {
+      console.error("Error checking username:", error);
+      res.status(500).json({ error: "Failed to check username availability" });
     }
   });
   
