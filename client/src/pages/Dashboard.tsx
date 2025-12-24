@@ -199,36 +199,41 @@ export default function Dashboard() {
           initial="initial"
           animate="animate"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 
-                  className="text-2xl sm:text-3xl font-bold tracking-tight"
-                  style={{ fontFamily: "var(--font-display)" }}
-                  data-testid="text-welcome"
-                >
-                  Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
-                </h1>
-                <Badge variant={learningStatus.variant} data-testid="badge-learning-level">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {learningStatus.level}
-                </Badge>
+          <div className="flex flex-col gap-4">
+            {/* Welcome Header Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 
+                    className="text-2xl sm:text-3xl font-bold tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                    data-testid="text-welcome"
+                  >
+                    Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
+                  </h1>
+                  <Badge variant={learningStatus.variant} data-testid="badge-learning-level">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    {learningStatus.level}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground" data-testid="text-motivational">
+                  {motivationalMessage}
+                </p>
               </div>
-              <p className="text-muted-foreground" data-testid="text-motivational">
-                {motivationalMessage}
-              </p>
             </div>
             
-            {/* Quick Links */}
-            <div className="flex flex-wrap gap-2">
+            {/* Quick Links - Full Width Row */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
+              <span className="text-xs text-muted-foreground font-medium mr-1">Quick Access:</span>
               {quickLinks.map((link) => (
                 <Link key={link.title} href={link.href}>
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="sm"
+                    className="h-8 px-3 text-xs"
                     data-testid={`quick-link-${link.title.toLowerCase()}`}
                   >
-                    <link.icon className="w-4 h-4 mr-1.5" />
+                    <link.icon className="w-3.5 h-3.5 mr-1.5" />
                     {link.title}
                   </Button>
                 </Link>
