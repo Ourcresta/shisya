@@ -37,6 +37,7 @@ import Marksheet from "@/pages/Marksheet";
 import MarksheetVerify from "@/pages/MarksheetVerify";
 import Wallet from "@/pages/Wallet";
 import MyLearnings from "@/pages/MyLearnings";
+import Pricing from "@/pages/Pricing";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
@@ -153,6 +154,7 @@ function Router() {
     <Switch>
       {/* Public Routes - No Login Required */}
       <Route path="/" component={LandingPage} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/courses" component={CourseCatalog} />
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />

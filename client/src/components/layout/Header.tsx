@@ -12,7 +12,8 @@ import {
   Coins,
   Sparkles,
   Search,
-  X
+  X,
+  CreditCard
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -266,6 +267,12 @@ export function Header() {
                       </Button>
                     </Link>
                   )}
+                  <Link href="/pricing">
+                    <Button variant="ghost" size="sm" data-testid="button-pricing">
+                      <CreditCard className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Pricing</span>
+                    </Button>
+                  </Link>
                   <Link href="/signup">
                     <Button 
                       variant="outline" 
