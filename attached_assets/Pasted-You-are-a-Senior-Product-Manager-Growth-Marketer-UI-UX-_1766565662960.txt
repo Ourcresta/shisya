@@ -1,0 +1,193 @@
+You are a Senior Product Manager, Growth Marketer, UI/UX Designer, and Full-Stack Engineer.
+
+Context:
+We are building an AI-powered education platform called OURSHIKSHA.
+We have:
+- Main Website (Marketing + Pricing)
+- SHISHYA (Student Portal)
+- GURU (Admin Portal)
+Backend APIs are hosted on AWS EC2.
+
+Goal:
+Design and implement a HIGH-CONVERSION Subscription & Pricing page on the MAIN SITE
+that clearly explains plans, benefits, and advertises:
+🎁 “Get FREE 500 Coins on Signup”
+
+Coins are the internal currency used for:
+- AI Mithra chat
+- Practice labs
+- Tests
+- Projects
+- Certificate generation
+- Premium courses
+
+------------------------------------
+CORE REQUIREMENTS
+------------------------------------
+1) High-conversion subscription page
+2) Clear coin-based value system
+3) Free plan with 500 coins
+4) Paid plans with monthly & yearly pricing
+5) Seamless upgrade path
+6) Admin-controlled pricing
+7) Secure backend integration
+
+------------------------------------
+PAGE SECTIONS (UI STRUCTURE)
+------------------------------------
+
+SECTION 1 — HERO (Above the Fold)
+- Headline:
+  "Learn Skills. Prove Knowledge. Get Certified."
+- Sub-headline:
+  "AI-Powered Learning with Practice, Projects & Certificates"
+- Highlight Badge:
+  🎁 "Get FREE 500 Coins on Signup"
+- Primary CTA:
+  [ Get Started Free ]
+- Secondary CTA:
+  [ View Plans ]
+
+------------------------------------
+
+SECTION 2 — WHAT ARE COINS?
+Explain in simple language:
+- Coins are used to unlock AI features
+- Transparent usage (no hidden charges)
+
+Example:
+- AI Mithra Chat → 5 coins / query
+- Practice Lab → 20 coins
+- Test Attempt → 30 coins
+- Project Evaluation → 50 coins
+- Certificate Generation → 100 coins
+
+------------------------------------
+
+SECTION 3 — PRICING PLANS
+Design a responsive pricing table:
+
+PLAN 1 — FREE (Starter)
+- ₹0
+- 500 coins (one-time)
+- Limited AI Mithra usage
+- Practice labs (basic)
+- 1 course access
+- No certificate
+CTA: [ Start Free ]
+
+PLAN 2 — BASIC
+- ₹199 / month
+- 2,000 coins / month
+- Full AI Mithra access
+- Practice labs + tests
+- Course completion certificate
+CTA: [ Upgrade ]
+
+PLAN 3 — PRO (Most Popular)
+- ₹499 / month
+- 6,000 coins / month
+- Unlimited AI Mithra
+- All labs, tests, projects
+- Certificates + marksheets
+- Priority support
+CTA: [ Go Pro ]
+
+PLAN 4 — ELITE / INSTITUTION
+- ₹999 / month
+- 15,000 coins / month
+- Everything unlocked
+- Advanced projects
+- Career guidance
+- Placement readiness
+CTA: [ Contact / Upgrade ]
+
+------------------------------------
+
+SECTION 4 — WHY OURSHIKSHA?
+Feature grid:
+- AI Tutor (Mithra)
+- Practice-first learning
+- Real-world projects
+- Verified certificates
+- Skill-based progression
+- Transparent coin system
+
+------------------------------------
+
+SECTION 5 — SOCIAL PROOF
+- “Built for students, professionals & institutions”
+- Trust badges
+- Testimonials placeholders
+
+------------------------------------
+
+SECTION 6 — FAQ
+- What are coins?
+- Do coins expire?
+- Can I buy extra coins?
+- Can I upgrade anytime?
+- Are certificates valid?
+
+------------------------------------
+BACKEND LOGIC (GURU EC2)
+------------------------------------
+Design backend APIs:
+
+- POST /api/signup
+  → Create user
+  → Assign FREE plan
+  → Credit 500 coins
+
+- GET /api/plans
+  → Fetch active plans (admin-controlled)
+
+- POST /api/subscribe
+  → Upgrade plan
+  → Credit monthly coins
+
+- GET /api/coins/balance
+- POST /api/coins/deduct
+- POST /api/coins/add
+
+Database Tables:
+- plans
+- subscriptions
+- coins_wallet
+- coin_transactions
+
+------------------------------------
+ADMIN (GURU) FEATURES
+------------------------------------
+- Create / edit plans
+- Set coin limits
+- Enable / disable plans
+- Run promotional campaigns
+- Change “Free Coins” amount
+
+------------------------------------
+SECURITY & RULES
+------------------------------------
+- Coins cannot go negative
+- All coin deductions logged
+- Admin-only coin grants
+- JWT authentication
+- No client-side trust
+
+------------------------------------
+OUTPUT EXPECTATION
+------------------------------------
+Generate:
+1) Pricing page UI (Next.js + Tailwind)
+2) Coins explanation components
+3) Backend APIs (Node.js)
+4) DB schema (SQL)
+5) Subscription logic
+6) Admin pricing control design
+7) Clear folder structure
+8) README explaining flows
+
+Think like a SaaS founder.
+Design for conversion.
+Build for scale.
+Deliver production-ready code.
