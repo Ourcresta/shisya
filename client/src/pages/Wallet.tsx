@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
@@ -28,11 +28,13 @@ import {
   TrendingUp,
   ShieldCheck,
   CreditCard,
-  Package
+  Package,
+  Loader2
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { queryClient } from "@/lib/queryClient";
 import type { CreditTransaction } from "@shared/schema";
 
 const creditPacks = [
@@ -97,11 +99,68 @@ const giftBoxes = [
 
 export default function Wallet() {
   const { user } = useAuth();
-  const { balance, totalEarned, totalSpent, isLoading: creditsLoading } = useCredits();
+  const { balance, totalEarned, totalSpent, isLoading: creditsLoading, refetchCredits } = useCredits();
   const { toast } = useToast();
+  const [location] = useLocation();
   const [voucherCode, setVoucherCode] = useState("");
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [purchasingPack, setPurchasingPack] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"history" | "buy" | "voucher" | "gift">("history");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    const pack = params.get("pack");
+
+    if (payment === "success" && pack) {
+      toast({
+        title: "Payment Successful!",
+        description: "Your learning points have been added to your wallet.",
+      });
+      refetchCredits();
+      queryClient.invalidateQueries({ queryKey: ["/api/user/credits/transactions"] });
+      window.history.replaceState({}, "", "/shishya/wallet");
+    } else if (payment === "cancelled") {
+      toast({
+        title: "Payment Cancelled",
+        description: "Your payment was cancelled. No charges were made.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, "", "/shishya/wallet");
+    }
+  }, []);
+
+  const handleBuyCredits = async (packId: string) => {
+    setPurchasingPack(packId);
+    try {
+      const response = await fetch("/api/payments/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ packId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to initiate payment. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to connect to payment gateway. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPurchasingPack(null);
+    }
+  };
 
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery<CreditTransaction[]>({
     queryKey: ["/api/user/credits/transactions"],
@@ -414,9 +473,18 @@ export default function Wallet() {
                           <Button 
                             className="w-full"
                             variant={pack.popular ? "default" : "outline"}
+                            onClick={() => handleBuyCredits(pack.id)}
+                            disabled={purchasingPack !== null}
                             data-testid={`button-buy-${pack.id}`}
                           >
-                            Buy Now
+                            {purchasingPack === pack.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              "Buy Now"
+                            )}
                           </Button>
                         </CardContent>
                       </Card>
