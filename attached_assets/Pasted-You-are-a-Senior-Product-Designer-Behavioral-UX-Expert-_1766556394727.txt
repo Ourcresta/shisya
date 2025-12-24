@@ -1,0 +1,155 @@
+You are a Senior Product Designer, Behavioral UX Expert,
+Frontend Engineer, and Performance Engineer.
+
+Your task is to ADD a RANDOM MOTIVATIONAL QUOTES FEATURE
+to the TOP of the Shishya (Student Portal) Dashboard
+in the OurShiksha platform.
+
+This feature must be:
+• Inspiring
+• Subtle
+• Non-intrusive
+• Performance-safe
+• Refresh-friendly
+
+--------------------------------------------------
+🎯 PURPOSE
+--------------------------------------------------
+
+The quote must:
+• Motivate students to continue learning
+• Reduce anxiety
+• Encourage consistency
+• NOT distract from primary actions
+
+This is NOT a social feed.
+This is a gentle psychological nudge.
+
+--------------------------------------------------
+📍 PLACEMENT (IMPORTANT)
+--------------------------------------------------
+
+Place the quote:
+• At the TOP of the Shishya Dashboard
+• Below the main header
+• Above learning metrics / cards
+
+It should be visible immediately on page load.
+
+--------------------------------------------------
+🧠 CONTENT RULES
+--------------------------------------------------
+
+Quotes must be:
+• Short (1–2 lines max)
+• Learning / growth focused
+• Neutral and inclusive
+• Non-religious
+• Non-political
+• Non-aggressive
+
+Example themes:
+• Consistency
+• Learning
+• Progress
+• Practice
+• Self-belief
+
+--------------------------------------------------
+🔀 RANDOMIZATION LOGIC
+--------------------------------------------------
+
+• Load ONE random quote per dashboard load
+• Quote should NOT change automatically every few seconds
+• Quote MAY change on page refresh or next login
+
+Optional enhancement:
+• Persist the same quote for the day using localStorage
+
+--------------------------------------------------
+🗂 DATA SOURCE STRATEGY
+--------------------------------------------------
+
+PHASE 1 (Now):
+• Store quotes as a local static array (20–50 quotes)
+
+PHASE 2 (Later):
+• Allow Admin (Guru) to manage quotes via API
+
+--------------------------------------------------
+🧩 COMPONENT DESIGN
+--------------------------------------------------
+
+Create a reusable component:
+
+<MotivationBanner />
+
+Props:
+• quoteText
+• author (optional)
+
+UI Style:
+• Soft background (light gradient or subtle color)
+• Rounded corners
+• Calm icon (spark / book / lightbulb)
+• Italic or light font style
+• No animations
+• No auto-scroll
+
+--------------------------------------------------
+🎨 DESIGN RULES
+--------------------------------------------------
+
+• Subtle colors only
+• No bold shouting text
+• Font slightly lighter than headers
+• Must work in light & dark mode
+• Mobile responsive
+
+--------------------------------------------------
+⚙️ TECHNICAL REQUIREMENTS
+--------------------------------------------------
+
+Frontend:
+• React + TypeScript
+• UseMemo or simple random selector
+• Optional localStorage persistence
+
+Performance:
+• Zero API calls
+• No re-render loops
+• No hydration issues
+
+--------------------------------------------------
+🧪 TEST CASES (MUST PASS)
+--------------------------------------------------
+
+✔ Quote appears on dashboard load
+✔ Only one quote visible at a time
+✔ Refresh shows a new quote (or same for the day)
+✔ No layout shift
+✔ Works on mobile & desktop
+✔ Does not block main dashboard content
+
+--------------------------------------------------
+🚫 DO NOT
+--------------------------------------------------
+
+✗ Do NOT auto-refresh quotes
+✗ Do NOT show long paragraphs
+✗ Do NOT distract user
+✗ Do NOT block loading
+✗ Do NOT add external API calls
+
+--------------------------------------------------
+✅ FINAL EXPECTATION
+--------------------------------------------------
+
+The quote must feel like:
+
+“A calm mentor’s reminder,
+not a loud notification.”
+
+Build it clean.
+Build it subtle.
+Build it motivational.

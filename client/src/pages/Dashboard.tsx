@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
+import MotivationBanner from "@/components/MotivationBanner";
 import { useCredits } from "@/contexts/CreditContext";
 import { getCourseProgress } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
@@ -185,6 +186,9 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        
+        {/* Motivation Quote Banner */}
+        <MotivationBanner className="mb-6" />
         
         {/* ZONE 1: Welcome & Status */}
         <motion.div 
