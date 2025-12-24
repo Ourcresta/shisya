@@ -14,7 +14,7 @@ I prefer an iterative development approach, focusing on one feature at a time.
 The SHISHYA student portal is built with a React + Vite frontend, utilizing TypeScript and Tailwind CSS with Shadcn UI for a clean, calm, and student-friendly aesthetic. TanStack React Query handles data fetching from the backend, ensuring efficient state management and caching. The backend is an Express.js application acting primarily as a read-only proxy to the OurShiksha Admin Course Factory, with session-based authentication managed by PostgreSQL and Drizzle ORM.
 
 **UI/UX Decisions:**
-- **Branding:** OurShiksha logo image (`attached_assets/ChatGPT_Image_Dec_23,_2025,_10_28_31_PM_1766572357087.png`) used across Header, Landing Page, Login, Signup, and as favicon.
+- **Branding:** GraduationCap icon used as Shiksha icon across Header, Landing Page, Login, and Signup pages.
 - **Design System:** Inter font for body, Space Grotesk for headings. Leverages Shadcn UI components for consistency.
 - **Multi-Theme System:** 6 curated color palettes (Default, Ocean, Forest, Sunset, Midnight, Rose) with light/dark/system mode support. ThemeSwitcher in header. Theme persisted to localStorage.
 - **Micro-Animations:** Framer Motion used for staggered card reveals, page transitions, and subtle UI feedback. Animation variants in `client/src/lib/animations.ts`.

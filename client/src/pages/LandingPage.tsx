@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/layout/Header";
 import { LevelBadge } from "@/components/ui/level-badge";
 import {
+  GraduationCap,
   BookOpen,
   FlaskConical,
   FolderKanban,
@@ -19,7 +20,6 @@ import {
   UserPlus,
   ChevronRight,
 } from "lucide-react";
-import ourShikshaLogo from "@assets/ChatGPT_Image_Dec_23,_2025,_10_28_31_PM_1766572357087.png";
 import type { Course } from "@shared/schema";
 
 const journeySteps = [
@@ -309,11 +309,9 @@ function CTASection() {
     <section className="py-16 md:py-20 bg-primary/5">
       <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
         <div className="flex justify-center mb-6">
-          <img 
-            src={ourShikshaLogo} 
-            alt="OurShiksha" 
-            className="w-16 h-16 rounded-full object-cover"
-          />
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <GraduationCap className="w-8 h-8 text-primary" />
+          </div>
         </div>
         <h2
           className="text-2xl md:text-3xl font-bold mb-4"
@@ -363,11 +361,9 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <img 
-              src={ourShikshaLogo} 
-              alt="OurShiksha" 
-              className="w-8 h-8 rounded-full object-cover"
-            />
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+              <GraduationCap className="w-4 h-4" />
+            </div>
             <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>
               OurShiksha
             </span>
