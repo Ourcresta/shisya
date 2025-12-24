@@ -13,7 +13,8 @@ import {
   Sparkles,
   Search,
   X,
-  CreditCard
+  CreditCard,
+  Home
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -260,19 +261,29 @@ export function Header() {
               ) : (
                 <>
                   {!isHome && (
-                    <Link href="/courses">
-                      <Button variant="ghost" size="sm" data-testid="button-courses">
-                        <BookOpen className="w-4 h-4 mr-2" />
-                        Courses
+                    <Link href="/">
+                      <Button variant="ghost" size="sm" data-testid="button-home">
+                        <Home className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Home</span>
                       </Button>
                     </Link>
                   )}
-                  <Link href="/pricing">
-                    <Button variant="ghost" size="sm" data-testid="button-pricing">
-                      <CreditCard className="w-4 h-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Pricing</span>
-                    </Button>
-                  </Link>
+                  {!isHome && !location.startsWith("/courses") && (
+                    <Link href="/courses">
+                      <Button variant="ghost" size="sm" data-testid="button-courses">
+                        <BookOpen className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Courses</span>
+                      </Button>
+                    </Link>
+                  )}
+                  {!location.startsWith("/pricing") && (
+                    <Link href="/pricing">
+                      <Button variant="ghost" size="sm" data-testid="button-pricing">
+                        <CreditCard className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Pricing</span>
+                      </Button>
+                    </Link>
+                  )}
                   <Link href="/signup">
                     <Button 
                       variant="outline" 
