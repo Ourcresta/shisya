@@ -222,18 +222,17 @@ export default function Dashboard() {
               </div>
             </div>
             
-            {/* Quick Links - Full Width Row */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
-              <span className="text-xs text-muted-foreground font-medium mr-1">Quick Access:</span>
+            {/* Quick Links - Horizontal Scrollable */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {quickLinks.map((link) => (
                 <Link key={link.title} href={link.href}>
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm"
-                    className="h-8 px-3 text-xs"
+                    className="shrink-0 gap-1.5"
                     data-testid={`quick-link-${link.title.toLowerCase()}`}
                   >
-                    <link.icon className="w-3.5 h-3.5 mr-1.5" />
+                    <link.icon className="w-4 h-4" />
                     {link.title}
                   </Button>
                 </Link>
