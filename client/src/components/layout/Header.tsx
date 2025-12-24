@@ -7,10 +7,13 @@ import {
   LogOut, 
   LogIn, 
   LayoutDashboard, 
-  UserPlus 
+  UserPlus,
+  Coins,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCredits } from "@/contexts/CreditContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
@@ -35,9 +38,11 @@ const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
 export function Header() {
   const [location, setLocation] = useLocation();
   const { user, isLoading, logout } = useAuth();
+  const { balance, isLoading: creditsLoading } = useCredits();
   const { themeMode, themeColor, setThemeMode, setThemeColor, resolvedMode } = useTheme();
   const isHome = location === "/" || location === "/courses";
   const isShishyaPortal = location.startsWith("/shishya");
+  const isWalletPage = location === "/shishya/wallet";
 
   const handleLogout = async () => {
     await logout();
@@ -108,6 +113,24 @@ export function Header() {
                       <Button variant="ghost" size="sm" data-testid="button-certificates">
                         <Award className="w-4 h-4 sm:mr-2" />
                         <span className="hidden md:inline">Certificates</span>
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  {/* Credits Balance & Buy Button */}
+                  {!isWalletPage && (
+                    <Link href="/shishya/wallet">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1.5 border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        data-testid="button-buy-credits"
+                      >
+                        <Coins className="w-4 h-4" />
+                        <span className="font-semibold">
+                          {creditsLoading ? "..." : balance.toLocaleString()}
+                        </span>
+                        <span className="hidden sm:inline text-xs opacity-75">Credits</span>
                       </Button>
                     </Link>
                   )}
@@ -203,16 +226,30 @@ export function Header() {
                       </Button>
                     </Link>
                   )}
+                  <Link href="/signup">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1.5 border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      data-testid="button-get-credits"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="hidden sm:inline">Get</span>
+                      <span className="font-semibold">500</span>
+                      <span className="hidden sm:inline">Free Credits</span>
+                      <span className="sm:hidden">Credits</span>
+                    </Button>
+                  </Link>
                   <Link href="/login">
                     <Button variant="ghost" size="sm" data-testid="button-login">
-                      <LogIn className="w-4 h-4 mr-2" />
-                      Log In
+                      <LogIn className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Log In</span>
                     </Button>
                   </Link>
                   <Link href="/signup">
                     <Button variant="default" size="sm" data-testid="button-signup">
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Sign Up
+                      <UserPlus className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Sign Up</span>
                     </Button>
                   </Link>
                 </>
