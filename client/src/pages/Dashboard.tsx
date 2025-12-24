@@ -23,7 +23,8 @@ import {
   Zap,
   Code2,
   Coins,
-  GraduationCap
+  GraduationCap,
+  Library
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -150,6 +151,7 @@ export default function Dashboard() {
   ];
 
   const quickLinks = [
+    { title: "My Learnings", icon: Library, href: "/shishya/my-learnings" },
     { title: "Courses", icon: BookOpen, href: "/courses" },
     { title: "Projects", icon: FolderOpen, href: "/shishya/projects" },
     { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests" },
