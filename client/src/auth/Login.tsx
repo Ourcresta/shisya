@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader as CardHeaderUI, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
+import ourShikshaLogo from "@assets/ChatGPT_Image_Dec_23,_2025,_10_28_31_PM_1766572357087.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/layout/Header";
 
@@ -105,9 +106,11 @@ export default function Login() {
         <Card className="w-full max-w-md">
           <CardHeaderUI className="space-y-2 text-center">
           <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary" />
-            </div>
+            <img 
+              src={ourShikshaLogo} 
+              alt="OurShiksha" 
+              className="w-12 h-12 rounded-full object-cover"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>
