@@ -1,0 +1,291 @@
+You are a Senior Backend Architect, Security Engineer,
+and SaaS Platform Developer.
+
+Context:
+We are building SHISHYA, the Student Portal backend for the OURSHIKSHA platform.
+
+There are TWO systems:
+1) GURU (Admin Portal + APIs) → SINGLE SOURCE OF TRUTH
+2) SHISHYA (Student Portal Backend) → EXECUTION & USER CONTEXT LAYER
+
+NON-NEGOTIABLE RULES:
+❗ SHISHYA does NOT own pricing, plans, rules, or content definitions
+❗ SHISHYA only CONSUMES rules and content from GURU
+❗ SHISHYA owns user sessions, progress, credits usage, and execution flows
+❗ All writes must respect rules received from GURU
+
+-------------------------------------------------
+GOAL
+-------------------------------------------------
+Generate the COMPLETE BACKEND API for SHISHYA,
+covering authentication, learning execution,
+wallet & payments, AI tutor, notifications,
+certificates, and integration with Guru.
+
+This backend must be:
+- Secure
+- Session-based
+- Scalable
+- Guru-driven
+- Production-grade
+
+-------------------------------------------------
+TECH STACK (FIXED)
+-------------------------------------------------
+- Node.js + Express + TypeScript
+- PostgreSQL (Neon / Replit)
+- Drizzle ORM
+- Session-based auth (HTTP-only cookies)
+- Razorpay integration
+- OpenAI (via backend only)
+- Zod validation
+- Rate limiting
+- Centralized error handling
+
+-------------------------------------------------
+ARCHITECTURE (MANDATORY)
+-------------------------------------------------
+
+Shishya Frontend
+   ↓ (session cookie)
+Shishya Backend (THIS SYSTEM)
+   ↓ (X-API-Key)
+Guru Public APIs
+
+Rules:
+- Frontend NEVER calls Guru directly
+- Backend acts as proxy, validator, and executor
+- Backend enriches requests with user context
+- Backend caches Guru responses safely
+
+-------------------------------------------------
+API STRUCTURE (MANDATORY)
+-------------------------------------------------
+
+/api
+ ├── auth
+ ├── user
+ ├── wallet
+ ├── payments
+ ├── courses
+ ├── learning
+ ├── labs
+ ├── tests
+ ├── projects
+ ├── certificates
+ ├── marksheet
+ ├── mithra
+ ├── notifications
+ ├── portfolio
+ └── health
+
+-------------------------------------------------
+1️⃣ AUTHENTICATION & SESSIONS
+-------------------------------------------------
+
+POST   /api/auth/signup
+POST   /api/auth/verify-otp
+POST   /api/auth/login
+POST   /api/auth/logout
+GET    /api/auth/me
+POST   /api/auth/resend-otp
+
+Identities:
+- Email + password
+- OTP email verification
+- Session stored in DB
+- Secure cookies only
+
+-------------------------------------------------
+2️⃣ USER PROFILE & ACCOUNT
+-------------------------------------------------
+
+GET    /api/user/profile
+PATCH  /api/user/profile
+
+GET    /api/user/subscription
+GET    /api/user/features
+
+-------------------------------------------------
+3️⃣ WALLET & CREDITS (EXECUTION ONLY)
+-------------------------------------------------
+
+GET    /api/wallet/balance
+GET    /api/wallet/transactions
+
+POST   /api/wallet/deduct
+POST   /api/wallet/add    // system-only (webhooks, admin sync)
+
+POST   /api/wallet/voucher/redeem
+
+Rules:
+- Cannot go negative
+- All changes logged
+- Pricing fetched from Guru
+
+-------------------------------------------------
+4️⃣ PAYMENTS (RAZORPAY)
+-------------------------------------------------
+
+POST   /api/payments/create-order
+POST   /api/payments/verify
+POST   /api/payments/webhook   // no auth
+
+Responsibilities:
+- Verify signatures
+- Credit wallet
+- Sync subscription status
+- Notify user
+
+-------------------------------------------------
+5️⃣ COURSE CATALOG (PROXY FROM GURU)
+-------------------------------------------------
+
+GET    /api/courses
+GET    /api/courses/:id
+
+Rules:
+- Fetch from Guru public APIs
+- Cache responses
+- Only published courses visible
+
+-------------------------------------------------
+6️⃣ ENROLLMENT & LEARNING FLOW
+-------------------------------------------------
+
+POST   /api/courses/:id/enroll
+GET    /api/courses/:id/progress
+
+-------------------------------------------------
+7️⃣ LESSON EXECUTION
+-------------------------------------------------
+
+GET    /api/learning/lesson/:lessonId
+POST   /api/learning/lesson/:lessonId/complete
+
+-------------------------------------------------
+8️⃣ PRACTICE LABS
+-------------------------------------------------
+
+GET    /api/labs/:courseId
+GET    /api/labs/:courseId/:labId
+POST   /api/labs/:courseId/:labId/submit
+
+Rules:
+- Validation in backend
+- Unlock rules enforced
+- Credit deduction enforced
+
+-------------------------------------------------
+9️⃣ TESTS & ASSESSMENTS
+-------------------------------------------------
+
+GET    /api/tests/:courseId
+GET    /api/tests/:courseId/:testId
+POST   /api/tests/:courseId/:testId/start
+POST   /api/tests/:courseId/:testId/submit
+
+Rules:
+- One-attempt enforcement
+- Timer server-validated
+- Mithra disabled during attempt
+
+-------------------------------------------------
+🔟 PROJECT SUBMISSIONS
+-------------------------------------------------
+
+GET    /api/projects/:courseId
+POST   /api/projects/:courseId/:projectId/submit
+
+-------------------------------------------------
+1️⃣1️⃣ CERTIFICATES
+-------------------------------------------------
+
+GET    /api/certificates
+POST   /api/certificates/generate
+GET    /api/certificates/:id
+GET    /api/verify/certificate/:id   // public
+
+Rules:
+- Eligibility fetched from Guru
+- Credit deduction enforced
+
+-------------------------------------------------
+1️⃣2️⃣ MARKSHEET
+-------------------------------------------------
+
+GET    /api/marksheet
+GET    /api/verify/marksheet/:id   // public
+
+-------------------------------------------------
+1️⃣3️⃣ AI TUTOR — MITHRA
+-------------------------------------------------
+
+POST   /api/mithra/ask
+
+Rules:
+- Backend-only OpenAI calls
+- Credit deduction per query
+- Context from Guru
+- Disabled during active tests
+
+-------------------------------------------------
+1️⃣4️⃣ NOTIFICATIONS
+-------------------------------------------------
+
+GET    /api/notifications
+POST   /api/notifications/:id/read
+POST   /api/notifications/read-all
+
+-------------------------------------------------
+1️⃣5️⃣ PORTFOLIO (PUBLIC PROFILE)
+-------------------------------------------------
+
+GET    /api/portfolio/me
+GET    /api/portfolio/:username
+
+-------------------------------------------------
+1️⃣6️⃣ SYSTEM & HEALTH
+-------------------------------------------------
+
+GET    /api/health
+
+-------------------------------------------------
+SECURITY RULES (MANDATORY)
+-------------------------------------------------
+- Session-based auth everywhere
+- Rate limiting (AI, tests, payments)
+- No secrets in frontend
+- No pricing logic here
+- All rules validated against Guru
+- Idempotent payment handling
+- Centralized error handler
+
+-------------------------------------------------
+INTEGRATION WITH GURU
+-------------------------------------------------
+
+- Use X-API-Key
+- Base URL from ENV
+- Safe retries
+- Graceful fallback
+- Cache TTL per endpoint
+
+-------------------------------------------------
+OUTPUT EXPECTATION
+-------------------------------------------------
+Generate:
+1) Express route files (modular)
+2) Controllers & services
+3) Session middleware
+4) Drizzle schema
+5) Validation schemas
+6) Payment & webhook logic
+7) Guru proxy layer
+8) API documentation
+9) README explaining Guru ↔ Shishya boundary
+
+Think like a platform integrator.
+Respect authority boundaries.
+Enforce rules strictly.
+Deliver production-ready backend code.
