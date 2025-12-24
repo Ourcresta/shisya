@@ -16,7 +16,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, AtSign, FileText, MapPin, Link as LinkIcon, Github, Linkedin, Image, Check, X, Loader2 } from "lucide-react";
+import { User, AtSign, FileText, MapPin, Link as LinkIcon, Github, Linkedin, Image, Check, X, Loader2, Upload, Globe, Plus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SiFacebook, SiInstagram } from "react-icons/si";
+import { useRef } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { StudentProfile } from "@shared/schema";
 
 const profileFormSchema = z.object({
@@ -28,9 +37,12 @@ const profileFormSchema = z.object({
   headline: z.string().max(100, "Headline must be less than 100 characters").optional().or(z.literal("")),
   bio: z.string().max(500, "Bio must be less than 500 characters").optional().or(z.literal("")),
   location: z.string().optional().or(z.literal("")),
-  profilePhoto: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  profilePhoto: z.string().optional().or(z.literal("")),
   githubUrl: z.string().url("Must be a valid GitHub URL").optional().or(z.literal("")),
   linkedinUrl: z.string().url("Must be a valid LinkedIn URL").optional().or(z.literal("")),
+  websiteUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  facebookUrl: z.string().url("Must be a valid Facebook URL").optional().or(z.literal("")),
+  instagramUrl: z.string().url("Must be a valid Instagram URL").optional().or(z.literal("")),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -52,6 +64,14 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
   const [usernameStatus, setUsernameStatus] = useState<UsernameCheckResult | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [visibleLinks, setVisibleLinks] = useState<string[]>(() => {
+    const links: string[] = ["github", "linkedin"];
+    if ((profile as any).websiteUrl) links.push("website");
+    if ((profile as any).facebookUrl) links.push("facebook");
+    if ((profile as any).instagramUrl) links.push("instagram");
+    return links;
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -64,6 +84,9 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
       profilePhoto: profile.profilePhoto || "",
       githubUrl: profile.githubUrl || "",
       linkedinUrl: profile.linkedinUrl || "",
+      websiteUrl: (profile as any).websiteUrl || "",
+      facebookUrl: (profile as any).facebookUrl || "",
+      instagramUrl: (profile as any).instagramUrl || "",
     },
   });
 
@@ -120,6 +143,42 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
     form.setValue("username", suggestion);
     setShowSuggestions(false);
   };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be less than 2MB");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      form.setValue("profilePhoto", base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddLink = (linkType: string) => {
+    if (!visibleLinks.includes(linkType)) {
+      setVisibleLinks([...visibleLinks, linkType]);
+    }
+  };
+
+  const availableLinksToAdd = [
+    { id: "website", label: "Website", icon: Globe },
+    { id: "facebook", label: "Facebook", icon: SiFacebook },
+    { id: "instagram", label: "Instagram", icon: SiInstagram },
+  ].filter(link => !visibleLinks.includes(link.id));
+
+  const profilePhotoValue = form.watch("profilePhoto");
 
   return (
     <Form {...form}>
@@ -241,15 +300,51 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
               name="profilePhoto"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Profile Photo URL</FormLabel>
+                  <FormLabel>Profile Photo</FormLabel>
                   <FormControl>
-                    <div className="flex items-center">
-                      <Image className="w-4 h-4 text-muted-foreground mr-2" />
-                      <Input placeholder="https://example.com/photo.jpg" {...field} data-testid="input-photo" />
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-16 h-16">
+                        <AvatarImage src={profilePhotoValue} alt="Profile" />
+                        <AvatarFallback>
+                          <User className="w-8 h-8 text-muted-foreground" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                          data-testid="input-photo-file"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          data-testid="button-upload-photo"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload Photo
+                        </Button>
+                        {profilePhotoValue && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => form.setValue("profilePhoto", "")}
+                            className="text-destructive"
+                            data-testid="button-remove-photo"
+                          >
+                            Remove Photo
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Enter a URL to your profile photo
+                    Upload a profile photo (max 2MB)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -293,46 +388,129 @@ export default function ProfileForm({ profile, onSave, isPending = false }: Prof
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
               <LinkIcon className="w-5 h-5" />
               Social Links
             </CardTitle>
+            {availableLinksToAdd.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" data-testid="button-add-link">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Link
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {availableLinksToAdd.map((link) => (
+                    <DropdownMenuItem
+                      key={link.id}
+                      onClick={() => handleAddLink(link.id)}
+                      data-testid={`menu-add-${link.id}`}
+                    >
+                      <link.icon className="w-4 h-4 mr-2" />
+                      {link.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="githubUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>GitHub</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center">
-                      <Github className="w-4 h-4 text-muted-foreground mr-2" />
-                      <Input placeholder="https://github.com/username" {...field} data-testid="input-github" />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {visibleLinks.includes("github") && (
+              <FormField
+                control={form.control}
+                name="githubUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GitHub</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Github className="w-4 h-4 text-muted-foreground mr-2" />
+                        <Input placeholder="https://github.com/username" {...field} data-testid="input-github" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            <FormField
-              control={form.control}
-              name="linkedinUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>LinkedIn</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center">
-                      <Linkedin className="w-4 h-4 text-muted-foreground mr-2" />
-                      <Input placeholder="https://linkedin.com/in/username" {...field} data-testid="input-linkedin" />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {visibleLinks.includes("linkedin") && (
+              <FormField
+                control={form.control}
+                name="linkedinUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Linkedin className="w-4 h-4 text-muted-foreground mr-2" />
+                        <Input placeholder="https://linkedin.com/in/username" {...field} data-testid="input-linkedin" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {visibleLinks.includes("website") && (
+              <FormField
+                control={form.control}
+                name="websiteUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Globe className="w-4 h-4 text-muted-foreground mr-2" />
+                        <Input placeholder="https://yourwebsite.com" {...field} data-testid="input-website" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {visibleLinks.includes("facebook") && (
+              <FormField
+                control={form.control}
+                name="facebookUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facebook</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <SiFacebook className="w-4 h-4 text-muted-foreground mr-2" />
+                        <Input placeholder="https://facebook.com/username" {...field} data-testid="input-facebook" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {visibleLinks.includes("instagram") && (
+              <FormField
+                control={form.control}
+                name="instagramUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <SiInstagram className="w-4 h-4 text-muted-foreground mr-2" />
+                        <Input placeholder="https://instagram.com/username" {...field} data-testid="input-instagram" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </CardContent>
         </Card>
 
