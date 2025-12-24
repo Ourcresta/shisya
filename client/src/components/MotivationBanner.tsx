@@ -50,13 +50,14 @@ const motivationalQuotes: Quote[] = [
 ];
 
 function getRandomQuote(): Quote {
-  const today = new Date().toDateString();
+  const now = new Date();
+  const currentHour = `${now.toDateString()}-${now.getHours()}`;
   const storedData = localStorage.getItem("motivation_quote");
   
   if (storedData) {
     try {
       const parsed = JSON.parse(storedData);
-      if (parsed.date === today && parsed.quote) {
+      if (parsed.hour === currentHour && parsed.quote) {
         return parsed.quote;
       }
     } catch {
@@ -68,7 +69,7 @@ function getRandomQuote(): Quote {
   const quote = motivationalQuotes[randomIndex];
   
   localStorage.setItem("motivation_quote", JSON.stringify({
-    date: today,
+    hour: currentHour,
     quote: quote
   }));
   
