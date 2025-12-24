@@ -6,6 +6,7 @@ import { authRouter } from "./auth";
 import { registerMithraRoutes } from "./mithra";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
+import { notificationsRouter } from "./notifications";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -50,6 +51,9 @@ export async function registerRoutes(
   
   // Razorpay payment routes
   app.use("/api/payments", razorpayRouter);
+  
+  // Notifications routes
+  app.use("/api/notifications", notificationsRouter);
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {

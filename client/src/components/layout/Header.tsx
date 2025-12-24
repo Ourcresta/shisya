@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -110,6 +111,8 @@ export function Header() {
                       </Button>
                     </Link>
                   )}
+                  
+                  <NotificationBell />
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

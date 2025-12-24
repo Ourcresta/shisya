@@ -1,0 +1,142 @@
+You are a Senior Full-Stack Architect, Security Engineer, and Product Designer.
+
+Context:
+We are building an AI-powered education platform called OURSHIKSHA with two applications deployed on separate AWS EC2 instances:
+1) GURU – Admin Portal + Backend API (private, secure)
+2) SHISHYA – Student Portal (public)
+
+Goal:
+Design and implement a COMPLETE, production-ready Notification System with a bell icon and popup dropdown that supports:
+- New product / course launched
+- New offers / announcements
+- Payment success / failure
+- Course published
+- Certificate issued
+- System notifications
+
+This must work for BOTH Guru and Shishya using a shared backend API hosted in Guru EC2.
+
+------------------------------------
+ARCHITECTURE REQUIREMENTS
+------------------------------------
+- Use a simple, scalable design (no WebSockets initially).
+- Notifications are stored in a database and fetched via secure APIs.
+- Polling every 30–60 seconds is acceptable.
+- Must be role-based (guru / shishya / all).
+- Must support global and user-specific notifications.
+- JWT authentication is mandatory.
+- Secrets must NEVER be exposed to frontend.
+
+------------------------------------
+DATABASE DESIGN
+------------------------------------
+Create SQL schema for a `notifications` table with:
+- id (uuid, primary key)
+- user_id (nullable, for personal notifications)
+- role (enum: 'guru', 'shishya', 'all')
+- title (string)
+- message (text)
+- type (enum: 'product', 'offer', 'payment', 'payment_failed', 'course', 'certificate', 'system')
+- link (nullable URL)
+- is_read (boolean, default false)
+- created_at (timestamp)
+
+------------------------------------
+BACKEND (GURU EC2)
+------------------------------------
+Implement REST APIs using Node.js + Express (or Next.js API):
+
+1) GET /api/notifications
+   - Returns latest notifications for logged-in user
+   - Filter by role + user_id
+   - Sorted by created_at desc
+   - Limit to last 10 (configurable)
+
+2) POST /api/notifications
+   - Admin-only
+   - Create global or targeted notification
+   - Accepts: title, message, type, role, user_id (optional), link
+
+3) PATCH /api/notifications/:id/read
+   - Marks a single notification as read
+
+4) PATCH /api/notifications/read-all
+   - Marks all user notifications as read
+
+Security:
+- JWT verification middleware
+- Role-based access control
+- Prevent cross-user access
+- Admin only can create notifications
+
+------------------------------------
+FRONTEND (SHISHYA + GURU)
+------------------------------------
+Create a reusable Notification Bell component in React / Next.js:
+
+Bell Icon:
+- Positioned in top header
+- Shows unread count badge
+- Visible on all pages
+
+Popup Dropdown:
+- Opens on bell click
+- Shows last 10 notifications
+- Icon + title + short message + relative time
+- Click notification → optional redirect using link
+- “Mark all as read” button
+- “View all notifications” link
+
+Behavior:
+- Fetch notifications on page load
+- Poll API every 30–60 seconds
+- Update unread count dynamically
+- Optimistic UI updates when marking as read
+
+------------------------------------
+EVENT INTEGRATION
+------------------------------------
+Trigger notifications automatically when:
+- Guru publishes a new course → notify all shishya
+- Admin launches a new offer → notify all users
+- Payment success/failure → notify specific user
+- Certificate issued → notify specific user
+- System announcements → role based
+
+------------------------------------
+ADMIN UI (GURU)
+------------------------------------
+Create a simple “Send Notification” admin panel:
+- Title
+- Message
+- Type (dropdown)
+- Target (All / Guru / Shishya / Specific User)
+- Optional link
+- Submit → calls POST /api/notifications
+
+------------------------------------
+NON-FUNCTIONAL REQUIREMENTS
+------------------------------------
+- Clean, modular code
+- Proper error handling
+- Production-ready structure
+- Easy to extend to WebSocket/SSE later
+- Commented code for clarity
+
+------------------------------------
+OUTPUT EXPECTATION
+------------------------------------
+Generate:
+1) Database schema (SQL)
+2) Backend API code
+3) JWT middleware
+4) Notification service logic
+5) React bell + popup UI component
+6) Admin notification sender UI
+7) Clear folder structure
+8) Short README explaining how it works
+
+Think carefully.
+Design cleanly.
+Build securely.
+Deliver production-ready code.

@@ -5,6 +5,7 @@ import { db } from './db';
 import { userCredits, creditTransactions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth, type AuthenticatedRequest } from './auth';
+import { NotificationTriggers } from './notifications';
 
 export const razorpayRouter = Router();
 
@@ -172,6 +173,13 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
     });
 
     console.log(`[Credits] User ${userId} purchased ${pack.credits} credits via Razorpay (${razorpay_payment_id})`);
+
+    // Send payment success notification
+    try {
+      await NotificationTriggers.paymentSuccess(userId, pack.credits, pack.name);
+    } catch (notifError) {
+      console.error('Failed to send payment notification:', notifError);
+    }
 
     res.json({
       success: true,

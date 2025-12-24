@@ -189,6 +189,19 @@ export const giftBoxes = pgTable("gift_boxes", {
   claimedAt: timestamp("claimed_at"),
 });
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id), // null for global notifications
+  role: varchar("role", { length: 20 }).notNull().default("all"), // 'guru', 'shishya', 'all'
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 30 }).notNull(), // 'product', 'offer', 'payment', 'payment_failed', 'course', 'certificate', 'system'
+  link: text("link"),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
@@ -200,6 +213,7 @@ export const insertCourseEnrollmentSchema = createInsertSchema(courseEnrollments
 export const insertVoucherSchema = createInsertSchema(vouchers).omit({ id: true, createdAt: true });
 export const insertVoucherRedemptionSchema = createInsertSchema(voucherRedemptions).omit({ id: true, redeemedAt: true });
 export const insertGiftBoxSchema = createInsertSchema(giftBoxes).omit({ id: true, createdAt: true });
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -229,6 +243,15 @@ export type GiftBox = typeof giftBoxes.$inferSelect;
 export type InsertVoucher = z.infer<typeof insertVoucherSchema>;
 export type InsertVoucherRedemption = z.infer<typeof insertVoucherRedemptionSchema>;
 export type InsertGiftBox = z.infer<typeof insertGiftBoxSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// Notification types
+export const NOTIFICATION_TYPES = ["product", "offer", "payment", "payment_failed", "course", "certificate", "system"] as const;
+export type NotificationType = typeof NOTIFICATION_TYPES[number];
+
+export const NOTIFICATION_ROLES = ["guru", "shishya", "all"] as const;
+export type NotificationRole = typeof NOTIFICATION_ROLES[number];
 
 // ============ ZOD SCHEMAS (for mock data and API validation) ============
 
