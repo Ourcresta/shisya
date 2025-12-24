@@ -7,6 +7,7 @@ import { registerMithraRoutes } from "./mithra";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
+import { sendGenericEmail } from "./resend";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -54,6 +55,73 @@ export async function registerRoutes(
   
   // Notifications routes
   app.use("/api/notifications", notificationsRouter);
+
+  // ============ PUBLIC CONFIG ROUTES ============
+
+  // GET /api/config/public - Serve public configuration values
+  app.get("/api/config/public", (req, res) => {
+    res.json({
+      supportEmail: process.env.SUPPORT_EMAIL || "support@ourshiksha.com",
+      privacyEmail: process.env.PRIVACY_EMAIL || "privacy@ourshiksha.com",
+      legalEmail: process.env.LEGAL_EMAIL || "legal@ourshiksha.com",
+      companyLocation: process.env.COMPANY_LOCATION || "Chennai, Tamil Nadu, India",
+      companyName: "OurShiksha",
+    });
+  });
+
+  // POST /api/contact - Send contact form email
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, subject, message } = req.body;
+
+      // Validate required fields
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email address" });
+      }
+
+      const supportEmail = process.env.SUPPORT_EMAIL || "support@ourshiksha.com";
+      
+      // Create email HTML
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">New Contact Form Submission</h2>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>From:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+          </div>
+          <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h3 style="color: #333; margin-top: 0;">Message:</h3>
+            <p style="white-space: pre-wrap;">${message}</p>
+          </div>
+          <p style="color: #666; font-size: 12px; margin-top: 20px;">
+            This email was sent from the OurShiksha contact form.
+          </p>
+        </div>
+      `;
+
+      const emailSent = await sendGenericEmail(
+        supportEmail,
+        `[Contact Form] ${subject}`,
+        html
+      );
+
+      if (emailSent) {
+        res.json({ success: true, message: "Your message has been sent successfully!" });
+      } else {
+        res.status(500).json({ error: "Failed to send message. Please try again later." });
+      }
+    } catch (error) {
+      console.error("Error sending contact form:", error);
+      res.status(500).json({ error: "Failed to send message. Please try again later." });
+    }
+  });
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {
