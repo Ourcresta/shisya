@@ -107,33 +107,34 @@ export default function Wallet() {
   const [purchasingPack, setPurchasingPack] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"history" | "buy" | "voucher" | "gift">("history");
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const payment = params.get("payment");
-    const pack = params.get("pack");
+  const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null);
 
-    if (payment === "success" && pack) {
-      toast({
-        title: "Payment Successful!",
-        description: "Your learning points have been added to your wallet.",
-      });
-      refetchCredits();
-      queryClient.invalidateQueries({ queryKey: ["/api/user/credits/transactions"] });
-      window.history.replaceState({}, "", "/shishya/wallet");
-    } else if (payment === "cancelled") {
-      toast({
-        title: "Payment Cancelled",
-        description: "Your payment was cancelled. No charges were made.",
-        variant: "destructive",
-      });
-      window.history.replaceState({}, "", "/shishya/wallet");
-    }
+  useEffect(() => {
+    // Load Razorpay key on mount
+    fetch("/api/payments/razorpay-key")
+      .then(res => res.json())
+      .then(data => {
+        if (data.keyId) {
+          setRazorpayKeyId(data.keyId);
+        }
+      })
+      .catch(err => console.error("Failed to load Razorpay key:", err));
   }, []);
 
   const handleBuyCredits = async (packId: string) => {
+    if (!razorpayKeyId) {
+      toast({
+        title: "Payment gateway not ready",
+        description: "Please wait a moment and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPurchasingPack(packId);
     try {
-      const response = await fetch("/api/payments/create-checkout", {
+      // Create order on backend
+      const response = await fetch("/api/payments/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -142,22 +143,105 @@ export default function Wallet() {
 
       const data = await response.json();
 
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-      } else {
+      if (!response.ok) {
         toast({
           title: "Error",
-          description: data.error || "Failed to initiate payment. Please try again.",
+          description: data.error || "Failed to create order. Please try again.",
           variant: "destructive",
         });
+        setPurchasingPack(null);
+        return;
       }
+
+      // Load Razorpay script if not loaded
+      if (!(window as any).Razorpay) {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+      }
+
+      // Open Razorpay checkout
+      const options = {
+        key: razorpayKeyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "OurShiksha",
+        description: `${data.packName} - ${data.credits} Learning Points`,
+        order_id: data.orderId,
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          // Verify payment on backend
+          try {
+            const verifyResponse = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                packId,
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyResponse.ok && verifyData.success) {
+              toast({
+                title: "Payment Successful!",
+                description: `${verifyData.credits} learning points have been added to your wallet.`,
+              });
+              refetchCredits();
+              queryClient.invalidateQueries({ queryKey: ["/api/user/credits/transactions"] });
+            } else {
+              toast({
+                title: "Verification Failed",
+                description: verifyData.error || "Please contact support if points were deducted.",
+                variant: "destructive",
+              });
+            }
+          } catch (error) {
+            toast({
+              title: "Verification Error",
+              description: "Please contact support if payment was deducted.",
+              variant: "destructive",
+            });
+          }
+          setPurchasingPack(null);
+        },
+        prefill: {
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#7c3aed",
+        },
+        modal: {
+          ondismiss: () => {
+            setPurchasingPack(null);
+            toast({
+              title: "Payment Cancelled",
+              description: "Your payment was cancelled. No charges were made.",
+              variant: "destructive",
+            });
+          },
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to connect to payment gateway. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setPurchasingPack(null);
     }
   };

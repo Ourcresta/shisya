@@ -5,7 +5,7 @@ import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
 import { registerMithraRoutes } from "./mithra";
 import { creditsRouter } from "./credits";
-import { stripePaymentsRouter } from "./stripePayments";
+import { razorpayRouter } from "./razorpayPayments";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -48,8 +48,8 @@ export async function registerRoutes(
   app.use("/api/user/credits", creditsRouter);
   app.use("/api", creditsRouter);
   
-  // Stripe payment routes
-  app.use("/api/payments", stripePaymentsRouter);
+  // Razorpay payment routes
+  app.use("/api/payments", razorpayRouter);
   
   // GET /api/courses - Fetch only published courses
   app.get("/api/courses", async (req, res) => {
