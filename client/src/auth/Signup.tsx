@@ -6,11 +6,12 @@ import { signupSchema, type SignupInput } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader as CardHeaderUI, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/layout/Header";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -90,9 +91,11 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md">
+          <CardHeaderUI className="space-y-2 text-center">
           <div className="flex justify-center mb-2">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <GraduationCap className="w-6 h-6 text-primary" />
@@ -102,7 +105,7 @@ export default function Signup() {
           <CardDescription>
             Join SHISHYA and start learning today
           </CardDescription>
-        </CardHeader>
+        </CardHeaderUI>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -170,7 +173,8 @@ export default function Signup() {
             </Link>
           </p>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

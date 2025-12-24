@@ -23,10 +23,11 @@ import {
   Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader as CardHeaderUI, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/contexts/AuthContext";
+import { Header } from "@/components/layout/Header";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -182,7 +183,9 @@ export default function Pricing() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
@@ -331,7 +334,7 @@ export default function Pricing() {
                     </div>
                   )}
                   
-                  <CardHeader className="text-center pb-4">
+                  <CardHeaderUI className="text-center pb-4">
                     <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                       plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted'
                     }`}>
@@ -347,7 +350,7 @@ export default function Pricing() {
                       <Coins className="w-3 h-3 text-amber-500" />
                       {plan.coins} coins {plan.coinsLabel}
                     </Badge>
-                  </CardHeader>
+                  </CardHeaderUI>
                   
                   <CardContent className="flex-1">
                     <ul className="space-y-3">
