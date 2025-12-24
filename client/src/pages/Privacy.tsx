@@ -1,8 +1,17 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { GraduationCap, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
+
+interface PublicConfig {
+  supportEmail: string;
+  privacyEmail: string;
+  legalEmail: string;
+  companyLocation: string;
+  companyName: string;
+}
 
 function Footer() {
   return (
@@ -41,6 +50,13 @@ function Footer() {
 }
 
 export default function Privacy() {
+  const { data: config } = useQuery<PublicConfig>({
+    queryKey: ["/api/config/public"],
+  });
+
+  const privacyEmail = config?.privacyEmail || "privacy@ourshiksha.com";
+  const companyLocation = config?.companyLocation || "Chennai, Tamil Nadu, India";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -222,13 +238,13 @@ export default function Privacy() {
                   <h2 className="text-xl font-semibold mb-3">Contact for Data Queries</h2>
                   <p className="text-muted-foreground">
                     For privacy-related questions or data requests, contact us at:{" "}
-                    <a href="mailto:privacy@ourshiksha.com" className="text-primary hover:underline">
-                      privacy@ourshiksha.com
+                    <a href={`mailto:${privacyEmail}`} className="text-primary hover:underline">
+                      {privacyEmail}
                     </a>
                   </p>
                   <p className="text-muted-foreground">
                     OurShiksha<br />
-                    Chennai, Tamil Nadu, India
+                    {companyLocation}
                   </p>
                 </section>
               </div>

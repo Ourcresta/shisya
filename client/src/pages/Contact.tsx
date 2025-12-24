@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { 
   GraduationCap, 
   Mail, 
   MapPin, 
   Send, 
   MessageSquare,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,10 +28,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Header } from "@/components/layout/Header";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+interface PublicConfig {
+  supportEmail: string;
+  privacyEmail: string;
+  legalEmail: string;
+  companyLocation: string;
+  companyName: string;
+}
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
+  subject: z.string().min(3, "Subject must be at least 3 characters"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
@@ -73,19 +86,54 @@ function Footer() {
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const { data: config } = useQuery<PublicConfig>({
+    queryKey: ["/api/config/public"],
+  });
+
+  const supportEmail = config?.supportEmail || "support@ourshiksha.com";
+  const companyLocation = config?.companyLocation || "Chennai, Tamil Nadu, India";
   
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
+      subject: "",
       message: "",
     },
   });
 
   const onSubmit = async (data: ContactFormData) => {
-    console.log("Contact form submitted:", data);
-    setSubmitted(true);
+    setIsSubmitting(true);
+    try {
+      const response = await apiRequest("POST", "/api/contact", data);
+      const result = await response.json();
+      
+      if (result.success) {
+        setSubmitted(true);
+        toast({
+          title: "Message Sent",
+          description: result.message || "We'll get back to you soon!",
+        });
+      } else {
+        toast({
+          title: "Failed to send",
+          description: result.error || "Please try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -134,11 +182,11 @@ export default function Contact() {
                       <div>
                         <h3 className="font-medium mb-1">Email Us</h3>
                         <a 
-                          href="mailto:support@ourshiksha.com" 
+                          href={`mailto:${supportEmail}`}
                           className="text-sm text-muted-foreground hover:text-primary transition-colors"
                           data-testid="link-email-support"
                         >
-                          support@ourshiksha.com
+                          {supportEmail}
                         </a>
                       </div>
                     </div>
@@ -154,8 +202,7 @@ export default function Contact() {
                       <div>
                         <h3 className="font-medium mb-1">Location</h3>
                         <p className="text-sm text-muted-foreground">
-                          Chennai, Tamil Nadu<br />
-                          India
+                          {companyLocation}
                         </p>
                       </div>
                     </div>
@@ -240,6 +287,24 @@ export default function Contact() {
 
                           <FormField
                             control={form.control}
+                            name="subject"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Subject</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="What is this about?" 
+                                    {...field} 
+                                    data-testid="input-contact-subject"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
                             name="message"
                             render={({ field }) => (
                               <FormItem>
@@ -260,11 +325,20 @@ export default function Contact() {
                           <Button 
                             type="submit" 
                             className="w-full gap-2"
-                            disabled={form.formState.isSubmitting}
+                            disabled={isSubmitting}
                             data-testid="button-submit-contact"
                           >
-                            <Send className="w-4 h-4" />
-                            Send Message
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Sending...
+                              </>
+                            ) : (
+                              <>
+                                <Send className="w-4 h-4" />
+                                Send Message
+                              </>
+                            )}
                           </Button>
                         </form>
                       </Form>

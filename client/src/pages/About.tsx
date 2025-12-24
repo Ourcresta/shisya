@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { 
   GraduationCap, 
   Brain, 
@@ -17,6 +18,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
+
+interface PublicConfig {
+  supportEmail: string;
+  privacyEmail: string;
+  legalEmail: string;
+  companyLocation: string;
+  companyName: string;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -68,6 +77,12 @@ function Footer() {
 }
 
 export default function About() {
+  const { data: config } = useQuery<PublicConfig>({
+    queryKey: ["/api/config/public"],
+  });
+
+  const companyLocation = config?.companyLocation || "Chennai, Tamil Nadu, India";
+
   const differentiators = [
     {
       icon: Brain,
@@ -233,7 +248,7 @@ export default function About() {
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-8">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-5 h-5 text-primary" />
-                  <span>Chennai, India</span>
+                  <span>{companyLocation}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />

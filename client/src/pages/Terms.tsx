@@ -1,8 +1,17 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { GraduationCap, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
+
+interface PublicConfig {
+  supportEmail: string;
+  privacyEmail: string;
+  legalEmail: string;
+  companyLocation: string;
+  companyName: string;
+}
 
 function Footer() {
   return (
@@ -41,6 +50,12 @@ function Footer() {
 }
 
 export default function Terms() {
+  const { data: config } = useQuery<PublicConfig>({
+    queryKey: ["/api/config/public"],
+  });
+
+  const legalEmail = config?.legalEmail || "legal@ourshiksha.com";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -193,8 +208,8 @@ export default function Terms() {
                   <h2 className="text-xl font-semibold mb-3">10. Contact</h2>
                   <p className="text-muted-foreground">
                     For questions about these terms, contact us at{" "}
-                    <a href="mailto:legal@ourshiksha.com" className="text-primary hover:underline">
-                      legal@ourshiksha.com
+                    <a href={`mailto:${legalEmail}`} className="text-primary hover:underline">
+                      {legalEmail}
                     </a>
                   </p>
                 </section>
