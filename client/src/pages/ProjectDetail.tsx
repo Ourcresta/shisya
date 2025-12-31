@@ -27,7 +27,7 @@ import {
   saveProjectSubmission 
 } from "@/lib/submissions";
 import { apiRequest } from "@/lib/queryClient";
-import { MithraAvatar } from "@/components/mithra";
+import { UshaAvatar } from "@/components/usha";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Project, ProjectSubmission, Course } from "@shared/schema";
 
@@ -329,9 +329,9 @@ export default function ProjectDetail() {
         </div>
       ) : null}
 
-      {/* Mithra AI Tutor Avatar */}
+      {/* Usha AI Tutor Avatar */}
       {user && project && (
-        <MithraAvatar
+        <UshaAvatar
           context={{
             courseId: courseIdNum,
             projectId: projectIdNum,

@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import QuestionCard from "@/components/test/QuestionCard";
 import TestTimer from "@/components/test/TestTimer";
 import TestProgress from "@/components/test/TestProgress";
-import { MithraAvatar } from "@/components/mithra/MithraAvatar";
+import { UshaAvatar } from "@/components/usha/UshaAvatar";
 import type { TestWithQuestionsUI, TestAttemptAnswer } from "@shared/schema";
 import { useTestAttempts } from "@/contexts/TestAttemptContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -275,7 +275,7 @@ export default function TestAttempt() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <MithraAvatar
+      <UshaAvatar
         context={{
           courseId: parseInt(courseId!, 10),
           pageType: "lesson",

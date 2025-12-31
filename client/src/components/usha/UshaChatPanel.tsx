@@ -8,15 +8,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Send, X, Sparkles, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { MithraAllowedPage, MithraResponseType, MithraHelpLevel, StudentProgressSummary, MithraTurn } from "@shared/schema";
+import type { UshaAllowedPage, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn } from "@shared/schema";
 
-interface MithraContext {
+interface UshaContext {
   courseId: number;
   moduleId?: number;
   lessonId?: number;
   labId?: number;
   projectId?: number;
-  pageType: MithraAllowedPage;
+  pageType: UshaAllowedPage;
   courseTitle?: string;
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
@@ -28,25 +28,25 @@ interface MithraContext {
 interface Message {
   role: "user" | "assistant";
   content: string;
-  type?: MithraResponseType;
-  helpLevel?: MithraHelpLevel;
+  type?: UshaResponseType;
+  helpLevel?: UshaHelpLevel;
 }
 
-interface MithraApiResponse {
+interface UshaApiResponse {
   answer: string;
-  type: MithraResponseType;
-  helpLevel: MithraHelpLevel;
+  type: UshaResponseType;
+  helpLevel: UshaHelpLevel;
   remaining?: number;
   nearLimit?: boolean;
   error?: string;
 }
 
-interface MithraChatPanelProps {
-  context: MithraContext;
+interface UshaChatPanelProps {
+  context: UshaContext;
   onClose: () => void;
 }
 
-function getResponseTypeBadge(type: MithraResponseType): { label: string; variant: "default" | "secondary" | "outline" | "destructive" } {
+function getResponseTypeBadge(type: UshaResponseType): { label: string; variant: "default" | "secondary" | "outline" | "destructive" } {
   switch (type) {
     case "explanation":
       return { label: "Explanation", variant: "secondary" };
@@ -61,7 +61,7 @@ function getResponseTypeBadge(type: MithraResponseType): { label: string; varian
   }
 }
 
-function getHelpLevelLabel(level: MithraHelpLevel): string {
+function getHelpLevelLabel(level: UshaHelpLevel): string {
   switch (level) {
     case "beginner":
       return "Detailed";
@@ -74,7 +74,7 @@ function getHelpLevelLabel(level: MithraHelpLevel): string {
   }
 }
 
-export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
+export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -93,7 +93,7 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
     inputRef.current?.focus();
   }, []);
 
-  const getPreviousTurns = (): MithraTurn[] => {
+  const getPreviousTurns = (): UshaTurn[] => {
     return messages.slice(-6).map((m) => ({
       role: m.role,
       content: m.content,
@@ -102,15 +102,15 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
 
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest("POST", "/api/mithra/ask", {
+      const response = await apiRequest("POST", "/api/usha/ask", {
         context: {
           studentId: user?.id,
           ...context,
-          previousMithraTurns: getPreviousTurns(),
+          previousUshaTurns: getPreviousTurns(),
         },
         question,
       });
-      return await response.json() as MithraApiResponse;
+      return await response.json() as UshaApiResponse;
     },
     onSuccess: (data) => {
       if (data.remaining !== undefined) {
@@ -155,7 +155,7 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
     }
   };
 
-  const getPageTypeLabel = (pageType: MithraAllowedPage): string => {
+  const getPageTypeLabel = (pageType: UshaAllowedPage): string => {
     switch (pageType) {
       case "lesson": return "Lesson";
       case "lab": return "Lab";
@@ -171,7 +171,7 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
           <div>
-            <h3 className="font-semibold text-sm">Mithra</h3>
+            <h3 className="font-semibold text-sm">Usha</h3>
             <p className="text-xs text-muted-foreground">
               {getPageTypeLabel(context.pageType)} Assistant
             </p>
@@ -181,7 +181,7 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
           size="icon"
           variant="ghost"
           onClick={onClose}
-          data-testid="button-mithra-close"
+          data-testid="button-usha-close"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -201,7 +201,7 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Sparkles className="h-8 w-8 mx-auto mb-3 opacity-50" />
-              <p className="text-sm mb-2">Hi, I am Mithra, your learning companion.</p>
+              <p className="text-sm mb-2">Hi, I am Usha, your learning companion.</p>
               <p className="text-xs mb-4">
                 I explain concepts, give hints, and guide your thinking.
                 I am here to help you learn, not to solve for you.
@@ -273,13 +273,13 @@ export function MithraChatPanel({ context, onClose }: MithraChatPanelProps) {
             placeholder="Ask a question..."
             className="min-h-10 max-h-24 resize-none text-sm"
             disabled={askMutation.isPending}
-            data-testid="input-mithra-question"
+            data-testid="input-usha-question"
           />
           <Button
             type="submit"
             size="icon"
             disabled={!input.trim() || askMutation.isPending}
-            data-testid="button-mithra-send"
+            data-testid="button-usha-send"
           >
             {askMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

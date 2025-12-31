@@ -2,15 +2,15 @@ import type { Express, Response } from "express";
 import OpenAI from "openai";
 import { db } from "./db";
 import { 
-  mithraConversations, 
-  mithraMessages, 
-  mithraRequestSchema, 
-  type MithraResponse, 
-  type MithraResponseType,
-  type MithraHelpLevel,
-  type MithraContext,
+  ushaConversations, 
+  ushaMessages, 
+  ushaRequestSchema, 
+  type UshaResponse, 
+  type UshaResponseType,
+  type UshaHelpLevel,
+  type UshaContext,
   type StudentProgressSummary,
-  type MithraTurn
+  type UshaTurn
 } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
@@ -45,7 +45,7 @@ function checkRateLimit(userId: string): { allowed: boolean; remaining: number; 
   return { allowed: true, remaining, nearLimit: remaining <= 2 };
 }
 
-const MITHRA_V2_SYSTEM_PROMPT = `You are Mithra, an AI Tutor Avatar for OurShiksha.
+const USHA_V2_SYSTEM_PROMPT = `You are Usha, an AI Tutor Avatar for OurShiksha.
 
 You behave like a calm senior tutor.
 You explain, guide, and encourage thinking.
@@ -93,7 +93,7 @@ Always end with ONE of these:
 
 If you detect repeated attempts to get direct answers, politely redirect without accusation or shaming.`;
 
-function calculateHelpLevel(context: MithraContext): MithraHelpLevel {
+function calculateHelpLevel(context: UshaContext): UshaHelpLevel {
   const courseLevel = context.courseLevel || "intermediate";
   const progress = context.studentProgressSummary;
   
@@ -107,7 +107,7 @@ function calculateHelpLevel(context: MithraContext): MithraHelpLevel {
   
   const hasRecentFailures = progress.recentFailures > 0;
   const stuckOnPage = (progress.timeOnCurrentPage || 0) > 300;
-  const previousTurns = context.previousMithraTurns?.length || 0;
+  const previousTurns = context.previousUshaTurns?.length || 0;
   const repeatedQuestions = previousTurns > 2;
 
   if (courseLevel === "beginner") {
@@ -166,7 +166,7 @@ function detectMisuse(question: string, userId: string): { isMisuse: boolean; is
   return { isMisuse: false, isRepeated: false };
 }
 
-function buildContextPrompt(context: MithraContext, helpLevel: MithraHelpLevel): string {
+function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel): string {
   let contextDesc = `CURRENT CONTEXT:\n`;
   contextDesc += `- Page type: ${context.pageType}\n`;
   contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
@@ -237,12 +237,12 @@ function buildContextPrompt(context: MithraContext, helpLevel: MithraHelpLevel):
 }
 
 function buildConversationMessages(
-  previousTurns: MithraTurn[] | undefined,
+  previousTurns: UshaTurn[] | undefined,
   contextPrompt: string,
   question: string
 ): Array<{ role: "system" | "user" | "assistant"; content: string }> {
   const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-    { role: "system", content: MITHRA_V2_SYSTEM_PROMPT },
+    { role: "system", content: USHA_V2_SYSTEM_PROMPT },
     { role: "system", content: contextPrompt },
   ];
 
@@ -261,7 +261,7 @@ function buildConversationMessages(
   return messages;
 }
 
-function determineResponseType(question: string, answer: string): MithraResponseType {
+function determineResponseType(question: string, answer: string): UshaResponseType {
   const lowerQ = question.toLowerCase();
   const lowerA = answer.toLowerCase();
 
@@ -277,7 +277,7 @@ function determineResponseType(question: string, answer: string): MithraResponse
   return "explanation";
 }
 
-function getMisuseResponse(isRepeated: boolean, helpLevel: MithraHelpLevel): MithraResponse {
+function getMisuseResponse(isRepeated: boolean, helpLevel: UshaHelpLevel): UshaResponse {
   if (isRepeated) {
     return {
       answer: "I notice you're looking for direct answers, but my role is to help you truly understand and learn. Direct answers might seem faster, but they won't help you in the long run. Let's take a different approach - can you tell me which specific concept is confusing you? I can break it down step by step, and I think you'll find that much more helpful.",
@@ -293,8 +293,8 @@ function getMisuseResponse(isRepeated: boolean, helpLevel: MithraHelpLevel): Mit
   };
 }
 
-export function registerMithraRoutes(app: Express): void {
-  app.post("/api/mithra/ask", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+export function registerUshaRoutes(app: Express): void {
+  app.post("/api/usha/ask", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user!.id;
 
@@ -306,7 +306,7 @@ export function registerMithraRoutes(app: Express): void {
         });
       }
 
-      const parseResult = mithraRequestSchema.safeParse(req.body);
+      const parseResult = ushaRequestSchema.safeParse(req.body);
       if (!parseResult.success) {
         return res.status(400).json({ error: "Invalid request", details: parseResult.error.issues });
       }
@@ -327,7 +327,7 @@ export function registerMithraRoutes(app: Express): void {
       }
 
       const contextPrompt = buildContextPrompt(context, helpLevel);
-      const messages = buildConversationMessages(context.previousMithraTurns, contextPrompt, question);
+      const messages = buildConversationMessages(context.previousUshaTurns, contextPrompt, question);
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1-mini",
@@ -339,7 +339,7 @@ export function registerMithraRoutes(app: Express): void {
       const answer = completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
       const responseType = determineResponseType(question, answer);
 
-      const response: MithraResponse = {
+      const response: UshaResponse = {
         answer,
         type: responseType,
         helpLevel,
@@ -356,12 +356,12 @@ export function registerMithraRoutes(app: Express): void {
       res.json(responseWithMeta);
 
     } catch (error) {
-      console.error("Mithra API error:", error);
+      console.error("Usha API error:", error);
       res.status(500).json({ error: "Failed to process your question. Please try again." });
     }
   });
 
-  app.get("/api/mithra/history", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/usha/history", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user!.id;
       const courseId = parseInt(req.query.courseId as string, 10);
@@ -371,28 +371,28 @@ export function registerMithraRoutes(app: Express): void {
         return res.status(400).json({ error: "courseId and pageType required" });
       }
 
-      const conversation = await db.query.mithraConversations.findFirst({
+      const conversation = await db.query.ushaConversations.findFirst({
         where: and(
-          eq(mithraConversations.userId, userId),
-          eq(mithraConversations.courseId, courseId),
-          eq(mithraConversations.pageType, pageType)
+          eq(ushaConversations.userId, userId),
+          eq(ushaConversations.courseId, courseId),
+          eq(ushaConversations.pageType, pageType)
         ),
-        orderBy: [desc(mithraConversations.createdAt)]
+        orderBy: [desc(ushaConversations.createdAt)]
       });
 
       if (!conversation) {
         return res.json({ messages: [] });
       }
 
-      const messages = await db.query.mithraMessages.findMany({
-        where: eq(mithraMessages.conversationId, conversation.id),
-        orderBy: [mithraMessages.createdAt]
+      const messages = await db.query.ushaMessages.findMany({
+        where: eq(ushaMessages.conversationId, conversation.id),
+        orderBy: [ushaMessages.createdAt]
       });
 
       res.json({ messages });
 
     } catch (error) {
-      console.error("Mithra history error:", error);
+      console.error("Usha history error:", error);
       res.status(500).json({ error: "Failed to fetch conversation history" });
     }
   });
@@ -403,20 +403,20 @@ async function saveConversation(
   courseId: number,
   pageType: string,
   question: string,
-  response: MithraResponse
+  response: UshaResponse
 ): Promise<void> {
   try {
-    let conversation = await db.query.mithraConversations.findFirst({
+    let conversation = await db.query.ushaConversations.findFirst({
       where: and(
-        eq(mithraConversations.userId, userId),
-        eq(mithraConversations.courseId, courseId),
-        eq(mithraConversations.pageType, pageType)
+        eq(ushaConversations.userId, userId),
+        eq(ushaConversations.courseId, courseId),
+        eq(ushaConversations.pageType, pageType)
       ),
-      orderBy: [desc(mithraConversations.createdAt)]
+      orderBy: [desc(ushaConversations.createdAt)]
     });
 
     if (!conversation) {
-      const [newConversation] = await db.insert(mithraConversations).values({
+      const [newConversation] = await db.insert(ushaConversations).values({
         userId,
         courseId,
         pageType,
@@ -424,7 +424,7 @@ async function saveConversation(
       conversation = newConversation;
     }
 
-    await db.insert(mithraMessages).values([
+    await db.insert(ushaMessages).values([
       {
         conversationId: conversation.id,
         role: "user",

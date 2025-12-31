@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useCourseProgress } from "@/contexts/ProgressContext";
-import { MithraAvatar } from "@/components/mithra";
+import { UshaAvatar } from "@/components/usha";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
@@ -253,9 +253,9 @@ export default function LessonViewer() {
         </div>
       ) : null}
 
-      {/* Mithra AI Tutor Avatar */}
+      {/* Usha AI Tutor Avatar */}
       {user && lesson && (
-        <MithraAvatar
+        <UshaAvatar
           context={{
             courseId: courseIdNum,
             lessonId: lessonIdNum,

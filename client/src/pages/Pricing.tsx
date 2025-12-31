@@ -44,7 +44,7 @@ const staggerContainer = {
 };
 
 const coinUsage = [
-  { icon: MessageSquare, label: "AI Mithra Chat", cost: "5 coins / query", description: "Get personalized help from your AI tutor" },
+  { icon: MessageSquare, label: "AI Usha Chat", cost: "5 coins / query", description: "Get personalized help from your AI tutor" },
   { icon: FlaskConical, label: "Practice Lab", cost: "20 coins", description: "Hands-on coding exercises" },
   { icon: ClipboardCheck, label: "Test Attempt", cost: "30 coins", description: "Skill assessment tests" },
   { icon: FolderKanban, label: "Project Evaluation", cost: "50 coins", description: "Real-world project reviews" },
@@ -62,7 +62,7 @@ const plans = [
     icon: Gift,
     features: [
       "500 coins (one-time bonus)",
-      "Limited AI Mithra usage",
+      "Limited AI Usha usage",
       "Practice labs (basic)",
       "1 course access",
       "Community support"
@@ -83,7 +83,7 @@ const plans = [
     icon: Zap,
     features: [
       "2,000 coins / month",
-      "Full AI Mithra access",
+      "Full AI Usha access",
       "All practice labs & tests",
       "5 course access",
       "Course completion certificate",
@@ -105,7 +105,7 @@ const plans = [
     icon: Crown,
     features: [
       "6,000 coins / month",
-      "Unlimited AI Mithra",
+      "Unlimited AI Usha",
       "All labs, tests & projects",
       "Unlimited course access",
       "Certificates + Marksheets",
@@ -144,7 +144,7 @@ const plans = [
 ];
 
 const features = [
-  { icon: Brain, title: "AI Tutor (Mithra)", description: "24/7 personalized learning assistant that never gives direct answers" },
+  { icon: Brain, title: "AI Tutor (Usha)", description: "24/7 personalized learning assistant that never gives direct answers" },
   { icon: FlaskConical, title: "Practice-First Learning", description: "Learn by doing with hands-on labs and exercises" },
   { icon: FolderKanban, title: "Real-World Projects", description: "Build portfolio-worthy projects with expert evaluation" },
   { icon: Award, title: "Verified Certificates", description: "Industry-recognized credentials with QR verification" },

@@ -16,7 +16,7 @@ import {
   saveLabCode 
 } from "@/lib/labProgress";
 import { executeJavaScript, compareOutput } from "@/lib/labRunner";
-import { MithraAvatar } from "@/components/mithra";
+import { UshaAvatar } from "@/components/usha";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lab, Course } from "@shared/schema";
 import { 
@@ -266,9 +266,9 @@ export default function LabPractice() {
         </div>
       </main>
 
-      {/* Mithra AI Tutor Avatar */}
+      {/* Usha AI Tutor Avatar */}
       {user && lab && (
-        <MithraAvatar
+        <UshaAvatar
           context={{
             courseId,
             labId,

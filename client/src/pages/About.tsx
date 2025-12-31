@@ -87,7 +87,7 @@ export default function About() {
     {
       icon: Brain,
       title: "AI-Powered Learning",
-      description: "Mithra, our AI tutor, provides personalized guidance using Socratic methods - never giving direct answers, always encouraging understanding."
+      description: "Usha, our AI tutor, provides personalized guidance using Socratic methods - never giving direct answers, always encouraging understanding."
     },
     {
       icon: Trophy,

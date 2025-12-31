@@ -603,10 +603,10 @@ export interface AuthUser {
   emailVerified: boolean;
 }
 
-// ============ MITHRA AI TUTOR SCHEMAS (v2) ============
+// ============ USHA AI TUTOR SCHEMAS (v2) ============
 
-// Mithra conversations table
-export const mithraConversations = pgTable("mithra_conversations", {
+// Usha conversations table (keeping db table name for compatibility)
+export const ushaConversations = pgTable("mithra_conversations", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
   courseId: integer("course_id").notNull(),
@@ -614,10 +614,10 @@ export const mithraConversations = pgTable("mithra_conversations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Mithra messages table
-export const mithraMessages = pgTable("mithra_messages", {
+// Usha messages table (keeping db table name for compatibility)
+export const ushaMessages = pgTable("mithra_messages", {
   id: serial("id").primaryKey(),
-  conversationId: integer("conversation_id").notNull().references(() => mithraConversations.id),
+  conversationId: integer("conversation_id").notNull().references(() => ushaConversations.id),
   role: varchar("role", { length: 10 }).notNull(),
   content: text("content").notNull(),
   responseType: varchar("response_type", { length: 20 }),
@@ -625,13 +625,13 @@ export const mithraMessages = pgTable("mithra_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Mithra allowed page types
-export const MITHRA_ALLOWED_PAGES = ["lesson", "lab", "project", "test_prep"] as const;
-export type MithraAllowedPage = typeof MITHRA_ALLOWED_PAGES[number];
+// Usha allowed page types
+export const USHA_ALLOWED_PAGES = ["lesson", "lab", "project", "test_prep"] as const;
+export type UshaAllowedPage = typeof USHA_ALLOWED_PAGES[number];
 
-// Mithra help levels for adaptive tutoring
-export const MITHRA_HELP_LEVELS = ["beginner", "intermediate", "advanced"] as const;
-export type MithraHelpLevel = typeof MITHRA_HELP_LEVELS[number];
+// Usha help levels for adaptive tutoring
+export const USHA_HELP_LEVELS = ["beginner", "intermediate", "advanced"] as const;
+export type UshaHelpLevel = typeof USHA_HELP_LEVELS[number];
 
 // Student progress summary for learning-aware responses
 export const studentProgressSummarySchema = z.object({
@@ -647,16 +647,16 @@ export const studentProgressSummarySchema = z.object({
 
 export type StudentProgressSummary = z.infer<typeof studentProgressSummarySchema>;
 
-// Previous Mithra conversation turn for session memory
-export const mithraTurnSchema = z.object({
+// Previous Usha conversation turn for session memory
+export const ushaTurnSchema = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string(),
 });
 
-export type MithraTurn = z.infer<typeof mithraTurnSchema>;
+export type UshaTurn = z.infer<typeof ushaTurnSchema>;
 
-// Mithra request context schema (v2 enhanced)
-export const mithraContextSchema = z.object({
+// Usha request context schema (v2 enhanced)
+export const ushaContextSchema = z.object({
   studentId: z.string(),
   courseId: z.number(),
   moduleId: z.number().optional(),
@@ -670,31 +670,31 @@ export const mithraContextSchema = z.object({
   labTitle: z.string().optional(),
   projectTitle: z.string().optional(),
   studentProgressSummary: studentProgressSummarySchema.optional(),
-  previousMithraTurns: z.array(mithraTurnSchema).optional(),
+  previousUshaTurns: z.array(ushaTurnSchema).optional(),
 });
 
-export type MithraContext = z.infer<typeof mithraContextSchema>;
+export type UshaContext = z.infer<typeof ushaContextSchema>;
 
-// Mithra request schema
-export const mithraRequestSchema = z.object({
-  context: mithraContextSchema,
+// Usha request schema
+export const ushaRequestSchema = z.object({
+  context: ushaContextSchema,
   question: z.string().min(1, "Question is required").max(500, "Question too long"),
 });
 
-export type MithraRequest = z.infer<typeof mithraRequestSchema>;
+export type UshaRequest = z.infer<typeof ushaRequestSchema>;
 
-// Mithra response types
-export const MITHRA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "warning"] as const;
-export type MithraResponseType = typeof MITHRA_RESPONSE_TYPES[number];
+// Usha response types
+export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "warning"] as const;
+export type UshaResponseType = typeof USHA_RESPONSE_TYPES[number];
 
-// Mithra response interface (v2 with help level)
-export interface MithraResponse {
+// Usha response interface (v2 with help level)
+export interface UshaResponse {
   answer: string;
-  type: MithraResponseType;
-  helpLevel: MithraHelpLevel;
+  type: UshaResponseType;
+  helpLevel: UshaHelpLevel;
 }
 
-// Mithra table types
-export type MithraConversation = typeof mithraConversations.$inferSelect;
-export type MithraMessage = typeof mithraMessages.$inferSelect;
+// Usha table types
+export type UshaConversation = typeof ushaConversations.$inferSelect;
+export type UshaMessage = typeof ushaMessages.$inferSelect;
 

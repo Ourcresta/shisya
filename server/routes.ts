@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
-import { registerMithraRoutes } from "./mithra";
+import { registerUshaRoutes } from "./usha";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
@@ -775,8 +775,8 @@ export async function registerRoutes(
     }
   });
 
-  // ============ MITHRA AI TUTOR ROUTES ============
-  registerMithraRoutes(app);
+  // ============ USHA AI TUTOR ROUTES ============
+  registerUshaRoutes(app);
 
   return httpServer;
 }

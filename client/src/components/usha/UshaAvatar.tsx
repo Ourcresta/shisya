@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Lock } from "lucide-react";
-import { MithraChatPanel } from "./MithraChatPanel";
-import type { MithraAllowedPage, StudentProgressSummary } from "@shared/schema";
+import { UshaChatPanel } from "./UshaChatPanel";
+import type { UshaAllowedPage, StudentProgressSummary } from "@shared/schema";
 
-interface MithraContext {
+interface UshaContext {
   courseId: number;
   moduleId?: number;
   lessonId?: number;
   labId?: number;
   projectId?: number;
-  pageType: MithraAllowedPage;
+  pageType: UshaAllowedPage;
   courseTitle?: string;
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
@@ -19,13 +19,13 @@ interface MithraContext {
   studentProgressSummary?: StudentProgressSummary;
 }
 
-interface MithraAvatarProps {
-  context: MithraContext;
+interface UshaAvatarProps {
+  context: UshaContext;
   disabled?: boolean;
   disabledMessage?: string;
 }
 
-export function MithraAvatar({ context, disabled = false, disabledMessage }: MithraAvatarProps) {
+export function UshaAvatar({ context, disabled = false, disabledMessage }: UshaAvatarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -42,7 +42,7 @@ export function MithraAvatar({ context, disabled = false, disabledMessage }: Mit
             variant="secondary"
             disabled
             className="h-14 w-14 rounded-full shadow-lg opacity-50 cursor-not-allowed"
-            data-testid="button-mithra-avatar-disabled"
+            data-testid="button-usha-avatar-disabled"
           >
             <Lock className="h-5 w-5" />
           </Button>
@@ -51,7 +51,7 @@ export function MithraAvatar({ context, disabled = false, disabledMessage }: Mit
               showTooltip ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           >
-            {disabledMessage || "Mithra is unavailable"}
+            {disabledMessage || "Usha is unavailable"}
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function MithraAvatar({ context, disabled = false, disabledMessage }: Mit
           variant="default"
           onClick={() => setIsOpen(!isOpen)}
           className="h-14 w-14 rounded-full shadow-lg"
-          data-testid="button-mithra-avatar"
+          data-testid="button-usha-avatar"
         >
           {isOpen ? (
             <X className="h-6 w-6" />
@@ -77,7 +77,7 @@ export function MithraAvatar({ context, disabled = false, disabledMessage }: Mit
       </div>
 
       {isOpen && (
-        <MithraChatPanel 
+        <UshaChatPanel 
           context={context} 
           onClose={() => setIsOpen(false)} 
         />
