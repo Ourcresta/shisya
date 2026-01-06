@@ -376,52 +376,63 @@ export default function Dashboard() {
         >
           {/* ZONE 4: Pending Actions */}
           <motion.div variants={staggerItem}>
-            <Card className="h-full overflow-hidden">
+            <Card className="h-full overflow-hidden relative bg-gradient-to-br from-card via-card to-primary/5 dark:to-primary/10 border-border/50 dark:border-primary/20">
+              {/* Decorative gradient orb */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+              
               <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3 relative">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-primary/10">
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
                     <Target className="w-4 h-4 text-primary" />
                   </div>
-                  Pending Actions
+                  <span className="dark:bg-gradient-to-r dark:from-foreground dark:to-foreground/80 dark:bg-clip-text">
+                    Pending Actions
+                  </span>
                 </CardTitle>
                 {(pendingTests.length > 0 || pendingProjects.length > 0) && (
                   <Badge 
-                    variant="default" 
-                    className="text-xs font-semibold animate-pulse"
+                    className="text-xs font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-lg dark:shadow-primary/30 animate-pulse"
                   >
                     {pendingTests.length + pendingProjects.length} pending
                   </Badge>
                 )}
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 relative">
                 {pendingTests.length === 0 && pendingProjects.length === 0 ? (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-10 text-center"
+                    className="flex flex-col items-center justify-center py-10 text-center relative"
                   >
+                    {/* Success gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-green-500/5 via-transparent to-emerald-500/5 rounded-xl" />
+                    
                     <div className="relative mb-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400/20 to-emerald-500/20 dark:from-green-400/10 dark:to-emerald-500/10 flex items-center justify-center">
-                        <CheckCircle className="w-8 h-8 text-green-500" />
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400/30 via-emerald-500/20 to-teal-500/30 dark:from-green-400/20 dark:via-emerald-500/15 dark:to-teal-500/20 flex items-center justify-center border border-green-500/30 shadow-lg dark:shadow-green-500/20">
+                        <CheckCircle className="w-10 h-10 text-green-500 dark:text-green-400" />
                       </div>
-                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30">
-                        <Sparkles className="w-3 h-3 text-white" />
+                      <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/40 animate-bounce">
+                        <Sparkles className="w-4 h-4 text-white" />
                       </div>
+                      {/* Glow ring */}
+                      <div className="absolute inset-0 rounded-full bg-green-500/20 blur-xl animate-pulse" />
                     </div>
-                    <p className="text-base font-semibold text-green-600 dark:text-green-400">
+                    <p className="text-lg font-bold bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
                       All caught up!
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
+                    <p className="text-sm text-muted-foreground mt-2 max-w-[220px]">
                       Great work! Keep learning to unlock new challenges.
                     </p>
                   </motion.div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {pendingTests.length > 0 && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 px-1">
-                          <ClipboardCheck className="w-3.5 h-3.5 text-purple-500" />
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <div className="p-1 rounded bg-gradient-to-br from-purple-500/20 to-violet-500/10">
+                            <ClipboardCheck className="w-3 h-3 text-purple-500" />
+                          </div>
+                          <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
                             Tests to Complete
                           </span>
                         </div>
@@ -435,31 +446,36 @@ export default function Dashboard() {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="group flex items-center justify-between gap-3 p-3 rounded-lg border border-purple-200/50 dark:border-purple-800/30 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-900/10 dark:to-transparent hover-elevate cursor-pointer"
+                              className="group relative flex items-center justify-between gap-3 p-3 rounded-xl border border-purple-300/50 dark:border-purple-500/30 bg-gradient-to-r from-purple-100/80 via-purple-50/50 to-violet-50/30 dark:from-purple-900/30 dark:via-purple-800/20 dark:to-violet-900/10 hover:border-purple-400 dark:hover:border-purple-400/50 hover:shadow-lg dark:hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer overflow-hidden"
                               data-testid={`pending-test-${course.id}`}
                             >
-                              <div className="flex items-center gap-3 min-w-0">
+                              {/* Hover glow effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              
+                              <div className="flex items-center gap-3 min-w-0 relative">
                                 <div className="relative">
-                                  <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/10 border border-purple-400/30 group-hover:from-purple-500/30 group-hover:to-violet-500/20 transition-colors shadow-inner">
                                     <ClipboardCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                                   </div>
-                                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-purple-500 animate-pulse" />
+                                  <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-purple-500 to-violet-500 animate-pulse shadow-lg shadow-purple-500/50" />
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium truncate">Take Assessment</p>
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="text-sm font-semibold text-purple-900 dark:text-purple-100 truncate">Take Assessment</p>
+                                    <Badge className="text-[10px] px-2 py-0 h-4 bg-gradient-to-r from-purple-500/20 to-violet-500/20 border-purple-400/50 text-purple-700 dark:text-purple-300 font-medium">
                                       Required
                                     </Badge>
                                   </div>
-                                  <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+                                  <p className="text-xs text-purple-600/80 dark:text-purple-400/80 truncate mt-0.5">{course.title}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-xs text-purple-600 dark:text-purple-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-2 shrink-0 relative">
+                                <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-x-1">
                                   Start
                                 </span>
-                                <ArrowRight className="w-4 h-4 text-purple-500 group-hover:translate-x-1 transition-transform" />
+                                <div className="p-1.5 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                                  <ArrowRight className="w-4 h-4 text-purple-500 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
                               </div>
                             </motion.div>
                           </Link>
@@ -468,10 +484,12 @@ export default function Dashboard() {
                     )}
                     
                     {pendingProjects.length > 0 && (
-                      <div className="space-y-2 pt-2">
+                      <div className="space-y-2 pt-1">
                         <div className="flex items-center gap-2 px-1">
-                          <FileText className="w-3.5 h-3.5 text-blue-500" />
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <div className="p-1 rounded bg-gradient-to-br from-blue-500/20 to-cyan-500/10">
+                            <FileText className="w-3 h-3 text-blue-500" />
+                          </div>
+                          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                             Projects to Submit
                           </span>
                         </div>
@@ -485,31 +503,36 @@ export default function Dashboard() {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: (pendingTests.length + index) * 0.1 }}
-                              className="group flex items-center justify-between gap-3 p-3 rounded-lg border border-blue-200/50 dark:border-blue-800/30 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10 dark:to-transparent hover-elevate cursor-pointer"
+                              className="group relative flex items-center justify-between gap-3 p-3 rounded-xl border border-blue-300/50 dark:border-blue-500/30 bg-gradient-to-r from-blue-100/80 via-blue-50/50 to-cyan-50/30 dark:from-blue-900/30 dark:via-blue-800/20 dark:to-cyan-900/10 hover:border-blue-400 dark:hover:border-blue-400/50 hover:shadow-lg dark:hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer overflow-hidden"
                               data-testid={`pending-project-${course.id}`}
                             >
-                              <div className="flex items-center gap-3 min-w-0">
+                              {/* Hover glow effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              
+                              <div className="flex items-center gap-3 min-w-0 relative">
                                 <div className="relative">
-                                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-400/30 group-hover:from-blue-500/30 group-hover:to-cyan-500/20 transition-colors shadow-inner">
                                     <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                   </div>
-                                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+                                  <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 animate-pulse shadow-lg shadow-blue-500/50" />
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium truncate">Submit Project</p>
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 truncate">Submit Project</p>
+                                    <Badge className="text-[10px] px-2 py-0 h-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400/50 text-blue-700 dark:text-blue-300 font-medium">
                                       Required
                                     </Badge>
                                   </div>
-                                  <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+                                  <p className="text-xs text-blue-600/80 dark:text-blue-400/80 truncate mt-0.5">{course.title}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-2 shrink-0 relative">
+                                <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-x-1">
                                   Submit
                                 </span>
-                                <ArrowRight className="w-4 h-4 text-blue-500 group-hover:translate-x-1 transition-transform" />
+                                <div className="p-1.5 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+                                  <ArrowRight className="w-4 h-4 text-blue-500 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
                               </div>
                             </motion.div>
                           </Link>
