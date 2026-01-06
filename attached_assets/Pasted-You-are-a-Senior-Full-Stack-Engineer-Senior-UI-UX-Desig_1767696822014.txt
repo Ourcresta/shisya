@@ -1,0 +1,276 @@
+You are a Senior Full-Stack Engineer, Senior UI/UX Designer,
+Senior Product Architect, Senior EdTech Platform Architect,
+and Senior Replit AI Engineer.
+
+Your task is to DESIGN, BUILD, and FINALIZE a COMPLETE
+AI-POWERED EDUCATION PLATFORM consisting of TWO parts:
+
+====================================================
+PART 1: PARENT / PUBLIC WEBSITE (MARKETING SITE)
+PART 2: SHISHYA – STUDENT LEARNING PORTAL
+====================================================
+
+This is NOT a demo.
+This is NOT partial.
+This must be PRODUCTION-READY.
+
+====================================================
+TECH STACK (MANDATORY)
+====================================================
+• Frontend: Next.js 14 (App Router)
+• Styling: Tailwind CSS
+• Icons: Lucide React
+• Animations: Framer Motion
+• Fonts: Inter
+• State: React Context / Zustand
+• Auth: Placeholder (email/password – mock)
+• DB: Mock JSON / in-memory (replaceable later)
+• Hosting-ready for Replit / Vercel / MilesWeb
+
+====================================================
+PROJECT STRUCTURE
+====================================================
+/app
+  /(public)
+    page.tsx                → Home
+    /courses/page.tsx       → Public Courses
+    /pricing/page.tsx
+    /about/page.tsx
+    /contact/page.tsx
+    /privacy/page.tsx
+    /terms/page.tsx
+
+  /(shishya)
+    /login/page.tsx
+    /register/page.tsx
+    /dashboard/page.tsx
+    /courses/page.tsx
+    /course/[id]/page.tsx
+    /tests/page.tsx
+    /wallet/page.tsx
+    /certificates/page.tsx
+    /profile/page.tsx
+
+/components
+  Navbar.tsx
+  Footer.tsx
+
+  // Public Components
+  HeroSection.tsx
+  Features.tsx
+  HowItWorks.tsx
+  CoursesPreview.tsx
+  RewardsSection.tsx
+  AISection.tsx
+  CertificatesPreview.tsx
+  Testimonials.tsx
+  PricingCards.tsx
+  FAQ.tsx
+  CTA.tsx
+
+  // Shishya Components
+  StudentSidebar.tsx
+  StudentHeader.tsx
+  CourseCard.tsx
+  LessonPlayer.tsx
+  ProgressTracker.tsx
+  TestEngine.tsx
+  WalletCard.tsx
+  CertificateCard.tsx
+
+/lib
+  mockData.ts
+  auth.ts
+
+/styles
+  globals.css
+
+====================================================
+PART 1 – PARENT / PUBLIC WEBSITE
+====================================================
+
+🎯 Purpose:
+• Brand trust
+• Marketing
+• Lead generation
+• Course discovery
+
+❌ NO login required
+❌ NO dashboards
+❌ NO wallet logic
+
+----------------------------------------------------
+HOME PAGE SECTIONS (MANDATORY)
+----------------------------------------------------
+
+1️⃣ HERO SECTION
+Headline:
+"Learn Skills. Earn Rewards. Build Your Future."
+
+Subtext:
+"AI-powered learning with courses, tests, rewards & certificates."
+
+Buttons:
+• Start Learning Free → /register
+• Browse Courses → /courses
+
+----------------------------------------------------
+
+2️⃣ PLATFORM FEATURES
+• Structured Courses
+• AI Tutor (Multi-language)
+• Practice Labs & Tests
+• Points & Rewards
+• Certificates & Marksheets
+
+----------------------------------------------------
+
+3️⃣ HOW IT WORKS
+1. Sign Up
+2. Choose Course
+3. Learn + Practice + Test
+4. Earn Points & Certificate
+
+----------------------------------------------------
+
+4️⃣ COURSES PREVIEW
+• Categories:
+  - Full Stack
+  - DevOps
+  - Data Analytics
+  - AI & Automation
+  - Interview Prep
+
+----------------------------------------------------
+
+5️⃣ REWARDS SYSTEM (VISUAL)
+• Course Completion → Points
+• Points → Wallet
+• Wallet → Scholarships / Vouchers
+
+----------------------------------------------------
+
+6️⃣ AI POWERED LEARNING
+• AI Avatar Tutor
+• English / Tamil / Hindi
+• Auto Tests
+• Instant Doubt Support
+
+----------------------------------------------------
+
+7️⃣ CERTIFICATES
+• Digital Certificates
+• Marksheets
+• QR / Verification-ready UI
+
+----------------------------------------------------
+
+8️⃣ PRICING
+• Free
+• Pro
+• Ultra
+
+----------------------------------------------------
+
+9️⃣ FAQ + FINAL CTA
+
+====================================================
+PART 2 – SHISHYA (STUDENT PORTAL)
+====================================================
+
+🎯 Purpose:
+• Learning
+• Practice
+• Progress
+• Rewards
+• Certificates
+
+🔐 Requires Login
+
+----------------------------------------------------
+SHISHYA DASHBOARD
+----------------------------------------------------
+• Welcome message
+• Enrolled courses count
+• Points balance
+• Certificates earned
+• Continue Learning button
+
+----------------------------------------------------
+COURSES MODULE
+----------------------------------------------------
+• Enrolled courses
+• Progress bar
+• Lessons list
+• Video player (YouTube embed supported)
+• Mark lesson as complete
+
+----------------------------------------------------
+TESTS & PRACTICE
+----------------------------------------------------
+• MCQ tests
+• Auto evaluation
+• Score display
+• Retake option
+
+----------------------------------------------------
+POINTS WALLET
+----------------------------------------------------
+• Earned points
+• History
+• Badges
+• Rewards info
+
+----------------------------------------------------
+CERTIFICATES
+----------------------------------------------------
+• Completed courses
+• Download certificate (mock PDF)
+• Marksheets
+
+----------------------------------------------------
+PROFILE
+----------------------------------------------------
+• Name
+• Email
+• Learning stats
+• Language preference
+
+====================================================
+DESIGN RULES
+====================================================
+• Clean modern UI
+• Mobile-first
+• Soft shadows
+• Rounded cards
+• Blue / Indigo primary
+• Gold / Green accent for rewards
+• Dark mode friendly
+
+====================================================
+IMPORTANT RULES
+====================================================
+• Parent website and Shishya portal MUST be separated
+• Public pages must NOT expose student data
+• Shishya must feel like a real LMS
+• No unfinished sections
+• No TODO comments
+• Fully navigable UI
+
+====================================================
+DELIVERABLES
+====================================================
+✔ Complete Parent Website
+✔ Complete Shishya Student Portal
+✔ Responsive UI
+✔ Clean, commented code
+✔ Mock data included
+✔ Ready to deploy
+
+====================================================
+FINAL INSTRUCTION
+====================================================
+Build EVERYTHING now.
+Do not explain.
+Do not summarize.
+Return FULL WORKING CODE.
