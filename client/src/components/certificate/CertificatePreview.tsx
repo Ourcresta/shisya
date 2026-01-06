@@ -3,6 +3,8 @@ import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
 import ourShikshaStamp from "@assets/image_1766511184194.png";
 
+import ourshiksha_stamp_rot from "@assets/ourshiksha stamp_rot.png";
+
 interface CertificatePreviewProps {
   certificate: Certificate;
   forPrint?: boolean;
@@ -191,7 +193,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
 
             <div className="flex items-end gap-4">
               <img 
-                src={ourShikshaStamp} 
+                src={ourshiksha_stamp_rot} 
                 alt="Official Seal" 
                 className="w-[88px] h-[88px] object-contain ml-[10%]"
               />
