@@ -10,7 +10,8 @@ import {
   type UshaHelpLevel,
   type UshaContext,
   type StudentProgressSummary,
-  type UshaTurn
+  type UshaTurn,
+  type SupportedLanguage
 } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
@@ -91,7 +92,18 @@ Always end with ONE of these:
 - A checkpoint: "What part is still unclear?"
 - A next step: "What would you try next?"
 
-If you detect repeated attempts to get direct answers, politely redirect without accusation or shaming.`;
+If you detect repeated attempts to get direct answers, politely redirect without accusation or shaming.
+
+MULTI-LANGUAGE SUPPORT:
+You can respond in the student's preferred language. When a language preference is specified:
+- ENGLISH: Respond in clear, simple English (default)
+- HINDI: Respond in Hindi (Devanagari script). Use simple Hindi that students can understand.
+- TAMIL: Respond in Tamil (Tamil script). Use simple Tamil that students can understand.
+
+When responding in Hindi or Tamil:
+- Keep technical terms in English (e.g., "function", "variable", "loop")
+- Use the regional language for explanations, questions, and guidance
+- Maintain the same educational principles regardless of language`;
 
 function calculateHelpLevel(context: UshaContext): UshaHelpLevel {
   const courseLevel = context.courseLevel || "intermediate";
@@ -166,10 +178,11 @@ function detectMisuse(question: string, userId: string): { isMisuse: boolean; is
   return { isMisuse: false, isRepeated: false };
 }
 
-function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel): string {
+function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, language: SupportedLanguage = "english"): string {
   let contextDesc = `CURRENT CONTEXT:\n`;
   contextDesc += `- Page type: ${context.pageType}\n`;
   contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
+  contextDesc += `- Response language: ${language.toUpperCase()}\n`;
   
   if (context.courseTitle) {
     contextDesc += `- Course: "${context.courseTitle}"`;
@@ -318,6 +331,7 @@ export function registerUshaRoutes(app: Express): void {
       }
 
       const helpLevel = calculateHelpLevel(context);
+      const language = (context.language || "english") as SupportedLanguage;
 
       const misuseCheck = detectMisuse(question, userId);
       if (misuseCheck.isMisuse) {
@@ -326,7 +340,7 @@ export function registerUshaRoutes(app: Express): void {
         return res.json(warningResponse);
       }
 
-      const contextPrompt = buildContextPrompt(context, helpLevel);
+      const contextPrompt = buildContextPrompt(context, helpLevel, language);
       const messages = buildConversationMessages(context.previousUshaTurns, contextPrompt, question);
 
       const completion = await openai.chat.completions.create({

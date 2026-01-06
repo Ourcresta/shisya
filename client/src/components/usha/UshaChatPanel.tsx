@@ -6,9 +6,16 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, X, Sparkles, AlertCircle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Send, X, Sparkles, AlertCircle, Globe } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { UshaAllowedPage, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn } from "@shared/schema";
+import type { UshaAllowedPage, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn, SupportedLanguage } from "@shared/schema";
 
 interface UshaContext {
   courseId: number;
@@ -24,6 +31,12 @@ interface UshaContext {
   projectTitle?: string;
   studentProgressSummary?: StudentProgressSummary;
 }
+
+const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+  english: "English",
+  hindi: "Hindi",
+  tamil: "Tamil",
+};
 
 interface Message {
   role: "user" | "assistant";
@@ -78,6 +91,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [language, setLanguage] = useState<SupportedLanguage>("english");
   const [remainingRequests, setRemainingRequests] = useState<number | null>(null);
   const [nearLimit, setNearLimit] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -106,6 +120,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
         context: {
           studentId: user?.id,
           ...context,
+          language,
           previousUshaTurns: getPreviousTurns(),
         },
         question,
@@ -177,14 +192,27 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
             </p>
           </div>
         </div>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={onClose}
-          data-testid="button-usha-close"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select value={language} onValueChange={(v) => setLanguage(v as SupportedLanguage)}>
+            <SelectTrigger className="w-[100px] h-8 text-xs" data-testid="select-usha-language">
+              <Globe className="h-3 w-3 mr-1" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="english" data-testid="option-english">English</SelectItem>
+              <SelectItem value="hindi" data-testid="option-hindi">Hindi</SelectItem>
+              <SelectItem value="tamil" data-testid="option-tamil">Tamil</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onClose}
+            data-testid="button-usha-close"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
 
       {nearLimit && (

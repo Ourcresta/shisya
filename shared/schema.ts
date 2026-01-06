@@ -655,6 +655,10 @@ export const ushaTurnSchema = z.object({
 
 export type UshaTurn = z.infer<typeof ushaTurnSchema>;
 
+// Supported languages for Usha AI Tutor
+export const SUPPORTED_LANGUAGES = ["english", "hindi", "tamil"] as const;
+export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+
 // Usha request context schema (v2 enhanced)
 export const ushaContextSchema = z.object({
   studentId: z.string(),
@@ -669,6 +673,7 @@ export const ushaContextSchema = z.object({
   lessonTitle: z.string().optional(),
   labTitle: z.string().optional(),
   projectTitle: z.string().optional(),
+  language: z.enum(SUPPORTED_LANGUAGES).optional().default("english"),
   studentProgressSummary: studentProgressSummarySchema.optional(),
   previousUshaTurns: z.array(ushaTurnSchema).optional(),
 });
