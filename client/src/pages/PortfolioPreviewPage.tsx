@@ -11,14 +11,14 @@ import SkillsSection from "@/components/profile/SkillsSection";
 import PortfolioProjects from "@/components/profile/PortfolioProjects";
 import CertificatesSection from "@/components/profile/CertificatesSection";
 import AssessmentsSection from "@/components/profile/AssessmentsSection";
-import { getProfile } from "@/lib/profile";
+import { getProfile, initializeDefaultProfile } from "@/lib/profile";
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getAllPassedTests, getPassedTestsCount } from "@/lib/testAttempts";
 import type { StudentProfile, Certificate, ProjectSubmission, TestAttempt } from "@shared/schema";
 import { 
   ArrowLeft, MapPin, Github, Linkedin, ShieldCheck, 
-  GraduationCap, Copy, Check, ExternalLink, Eye
+  GraduationCap, Copy, Check, ExternalLink, Eye, Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { staggerContainer, staggerItem } from "@/lib/animations";
@@ -41,10 +41,12 @@ export default function PortfolioPreviewPage() {
   useEffect(() => {
     initializeMockCertificates();
     
-    const p = getProfile();
-    if (p) {
-      setProfile(p);
+    // Get profile or initialize a default one
+    let p = getProfile();
+    if (!p) {
+      p = initializeDefaultProfile("New Student");
     }
+    setProfile(p);
 
     setCertificates(getAllCertificates());
     
@@ -174,6 +176,34 @@ export default function PortfolioPreviewPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Try Neon Portfolio Banner */}
+        <Card className="mb-6 border-cyan-500/30 dark:border-cyan-400/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">Try the New Neon Portfolio</h3>
+                <p className="text-sm text-slate-400">
+                  Modern dark theme with 5 color options and stunning effects
+                </p>
+              </div>
+            </div>
+            <Link href="/shishya/profile/neon-portfolio">
+              <Button 
+                variant="default" 
+                size="sm"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                data-testid="button-try-neon-portfolio"
+              >
+                <Sparkles className="w-4 h-4 mr-1" />
+                Try Now
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         <motion.div
           variants={staggerContainer}
