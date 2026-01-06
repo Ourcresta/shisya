@@ -5,6 +5,8 @@ import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 import ourshiksha_stamp_rot from "@assets/ourshiksha stamp_rot.png";
 
+import ourshiksha_stamp2 from "@assets/ourshiksha stamp2.png";
+
 interface CertificatePreviewProps {
   certificate: Certificate;
   forPrint?: boolean;
@@ -193,9 +195,9 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
 
             <div className="flex items-end gap-4">
               <img 
-                src={ourshiksha_stamp_rot} 
+                src={ourshiksha_stamp2} 
                 alt="Official Seal" 
-                className="w-[88px] h-[88px] object-contain ml-[10%]"
+                className="w-[88px] h-[88px] object-contain ml-[16.775px] mr-[16.775px]"
               />
               
               <div className="text-right">
