@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { getProfile } from "@/lib/profile";
+import { getProfile, initializeDefaultProfile } from "@/lib/profile";
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getPassedTestsCount } from "@/lib/testAttempts";
@@ -146,7 +146,12 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
   useEffect(() => {
     initializeMockCertificates();
     
-    const profile = getProfile();
+    // Get profile or initialize a default one for preview mode
+    let profile = getProfile();
+    if (!profile && isPreview) {
+      profile = initializeDefaultProfile("New Student");
+    }
+    
     const certificates = getAllCertificates();
     const submissions = getAllSubmissions();
     const testsPassed = getPassedTestsCount();
@@ -168,7 +173,7 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
         certificatesEarned: certificates.length,
       },
     });
-  }, [params.username]);
+  }, [params.username, isPreview]);
 
   useEffect(() => {
     const handleScroll = () => {
