@@ -1,7 +1,7 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaStamp from "@assets/image_1767693334294.png";
+import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
