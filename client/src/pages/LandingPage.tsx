@@ -202,11 +202,14 @@ function HeroSection() {
 
 function JourneySection() {
   return (
-    <section className="py-16 md:py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-background overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent dark:via-primary/10" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-journey-title"
           >
@@ -220,13 +223,13 @@ function JourneySection() {
           {journeySteps.map((step, index) => (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl bg-muted/30"
+              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 dark:from-card/80 dark:to-card/40 border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon"
               data-testid={`card-journey-step-${index + 1}`}
             >
-              <div className="absolute -top-3 left-4 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+              <div className="absolute -top-3 left-4 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-lg dark:shadow-neon">
                 {index + 1}
               </div>
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 flex items-center justify-center mb-4 border border-primary/20">
                 <step.icon className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-display)" }}>
@@ -242,12 +245,25 @@ function JourneySection() {
 }
 
 function FeaturesSection() {
+  const featureGradients = [
+    "from-cyan-500/20 to-blue-500/20 dark:from-cyan-500/30 dark:to-blue-500/10",
+    "from-purple-500/20 to-pink-500/20 dark:from-purple-500/30 dark:to-pink-500/10",
+    "from-green-500/20 to-emerald-500/20 dark:from-green-500/30 dark:to-emerald-500/10",
+    "from-orange-500/20 to-amber-500/20 dark:from-orange-500/30 dark:to-amber-500/10",
+    "from-blue-500/20 to-indigo-500/20 dark:from-blue-500/30 dark:to-indigo-500/10",
+    "from-rose-500/20 to-red-500/20 dark:from-rose-500/30 dark:to-red-500/10",
+  ];
+
   return (
-    <section className="py-16 md:py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-background dark:via-card/30 dark:to-background overflow-hidden">
+      {/* Decorative gradient orbs */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-features-title"
           >
@@ -257,27 +273,25 @@ function FeaturesSection() {
             Everything you need to master new skills and advance your career
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature) => (
-            <Card
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <div
               key={feature.title}
-              className="relative"
+              className={`relative p-6 rounded-2xl bg-gradient-to-br ${featureGradients[index % featureGradients.length]} border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon group`}
               data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
             >
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-6 h-6 text-primary" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -349,11 +363,14 @@ function CoursePreviewSection() {
   const previewCourses = courses?.slice(0, 3) || [];
 
   return (
-    <section className="py-16 md:py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-background to-muted/20 dark:to-card/20 overflow-hidden">
+      {/* Gradient mesh background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.1),transparent)] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.15),transparent)]" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-preview-title"
           >
@@ -377,7 +394,7 @@ function CoursePreviewSection() {
         {previewCourses.length > 0 && (
           <div className="text-center">
             <Link href="/courses">
-              <Button variant="outline" size="lg" data-testid="button-view-all-courses">
+              <Button variant="outline" size="lg" className="dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-neon" data-testid="button-view-all-courses">
                 View All Courses
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -391,11 +408,15 @@ function CoursePreviewSection() {
 
 function RewardsSection() {
   return (
-    <section className="py-16 md:py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 dark:from-amber-500/10 dark:via-background dark:to-orange-500/10 overflow-hidden">
+      {/* Gold gradient orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-amber-400/10 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-orange-400/10 to-transparent rounded-full blur-3xl" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-rewards-title"
           >
@@ -409,15 +430,15 @@ function RewardsSection() {
           {rewardsFlow.map((step, index) => (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-xl bg-background border"
+              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/5 dark:from-amber-500/20 dark:to-orange-500/10 border border-amber-500/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/40 hover:shadow-lg dark:hover:shadow-[0_4px_20px_-5px_rgba(251,191,36,0.3)]"
               data-testid={`card-reward-step-${index + 1}`}
             >
               {index < rewardsFlow.length - 1 && (
                 <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <ChevronRight className="w-6 h-6 text-muted-foreground" />
+                  <ChevronRight className="w-6 h-6 text-amber-500/60" />
                 </div>
               )}
-              <div className="w-14 h-14 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 flex items-center justify-center mb-4 border border-amber-500/30">
                 <step.icon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-display)" }}>
@@ -434,16 +455,20 @@ function RewardsSection() {
 
 function AISection() {
   return (
-    <section className="py-16 md:py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-purple-500/5 to-background dark:via-purple-500/10 overflow-hidden">
+      {/* AI-themed gradient orbs */}
+      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/10 via-primary/5 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <Badge variant="secondary" className="text-sm">
+            <Badge className="bg-gradient-to-r from-purple-500/20 to-primary/20 text-primary border-primary/30 dark:border-primary/50">
               <Sparkles className="w-3 h-3 mr-1" />
               AI-Powered Learning
             </Badge>
             <h2
-              className="text-2xl md:text-3xl font-bold"
+              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-primary to-cyan-400 bg-clip-text text-transparent"
               style={{ fontFamily: "var(--font-display)" }}
               data-testid="text-ai-title"
             >
@@ -455,8 +480,8 @@ function AISection() {
             </p>
             <div className="grid grid-cols-2 gap-4">
               {aiFeatures.map((feature) => (
-                <div key={feature.title} className="flex items-start gap-3" data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div key={feature.title} className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/5 border border-primary/20 transition-all duration-300 hover:border-primary/40" data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/30 to-purple-500/20 flex items-center justify-center flex-shrink-0 border border-primary/20">
                     <feature.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
@@ -468,20 +493,20 @@ function AISection() {
             </div>
           </div>
           <div className="relative">
-            <div className="aspect-square max-w-md mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8 flex items-center justify-center">
-              <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-primary/40 ring-4 ring-primary/20 ring-offset-4 ring-offset-background">
+            <div className="aspect-square max-w-md mx-auto rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-cyan-500/10 p-8 flex items-center justify-center border border-primary/20 dark:border-primary/30 backdrop-blur-sm">
+              <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-primary/40 ring-4 ring-primary/30 ring-offset-4 ring-offset-background dark:shadow-neon-lg animate-float">
                 <img 
                   src={ushaAvatarImage} 
                   alt="Usha AI Tutor" 
                   className="w-full h-full object-cover object-center scale-110"
                   data-testid="img-usha-avatar-landing"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent pointer-events-none" />
               </div>
-              <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-background rounded-xl shadow-lg p-3 md:p-4 border-2 border-primary/20">
+              <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-background/90 backdrop-blur-md rounded-xl shadow-lg p-3 md:p-4 border border-primary/30 dark:shadow-neon">
                 <p className="text-sm md:text-base font-medium">Need help with this concept?</p>
               </div>
-              <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-background rounded-xl shadow-lg p-3 md:p-4 border-2 border-primary/20">
+              <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-background/90 backdrop-blur-md rounded-xl shadow-lg p-3 md:p-4 border border-primary/30 dark:shadow-neon">
                 <p className="text-sm md:text-base text-muted-foreground">Ask me anything!</p>
               </div>
             </div>
@@ -494,11 +519,15 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="py-16 md:py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-primary/5 dark:from-card/30 dark:via-background dark:to-primary/10 overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute top-10 left-10 w-20 h-20 border border-primary/20 rounded-full" />
+      <div className="absolute bottom-20 right-20 w-32 h-32 border border-primary/10 rounded-full" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-testimonials-title"
           >
@@ -510,27 +539,29 @@ function TestimonialsSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
-            <Card key={testimonial.name} className="relative" data-testid={`card-testimonial-${index + 1}`}>
-              <CardContent className="pt-6">
-                <div className="absolute -top-3 left-6">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Quote className="w-4 h-4 text-primary" />
-                  </div>
+            <div 
+              key={testimonial.name} 
+              className="relative p-6 rounded-2xl bg-gradient-to-br from-card to-card/80 dark:from-card/80 dark:to-card/40 border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon" 
+              data-testid={`card-testimonial-${index + 1}`}
+            >
+              <div className="absolute -top-3 left-6">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border border-primary/30">
+                  <Quote className="w-4 h-4 text-primary" />
                 </div>
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                  "{testimonial.content}"
-                </p>
-                <div className="pt-4 border-t">
-                  <p className="font-semibold text-sm">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex gap-1 mb-4 pt-2">
+                {Array.from({ length: testimonial.rating }).map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                "{testimonial.content}"
+              </p>
+              <div className="pt-4 border-t border-border/50 dark:border-primary/20">
+                <p className="font-semibold text-sm">{testimonial.name}</p>
+                <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -540,11 +571,11 @@ function TestimonialsSection() {
 
 function FAQSection() {
   return (
-    <section className="py-16 md:py-20 bg-background">
-      <div className="max-w-3xl mx-auto px-4 md:px-8">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background to-muted/20 dark:to-card/20 overflow-hidden">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-faq-title"
           >
@@ -559,7 +590,7 @@ function FAQSection() {
             <AccordionItem
               key={item.question}
               value={`item-${index}`}
-              className="border rounded-lg px-4"
+              className="border border-border/50 dark:border-primary/20 rounded-2xl px-4 bg-gradient-to-r from-card/50 to-card/30 dark:from-card/60 dark:to-card/30 backdrop-blur-sm transition-all duration-300 dark:hover:border-primary/40"
               data-testid={`faq-item-${index + 1}`}
             >
               <AccordionTrigger className="hover:no-underline text-left">
@@ -580,15 +611,19 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="py-16 md:py-20 bg-primary/5">
-      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5 dark:from-primary/20 dark:via-background dark:to-primary/10 overflow-hidden">
+      {/* Gradient orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-primary/15 to-transparent rounded-full blur-3xl" />
+      
+      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <GraduationCap className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg dark:shadow-neon animate-float">
+            <GraduationCap className="w-8 h-8 text-primary-foreground" />
           </div>
         </div>
         <h2
-          className="text-2xl md:text-3xl font-bold mb-4"
+          className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
           style={{ fontFamily: "var(--font-display)" }}
           data-testid="text-cta-title"
         >
@@ -600,7 +635,7 @@ function CTASection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {user ? (
             <Link href="/shishya/dashboard">
-              <Button size="lg" className="min-w-[180px]" data-testid="button-cta-shishya">
+              <Button size="lg" className="min-w-[180px] dark:shadow-neon dark:hover:shadow-neon-lg" data-testid="button-cta-shishya">
                 Go to Shishya
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -608,13 +643,13 @@ function CTASection() {
           ) : (
             <>
               <Link href="/login">
-                <Button size="lg" className="min-w-[150px]" data-testid="button-cta-login">
+                <Button size="lg" className="min-w-[150px] dark:shadow-neon dark:hover:shadow-neon-lg" data-testid="button-cta-login">
                   <LogIn className="w-5 h-5 mr-2" />
                   Login
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button size="lg" variant="outline" className="min-w-[150px]" data-testid="button-cta-signup">
+                <Button size="lg" variant="outline" className="min-w-[150px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-neon" data-testid="button-cta-signup">
                   <UserPlus className="w-5 h-5 mr-2" />
                   Sign Up
                 </Button>
@@ -631,31 +666,31 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t py-8 bg-background">
+    <footer className="border-t border-border/50 dark:border-primary/20 py-8 bg-gradient-to-b from-background to-muted/20 dark:to-card/30">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm dark:shadow-neon">
               <GraduationCap className="w-4 h-4" />
             </div>
-            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="font-semibold dark:neon-gradient-text" style={{ fontFamily: "var(--font-display)" }}>
               OurShiksha
             </span>
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground transition-colors" data-testid="link-home">
+            <Link href="/" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-home">
               Home
             </Link>
-            <Link href="/about" className="hover:text-foreground transition-colors" data-testid="link-about">
+            <Link href="/about" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-about">
               About
             </Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors" data-testid="link-privacy">
+            <Link href="/privacy" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-privacy">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors" data-testid="link-terms">
+            <Link href="/terms" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-terms">
               Terms of Service
             </Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors" data-testid="link-contact">
+            <Link href="/contact" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-contact">
               Contact
             </Link>
           </nav>
