@@ -102,6 +102,11 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      boxShadow: {
+        'neon': '0 4px 20px -5px rgba(34, 211, 238, 0.3)',
+        'neon-lg': '0 6px 30px -5px rgba(34, 211, 238, 0.4)',
+        'neon-glow': '0 0 20px rgba(34, 211, 238, 0.4)',
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
