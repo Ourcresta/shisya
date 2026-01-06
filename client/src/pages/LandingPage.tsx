@@ -492,28 +492,13 @@ function AISection() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <div className="flex items-start justify-between gap-4">
-              <h2
-                className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-primary to-cyan-400 bg-clip-text text-transparent"
-                style={{ fontFamily: "var(--font-display)" }}
-                data-testid="text-ai-title"
-              >
-                Meet Usha, Your AI Learning Companion
-              </h2>
-              {/* Floating mini Usha avatar */}
-              <div className="relative flex-shrink-0 animate-float">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 p-0.5 shadow-lg dark:shadow-[0_0_20px_-3px_rgba(34,211,238,0.5)]">
-                  <img 
-                    src={ushaAvatarImage} 
-                    alt="Usha" 
-                    className="w-full h-full rounded-full object-cover border-2 border-background"
-                  />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center border-2 border-background shadow-lg">
-                  <Sparkles className="w-2.5 h-2.5 text-white" />
-                </div>
-              </div>
-            </div>
+            <h2
+              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-primary to-cyan-400 bg-clip-text text-transparent"
+              style={{ fontFamily: "var(--font-display)" }}
+              data-testid="text-ai-title"
+            >
+              Meet Usha, Your AI Learning Companion
+            </h2>
             <p className="text-muted-foreground text-lg">
               Usha is integrated into every lesson, lab, and project to help you learn effectively. 
               Get instant guidance without direct answers, promoting genuine understanding.
