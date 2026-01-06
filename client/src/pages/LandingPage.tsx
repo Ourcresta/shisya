@@ -28,7 +28,6 @@ import {
   Coins,
   Wallet,
   Gift,
-  Bot,
   Globe,
   Sparkles,
   MessageCircle,
@@ -36,6 +35,7 @@ import {
   Quote,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
+import ushaAvatarImage from "@assets/image_1767697725032.png";
 
 const journeySteps = [
   {
@@ -82,10 +82,10 @@ const rewardsFlow = [
 ];
 
 const aiFeatures = [
-  { icon: Bot, title: "Usha AI Tutor", description: "Your personal learning companion" },
+  { icon: Sparkles, title: "Usha AI Tutor", description: "Your personal learning companion" },
   { icon: Globe, title: "Multi-Language", description: "Learn in English, Hindi, or Tamil" },
-  { icon: Sparkles, title: "Smart Hints", description: "Get guidance without answers" },
-  { icon: MessageCircle, title: "Instant Support", description: "Ask doubts anytime" },
+  { icon: MessageCircle, title: "Smart Hints", description: "Get guidance without answers" },
+  { icon: Award, title: "Instant Support", description: "Ask doubts anytime" },
 ];
 
 const testimonials = [
@@ -429,7 +429,7 @@ function AISection() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <Badge variant="secondary" className="text-sm">
-              <Bot className="w-3 h-3 mr-1" />
+              <Sparkles className="w-3 h-3 mr-1" />
               AI-Powered Learning
             </Badge>
             <h2
@@ -459,8 +459,13 @@ function AISection() {
           </div>
           <div className="relative">
             <div className="aspect-square max-w-md mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8 flex items-center justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-                <Bot className="w-16 h-16 text-primary-foreground" />
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg overflow-hidden border-4 border-primary/30">
+                <img 
+                  src={ushaAvatarImage} 
+                  alt="Usha AI Tutor" 
+                  className="w-full h-full object-cover"
+                  data-testid="img-usha-avatar-landing"
+                />
               </div>
               <div className="absolute top-8 right-8 bg-background rounded-lg shadow-md p-3 border">
                 <p className="text-sm font-medium">Need help with this concept?</p>

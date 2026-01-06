@@ -1,4 +1,4 @@
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import { db } from "./db";
 import {
   motivationRules,
@@ -20,6 +20,7 @@ import {
   collectStudentSignals,
 } from "./ai";
 import { seedDefaultRules } from "./ai/seedRules";
+import { requireAuth, type AuthenticatedRequest } from "./auth";
 
 export function registerMotivationRoutes(app: Express) {
   seedDefaultRules().catch(console.error);
@@ -92,18 +93,14 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.post("/api/motivation/evaluate", async (req, res) => {
+  app.post("/api/motivation/evaluate", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const { courseId } = req.body;
       
-      await updateStudentStreak(user.id);
+      await updateStudentStreak(userId);
       
-      const results = await evaluateRulesForStudent(user.id, courseId);
+      const results = await evaluateRulesForStudent(userId, courseId);
       
       res.json({
         triggered: results.filter(r => r.triggered).length,
@@ -116,15 +113,11 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/signals", async (req, res) => {
+  app.get("/api/motivation/signals", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const courseId = req.query.courseId ? parseInt(req.query.courseId as string, 10) : undefined;
-      const signals = await collectStudentSignals(user.id, courseId);
+      const signals = await collectStudentSignals(userId, courseId);
       
       res.json(signals);
     } catch (error) {
@@ -133,16 +126,12 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/streak", async (req, res) => {
+  app.get("/api/motivation/streak", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const streak = await db.select()
         .from(studentStreaks)
-        .where(eq(studentStreaks.userId, user.id))
+        .where(eq(studentStreaks.userId, userId))
         .limit(1);
 
       res.json(streak[0] || {
@@ -156,16 +145,12 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/cards", async (req, res) => {
+  app.get("/api/motivation/cards", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const cards = await db.select()
         .from(motivationCards)
-        .where(eq(motivationCards.userId, user.id))
+        .where(eq(motivationCards.userId, userId))
         .orderBy(desc(motivationCards.createdAt));
 
       res.json(cards);
@@ -199,16 +184,12 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/mystery-boxes", async (req, res) => {
+  app.get("/api/motivation/mystery-boxes", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const boxes = await db.select()
         .from(mysteryBoxes)
-        .where(and(eq(mysteryBoxes.userId, user.id), eq(mysteryBoxes.isOpened, false)))
+        .where(and(eq(mysteryBoxes.userId, userId), eq(mysteryBoxes.isOpened, false)))
         .orderBy(desc(mysteryBoxes.createdAt));
 
       res.json(boxes);
@@ -218,18 +199,14 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.post("/api/motivation/mystery-boxes/:boxId/open", async (req, res) => {
+  app.post("/api/motivation/mystery-boxes/:boxId/open", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const { boxId } = req.params;
 
       const box = await db.select()
         .from(mysteryBoxes)
-        .where(and(eq(mysteryBoxes.boxId, boxId), eq(mysteryBoxes.userId, user.id)))
+        .where(and(eq(mysteryBoxes.boxId, boxId), eq(mysteryBoxes.userId, userId)))
         .limit(1);
 
       if (box.length === 0) {
@@ -251,11 +228,11 @@ export function registerMotivationRoutes(app: Express) {
       const rewardValue = box[0].rewardValue ? JSON.parse(box[0].rewardValue) : {};
       
       if (box[0].rewardType === "coins" && rewardValue.amount) {
-        const existingCredits = await db.select().from(userCredits).where(eq(userCredits.userId, user.id)).limit(1);
+        const existingCredits = await db.select().from(userCredits).where(eq(userCredits.userId, userId)).limit(1);
         
         if (existingCredits.length === 0) {
           await db.insert(userCredits).values({
-            userId: user.id,
+            userId: userId,
             balance: rewardValue.amount,
             totalEarned: rewardValue.amount,
             totalSpent: 0,
@@ -267,13 +244,13 @@ export function registerMotivationRoutes(app: Express) {
               totalEarned: sql`${userCredits.totalEarned} + ${rewardValue.amount}`,
               updatedAt: new Date(),
             })
-            .where(eq(userCredits.userId, user.id));
+            .where(eq(userCredits.userId, userId));
         }
 
-        const updatedCredits = await db.select().from(userCredits).where(eq(userCredits.userId, user.id)).limit(1);
+        const updatedCredits = await db.select().from(userCredits).where(eq(userCredits.userId, userId)).limit(1);
         
         await db.insert(creditTransactions).values({
-          userId: user.id,
+          userId: userId,
           amount: rewardValue.amount,
           type: "BONUS",
           reason: "REWARD",
@@ -293,16 +270,12 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/nudges", async (req, res) => {
+  app.get("/api/motivation/nudges", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const nudges = await db.select()
         .from(aiNudgeLogs)
-        .where(and(eq(aiNudgeLogs.userId, user.id), eq(aiNudgeLogs.isRead, false)))
+        .where(and(eq(aiNudgeLogs.userId, userId), eq(aiNudgeLogs.isRead, false)))
         .orderBy(desc(aiNudgeLogs.sentAt))
         .limit(10);
 
@@ -313,19 +286,15 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.post("/api/motivation/nudges/:nudgeId/read", async (req, res) => {
+  app.post("/api/motivation/nudges/:nudgeId/read", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
+      const userId = req.user!.id;
       const { nudgeId } = req.params;
       const nudgeIdNum = parseInt(nudgeId, 10);
 
       await db.update(aiNudgeLogs)
         .set({ isRead: true })
-        .where(and(eq(aiNudgeLogs.id, nudgeIdNum), eq(aiNudgeLogs.userId, user.id)));
+        .where(and(eq(aiNudgeLogs.id, nudgeIdNum), eq(aiNudgeLogs.userId, userId)));
 
       res.json({ success: true });
     } catch (error) {
@@ -334,12 +303,9 @@ export function registerMotivationRoutes(app: Express) {
     }
   });
 
-  app.get("/api/motivation/scholarships", async (req, res) => {
+  app.get("/api/motivation/scholarships", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const user = (req as any).user;
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      const userId = req.user!.id;
 
       const userScholarshipsList = await db.select({
         userScholarship: userScholarships,
@@ -347,7 +313,7 @@ export function registerMotivationRoutes(app: Express) {
       })
         .from(userScholarships)
         .innerJoin(scholarships, eq(userScholarships.scholarshipId, scholarships.id))
-        .where(and(eq(userScholarships.userId, user.id), eq(userScholarships.isUsed, false)));
+        .where(and(eq(userScholarships.userId, userId), eq(userScholarships.isUsed, false)));
 
       res.json(userScholarshipsList);
     } catch (error) {
