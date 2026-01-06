@@ -16,7 +16,7 @@ import {
   Download, ExternalLink, Eye, Code, Palette, Layers, 
   Globe, Smartphone, Server, Database, Zap, Sparkles,
   GraduationCap, Award, Briefcase, Send, MapPin, Check,
-  Copy, Menu, X, ChevronRight, Star, Calendar
+  Copy, Menu, X, ChevronRight, Star, Calendar, FileText, ScrollText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -567,24 +567,27 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
           >
             <div className="relative">
               <div 
-                className="absolute inset-0 hexagon-frame floating"
+                className="absolute inset-0 rounded-full floating"
                 style={{ 
                   background: `linear-gradient(135deg, ${theme.primary}40, ${theme.accent}20)`,
                   transform: "scale(1.15)",
                 }}
               />
               <div 
-                className="relative w-64 h-72 md:w-80 md:h-88 hexagon-frame overflow-hidden neon-glow floating"
-                style={{ background: theme.backgroundSecondary }}
+                className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden neon-glow floating"
+                style={{ 
+                  background: theme.backgroundSecondary,
+                  boxShadow: `0 0 40px ${theme.primary}40, 0 0 80px ${theme.primary}20`,
+                }}
               >
-                <Avatar className="w-full h-full rounded-none">
+                <Avatar className="w-full h-full">
                   <AvatarImage 
                     src={profile.profilePhoto || undefined} 
                     alt={profile.fullName}
                     className="w-full h-full object-cover"
                   />
                   <AvatarFallback 
-                    className="w-full h-full text-6xl font-bold flex items-center justify-center rounded-none"
+                    className="w-full h-full text-6xl font-bold flex items-center justify-center"
                     style={{ background: theme.backgroundSecondary, color: theme.primary }}
                   >
                     {initials}
@@ -809,9 +812,21 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
               viewport={{ once: true }}
               className="mt-16"
             >
-              <h3 className="text-2xl font-bold mb-8 text-center">
-                <span style={{ color: theme.primary }}>Certificates</span> Earned
-              </h3>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                <h3 className="text-2xl font-bold text-center">
+                  <span style={{ color: theme.primary }}>Certificates</span> Earned
+                </h3>
+                <a
+                  href={isPreview ? "/shishya/marksheet" : `/verify/marksheet/${profile.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all glow-button text-white"
+                  data-testid="button-total-marksheet"
+                >
+                  <ScrollText className="w-4 h-4" />
+                  Total Marksheet
+                </a>
+              </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {certificates.slice(0, 6).map((cert, index) => (
                   <div 
@@ -826,7 +841,7 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
                       >
                         <Award className="w-6 h-6" style={{ color: theme.primary }} />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-semibold">{cert.courseTitle}</h4>
                         <p style={{ color: theme.textMuted }} className="text-sm mt-1">
                           Completed Course
@@ -845,6 +860,21 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
                             </span>
                           ))}
                         </div>
+                        <a
+                          href={`/verify/certificate/${cert.certificateId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full text-sm font-medium transition-all"
+                          style={{ 
+                            background: `${theme.primary}20`,
+                            color: theme.primary,
+                            border: `1px solid ${theme.primary}40`,
+                          }}
+                          data-testid={`button-open-certificate-${cert.certificateId}`}
+                        >
+                          <FileText className="w-4 h-4" />
+                          Open Certificate
+                        </a>
                       </div>
                     </div>
                   </div>
