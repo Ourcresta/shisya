@@ -518,7 +518,7 @@ function AISection() {
             </div>
           </div>
           <div className="relative">
-            <div className="aspect-square max-w-md mx-auto rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-cyan-500/10 p-8 flex flex-col items-center justify-center border border-primary/20 dark:border-primary/30 backdrop-blur-sm">
+            <div className="aspect-square max-w-md mx-auto rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-cyan-500/10 p-8 flex items-center justify-center border border-primary/20 dark:border-primary/30 backdrop-blur-sm">
               <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-primary/40 ring-4 ring-primary/30 ring-offset-4 ring-offset-background dark:shadow-neon-lg animate-float">
                 <img 
                   src={ushaAvatarImage} 
@@ -527,13 +527,6 @@ function AISection() {
                   data-testid="img-usha-avatar-landing"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent pointer-events-none" />
-              </div>
-              {/* Learn with Usha tagline */}
-              <div className="mt-6 text-center">
-                <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-400 via-primary to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]" style={{ fontFamily: "var(--font-display)" }}>
-                  Learn with Usha
-                </p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">Your AI-Powered Guide</p>
               </div>
               <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-background/90 backdrop-blur-md rounded-xl shadow-lg p-3 md:p-4 border border-primary/30 dark:shadow-neon">
                 <p className="text-sm md:text-base font-medium">Need help with this concept?</p>
