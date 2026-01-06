@@ -1,0 +1,214 @@
+You are a Senior UI/UX Designer, Senior Frontend Architect,
+Senior Brand Designer, and Senior Product Engineer.
+
+Your task is to DESIGN and IMPLEMENT the
+DEFAULT THEME SYSTEM
+for the PARENT / PUBLIC WEBSITE of the Siksha.ai (OurShiksha) platform.
+
+====================================================
+THEME NAME
+====================================================
+Neon Modern – Trust + Innovation
+
+====================================================
+THEME PHILOSOPHY
+====================================================
+- Modern
+- Futuristic but readable
+- Neon highlights (not overpowering)
+- Premium EdTech feel
+- AI-first brand identity
+- Suitable for:
+  - Students
+  - Parents
+  - Professionals
+  - Institutions
+
+====================================================
+GLOBAL THEME MODE
+====================================================
+- Default mode: DARK
+- Neon accents for interaction & focus
+- Soft contrast (not pure black)
+- Eye-friendly for long usage
+
+====================================================
+COLOR SYSTEM (CORE)
+====================================================
+
+Define CSS variables:
+
+--bg-main: #020617;              /* Deep dark navy */
+--bg-secondary: #020617;
+--bg-card: #020617;
+
+--neon-primary: #22d3ee;         /* Cyan Neon */
+--neon-secondary: #38bdf8;       /* Sky Blue Neon */
+--neon-accent: #a78bfa;          /* Violet Neon */
+--neon-success: #4ade80;         /* Green Neon */
+--neon-warning: #facc15;         /* Yellow Neon */
+--neon-danger: #fb7185;          /* Pink/Red Neon */
+
+--text-main: #e5e7eb;            /* Soft white */
+--text-muted: #94a3b8;
+--text-dim: #64748b;
+
+--border-glow: rgba(34,211,238,0.4);
+
+====================================================
+GRADIENT SYSTEM
+====================================================
+Primary Neon Gradient:
+linear-gradient(135deg, #22d3ee, #38bdf8, #a78bfa)
+
+Background Glow Gradient:
+radial-gradient(circle at top right, rgba(34,211,238,0.15), transparent 60%)
+
+====================================================
+TYPOGRAPHY SYSTEM
+====================================================
+
+Primary Font:
+- Inter (UI + readability)
+
+Secondary / Display Font:
+- Poppins (Headings & Hero text)
+
+Font Stack:
+font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+
+Font Sizes:
+- Hero Title: 52–64px
+- Page Title: 36–44px
+- Section Title: 24–28px
+- Body Text: 15–16px
+- Caption: 13–14px
+
+Font Weight Usage:
+- Headings: 600–700
+- Body: 400–500
+- Buttons: 500–600
+
+====================================================
+LAYOUT & GRID
+====================================================
+- Max width: 1280px
+- Section padding: 80px vertical
+- Content padding: 24px
+- Responsive grid using CSS Grid / Flexbox
+- Mobile-first approach
+
+====================================================
+CARD DESIGN (IMPORTANT)
+====================================================
+Card Style:
+- Background: rgba(15,23,42,0.6)
+- Backdrop blur: 12px
+- Border: 1px solid rgba(34,211,238,0.2)
+- Border radius: 18px
+- Soft glow on hover
+
+Hover Effect:
+- TranslateY(-4px)
+- Neon border glow
+- Subtle shadow
+
+====================================================
+BUTTON SYSTEM
+====================================================
+
+Primary Button:
+- Background: Neon Gradient
+- Text: Dark
+- Border-radius: 999px
+- Glow on hover
+
+Secondary Button:
+- Transparent background
+- Neon border
+- Neon text
+
+Ghost Button:
+- Text-only
+- Neon underline on hover
+
+====================================================
+NAVBAR DESIGN
+====================================================
+- Sticky header
+- Transparent with blur
+- Neon underline for active links
+- CTA button highlighted with neon glow
+
+====================================================
+HERO SECTION STYLE
+====================================================
+- Two-column layout
+- Left: Headline + CTA
+- Right: AI illustration / avatar
+- Floating neon glow or orb background
+- Animated gradient text for keywords
+
+====================================================
+ANIMATIONS & MICRO-INTERACTIONS
+====================================================
+- Smooth scroll
+- Fade + slide on scroll
+- Button glow pulse
+- Floating elements (AI avatar, icons)
+- Hover neon ripple effect
+
+====================================================
+ICONOGRAPHY
+====================================================
+- Icon set: Lucide / Heroicons
+- Neon stroke icons
+- Rounded edges
+- Consistent size system
+
+====================================================
+PAGE TYPES USING THIS THEME
+====================================================
+- Landing Page
+- About
+- Courses Listing
+- Pricing
+- AI Course Factory Landing
+- Login / Signup
+- Shishya Entry Page
+
+====================================================
+ACCESSIBILITY & USABILITY
+====================================================
+- Maintain contrast ratio
+- Avoid neon text for long paragraphs
+- Neon only for highlights & CTAs
+- Keyboard navigation support
+
+====================================================
+DELIVERABLES
+====================================================
+Generate:
+1) Global CSS theme file
+2) CSS variables
+3) Reusable UI components:
+   - Buttons
+   - Cards
+   - Navbar
+   - Hero section
+4) Example landing page using this theme
+
+====================================================
+FINAL EXPECTATION
+====================================================
+The Parent Website should look:
+- Premium
+- AI-powered
+- Modern
+- Trustworthy
+- Comparable to:
+  AI SaaS + EdTech unicorn platforms
+
+DO NOT ASK QUESTIONS.
+DO NOT SIMPLIFY.
+GENERATE CLEAN, PRODUCTION-READY CODE.

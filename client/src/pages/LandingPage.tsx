@@ -140,12 +140,22 @@ function HeroSection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10 py-16 md:py-24">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50" />
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10 dark:from-background dark:via-background dark:to-background py-16 md:py-24">
+      {/* Neon glow orbs for dark mode */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] neon-orb neon-orb-primary opacity-0 dark:opacity-20" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] neon-orb neon-orb-secondary opacity-0 dark:opacity-15" />
+      <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] neon-orb neon-orb-accent opacity-0 dark:opacity-10" />
+      
+      {/* Light mode gradient */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50 dark:opacity-0" />
+      
+      {/* Dark mode radial glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.15),transparent_60%)] opacity-0 dark:opacity-100" />
+      
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-hero-headline"
           >
@@ -162,7 +172,7 @@ function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             {user ? (
               <Link href="/shishya/dashboard">
-                <Button size="lg" className="min-w-[200px]" data-testid="button-go-to-shishya">
+                <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-go-to-shishya">
                   Go to Shishya
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -170,13 +180,13 @@ function HeroSection() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button size="lg" className="min-w-[200px]" data-testid="button-hero-login">
+                  <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-hero-login">
                     <LogIn className="w-5 h-5 mr-2" />
                     Login to Shishya
                   </Button>
                 </Link>
                 <Link href="/courses">
-                  <Button size="lg" variant="outline" className="min-w-[200px]" data-testid="button-hero-explore">
+                  <Button size="lg" variant="outline" className="min-w-[200px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]" data-testid="button-hero-explore">
                     Explore Courses
                     <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>
