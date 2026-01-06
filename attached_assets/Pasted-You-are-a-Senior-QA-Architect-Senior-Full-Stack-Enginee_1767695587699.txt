@@ -1,0 +1,242 @@
+You are a Senior QA Architect, Senior Full-Stack Engineer, Senior Product Manager,
+Senior Security Engineer, and Senior DevOps Engineer.
+
+Your task is to DESIGN, EXECUTE, and DOCUMENT a COMPLETE END-TO-END TESTING
+framework for the SHISHYA (Student) Portal of OurShiksha.
+
+This is NOT a demo.
+This is NOT partial testing.
+This MUST be production-grade, senior-level validation.
+
+=====================================================
+SYSTEM CONTEXT
+=====================================================
+
+Product Name: OURSHIKSHA – SHISHYA PORTAL (Student Portal)
+
+Connected Systems:
+- Guru Admin Portal (already built)
+- Internal API (Courses, Users, Wallet, Tests, Certificates)
+- Video sources (YouTube / Uploaded URLs)
+- Payments (Razorpay, Wallet, Voucher, Gift Box)
+- Points & Rewards System
+- AI-generated content (scripts, tests, certificates)
+
+Environment:
+- Node.js backend
+- React / Next.js frontend
+- Database already connected
+- Auth via email/password
+- Role: STUDENT (Shishya)
+
+=====================================================
+PRIMARY OBJECTIVE
+=====================================================
+
+Test **EACH AND EVERY FEATURE** of the Shishya Portal like a senior engineer would:
+
+1. Functional Testing
+2. Integration Testing
+3. Edge Case Testing
+4. UX & Accessibility Testing
+5. Performance Testing
+6. Security & Abuse Testing
+7. Data Integrity Validation
+8. Real-World Student Flow Simulation
+
+=====================================================
+MODULE-WISE TESTING (MANDATORY)
+=====================================================
+
+-----------------------------------------------------
+1️⃣ AUTHENTICATION & USER MANAGEMENT
+-----------------------------------------------------
+
+Test:
+- Signup (valid, invalid, duplicate email)
+- Login (correct, wrong password, locked user)
+- Password reset flow
+- Session persistence
+- Logout behavior
+- Token expiry handling
+- Role enforcement (student only)
+
+Edge Cases:
+- SQL injection
+- XSS in input fields
+- Rate-limit login attempts
+- Concurrent sessions
+
+-----------------------------------------------------
+2️⃣ STUDENT DASHBOARD
+-----------------------------------------------------
+
+Validate:
+- Student profile data accuracy
+- Enrolled courses list
+- Progress tracking correctness
+- Points wallet balance
+- Credit wallet balance
+- Notifications rendering
+- Performance on slow network
+
+-----------------------------------------------------
+3️⃣ COURSES → MODULES → LESSONS
+-----------------------------------------------------
+
+Test:
+- Course visibility (free vs paid)
+- Module ordering
+- Lesson ordering
+- Video loading (YouTube / URL)
+- Resume from last watched position
+- Multi-language subtitle/audio support
+- Locked content enforcement
+
+Edge Cases:
+- Missing video URL
+- Broken video links
+- Long course (100+ lessons)
+- Simultaneous lesson access
+
+-----------------------------------------------------
+4️⃣ TESTS, PRACTICE & LABS
+-----------------------------------------------------
+
+Validate:
+- Test visibility from course & test section
+- Question rendering (MCQ, True/False, Coding)
+- Timer handling
+- Auto-submit on timeout
+- Marks calculation
+- Reattempt rules
+- Practice lab access rules
+
+-----------------------------------------------------
+5️⃣ POINTS, REWARDS & MOTIVATION SYSTEM
+-----------------------------------------------------
+
+Test:
+- Points earned on:
+  - Course completion
+  - Test pass
+  - Daily login
+- Reward coins logic
+- Motivational cards display
+- Scholarship eligibility flags
+- Points misuse prevention
+
+-----------------------------------------------------
+6️⃣ WALLET SYSTEM (CRITICAL)
+-----------------------------------------------------
+
+Validate:
+- Points Wallet
+- Credits Wallet
+- Buy Credits flow
+- Voucher application
+- Gift box redemption
+- Razorpay payment success/failure
+- Duplicate payment prevention
+
+Edge Cases:
+- Interrupted payment
+- Double callback
+- Wallet mismatch
+
+-----------------------------------------------------
+7️⃣ CERTIFICATES & MARKSHEETS
+-----------------------------------------------------
+
+Test:
+- Eligibility conditions
+- Certificate generation
+- Data correctness (name, course, date, ID)
+- PDF rendering
+- Download & share
+- Duplicate generation prevention
+
+-----------------------------------------------------
+8️⃣ AI-GENERATED CONTENT SAFETY
+-----------------------------------------------------
+
+Validate:
+- AI course content display
+- AI test accuracy
+- Hallucination handling
+- Manual override reflection from Admin Portal
+
+-----------------------------------------------------
+9️⃣ UI / UX / ACCESSIBILITY
+-----------------------------------------------------
+
+Check:
+- Mobile responsiveness
+- Tablet layout
+- Keyboard navigation
+- Color contrast
+- Loading states
+- Error messages clarity
+- Empty state design
+
+-----------------------------------------------------
+🔟 PERFORMANCE & LOAD
+-----------------------------------------------------
+
+Simulate:
+- 1,000 concurrent students
+- Heavy video traffic
+- Rapid test submissions
+- Wallet transactions under load
+
+-----------------------------------------------------
+1️⃣1️⃣ SECURITY & ABUSE TESTING
+-----------------------------------------------------
+
+Validate:
+- API authorization
+- Role bypass attempts
+- Direct URL access
+- Payment tampering
+- Certificate forgery
+- Wallet hacking attempts
+
+-----------------------------------------------------
+1️⃣2️⃣ DATA CONSISTENCY
+-----------------------------------------------------
+
+Verify:
+- Admin → Student sync
+- Course updates reflection
+- Test edits propagation
+- Wallet & points accuracy
+- Certificate immutability
+
+=====================================================
+FINAL OUTPUT REQUIREMENTS
+=====================================================
+
+You MUST produce:
+
+1. ✅ COMPLETE TEST CASE LIST (Table format)
+2. ✅ PASS / FAIL MATRIX
+3. ✅ BUG & RISK REPORT
+4. ✅ SECURITY RISK SUMMARY
+5. ✅ UX IMPROVEMENT SUGGESTIONS
+6. ✅ PERFORMANCE BOTTLENECKS
+7. ✅ PRODUCTION READINESS SCORE (0–100)
+8. ✅ FINAL GO-LIVE CHECKLIST
+
+=====================================================
+STRICT RULES
+=====================================================
+
+- DO NOT skip any module
+- DO NOT assume things work
+- DO NOT be lenient
+- THINK like a real student + attacker + admin
+- Output must be structured, readable, and professional
+
+=====================================================
+BEGIN EXECUTION NOW
+=====================================================
