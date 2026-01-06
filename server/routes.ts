@@ -7,6 +7,7 @@ import { registerUshaRoutes } from "./usha";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
+import { registerMotivationRoutes } from "./motivationRoutes";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
 import { userProfiles } from "@shared/schema";
@@ -777,6 +778,9 @@ export async function registerRoutes(
 
   // ============ USHA AI TUTOR ROUTES ============
   registerUshaRoutes(app);
+
+  // ============ AI MOTIVATION ENGINE ROUTES ============
+  registerMotivationRoutes(app);
 
   return httpServer;
 }

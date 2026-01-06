@@ -202,6 +202,126 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ============ AI MOTIVATION RULES ENGINE TABLES ============
+
+// Motivation Rules - configurable rules with conditions and actions
+export const motivationRules = pgTable("motivation_rules", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  ruleType: varchar("rule_type", { length: 30 }).notNull(), // 'progress', 'time', 'performance', 'streak', 'milestone'
+  conditions: text("conditions").notNull(), // JSON: {field, operator, value}[]
+  actions: text("actions").notNull(), // JSON: {type, value, message}[]
+  priority: integer("priority").notNull().default(0),
+  cooldownHours: integer("cooldown_hours").notNull().default(24), // Hours before rule can trigger again
+  maxTriggerCount: integer("max_trigger_count"), // null = unlimited
+  isActive: boolean("is_active").notNull().default(true),
+  isGlobal: boolean("is_global").notNull().default(true), // applies to all courses or specific
+  courseId: integer("course_id"), // null for global rules
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Rule Trigger Logs - track rule executions for idempotency
+export const ruleTriggerLogs = pgTable("rule_trigger_logs", {
+  id: serial("id").primaryKey(),
+  ruleId: integer("rule_id").notNull().references(() => motivationRules.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  courseId: integer("course_id"),
+  triggerCount: integer("trigger_count").notNull().default(1),
+  actionsExecuted: text("actions_executed").notNull(), // JSON: what actions were taken
+  inputSignals: text("input_signals"), // JSON: snapshot of data that triggered rule
+  triggeredAt: timestamp("triggered_at").defaultNow().notNull(),
+});
+
+// Motivation Cards - shareable achievement cards
+export const motivationCards = pgTable("motivation_cards", {
+  id: serial("id").primaryKey(),
+  cardId: varchar("card_id", { length: 20 }).notNull().unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  courseId: integer("course_id"),
+  courseTitle: text("course_title"),
+  cardType: varchar("card_type", { length: 30 }).notNull(), // 'streak', 'milestone', 'completion', 'performance', 'speedster', 'comeback'
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  badge: varchar("badge", { length: 50 }), // badge name or icon
+  stats: text("stats"), // JSON: {label, value}[] for display
+  message: text("message"),
+  percentileRank: integer("percentile_rank"), // e.g., "Top 13%"
+  isShareable: boolean("is_shareable").notNull().default(true),
+  shareUrl: text("share_url"),
+  viewCount: integer("view_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Scholarships - rule-based discounts and free access
+export const scholarships = pgTable("scholarships", {
+  id: serial("id").primaryKey(),
+  scholarshipId: varchar("scholarship_id", { length: 20 }).notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  discountPercent: integer("discount_percent").notNull(), // 0-100
+  courseId: integer("course_id"), // null for any course
+  maxRedemptions: integer("max_redemptions"), // null = unlimited
+  redemptionCount: integer("redemption_count").notNull().default(0),
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  ruleId: integer("rule_id").references(() => motivationRules.id), // link to triggering rule
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User Scholarships - scholarships awarded to users
+export const userScholarships = pgTable("user_scholarships", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  scholarshipId: integer("scholarship_id").notNull().references(() => scholarships.id),
+  courseId: integer("course_id"), // null if applicable to any course
+  isUsed: boolean("is_used").notNull().default(false),
+  usedAt: timestamp("used_at"),
+  awardedAt: timestamp("awarded_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
+// AI Nudge Logs - track motivation messages sent
+export const aiNudgeLogs = pgTable("ai_nudge_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  courseId: integer("course_id"),
+  nudgeType: varchar("nudge_type", { length: 30 }).notNull(), // 'encouragement', 'reminder', 'celebration', 'comeback', 'streak'
+  message: text("message").notNull(),
+  channel: varchar("channel", { length: 20 }).notNull().default("app"), // 'app', 'email', 'push'
+  ruleId: integer("rule_id").references(() => motivationRules.id),
+  isRead: boolean("is_read").notNull().default(false),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+});
+
+// Mystery Reward Boxes - gamification rewards
+export const mysteryBoxes = pgTable("mystery_boxes", {
+  id: serial("id").primaryKey(),
+  boxId: varchar("box_id", { length: 20 }).notNull().unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  ruleId: integer("rule_id").references(() => motivationRules.id),
+  rewardType: varchar("reward_type", { length: 30 }), // 'coins', 'scholarship', 'badge', 'coupon'
+  rewardValue: text("reward_value"), // JSON with reward details
+  isOpened: boolean("is_opened").notNull().default(false),
+  openedAt: timestamp("opened_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Student Streaks - track learning consistency
+export const studentStreaks = pgTable("student_streaks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id).unique(),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  streakStartDate: timestamp("streak_start_date"),
+  totalActiveDays: integer("total_active_days").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
@@ -214,6 +334,16 @@ export const insertVoucherSchema = createInsertSchema(vouchers).omit({ id: true,
 export const insertVoucherRedemptionSchema = createInsertSchema(voucherRedemptions).omit({ id: true, redeemedAt: true });
 export const insertGiftBoxSchema = createInsertSchema(giftBoxes).omit({ id: true, createdAt: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+
+// AI Motivation Rules Engine insert schemas
+export const insertMotivationRuleSchema = createInsertSchema(motivationRules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRuleTriggerLogSchema = createInsertSchema(ruleTriggerLogs).omit({ id: true, triggeredAt: true });
+export const insertMotivationCardSchema = createInsertSchema(motivationCards).omit({ id: true, createdAt: true });
+export const insertScholarshipSchema = createInsertSchema(scholarships).omit({ id: true, createdAt: true });
+export const insertUserScholarshipSchema = createInsertSchema(userScholarships).omit({ id: true, awardedAt: true });
+export const insertAiNudgeLogSchema = createInsertSchema(aiNudgeLogs).omit({ id: true, sentAt: true });
+export const insertMysteryBoxSchema = createInsertSchema(mysteryBoxes).omit({ id: true, createdAt: true });
+export const insertStudentStreakSchema = createInsertSchema(studentStreaks).omit({ id: true, updatedAt: true });
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -246,12 +376,126 @@ export type InsertGiftBox = z.infer<typeof insertGiftBoxSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
+// AI Motivation Rules Engine types
+export type MotivationRule = typeof motivationRules.$inferSelect;
+export type RuleTriggerLog = typeof ruleTriggerLogs.$inferSelect;
+export type MotivationCard = typeof motivationCards.$inferSelect;
+export type Scholarship = typeof scholarships.$inferSelect;
+export type UserScholarship = typeof userScholarships.$inferSelect;
+export type AiNudgeLog = typeof aiNudgeLogs.$inferSelect;
+export type MysteryBox = typeof mysteryBoxes.$inferSelect;
+export type StudentStreak = typeof studentStreaks.$inferSelect;
+
+export type InsertMotivationRule = z.infer<typeof insertMotivationRuleSchema>;
+export type InsertRuleTriggerLog = z.infer<typeof insertRuleTriggerLogSchema>;
+export type InsertMotivationCard = z.infer<typeof insertMotivationCardSchema>;
+export type InsertScholarship = z.infer<typeof insertScholarshipSchema>;
+export type InsertUserScholarship = z.infer<typeof insertUserScholarshipSchema>;
+export type InsertAiNudgeLog = z.infer<typeof insertAiNudgeLogSchema>;
+export type InsertMysteryBox = z.infer<typeof insertMysteryBoxSchema>;
+export type InsertStudentStreak = z.infer<typeof insertStudentStreakSchema>;
+
 // Notification types
-export const NOTIFICATION_TYPES = ["product", "offer", "payment", "payment_failed", "course", "certificate", "system"] as const;
+export const NOTIFICATION_TYPES = ["product", "offer", "payment", "payment_failed", "course", "certificate", "system", "motivation"] as const;
 export type NotificationType = typeof NOTIFICATION_TYPES[number];
 
 export const NOTIFICATION_ROLES = ["guru", "shishya", "all"] as const;
 export type NotificationRole = typeof NOTIFICATION_ROLES[number];
+
+// ============ AI MOTIVATION RULES ENGINE CONSTANTS ============
+
+// Rule types
+export const MOTIVATION_RULE_TYPES = ["progress", "time", "performance", "streak", "milestone", "comeback", "speed"] as const;
+export type MotivationRuleType = typeof MOTIVATION_RULE_TYPES[number];
+
+// Condition operators
+export const CONDITION_OPERATORS = ["eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "not_in"] as const;
+export type ConditionOperator = typeof CONDITION_OPERATORS[number];
+
+// Condition fields (input signals)
+export const CONDITION_FIELDS = [
+  "lessonsCompleted",
+  "testsCompleted",
+  "projectsSubmitted",
+  "courseProgressPercent",
+  "testScore",
+  "avgTestScore",
+  "daysSinceLastActivity",
+  "streakCount",
+  "totalActiveDays",
+  "coursesEnrolled",
+  "coursesCompleted",
+  "certificatesEarned",
+  "daysTaken",
+  "targetDays",
+  "percentileRank",
+] as const;
+export type ConditionField = typeof CONDITION_FIELDS[number];
+
+// Action types
+export const ACTION_TYPES = [
+  "add_coins",
+  "generate_card",
+  "award_scholarship",
+  "create_mystery_box",
+  "send_nudge",
+  "send_notification",
+  "award_badge",
+  "unlock_reward",
+] as const;
+export type ActionType = typeof ACTION_TYPES[number];
+
+// Motivation card types
+export const MOTIVATION_CARD_TYPES = ["streak", "milestone", "completion", "performance", "speedster", "comeback", "top_performer", "dedication"] as const;
+export type MotivationCardType = typeof MOTIVATION_CARD_TYPES[number];
+
+// Nudge types
+export const NUDGE_TYPES = ["encouragement", "reminder", "celebration", "comeback", "streak", "progress", "challenge"] as const;
+export type NudgeType = typeof NUDGE_TYPES[number];
+
+// Mystery box reward types
+export const MYSTERY_BOX_REWARD_TYPES = ["coins", "scholarship", "badge", "coupon", "free_course"] as const;
+export type MysteryBoxRewardType = typeof MYSTERY_BOX_REWARD_TYPES[number];
+
+// Rule condition schema for validation
+export const ruleConditionSchema = z.object({
+  field: z.enum(CONDITION_FIELDS),
+  operator: z.enum(CONDITION_OPERATORS),
+  value: z.union([z.number(), z.string(), z.array(z.number()), z.array(z.string())]),
+  value2: z.union([z.number(), z.string()]).optional(), // For 'between' operator
+});
+export type RuleCondition = z.infer<typeof ruleConditionSchema>;
+
+// Rule action schema for validation
+export const ruleActionSchema = z.object({
+  type: z.enum(ACTION_TYPES),
+  value: z.union([z.number(), z.string(), z.object({})]).optional(), // Coins amount, card type, etc.
+  message: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+export type RuleAction = z.infer<typeof ruleActionSchema>;
+
+// Student input signals - data used to evaluate rules
+export const studentSignalsSchema = z.object({
+  userId: z.string(),
+  courseId: z.number().optional(),
+  lessonsCompleted: z.number().default(0),
+  testsCompleted: z.number().default(0),
+  projectsSubmitted: z.number().default(0),
+  courseProgressPercent: z.number().default(0),
+  testScore: z.number().optional(),
+  avgTestScore: z.number().default(0),
+  daysSinceLastActivity: z.number().default(0),
+  streakCount: z.number().default(0),
+  totalActiveDays: z.number().default(0),
+  coursesEnrolled: z.number().default(0),
+  coursesCompleted: z.number().default(0),
+  certificatesEarned: z.number().default(0),
+  daysTaken: z.number().optional(),
+  targetDays: z.number().optional(),
+  percentileRank: z.number().optional(),
+});
+export type StudentSignals = z.infer<typeof studentSignalsSchema>;
 
 // ============ ZOD SCHEMAS (for mock data and API validation) ============
 

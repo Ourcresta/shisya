@@ -1,0 +1,231 @@
+YOU ARE REPLIT AI.
+
+ACT AS:
+- Senior Full Stack Engineer
+- Senior AI Architect
+- Senior Database Architect
+- Senior EdTech Product Manager
+- Senior Gamification Designer
+- Senior QA Engineer
+
+DO NOT ASK QUESTIONS.
+DO NOT SIMPLIFY.
+DO NOT CREATE DEMO CODE.
+BUILD A FULL PRODUCTION-READY SYSTEM.
+
+=====================================================
+PROJECT NAME:
+OURSHIKSHA – AI MOTIVATION RULES ENGINE
+=====================================================
+
+GOAL:
+Increase course completion, discipline, consistency, and platform retention
+using AI-driven motivation, gamification, rewards, and scholarships.
+
+=====================================================
+TECH STACK (MANDATORY)
+=====================================================
+Backend:
+- Node.js
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- JWT Authentication
+- Node-Cron
+
+Frontend:
+- React
+- Tailwind CSS
+- ShadCN UI
+- Chart.js
+
+AI:
+- Rule-based AI Engine (Phase 1)
+- Configurable + extensible
+
+=====================================================
+SYSTEM ARCHITECTURE
+=====================================================
+1. Student Portal (Shishya)
+2. Admin / Guru Portal
+3. AI Motivation Rules Engine
+4. Wallet & Rewards System
+5. Scholarship Engine
+6. Motivation Card Generator
+7. Cron-Based Automation Engine
+
+=====================================================
+FOLDER STRUCTURE (MANDATORY)
+=====================================================
+/backend
+ ├─ src
+ │  ├─ ai
+ │  │  ├─ motivationEngine.js
+ │  │  ├─ ruleEvaluator.js
+ │  │  ├─ nudgeGenerator.js
+ │  │  └─ rewardDispatcher.js
+ │  ├─ cron
+ │  │  └─ dailyMotivationJob.js
+ │  ├─ controllers
+ │  ├─ routes
+ │  ├─ services
+ │  ├─ middlewares
+ │  └─ server.js
+ ├─ prisma
+ │  └─ schema.prisma
+ └─ .env.example
+
+/frontend
+ ├─ components
+ ├─ pages
+ ├─ admin
+ ├─ student
+ └─ ui
+
+=====================================================
+AI MOTIVATION RULES ENGINE (CORE)
+=====================================================
+INPUT SIGNALS:
+- lastActivityDate
+- lessonsCompleted
+- testsCompleted
+- testScore
+- courseProgressPercent
+- targetDays
+- daysTaken
+- streakCount
+
+RULE TYPES:
+- Progress Rules
+- Time/Inactivity Rules
+- Performance Rules
+- Streak Rules
+
+EACH RULE CONTAINS:
+- Conditions (JSON)
+- Actions (Coins, Card, Coupon, Message)
+- Cooldown
+- Max Trigger Limit
+- Enable/Disable Toggle
+
+=====================================================
+ACTIONS SUPPORTED
+=====================================================
+- Add Coins to Wallet
+- Generate Motivation Card
+- Issue Scholarship / Coupon
+- Unlock Mystery Reward Box
+- Send AI Motivation Message
+- Push Notification / Email (stub)
+
+=====================================================
+WALLET SYSTEM
+=====================================================
+- Each user has one wallet
+- Coins are non-negative
+- All transactions logged
+- Admin adjustment support
+- Optional expiry
+
+=====================================================
+MOTIVATION CARD ENGINE
+=====================================================
+Generate digital cards with:
+- Student Name
+- Course Name
+- Badge
+- Completion Speed
+- Rank Percentile
+- Date
+
+Cards must be:
+- Stored in DB
+- Downloadable (Image/PDF)
+- Shareable link
+
+=====================================================
+SCHOLARSHIP SYSTEM
+=====================================================
+- Rule-based scholarships
+- Configurable percentage / free access
+- Time-bound
+- Limited per user
+
+=====================================================
+AI NUDGE GENERATOR
+=====================================================
+Generate human-like messages such as:
+- "🔥 You're ahead of 87% learners"
+- "Just 2 lessons to unlock a reward"
+- "Comeback bonus waiting 🎁"
+
+Messages must rotate to avoid repetition.
+
+=====================================================
+CRON JOBS
+=====================================================
+- Run daily
+- Scan all active enrollments
+- Evaluate rules
+- Trigger rewards safely
+- Prevent duplicate triggers
+
+=====================================================
+ADMIN / GURU PANEL
+=====================================================
+Admin can:
+- Create / edit rules
+- Set coin values
+- Control target days
+- Configure scholarships
+- Manage reward probabilities
+- Launch seasonal events
+
+NO CODE CHANGE REQUIRED FOR CONFIG.
+
+=====================================================
+DATABASE (PRISMA REQUIRED)
+=====================================================
+Tables:
+- User
+- Course
+- Enrollment
+- Progress
+- Wallet
+- WalletTransaction
+- MotivationRule
+- RuleCondition
+- RuleAction
+- Reward
+- Scholarship
+- MotivationCard
+- AIMessageLog
+
+Include relations, indexes, timestamps.
+
+=====================================================
+SECURITY & QUALITY
+=====================================================
+- JWT-protected APIs
+- Idempotent reward triggers
+- Abuse prevention
+- Error handling
+- Logging
+
+=====================================================
+DELIVERABLE REQUIREMENTS
+=====================================================
+1. Explain architecture clearly
+2. Design database schema
+3. Write backend code
+4. Write frontend UI
+5. Comment all logic
+6. Provide setup & run steps
+7. Production-ready output only
+
+DO NOT SKIP ANY PART.
+BUILD EVERYTHING END-TO-END.
+
+=====================================================
+END OF MASTER PROMPT
+=====================================================
