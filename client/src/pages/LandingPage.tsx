@@ -8,6 +8,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/layout/Header";
 import { LevelBadge } from "@/components/ui/level-badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   GraduationCap,
   BookOpen,
   FlaskConical,
@@ -19,6 +25,15 @@ import {
   LogIn,
   UserPlus,
   ChevronRight,
+  Coins,
+  Wallet,
+  Gift,
+  Bot,
+  Globe,
+  Sparkles,
+  MessageCircle,
+  Star,
+  Quote,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 
@@ -57,6 +72,68 @@ const features = [
   { icon: ClipboardCheck, title: "Skill Assessments", description: "Validate your knowledge" },
   { icon: Award, title: "Verified Certificates", description: "Prove your skills" },
   { icon: Briefcase, title: "Career Portfolio", description: "Showcase your work" },
+];
+
+const rewardsFlow = [
+  { icon: BookOpen, title: "Complete Courses", description: "Finish lessons and projects" },
+  { icon: Coins, title: "Earn Points", description: "Get rewarded for learning" },
+  { icon: Wallet, title: "Fill Your Wallet", description: "Points go to your wallet" },
+  { icon: Gift, title: "Unlock Rewards", description: "Use for new courses" },
+];
+
+const aiFeatures = [
+  { icon: Bot, title: "Usha AI Tutor", description: "Your personal learning companion" },
+  { icon: Globe, title: "Multi-Language", description: "Learn in English, Hindi, or Tamil" },
+  { icon: Sparkles, title: "Smart Hints", description: "Get guidance without answers" },
+  { icon: MessageCircle, title: "Instant Support", description: "Ask doubts anytime" },
+];
+
+const testimonials = [
+  {
+    name: "Priya Sharma",
+    role: "Software Developer",
+    content: "OurShiksha helped me transition from a non-tech background to landing my first developer job. The structured courses and hands-on projects made all the difference.",
+    rating: 5,
+  },
+  {
+    name: "Rahul Kumar",
+    role: "Data Analyst",
+    content: "The Python for Data Science course was exactly what I needed. The guided labs gave me practical experience that I could apply immediately at work.",
+    rating: 5,
+  },
+  {
+    name: "Ananya Reddy",
+    role: "Full Stack Developer",
+    content: "What I love about OurShiksha is the certificate verification system. Employers can verify my credentials instantly, which has opened many doors for me.",
+    rating: 5,
+  },
+];
+
+const faqItems = [
+  {
+    question: "What is OurShiksha?",
+    answer: "OurShiksha is a comprehensive skill-learning platform designed for students and professionals. We offer structured courses, hands-on labs, real projects, and verified certificates to help you master new skills and advance your career.",
+  },
+  {
+    question: "How do learning credits work?",
+    answer: "When you sign up, you receive 500 free learning credits. You can use these credits to enroll in paid courses. Some courses are completely free. As you complete courses, you can earn more credits through our rewards system.",
+  },
+  {
+    question: "Are the certificates industry-recognized?",
+    answer: "Yes! Our certificates come with QR codes for instant verification. Employers and recruiters can verify your credentials on our public verification page, ensuring authenticity and building trust.",
+  },
+  {
+    question: "Can I learn at my own pace?",
+    answer: "Absolutely! All our courses are self-paced. You can learn whenever it suits you, track your progress, and pick up right where you left off. Your progress is saved automatically.",
+  },
+  {
+    question: "What is Usha AI Tutor?",
+    answer: "Usha is our AI-powered learning assistant integrated into every lesson, lab, and project. Usha helps you understand concepts by providing hints and explanations without giving away direct answers, promoting genuine learning.",
+  },
+  {
+    question: "How do I get started?",
+    answer: "Simply sign up for a free account to receive 500 learning credits. Browse our course catalog, enroll in a course that interests you, and start learning immediately. No credit card required!",
+  },
 ];
 
 function HeroSection() {
@@ -302,6 +379,187 @@ function CoursePreviewSection() {
   );
 }
 
+function RewardsSection() {
+  return (
+    <section className="py-16 md:py-20 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12">
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{ fontFamily: "var(--font-display)" }}
+            data-testid="text-rewards-title"
+          >
+            Earn While You Learn
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Complete courses, earn points, and unlock more learning opportunities
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {rewardsFlow.map((step, index) => (
+            <div
+              key={step.title}
+              className="relative flex flex-col items-center text-center p-6 rounded-xl bg-background border"
+              data-testid={`card-reward-step-${index + 1}`}
+            >
+              {index < rewardsFlow.length - 1 && (
+                <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10">
+                  <ChevronRight className="w-6 h-6 text-muted-foreground" />
+                </div>
+              )}
+              <div className="w-14 h-14 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                <step.icon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-display)" }}>
+                {step.title}
+              </h3>
+              <p className="text-sm text-muted-foreground">{step.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AISection() {
+  return (
+    <section className="py-16 md:py-20 bg-background">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <Badge variant="secondary" className="text-sm">
+              <Bot className="w-3 h-3 mr-1" />
+              AI-Powered Learning
+            </Badge>
+            <h2
+              className="text-2xl md:text-3xl font-bold"
+              style={{ fontFamily: "var(--font-display)" }}
+              data-testid="text-ai-title"
+            >
+              Meet Usha, Your AI Learning Companion
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Usha is integrated into every lesson, lab, and project to help you learn effectively. 
+              Get instant guidance without direct answers, promoting genuine understanding.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              {aiFeatures.map((feature) => (
+                <div key={feature.title} className="flex items-start gap-3" data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">{feature.title}</h4>
+                    <p className="text-xs text-muted-foreground">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <div className="aspect-square max-w-md mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+                <Bot className="w-16 h-16 text-primary-foreground" />
+              </div>
+              <div className="absolute top-8 right-8 bg-background rounded-lg shadow-md p-3 border">
+                <p className="text-sm font-medium">Need help with this concept?</p>
+              </div>
+              <div className="absolute bottom-8 left-8 bg-background rounded-lg shadow-md p-3 border">
+                <p className="text-sm text-muted-foreground">Ask me anything!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TestimonialsSection() {
+  return (
+    <section className="py-16 md:py-20 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12">
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{ fontFamily: "var(--font-display)" }}
+            data-testid="text-testimonials-title"
+          >
+            What Our Students Say
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Hear from learners who have transformed their careers with OurShiksha
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <Card key={testimonial.name} className="relative" data-testid={`card-testimonial-${index + 1}`}>
+              <CardContent className="pt-6">
+                <div className="absolute -top-3 left-6">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Quote className="w-4 h-4 text-primary" />
+                  </div>
+                </div>
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                  "{testimonial.content}"
+                </p>
+                <div className="pt-4 border-t">
+                  <p className="font-semibold text-sm">{testimonial.name}</p>
+                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQSection() {
+  return (
+    <section className="py-16 md:py-20 bg-background">
+      <div className="max-w-3xl mx-auto px-4 md:px-8">
+        <div className="text-center mb-12">
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{ fontFamily: "var(--font-display)" }}
+            data-testid="text-faq-title"
+          >
+            Frequently Asked Questions
+          </h2>
+          <p className="text-muted-foreground">
+            Everything you need to know about OurShiksha
+          </p>
+        </div>
+        <Accordion type="single" collapsible className="space-y-4" data-testid="accordion-faq">
+          {faqItems.map((item, index) => (
+            <AccordionItem
+              key={item.question}
+              value={`item-${index}`}
+              className="border rounded-lg px-4"
+              data-testid={`faq-item-${index + 1}`}
+            >
+              <AccordionTrigger className="hover:no-underline text-left">
+                <span className="font-medium">{item.question}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </section>
+  );
+}
+
 function CTASection() {
   const { user } = useAuth();
 
@@ -402,7 +660,11 @@ export default function LandingPage() {
         <HeroSection />
         <JourneySection />
         <FeaturesSection />
+        <RewardsSection />
+        <AISection />
         <CoursePreviewSection />
+        <TestimonialsSection />
+        <FAQSection />
         <CTASection />
       </main>
       <Footer />
