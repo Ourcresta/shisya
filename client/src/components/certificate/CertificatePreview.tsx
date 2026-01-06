@@ -1,7 +1,6 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
@@ -49,23 +48,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
       />
       <div className="absolute inset-0 p-10 md:p-12 flex flex-col" style={{ backgroundColor: "transparent" }}>
         
-        <div 
-          className="absolute inset-0 opacity-[0.05] pointer-events-none flex items-center justify-center"
-          aria-hidden="true"
-        >
-          <img src={ourShikshaStamp} alt="" className="w-[320px] h-[320px] object-contain" />
-        </div>
-
-        <div 
-          className="absolute top-6 left-6 z-20"
-        >
-          <img 
-            src={ourShikshaStamp} 
-            alt="OurShiksha Seal" 
-            className="w-40 h-40 object-contain"
-          />
-        </div>
-
         <div className="text-center mb-3 relative z-10">
           <h1 
             className="text-2xl md:text-3xl font-bold tracking-[0.1em] uppercase"
@@ -190,12 +172,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
             </div>
 
             <div className="flex items-end gap-4">
-              <img 
-                src={ourShikshaStamp} 
-                alt="Official Seal" 
-                className="w-20 h-20 object-contain"
-              />
-              
               <div className="text-right">
                 <div className="mb-6"></div>
                 <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "130px" }}>
