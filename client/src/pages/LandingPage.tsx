@@ -459,19 +459,20 @@ function AISection() {
           </div>
           <div className="relative">
             <div className="aspect-square max-w-md mx-auto rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-8 flex items-center justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg overflow-hidden border-4 border-primary/30">
+              <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-primary/40 ring-4 ring-primary/20 ring-offset-4 ring-offset-background">
                 <img 
                   src={ushaAvatarImage} 
                   alt="Usha AI Tutor" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center scale-110"
                   data-testid="img-usha-avatar-landing"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
               </div>
-              <div className="absolute top-8 right-8 bg-background rounded-lg shadow-md p-3 border">
-                <p className="text-sm font-medium">Need help with this concept?</p>
+              <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-background rounded-xl shadow-lg p-3 md:p-4 border-2 border-primary/20">
+                <p className="text-sm md:text-base font-medium">Need help with this concept?</p>
               </div>
-              <div className="absolute bottom-8 left-8 bg-background rounded-lg shadow-md p-3 border">
-                <p className="text-sm text-muted-foreground">Ask me anything!</p>
+              <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-background rounded-xl shadow-lg p-3 md:p-4 border-2 border-primary/20">
+                <p className="text-sm md:text-base text-muted-foreground">Ask me anything!</p>
               </div>
             </div>
           </div>
