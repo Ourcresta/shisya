@@ -408,21 +408,22 @@ function CoursePreviewSection() {
 
 function RewardsSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 dark:from-amber-500/10 dark:via-background dark:to-orange-500/10 overflow-hidden">
-      {/* Gold gradient orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-amber-400/10 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-orange-400/10 to-transparent rounded-full blur-3xl" />
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-slate-900/50 via-background to-cyan-950/30 dark:from-slate-950 dark:via-[#020617] dark:to-cyan-950/50 overflow-hidden">
+      {/* Neon gradient orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-cyan-400/10 via-teal-500/5 to-transparent rounded-full blur-3xl" />
+      <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-3xl" />
       
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent"
+            className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-teal-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-rewards-title"
           >
             Earn While You Learn
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto dark:text-slate-400">
             Complete courses, earn points, and unlock more learning opportunities
           </p>
         </div>
@@ -430,21 +431,21 @@ function RewardsSection() {
           {rewardsFlow.map((step, index) => (
             <div
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/5 dark:from-amber-500/20 dark:to-orange-500/10 border border-amber-500/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/40 hover:shadow-lg dark:hover:shadow-[0_4px_20px_-5px_rgba(251,191,36,0.3)]"
+              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-cyan-950/20 dark:from-slate-900/80 dark:via-slate-950/60 dark:to-cyan-950/30 border border-cyan-500/20 dark:border-cyan-400/30 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-cyan-400/50 hover:shadow-lg dark:hover:shadow-[0_4px_25px_-5px_rgba(34,211,238,0.4)]"
               data-testid={`card-reward-step-${index + 1}`}
             >
               {index < rewardsFlow.length - 1 && (
                 <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <ChevronRight className="w-6 h-6 text-amber-500/60" />
+                  <ChevronRight className="w-6 h-6 text-cyan-400/60 dark:text-cyan-400/80 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
                 </div>
               )}
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 flex items-center justify-center mb-4 border border-amber-500/30">
-                <step.icon className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-teal-500/10 dark:from-cyan-400/40 dark:via-blue-500/30 dark:to-teal-500/20 flex items-center justify-center mb-4 border border-cyan-400/40 dark:border-cyan-400/50 shadow-lg dark:shadow-[0_0_20px_-5px_rgba(34,211,238,0.4)]">
+                <step.icon className="w-7 h-7 text-cyan-600 dark:text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
               </div>
-              <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-display)" }}>
+              <h3 className="text-lg font-semibold mb-2 dark:text-white" style={{ fontFamily: "var(--font-display)" }}>
                 {step.title}
               </h3>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
+              <p className="text-sm text-muted-foreground dark:text-slate-400">{step.description}</p>
             </div>
           ))}
         </div>
