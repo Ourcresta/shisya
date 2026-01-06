@@ -193,7 +193,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
               <img 
                 src={ourShikshaStamp} 
                 alt="Official Seal" 
-                className="w-20 h-20 object-contain"
+                className="w-[88px] h-[88px] object-contain ml-[10%]"
               />
               
               <div className="text-right">
