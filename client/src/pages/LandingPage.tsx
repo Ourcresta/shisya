@@ -153,46 +153,74 @@ function HeroSection() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.15),transparent_60%)] opacity-0 dark:opacity-100" />
       
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
-            data-testid="text-hero-headline"
-          >
-            Learn. Practice. Prove.
-          </h1>
-          <p
-            className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto"
-            data-testid="text-hero-subheading"
-          >
-            OurShiksha is a complete skill-learning platform where students learn concepts,
-            practice with hands-on labs, build real projects, pass assessments, and earn
-            verified certificates.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            {user ? (
-              <Link href="/shishya/dashboard">
-                <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-go-to-shishya">
-                  Go to Shishya
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-hero-login">
-                    <LogIn className="w-5 h-5 mr-2" />
-                    Login to Shishya
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left side - Text content */}
+          <div className="text-center lg:text-left space-y-6">
+            <h1
+              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight dark:neon-gradient-text"
+              style={{ fontFamily: "var(--font-display)" }}
+              data-testid="text-hero-headline"
+            >
+              Learn. Practice. Prove.
+            </h1>
+            <p
+              className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0"
+              data-testid="text-hero-subheading"
+            >
+              OurShiksha is a complete skill-learning platform where students learn concepts,
+              practice with hands-on labs, build real projects, pass assessments, and earn
+              verified certificates.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+              {user ? (
+                <Link href="/shishya/dashboard">
+                  <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-go-to-shishya">
+                    Go to Shishya
+                    <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="/courses">
-                  <Button size="lg" variant="outline" className="min-w-[200px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]" data-testid="button-hero-explore">
-                    Explore Courses
-                    <ChevronRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-hero-login">
+                      <LogIn className="w-5 h-5 mr-2" />
+                      Login to Shishya
+                    </Button>
+                  </Link>
+                  <Link href="/courses">
+                    <Button size="lg" variant="outline" className="min-w-[200px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]" data-testid="button-hero-explore">
+                      Explore Courses
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Right side - Usha Avatar */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 p-1 shadow-2xl dark:shadow-[0_0_40px_-5px_rgba(34,211,238,0.5)] animate-float">
+              <img 
+                src={ushaAvatarImage} 
+                alt="Usha AI Tutor" 
+                className="w-full h-full rounded-full object-cover border-4 border-background"
+                data-testid="img-usha-avatar-hero"
+              />
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center border-4 border-background shadow-lg">
+                <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              </div>
+            </div>
+            <div className="mt-6 text-center">
+              <p 
+                className="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-primary to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                style={{ fontFamily: "var(--font-display)" }}
+                data-testid="text-meet-usha"
+              >
+                Meet Usha
+              </p>
+              <p className="text-sm md:text-base text-muted-foreground mt-1">Your AI Learning Companion</p>
+            </div>
           </div>
         </div>
       </div>
