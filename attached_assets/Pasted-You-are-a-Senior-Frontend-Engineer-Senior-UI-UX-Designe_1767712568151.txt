@@ -1,0 +1,167 @@
+You are a Senior Frontend Engineer, Senior UI/UX Designer, and Senior Product Designer.
+
+Your task is to BUILD a COMPLETE, MODERN, RESPONSIVE PERSONAL PORTFOLIO WEBSITE
+inspired by a DARK THEME + NEON GLOW UI like the provided reference image.
+
+====================================================
+PROJECT NAME
+====================================================
+Modern Portfolio – Dark Neon UI
+
+====================================================
+TECH STACK (MANDATORY)
+====================================================
+- HTML5
+- CSS3 (Flexbox + Grid)
+- JavaScript (Vanilla)
+- Google Fonts (Poppins or Inter)
+- Font Awesome Icons
+- No frameworks (pure frontend)
+
+====================================================
+DESIGN REQUIREMENTS (VERY IMPORTANT)
+====================================================
+1. Dark background (#0f172a / #020617 style)
+2. Neon cyan / teal accent glow (#22d3ee / #06b6d4)
+3. Soft glassmorphism cards
+4. Rounded corners (16px–24px)
+5. Smooth hover animations
+6. Professional modern look (startup-level UI)
+
+====================================================
+LAYOUT STRUCTURE
+====================================================
+
+1️⃣ NAVBAR (Top)
+- Logo text: "Portfolio."
+- Menu items:
+  - Home
+  - About
+  - Skills
+  - Portfolio
+  - Contact
+- Active menu highlighted with neon color
+- Sticky navbar
+- Smooth scroll
+
+----------------------------------------------------
+
+2️⃣ HERO SECTION (MAIN FOCUS)
+Two-column layout:
+
+LEFT SIDE:
+- Text:
+  - "Hello, It's Me"
+  - Big bold name (example: John Kendric)
+  - Highlight role in neon color (Frontend Developer)
+- Short description paragraph
+- Social icons (circle neon buttons):
+  - Facebook
+  - Twitter
+  - GitHub
+  - LinkedIn
+- Primary CTA button:
+  - "Download CV"
+  - Rounded pill
+  - Neon glow on hover
+
+RIGHT SIDE:
+- Profile image inside:
+  - Hexagon OR circular glowing frame
+  - Neon cyan glow shadow
+  - Floating animation (subtle up/down)
+
+----------------------------------------------------
+
+3️⃣ ABOUT SECTION
+- Card-style layout
+- Short intro about the person
+- Years of experience
+- Tech focus
+- Glassmorphism background
+
+----------------------------------------------------
+
+4️⃣ SKILLS SECTION
+- Skill cards with icons
+- Example skills:
+  - HTML
+  - CSS
+  - JavaScript
+  - React
+  - UI/UX
+- Hover glow effect
+- Grid layout
+
+----------------------------------------------------
+
+5️⃣ PORTFOLIO SECTION
+- Project cards
+- Each card:
+  - Project image placeholder
+  - Title
+  - Short description
+  - View Project button
+- Hover zoom + glow
+
+----------------------------------------------------
+
+6️⃣ CONTACT SECTION
+- Contact form:
+  - Name
+  - Email
+  - Message
+- Neon submit button
+- Input focus glow
+
+----------------------------------------------------
+
+7️⃣ FOOTER
+- Copyright
+- Social icons
+- Minimal dark footer
+
+====================================================
+ANIMATIONS & INTERACTIONS
+====================================================
+- Smooth scrolling
+- Button hover glow
+- Card lift on hover
+- Image floating animation
+- Navbar link underline animation
+
+====================================================
+RESPONSIVENESS
+====================================================
+- Mobile-first design
+- Stack hero section vertically on mobile
+- Responsive font sizes
+- Touch-friendly buttons
+
+====================================================
+FILES TO GENERATE
+====================================================
+1. index.html
+2. style.css
+3. script.js
+
+====================================================
+CODE QUALITY RULES
+====================================================
+- Clean readable code
+- Well-commented sections
+- Use CSS variables for colors
+- No broken layouts
+- Production-ready UI
+
+====================================================
+FINAL OUTPUT EXPECTATION
+====================================================
+When opened in browser, the site should look like:
+- A premium dark-themed personal portfolio
+- Similar layout and feel to the reference image
+- Ready for real developer/designer use
+
+DO NOT EXPLAIN.
+DO NOT ASK QUESTIONS.
+JUST GENERATE THE FULL WORKING CODE.
