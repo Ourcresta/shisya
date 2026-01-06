@@ -376,80 +376,147 @@ export default function Dashboard() {
         >
           {/* ZONE 4: Pending Actions */}
           <motion.div variants={staggerItem}>
-            <Card className="h-full">
-              <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
+            <Card className="h-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3 relative">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="w-4 h-4 text-amber-500" />
+                  <div className="p-1.5 rounded-md bg-primary/10">
+                    <Target className="w-4 h-4 text-primary" />
+                  </div>
                   Pending Actions
                 </CardTitle>
                 {(pendingTests.length > 0 || pendingProjects.length > 0) && (
-                  <Badge variant="secondary" className="text-xs">
-                    {pendingTests.length + pendingProjects.length} items
+                  <Badge 
+                    variant="default" 
+                    className="text-xs font-semibold animate-pulse"
+                  >
+                    {pendingTests.length + pendingProjects.length} pending
                   </Badge>
                 )}
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
                 {pendingTests.length === 0 && pendingProjects.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-3">
-                      <CheckCircle className="w-6 h-6 text-green-500" />
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-10 text-center"
+                  >
+                    <div className="relative mb-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400/20 to-emerald-500/20 dark:from-green-400/10 dark:to-emerald-500/10 flex items-center justify-center">
+                        <CheckCircle className="w-8 h-8 text-green-500" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30">
+                        <Sparkles className="w-3 h-3 text-white" />
+                      </div>
                     </div>
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                      You're all caught up!
+                    <p className="text-base font-semibold text-green-600 dark:text-green-400">
+                      All caught up!
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      No pending actions right now.
+                    <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
+                      Great work! Keep learning to unlock new challenges.
                     </p>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <>
-                    {pendingTests.map((course) => (
-                      <Link 
-                        key={`test-${course.id}`} 
-                        href={`/shishya/tests/${course.id}`}
-                        className="block"
-                      >
-                        <div 
-                          className="flex items-center justify-between gap-3 p-3 rounded-lg border hover-elevate cursor-pointer"
-                          data-testid={`pending-test-${course.id}`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-1.5 rounded bg-purple-100 dark:bg-purple-900/30">
-                              <ClipboardCheck className="w-4 h-4 text-purple-500" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">Take Test</p>
-                              <p className="text-xs text-muted-foreground truncate">{course.title}</p>
-                            </div>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <div className="space-y-2">
+                    {pendingTests.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 px-1">
+                          <ClipboardCheck className="w-3.5 h-3.5 text-purple-500" />
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Tests to Complete
+                          </span>
                         </div>
-                      </Link>
-                    ))}
-                    {pendingProjects.map((course) => (
-                      <Link 
-                        key={`project-${course.id}`} 
-                        href={`/shishya/projects/${course.id}`}
-                        className="block"
-                      >
-                        <div 
-                          className="flex items-center justify-between gap-3 p-3 rounded-lg border hover-elevate cursor-pointer"
-                          data-testid={`pending-project-${course.id}`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="p-1.5 rounded bg-blue-100 dark:bg-blue-900/30">
-                              <FileText className="w-4 h-4 text-blue-500" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">Submit Project</p>
-                              <p className="text-xs text-muted-foreground truncate">{course.title}</p>
-                            </div>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                        {pendingTests.map((course, index) => (
+                          <Link 
+                            key={`test-${course.id}`} 
+                            href={`/shishya/tests/${course.id}`}
+                            className="block"
+                          >
+                            <motion.div 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="group flex items-center justify-between gap-3 p-3 rounded-lg border border-purple-200/50 dark:border-purple-800/30 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-900/10 dark:to-transparent hover-elevate cursor-pointer"
+                              data-testid={`pending-test-${course.id}`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative">
+                                  <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                                    <ClipboardCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-purple-500 animate-pulse" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium truncate">Take Assessment</p>
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400">
+                                      Required
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-purple-600 dark:text-purple-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Start
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-purple-500 group-hover:translate-x-1 transition-transform" />
+                              </div>
+                            </motion.div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {pendingProjects.length > 0 && (
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center gap-2 px-1">
+                          <FileText className="w-3.5 h-3.5 text-blue-500" />
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Projects to Submit
+                          </span>
                         </div>
-                      </Link>
-                    ))}
-                  </>
+                        {pendingProjects.map((course, index) => (
+                          <Link 
+                            key={`project-${course.id}`} 
+                            href={`/shishya/projects/${course.id}`}
+                            className="block"
+                          >
+                            <motion.div 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: (pendingTests.length + index) * 0.1 }}
+                              className="group flex items-center justify-between gap-3 p-3 rounded-lg border border-blue-200/50 dark:border-blue-800/30 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10 dark:to-transparent hover-elevate cursor-pointer"
+                              data-testid={`pending-project-${course.id}`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative">
+                                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                                    <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium truncate">Submit Project</p>
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400">
+                                      Required
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Submit
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-blue-500 group-hover:translate-x-1 transition-transform" />
+                              </div>
+                            </motion.div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
