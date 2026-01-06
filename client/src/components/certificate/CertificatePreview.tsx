@@ -1,7 +1,6 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
@@ -190,12 +189,6 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
             </div>
 
             <div className="flex items-end gap-4">
-              <img 
-                src={ourShikshaStamp} 
-                alt="Official Seal" 
-                className="w-20 h-20 object-contain"
-              />
-              
               <div className="text-right">
                 <div className="mb-6"></div>
                 <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "130px" }}>
