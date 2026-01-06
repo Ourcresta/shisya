@@ -6,6 +6,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -13,9 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, X, Sparkles, AlertCircle, Globe } from "lucide-react";
+import { Loader2, Send, X, AlertCircle, Globe } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { UshaAllowedPage, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn, SupportedLanguage } from "@shared/schema";
+import ushaAvatarImage from "@assets/image_1767697725032.png";
 
 interface UshaContext {
   courseId: number;
@@ -184,7 +186,10 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
     <Card className="fixed bottom-24 right-6 w-96 max-h-[70vh] z-50 flex flex-col shadow-xl">
       <CardHeader className="flex flex-row items-center justify-between gap-2 py-3 px-4 border-b">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Avatar className="h-8 w-8 border border-primary">
+            <AvatarImage src={ushaAvatarImage} alt="Usha" />
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
           <div>
             <h3 className="font-semibold text-sm">Usha</h3>
             <p className="text-xs text-muted-foreground">
@@ -228,7 +233,10 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
         <ScrollArea className="h-80 p-4" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <Sparkles className="h-8 w-8 mx-auto mb-3 opacity-50" />
+              <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/30">
+                <AvatarImage src={ushaAvatarImage} alt="Usha" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
               <p className="text-sm mb-2">Hi, I am Usha, your learning companion.</p>
               <p className="text-xs mb-4">
                 I explain concepts, give hints, and guide your thinking.
