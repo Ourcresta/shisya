@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
-export type ThemeColor = "default" | "ocean" | "forest" | "sunset" | "midnight" | "rose";
+export type ThemeColor = "neon" | "cyberpunk" | "minimal" | "ocean" | "sunset";
 export type ThemeMode = "light" | "dark" | "system";
 
 interface ThemeContextType {
@@ -17,12 +17,11 @@ const THEME_COLOR_KEY = "shishya-theme-color";
 const THEME_MODE_KEY = "shishya-theme-mode";
 
 export const themeColors: { id: ThemeColor; name: string; primary: string; description: string }[] = [
-  { id: "default", name: "Default", primary: "#2563eb", description: "Professional Blue" },
-  { id: "ocean", name: "Ocean", primary: "#0891b2", description: "Calm & Fresh" },
-  { id: "forest", name: "Forest", primary: "#16a34a", description: "Natural & Growth" },
-  { id: "sunset", name: "Sunset", primary: "#ea580c", description: "Warm & Energetic" },
-  { id: "midnight", name: "Midnight", primary: "#7c3aed", description: "Deep & Focused" },
-  { id: "rose", name: "Rose", primary: "#db2777", description: "Soft & Creative" },
+  { id: "neon", name: "Neon", primary: "#22d3ee", description: "Cyan Glow" },
+  { id: "cyberpunk", name: "Cyberpunk", primary: "#f0abfc", description: "Purple Neon" },
+  { id: "minimal", name: "Minimal", primary: "#3b82f6", description: "Clean Blue" },
+  { id: "ocean", name: "Ocean", primary: "#2dd4bf", description: "Teal Waves" },
+  { id: "sunset", name: "Sunset", primary: "#fb923c", description: "Warm Orange" },
 ];
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -33,7 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         return stored as ThemeColor;
       }
     }
-    return "default";
+    return "neon";
   });
 
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {

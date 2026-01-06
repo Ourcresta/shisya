@@ -4,8 +4,8 @@
 
 /* ============================================
    MULTI-THEME SYSTEM
-   Themes: default, ocean, forest, sunset, midnight, rose
-   Each theme has light and dark variants
+   Themes: neon, cyberpunk, minimal, ocean, sunset
+   Each theme has light and dark variants with neon accents
    ============================================ */
 
 /* Theme transition for smooth switching */
@@ -18,12 +18,12 @@
 }
 
 /* ============================================
-   DEFAULT THEME (Blue - Professional)
+   NEON THEME (Cyan - Electric Glow)
    ============================================ */
 
-/* LIGHT MODE - Default */
+/* LIGHT MODE - Neon */
 :root,
-[data-theme="default"] {
+[data-theme="neon"] {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
   --opaque-button-border-intensity: -8;
@@ -38,21 +38,21 @@
   --sidebar: 220 15% 96%;
   --sidebar-foreground: 220 15% 15%;
   --sidebar-border: 220 10% 92%;
-  --sidebar-primary: 217 91% 45%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 217 20% 88%;
+  --sidebar-primary: 187 85% 53%;
+  --sidebar-primary-foreground: 220 15% 8%;
+  --sidebar-accent: 187 20% 88%;
   --sidebar-accent-foreground: 220 15% 15%;
-  --sidebar-ring: 217 91% 45%;
+  --sidebar-ring: 187 85% 53%;
   --popover: 220 15% 95%;
   --popover-foreground: 220 15% 15%;
   --popover-border: 220 10% 91%;
-  --primary: 217 91% 45%;
-  --primary-foreground: 0 0% 98%;
+  --primary: 187 85% 53%;
+  --primary-foreground: 220 15% 8%;
   --secondary: 220 10% 92%;
   --secondary-foreground: 220 15% 15%;
   --muted: 220 10% 90%;
   --muted-foreground: 220 10% 40%;
-  --accent: 217 15% 90%;
+  --accent: 187 15% 90%;
   --accent-foreground: 220 15% 15%;
   --destructive: 0 84% 42%;
   --destructive-foreground: 0 0% 98%;
@@ -63,12 +63,12 @@
   --info: 199 89% 48%;
   --info-foreground: 0 0% 98%;
   --input: 220 10% 75%;
-  --ring: 217 91% 45%;
-  --chart-1: 217 91% 35%;
-  --chart-2: 142 76% 36%;
+  --ring: 187 85% 53%;
+  --chart-1: 187 85% 45%;
+  --chart-2: 160 76% 45%;
   --chart-3: 38 92% 50%;
-  --chart-4: 280 65% 45%;
-  --chart-5: 340 82% 45%;
+  --chart-4: 280 65% 50%;
+  --chart-5: 340 82% 50%;
   --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -101,9 +101,9 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* DARK MODE - Default */
+/* DARK MODE - Neon */
 .dark,
-[data-theme="default"].dark {
+[data-theme="neon"].dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
   --opaque-button-border-intensity: 9;
@@ -118,21 +118,21 @@
   --sidebar: 220 15% 12%;
   --sidebar-foreground: 220 10% 95%;
   --sidebar-border: 220 10% 16%;
-  --sidebar-primary: 217 91% 55%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 217 15% 20%;
+  --sidebar-primary: 187 85% 53%;
+  --sidebar-primary-foreground: 220 15% 8%;
+  --sidebar-accent: 187 15% 20%;
   --sidebar-accent-foreground: 220 10% 95%;
-  --sidebar-ring: 217 91% 55%;
+  --sidebar-ring: 187 85% 53%;
   --popover: 220 15% 14%;
   --popover-foreground: 220 10% 95%;
   --popover-border: 220 10% 18%;
-  --primary: 217 91% 55%;
-  --primary-foreground: 0 0% 98%;
+  --primary: 187 85% 53%;
+  --primary-foreground: 220 15% 8%;
   --secondary: 220 10% 18%;
   --secondary-foreground: 220 10% 95%;
   --muted: 220 10% 20%;
   --muted-foreground: 220 10% 65%;
-  --accent: 217 15% 22%;
+  --accent: 187 15% 22%;
   --accent-foreground: 220 10% 95%;
   --destructive: 0 84% 50%;
   --destructive-foreground: 0 0% 98%;
@@ -143,12 +143,12 @@
   --info: 199 89% 55%;
   --info-foreground: 0 0% 98%;
   --input: 220 10% 30%;
-  --ring: 217 91% 55%;
-  --chart-1: 217 91% 65%;
-  --chart-2: 142 76% 60%;
-  --chart-3: 38 92% 65%;
-  --chart-4: 280 65% 65%;
-  --chart-5: 340 82% 65%;
+  --ring: 187 85% 53%;
+  --chart-1: 187 85% 60%;
+  --chart-2: 160 76% 55%;
+  --chart-3: 38 92% 60%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 82% 60%;
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.20);
   --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.25);
   --shadow-sm: 0px 2px 4px -1px hsl(0 0% 0% / 0.30);
@@ -175,220 +175,231 @@
 }
 
 /* ============================================
-   OCEAN THEME (Teal/Cyan - Calm & Fresh)
+   CYBERPUNK THEME (Purple - Neon Violet)
+   ============================================ */
+
+[data-theme="cyberpunk"] {
+  --primary: 290 90% 75%;
+  --primary-foreground: 290 30% 10%;
+  --sidebar-primary: 290 90% 75%;
+  --sidebar-primary-foreground: 290 30% 10%;
+  --sidebar-accent: 290 25% 88%;
+  --sidebar-accent-foreground: 290 30% 15%;
+  --sidebar-ring: 290 90% 75%;
+  --accent: 290 20% 90%;
+  --accent-foreground: 290 30% 15%;
+  --ring: 290 90% 75%;
+  --chart-1: 290 90% 70%;
+  --chart-2: 270 70% 60%;
+  --chart-3: 320 80% 55%;
+  --chart-4: 250 70% 55%;
+  --chart-5: 330 70% 55%;
+}
+
+[data-theme="cyberpunk"].dark {
+  --background: 260 30% 6%;
+  --foreground: 290 10% 95%;
+  --border: 260 20% 18%;
+  --card: 260 25% 10%;
+  --card-foreground: 290 10% 95%;
+  --card-border: 260 20% 14%;
+  --sidebar: 260 25% 12%;
+  --sidebar-foreground: 290 10% 95%;
+  --sidebar-border: 260 20% 16%;
+  --popover: 260 25% 14%;
+  --popover-foreground: 290 10% 95%;
+  --popover-border: 260 20% 18%;
+  --muted: 260 15% 20%;
+  --muted-foreground: 290 20% 70%;
+  --secondary: 260 15% 18%;
+  --secondary-foreground: 290 10% 95%;
+  --input: 260 20% 30%;
+  --primary: 290 90% 75%;
+  --primary-foreground: 290 30% 10%;
+  --sidebar-primary: 290 90% 75%;
+  --sidebar-primary-foreground: 290 30% 10%;
+  --sidebar-accent: 290 20% 22%;
+  --sidebar-accent-foreground: 290 20% 95%;
+  --sidebar-ring: 290 90% 75%;
+  --accent: 290 20% 22%;
+  --accent-foreground: 290 20% 95%;
+  --ring: 290 90% 75%;
+  --chart-1: 290 90% 75%;
+  --chart-2: 270 70% 65%;
+  --chart-3: 320 80% 65%;
+  --chart-4: 250 70% 65%;
+  --chart-5: 330 70% 65%;
+}
+
+/* ============================================
+   MINIMAL THEME (Blue - Clean & Modern)
+   ============================================ */
+
+[data-theme="minimal"] {
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
+  --sidebar-primary: 217 91% 60%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 217 25% 88%;
+  --sidebar-accent-foreground: 217 30% 15%;
+  --sidebar-ring: 217 91% 60%;
+  --accent: 217 20% 90%;
+  --accent-foreground: 217 30% 15%;
+  --ring: 217 91% 60%;
+  --chart-1: 217 91% 55%;
+  --chart-2: 200 80% 50%;
+  --chart-3: 230 70% 55%;
+  --chart-4: 190 75% 50%;
+  --chart-5: 240 65% 55%;
+}
+
+[data-theme="minimal"].dark {
+  --background: 0 0% 4%;
+  --foreground: 0 0% 98%;
+  --border: 0 0% 18%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 98%;
+  --card-border: 0 0% 12%;
+  --sidebar: 0 0% 9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 14%;
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 98%;
+  --popover-border: 0 0% 16%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 65%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --input: 0 0% 25%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
+  --sidebar-primary: 217 91% 60%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 217 15% 20%;
+  --sidebar-accent-foreground: 217 10% 95%;
+  --sidebar-ring: 217 91% 60%;
+  --accent: 217 15% 20%;
+  --accent-foreground: 217 10% 95%;
+  --ring: 217 91% 60%;
+  --chart-1: 217 91% 65%;
+  --chart-2: 200 80% 60%;
+  --chart-3: 230 70% 65%;
+  --chart-4: 190 75% 60%;
+  --chart-5: 240 65% 65%;
+}
+
+/* ============================================
+   OCEAN THEME (Teal - Deep Waters)
    ============================================ */
 
 [data-theme="ocean"] {
-  --primary: 187 85% 40%;
+  --primary: 168 76% 42%;
   --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 187 85% 40%;
+  --sidebar-primary: 168 76% 42%;
   --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 187 25% 88%;
-  --sidebar-accent-foreground: 187 30% 15%;
-  --sidebar-ring: 187 85% 40%;
-  --accent: 187 20% 90%;
-  --accent-foreground: 187 30% 15%;
-  --ring: 187 85% 40%;
-  --chart-1: 187 85% 35%;
-  --chart-2: 160 70% 40%;
-  --chart-3: 200 80% 50%;
-  --chart-4: 220 70% 55%;
-  --chart-5: 240 60% 50%;
+  --sidebar-accent: 168 30% 88%;
+  --sidebar-accent-foreground: 168 40% 15%;
+  --sidebar-ring: 168 76% 42%;
+  --accent: 168 25% 90%;
+  --accent-foreground: 168 40% 15%;
+  --ring: 168 76% 42%;
+  --chart-1: 168 76% 40%;
+  --chart-2: 180 70% 45%;
+  --chart-3: 150 70% 50%;
+  --chart-4: 200 75% 50%;
+  --chart-5: 140 65% 55%;
 }
 
 [data-theme="ocean"].dark {
-  --primary: 187 85% 50%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 187 85% 50%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 187 20% 22%;
-  --sidebar-accent-foreground: 187 20% 95%;
-  --sidebar-ring: 187 85% 50%;
-  --accent: 187 20% 22%;
-  --accent-foreground: 187 20% 95%;
-  --ring: 187 85% 50%;
-  --chart-1: 187 85% 60%;
-  --chart-2: 160 70% 55%;
-  --chart-3: 200 80% 60%;
-  --chart-4: 220 70% 65%;
-  --chart-5: 240 60% 60%;
+  --background: 170 40% 4%;
+  --foreground: 168 10% 95%;
+  --border: 170 20% 18%;
+  --card: 170 30% 8%;
+  --card-foreground: 168 10% 95%;
+  --card-border: 170 20% 12%;
+  --sidebar: 170 30% 10%;
+  --sidebar-foreground: 168 10% 95%;
+  --sidebar-border: 170 20% 14%;
+  --popover: 170 30% 12%;
+  --popover-foreground: 168 10% 95%;
+  --popover-border: 170 20% 16%;
+  --muted: 170 15% 20%;
+  --muted-foreground: 168 40% 60%;
+  --secondary: 170 15% 15%;
+  --secondary-foreground: 168 10% 95%;
+  --input: 170 20% 25%;
+  --primary: 168 76% 50%;
+  --primary-foreground: 170 40% 8%;
+  --sidebar-primary: 168 76% 50%;
+  --sidebar-primary-foreground: 170 40% 8%;
+  --sidebar-accent: 168 20% 22%;
+  --sidebar-accent-foreground: 168 15% 95%;
+  --sidebar-ring: 168 76% 50%;
+  --accent: 168 20% 22%;
+  --accent-foreground: 168 15% 95%;
+  --ring: 168 76% 50%;
+  --chart-1: 168 76% 55%;
+  --chart-2: 180 70% 55%;
+  --chart-3: 150 70% 60%;
+  --chart-4: 200 75% 60%;
+  --chart-5: 140 65% 65%;
 }
 
 /* ============================================
-   FOREST THEME (Green - Natural & Growth)
-   ============================================ */
-
-[data-theme="forest"] {
-  --primary: 142 70% 35%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 142 70% 35%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 142 25% 88%;
-  --sidebar-accent-foreground: 142 30% 15%;
-  --sidebar-ring: 142 70% 35%;
-  --accent: 142 20% 90%;
-  --accent-foreground: 142 30% 15%;
-  --ring: 142 70% 35%;
-  --chart-1: 142 70% 30%;
-  --chart-2: 120 60% 40%;
-  --chart-3: 80 70% 45%;
-  --chart-4: 160 65% 40%;
-  --chart-5: 100 55% 50%;
-}
-
-[data-theme="forest"].dark {
-  --primary: 142 70% 45%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 142 70% 45%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 142 20% 22%;
-  --sidebar-accent-foreground: 142 20% 95%;
-  --sidebar-ring: 142 70% 45%;
-  --accent: 142 20% 22%;
-  --accent-foreground: 142 20% 95%;
-  --ring: 142 70% 45%;
-  --chart-1: 142 70% 55%;
-  --chart-2: 120 60% 55%;
-  --chart-3: 80 70% 60%;
-  --chart-4: 160 65% 55%;
-  --chart-5: 100 55% 60%;
-}
-
-/* ============================================
-   SUNSET THEME (Orange/Amber - Warm & Energetic)
+   SUNSET THEME (Orange - Warm Glow)
    ============================================ */
 
 [data-theme="sunset"] {
-  --primary: 25 95% 50%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 25 95% 50%;
-  --sidebar-primary-foreground: 0 0% 98%;
+  --primary: 25 95% 55%;
+  --primary-foreground: 25 40% 10%;
+  --sidebar-primary: 25 95% 55%;
+  --sidebar-primary-foreground: 25 40% 10%;
   --sidebar-accent: 25 30% 88%;
   --sidebar-accent-foreground: 25 40% 15%;
-  --sidebar-ring: 25 95% 50%;
+  --sidebar-ring: 25 95% 55%;
   --accent: 25 25% 90%;
   --accent-foreground: 25 40% 15%;
-  --ring: 25 95% 50%;
-  --chart-1: 25 95% 45%;
-  --chart-2: 38 90% 50%;
-  --chart-3: 10 85% 50%;
-  --chart-4: 45 100% 50%;
-  --chart-5: 0 80% 55%;
+  --ring: 25 95% 55%;
+  --chart-1: 25 95% 50%;
+  --chart-2: 38 90% 55%;
+  --chart-3: 10 85% 55%;
+  --chart-4: 45 100% 55%;
+  --chart-5: 0 80% 60%;
 }
 
 [data-theme="sunset"].dark {
-  --primary: 25 95% 55%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 25 95% 55%;
-  --sidebar-primary-foreground: 0 0% 98%;
+  --background: 15 30% 6%;
+  --foreground: 25 10% 95%;
+  --border: 15 20% 18%;
+  --card: 15 25% 9%;
+  --card-foreground: 25 10% 95%;
+  --card-border: 15 20% 13%;
+  --sidebar: 15 25% 11%;
+  --sidebar-foreground: 25 10% 95%;
+  --sidebar-border: 15 20% 15%;
+  --popover: 15 25% 13%;
+  --popover-foreground: 25 10% 95%;
+  --popover-border: 15 20% 17%;
+  --muted: 15 15% 20%;
+  --muted-foreground: 25 30% 65%;
+  --secondary: 15 15% 16%;
+  --secondary-foreground: 25 10% 95%;
+  --input: 15 20% 28%;
+  --primary: 25 95% 58%;
+  --primary-foreground: 25 40% 10%;
+  --sidebar-primary: 25 95% 58%;
+  --sidebar-primary-foreground: 25 40% 10%;
   --sidebar-accent: 25 25% 22%;
-  --sidebar-accent-foreground: 25 20% 95%;
-  --sidebar-ring: 25 95% 55%;
+  --sidebar-accent-foreground: 25 15% 95%;
+  --sidebar-ring: 25 95% 58%;
   --accent: 25 25% 22%;
-  --accent-foreground: 25 20% 95%;
-  --ring: 25 95% 55%;
-  --chart-1: 25 95% 60%;
-  --chart-2: 38 90% 60%;
-  --chart-3: 10 85% 60%;
-  --chart-4: 45 100% 60%;
-  --chart-5: 0 80% 65%;
-}
-
-/* ============================================
-   MIDNIGHT THEME (Indigo/Purple - Deep & Focused)
-   ============================================ */
-
-[data-theme="midnight"] {
-  --primary: 250 85% 55%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 250 85% 55%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 250 25% 88%;
-  --sidebar-accent-foreground: 250 30% 15%;
-  --sidebar-ring: 250 85% 55%;
-  --accent: 250 20% 90%;
-  --accent-foreground: 250 30% 15%;
-  --ring: 250 85% 55%;
-  --chart-1: 250 85% 50%;
-  --chart-2: 270 70% 55%;
-  --chart-3: 230 80% 55%;
-  --chart-4: 290 65% 50%;
-  --chart-5: 210 75% 55%;
-}
-
-[data-theme="midnight"].dark {
-  --background: 250 20% 8%;
-  --foreground: 250 10% 95%;
-  --border: 250 15% 18%;
-  --card: 250 20% 10%;
-  --card-foreground: 250 10% 95%;
-  --card-border: 250 15% 14%;
-  --sidebar: 250 20% 12%;
-  --sidebar-foreground: 250 10% 95%;
-  --sidebar-border: 250 15% 16%;
-  --popover: 250 20% 14%;
-  --popover-foreground: 250 10% 95%;
-  --popover-border: 250 15% 18%;
-  --muted: 250 15% 20%;
-  --muted-foreground: 250 10% 65%;
-  --secondary: 250 15% 18%;
-  --secondary-foreground: 250 10% 95%;
-  --primary: 250 85% 60%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 250 85% 60%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 250 20% 22%;
-  --sidebar-accent-foreground: 250 15% 95%;
-  --sidebar-ring: 250 85% 60%;
-  --accent: 250 20% 22%;
-  --accent-foreground: 250 15% 95%;
-  --ring: 250 85% 60%;
-  --input: 250 15% 30%;
-  --chart-1: 250 85% 65%;
-  --chart-2: 270 70% 65%;
-  --chart-3: 230 80% 65%;
-  --chart-4: 290 65% 65%;
-  --chart-5: 210 75% 65%;
-}
-
-/* ============================================
-   ROSE THEME (Pink/Rose - Soft & Creative)
-   ============================================ */
-
-[data-theme="rose"] {
-  --primary: 340 80% 52%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 340 80% 52%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 340 25% 88%;
-  --sidebar-accent-foreground: 340 30% 15%;
-  --sidebar-ring: 340 80% 52%;
-  --accent: 340 20% 90%;
-  --accent-foreground: 340 30% 15%;
-  --ring: 340 80% 52%;
-  --chart-1: 340 80% 48%;
-  --chart-2: 320 70% 50%;
-  --chart-3: 355 75% 55%;
-  --chart-4: 310 65% 50%;
-  --chart-5: 0 70% 55%;
-}
-
-[data-theme="rose"].dark {
-  --primary: 340 80% 58%;
-  --primary-foreground: 0 0% 98%;
-  --sidebar-primary: 340 80% 58%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 340 20% 22%;
-  --sidebar-accent-foreground: 340 15% 95%;
-  --sidebar-ring: 340 80% 58%;
-  --accent: 340 20% 22%;
-  --accent-foreground: 340 15% 95%;
-  --ring: 340 80% 58%;
-  --chart-1: 340 80% 65%;
-  --chart-2: 320 70% 60%;
-  --chart-3: 355 75% 65%;
-  --chart-4: 310 65% 60%;
-  --chart-5: 0 70% 65%;
+  --accent-foreground: 25 15% 95%;
+  --ring: 25 95% 58%;
+  --chart-1: 25 95% 63%;
+  --chart-2: 38 90% 63%;
+  --chart-3: 10 85% 63%;
+  --chart-4: 45 100% 63%;
+  --chart-5: 0 80% 68%;
 }
 
 /* ============================================
