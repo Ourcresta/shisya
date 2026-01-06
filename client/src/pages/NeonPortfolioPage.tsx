@@ -160,7 +160,7 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
       profile,
       certificates,
       projects: submissions,
-      skills: [...new Set(allSkills)],
+      skills: Array.from(new Set(allSkills)),
       stats: {
         coursesCompleted: certificates.length,
         projectsSubmitted: submissions.length,
@@ -769,7 +769,7 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
                     Project #{project.projectId}
                   </h3>
                   <p style={{ color: theme.textMuted }} className="text-sm mb-4">
-                    {project.description || "A creative project showcasing modern development skills."}
+                    {(project as any).description || (project as any).notes || "A creative project showcasing modern development skills."}
                   </p>
                   <div className="flex items-center gap-3">
                     {project.githubUrl && (
@@ -810,9 +810,9 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {certificates.slice(0, 6).map((cert, index) => (
                   <div 
-                    key={cert.id}
+                    key={cert.certificateId}
                     className="glass-card rounded-xl p-6"
-                    data-testid={`certificate-${cert.id}`}
+                    data-testid={`certificate-${cert.certificateId}`}
                   >
                     <div className="flex items-start gap-4">
                       <div 
@@ -822,7 +822,7 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
                         <Award className="w-6 h-6" style={{ color: theme.primary }} />
                       </div>
                       <div>
-                        <h4 className="font-semibold">{cert.courseName}</h4>
+                        <h4 className="font-semibold">{cert.courseTitle}</h4>
                         <p style={{ color: theme.textMuted }} className="text-sm mt-1">
                           Completed Course
                         </p>

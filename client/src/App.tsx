@@ -45,6 +45,7 @@ import Contact from "@/pages/Contact";
 import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
+import { NeonPortfolioPreview, PublicNeonPortfolio } from "@/pages/NeonPortfolioPage";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -130,6 +131,10 @@ function ProtectedMyLearnings() {
   return <ProtectedRoute><MyLearnings /></ProtectedRoute>;
 }
 
+function ProtectedNeonPortfolioPreview() {
+  return <ProtectedRoute><NeonPortfolioPreview /></ProtectedRoute>;
+}
+
 function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -172,6 +177,7 @@ function Router() {
       <Route path="/verify-otp" component={VerifyOtp} />
       <Route path="/profile/:username" component={PublicProfilePage} />
       <Route path="/portfolio/:username" component={PublicProfilePage} />
+      <Route path="/neon-portfolio/:username" component={PublicNeonPortfolio} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
@@ -195,6 +201,7 @@ function Router() {
       <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
       <Route path="/shishya/profile/portfolio-preview" component={ProtectedPortfolioPreview} />
+      <Route path="/shishya/profile/neon-portfolio" component={ProtectedNeonPortfolioPreview} />
       
       <Route component={NotFound} />
     </Switch>
