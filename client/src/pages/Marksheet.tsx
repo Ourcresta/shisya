@@ -403,7 +403,7 @@ export default function Marksheet() {
                       >
                         OurShiksha Academy
                       </h2>
-                      <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-2 text-left">CONSOLIDATED ACADEMIC MARKSHEET</h3>
+                      <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-2 text-center">CONSOLIDATED ACADEMIC MARKSHEET</h3>
                     </div>
                     <div className="w-24 h-28 rounded-lg border-2 border-blue-200 shadow-md overflow-hidden bg-slate-100 flex items-center justify-center">
                       {studentPhoto ? (
