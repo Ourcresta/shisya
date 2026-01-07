@@ -34,6 +34,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import type { Course, MarksheetCourseEntry } from "@shared/schema";
 import stampImage from "@assets/ourshiksha_stamp2_1767767723805.png";
+import logoImage from "@assets/ChatGPT_Image_Dec_23,_2025,_10_28_31_PM_1767767974982.png";
 
 interface MarksheetEntry {
   sno: number;
@@ -387,9 +388,11 @@ export default function Marksheet() {
                 <div className="border-b border-blue-200 pb-6 mb-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md">
-                        <GraduationCap className="w-10 h-10 text-white" />
-                      </div>
+                      <img 
+                        src={logoImage} 
+                        alt="OurShiksha Logo" 
+                        className="w-14 h-14 object-contain rounded-lg shadow-md"
+                      />
                       <div>
                         <h2 
                           className="text-2xl sm:text-3xl font-bold text-slate-800"
