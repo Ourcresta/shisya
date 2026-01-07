@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,6 @@ import {
   BookOpen,
   CheckCircle,
   XCircle,
-  Sparkles,
   Star,
   Trophy,
   Coins,
@@ -30,7 +29,6 @@ import { getTestAttempts } from "@/lib/testAttempts";
 import { getAllSubmissions } from "@/lib/submissions";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { getProfile } from "@/lib/profile";
-import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import type { Course, MarksheetCourseEntry } from "@shared/schema";
@@ -190,45 +188,6 @@ export default function Marksheet() {
     year: "numeric"
   });
 
-  const generateMutation = useMutation({
-    mutationFn: async () => {
-      const courseData = entries.map(e => ({
-        sno: e.sno,
-        courseCode: e.courseCode,
-        courseId: e.courseId,
-        courseName: e.courseName,
-        programName: e.programName,
-        credits: e.credits,
-        maxMarks: e.maxMarks,
-        obtainedMarks: e.obtainedMarks,
-        testScore: e.testScore,
-        grade: e.grade,
-        projectStatus: e.projectStatus,
-        labStatus: e.labStatus,
-        status: e.status,
-      }));
-
-      return apiRequest("POST", "/api/marksheet/generate", {
-        courseData,
-        studentName: user?.email?.split("@")[0] || "Student",
-        studentEmail: user?.email || "",
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Marksheet Generated",
-        description: "Your official marksheet has been created and saved.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Generation Failed",
-        description: "Could not generate marksheet. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(verificationUrl);
@@ -341,15 +300,6 @@ export default function Marksheet() {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Button
-                onClick={() => generateMutation.mutate()}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600"
-                disabled={generateMutation.isPending}
-                data-testid="button-generate"
-              >
-                <Sparkles className="w-4 h-4" />
-                {generateMutation.isPending ? "Generating..." : "Generate Official"}
-              </Button>
               <Button 
                 onClick={handleDownloadPDF} 
                 className="gap-2"
