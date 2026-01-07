@@ -172,6 +172,7 @@ function Router() {
       <Route path="/courses/:courseId" component={CourseOverview} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />
       <Route path="/verify/marksheet/:marksheetId" component={MarksheetVerify} />
+      <Route path="/verify/marksheet/code/:code" component={MarksheetVerify} />
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
       <Route path="/verify-otp" component={VerifyOtp} />

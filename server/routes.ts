@@ -837,10 +837,13 @@ export async function registerRoutes(
     return Math.floor((baseCoins[classification] || 0) * (cgpa / 10));
   }
 
+  // Import auth middleware
+  const { requireAuth } = await import("./auth");
+
   // POST /api/marksheet/generate - Generate a marksheet for authenticated user
-  app.post("/api/marksheet/generate", async (req, res) => {
+  app.post("/api/marksheet/generate", requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.session as any)?.userId;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
@@ -933,9 +936,9 @@ export async function registerRoutes(
   });
 
   // GET /api/marksheet - Get current user's marksheet
-  app.get("/api/marksheet", async (req, res) => {
+  app.get("/api/marksheet", requireAuth, async (req: any, res) => {
     try {
-      const userId = (req.session as any)?.userId;
+      const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
