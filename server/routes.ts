@@ -10,7 +10,7 @@ import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles } from "@shared/schema";
+import { userProfiles, marksheets, marksheetVerifications } from "@shared/schema";
 import { eq, like, or } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
