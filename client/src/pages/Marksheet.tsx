@@ -18,7 +18,6 @@ import {
   XCircle,
   Sparkles,
   Star,
-  Shield,
   Trophy,
   Coins
 } from "lucide-react";
@@ -386,22 +385,20 @@ export default function Marksheet() {
                 </div>
 
                 <div className="border-b border-blue-200 pb-6 mb-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={logoImage} 
-                        alt="OurShiksha Logo" 
-                        className="w-20 h-20 object-contain rounded-lg shadow-md"
-                      />
-                      <div>
-                        <h2 
-                          className="text-2xl sm:text-3xl font-bold text-slate-800"
-                          style={{ fontFamily: "var(--font-display)" }}
-                        >
-                          OurShiksha Academy
-                        </h2>
-                        <p className="text-xs text-slate-500">Digital Learning Platform</p>
-                      </div>
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <img 
+                      src={logoImage} 
+                      alt="OurShiksha Logo" 
+                      className="w-28 h-28 object-contain rounded-lg shadow-md"
+                    />
+                    <div className="text-center">
+                      <h2 
+                        className="text-2xl sm:text-3xl font-bold text-slate-800"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        OurShiksha Academy
+                      </h2>
+                      <p className="text-xs text-slate-500">Digital Learning Platform</p>
                     </div>
                   </div>
                   <div className="text-center mt-4">
@@ -411,11 +408,9 @@ export default function Marksheet() {
 
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-6">
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-blue-600" />
-                      <span className="text-slate-600">Marksheet ID:</span>
-                      <span className="font-mono font-medium text-slate-800">{marksheetId}</span>
-                    </div>
+                    <p className="text-slate-600">
+                      <span className="font-medium text-slate-800">Marksheet ID:</span> <span className="font-mono">{marksheetId}</span>
+                    </p>
                     <p className="text-slate-600">
                       <span className="font-medium text-slate-800">Student:</span> {user?.email?.split('@')[0] || 'Student'}
                     </p>
