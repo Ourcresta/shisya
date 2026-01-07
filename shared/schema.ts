@@ -4,6 +4,97 @@ import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
 
+// ============ COURSE CONTENT TABLES (Admin manages, SHISHYA reads) ============
+
+// Courses table - master catalog of all courses
+export const courses = pgTable("courses", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  shortDescription: varchar("short_description", { length: 500 }),
+  level: varchar("level", { length: 20 }).notNull().default("beginner"),
+  duration: varchar("duration", { length: 50 }),
+  skills: text("skills"),
+  status: varchar("status", { length: 20 }).notNull().default("draft"),
+  isFree: boolean("is_free").notNull().default(false),
+  creditCost: integer("credit_cost").notNull().default(0),
+  testRequired: boolean("test_required").notNull().default(false),
+  projectRequired: boolean("project_required").notNull().default(false),
+  thumbnailUrl: text("thumbnail_url"),
+  instructorId: varchar("instructor_id", { length: 36 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Modules table - sections/chapters within a course
+export const modules = pgTable("modules", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  orderIndex: integer("order_index").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Lessons table - individual learning units
+export const lessons = pgTable("lessons", {
+  id: serial("id").primaryKey(),
+  moduleId: integer("module_id").notNull().references(() => modules.id),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content"),
+  videoUrl: text("video_url"),
+  durationMinutes: integer("duration_minutes"),
+  orderIndex: integer("order_index").notNull().default(0),
+  isPreview: boolean("is_preview").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Tests table - assessments/quizzes for courses
+export const tests = pgTable("tests", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  durationMinutes: integer("duration_minutes").notNull().default(30),
+  passingPercentage: integer("passing_percentage").notNull().default(60),
+  questions: text("questions").notNull(),
+  maxAttempts: integer("max_attempts"),
+  shuffleQuestions: boolean("shuffle_questions").notNull().default(false),
+  showCorrectAnswers: boolean("show_correct_answers").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Projects table - hands-on assignments
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  difficulty: varchar("difficulty", { length: 20 }).notNull().default("medium"),
+  requirements: text("requirements"),
+  resources: text("resources"),
+  estimatedHours: integer("estimated_hours"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Labs table - interactive coding exercises
+export const labs = pgTable("labs", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  lessonId: integer("lesson_id").references(() => lessons.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  instructions: text("instructions").notNull(),
+  starterCode: text("starter_code"),
+  expectedOutput: text("expected_output"),
+  solutionCode: text("solution_code"),
+  language: varchar("language", { length: 20 }).notNull().default("javascript"),
+  orderIndex: integer("order_index").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ============ AUTHENTICATION TABLES ============
+
 // Users table for authentication
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -363,6 +454,14 @@ export const marksheetVerifications = pgTable("marksheet_verifications", {
   verifiedAt: timestamp("verified_at").defaultNow().notNull(),
 });
 
+// Course Content insert schemas
+export const insertCourseSchema = createInsertSchema(courses).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertModuleSchema = createInsertSchema(modules).omit({ id: true, createdAt: true });
+export const insertLessonSchema = createInsertSchema(lessons).omit({ id: true, createdAt: true });
+export const insertTestSchema = createInsertSchema(tests).omit({ id: true, createdAt: true });
+export const insertProjectSchema = createInsertSchema(projects).omit({ id: true, createdAt: true });
+export const insertLabSchema = createInsertSchema(labs).omit({ id: true, createdAt: true });
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
@@ -393,6 +492,21 @@ export const insertMarksheetVerificationSchema = createInsertSchema(marksheetVer
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
 export type OtpPurpose = typeof OTP_PURPOSES[number];
+
+// Course Content DB types (for database operations)
+export type DbCourse = typeof courses.$inferSelect;
+export type DbModule = typeof modules.$inferSelect;
+export type DbLesson = typeof lessons.$inferSelect;
+export type DbTest = typeof tests.$inferSelect;
+export type DbProject = typeof projects.$inferSelect;
+export type DbLab = typeof labs.$inferSelect;
+
+export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type InsertModule = z.infer<typeof insertModuleSchema>;
+export type InsertLesson = z.infer<typeof insertLessonSchema>;
+export type InsertTest = z.infer<typeof insertTestSchema>;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type InsertLab = z.infer<typeof insertLabSchema>;
 
 // Types from database
 export type User = typeof users.$inferSelect;
