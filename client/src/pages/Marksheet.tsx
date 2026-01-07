@@ -426,9 +426,9 @@ export default function Marksheet() {
                                 Done
                               </Badge>
                             ) : entry.projectStatus === "Pending" ? (
-                              <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                              <span className="text-xs text-amber-700">
                                 Pending
-                              </Badge>
+                              </span>
                             ) : (
                               <span className="text-slate-400">N/A</span>
                             )}
