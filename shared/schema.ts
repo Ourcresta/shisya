@@ -322,6 +322,47 @@ export const studentStreaks = pgTable("student_streaks", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ============ ACADEMIC MARKSHEET TABLES ============
+
+// Marksheets - Official academic transcripts with verification
+export const marksheets = pgTable("marksheets", {
+  id: serial("id").primaryKey(),
+  marksheetId: varchar("marksheet_id", { length: 30 }).notNull().unique(), // MS-2024-XXXXXXXX
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  studentName: text("student_name").notNull(),
+  studentEmail: varchar("student_email", { length: 255 }).notNull(),
+  programName: text("program_name").notNull().default("Full Stack Development"),
+  academicYear: varchar("academic_year", { length: 10 }).notNull(), // 2024-25
+  courseData: text("course_data").notNull(), // JSON array of course entries
+  totalMarks: integer("total_marks").notNull().default(0),
+  obtainedMarks: integer("obtained_marks").notNull().default(0),
+  percentage: integer("percentage").notNull().default(0),
+  grade: varchar("grade", { length: 5 }).notNull(), // O, A+, A, B+, B, C, F
+  cgpa: varchar("cgpa", { length: 5 }).notNull(), // 0.00 - 10.00
+  result: varchar("result", { length: 20 }).notNull(), // Pass, Fail, Pending
+  classification: varchar("classification", { length: 30 }).notNull(), // Distinction, First Class, Pass
+  totalCredits: integer("total_credits").notNull().default(0),
+  coursesCompleted: integer("courses_completed").notNull().default(0),
+  rewardCoins: integer("reward_coins").notNull().default(0),
+  scholarshipEligible: boolean("scholarship_eligible").notNull().default(false),
+  verificationCode: varchar("verification_code", { length: 20 }).notNull().unique(), // For QR verification
+  pdfHash: text("pdf_hash"), // SHA256 hash of generated PDF for tampering detection
+  signedBy: text("signed_by").default("Controller of Examinations"), // Digital signature authority
+  aiVerifierName: text("ai_verifier_name").default("Acharya Usha"), // AI Verifier signature
+  issuedAt: timestamp("issued_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"), // Optional expiry
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active, revoked, expired
+});
+
+// Marksheet verification logs - Track who verified marksheets
+export const marksheetVerifications = pgTable("marksheet_verifications", {
+  id: serial("id").primaryKey(),
+  marksheetId: integer("marksheet_id").notNull().references(() => marksheets.id),
+  verifierIp: varchar("verifier_ip", { length: 45 }),
+  verifierUserAgent: text("verifier_user_agent"),
+  verifiedAt: timestamp("verified_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
 export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
@@ -344,6 +385,10 @@ export const insertUserScholarshipSchema = createInsertSchema(userScholarships).
 export const insertAiNudgeLogSchema = createInsertSchema(aiNudgeLogs).omit({ id: true, sentAt: true });
 export const insertMysteryBoxSchema = createInsertSchema(mysteryBoxes).omit({ id: true, createdAt: true });
 export const insertStudentStreakSchema = createInsertSchema(studentStreaks).omit({ id: true, updatedAt: true });
+
+// Marksheet insert schemas
+export const insertMarksheetSchema = createInsertSchema(marksheets).omit({ id: true, issuedAt: true });
+export const insertMarksheetVerificationSchema = createInsertSchema(marksheetVerifications).omit({ id: true, verifiedAt: true });
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -394,6 +439,40 @@ export type InsertUserScholarship = z.infer<typeof insertUserScholarshipSchema>;
 export type InsertAiNudgeLog = z.infer<typeof insertAiNudgeLogSchema>;
 export type InsertMysteryBox = z.infer<typeof insertMysteryBoxSchema>;
 export type InsertStudentStreak = z.infer<typeof insertStudentStreakSchema>;
+
+// Marksheet types
+export type Marksheet = typeof marksheets.$inferSelect;
+export type MarksheetVerification = typeof marksheetVerifications.$inferSelect;
+export type InsertMarksheet = z.infer<typeof insertMarksheetSchema>;
+export type InsertMarksheetVerification = z.infer<typeof insertMarksheetVerificationSchema>;
+
+// Marksheet grades
+export const MARKSHEET_GRADES = ["O", "A+", "A", "B+", "B", "C", "F"] as const;
+export type MarksheetGrade = typeof MARKSHEET_GRADES[number];
+
+// Marksheet result statuses
+export const MARKSHEET_RESULTS = ["Pass", "Fail", "Pending"] as const;
+export type MarksheetResult = typeof MARKSHEET_RESULTS[number];
+
+// Marksheet classifications
+export const MARKSHEET_CLASSIFICATIONS = ["Distinction", "First Class", "Second Class", "Pass", "Below Pass"] as const;
+export type MarksheetClassification = typeof MARKSHEET_CLASSIFICATIONS[number];
+
+// Marksheet course entry interface (stored as JSON in courseData)
+export interface MarksheetCourseEntry {
+  sno: number;
+  courseCode: string;
+  courseId: number;
+  courseName: string;
+  credits: number;
+  maxMarks: number;
+  obtainedMarks: number;
+  testScore: number | null;
+  grade: MarksheetGrade;
+  projectStatus: "Submitted" | "Pending" | "N/A";
+  labStatus: "Completed" | "Pending" | "N/A";
+  status: MarksheetResult;
+}
 
 // Notification types
 export const NOTIFICATION_TYPES = ["product", "offer", "payment", "payment_failed", "course", "certificate", "system", "motivation"] as const;
