@@ -398,7 +398,6 @@ export default function Marksheet() {
                       >
                         OurShiksha Academy
                       </h2>
-                      <p className="text-xs text-slate-500">Digital Learning Platform</p>
                       <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-4">CONSOLIDATED ACADEMIC MARKSHEET</h3>
                     </div>
                   </div>
