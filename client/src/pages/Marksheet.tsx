@@ -16,7 +16,6 @@ import {
   XCircle,
   Star,
   Trophy,
-  Coins,
   User
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -87,16 +86,6 @@ function getGradeColor(grade: string): string {
   return colors[grade] || "text-gray-600";
 }
 
-function calculateRewardCoins(classification: string, cgpa: number): number {
-  const baseCoins: Record<string, number> = {
-    "Distinction": 500,
-    "First Class": 300,
-    "Second Class": 150,
-    "Pass": 50,
-    "Below Pass": 0
-  };
-  return Math.floor((baseCoins[classification] || 0) * (cgpa / 10));
-}
 
 function generateMarksheetId(userId: string): string {
   const date = new Date();
@@ -163,7 +152,6 @@ export default function Marksheet() {
   });
 
   const completedEntries = entries.filter(e => e.status === "Pass");
-  const totalCreditsEarned = completedEntries.reduce((sum, e) => sum + e.credits, 0);
   const totalCoursesCompleted = completedEntries.length;
   
   const validScores = entries.filter(e => e.testScore !== null);
@@ -175,7 +163,6 @@ export default function Marksheet() {
   const cgpa = completedEntries.length > 0 ? (totalGradePoints / completedEntries.length).toFixed(2) : "0.00";
   
   const classification = getClassification(averageScore);
-  const rewardCoins = calculateRewardCoins(classification.label, parseFloat(cgpa));
   const scholarshipEligible = classification.label === "Distinction" || parseFloat(cgpa) >= 8.5;
   const marksheetId = user?.id ? generateMarksheetId(user.id) : "MS-PENDING";
   const verificationCode = marksheetId.replace("MS-", "").replace(/-/g, "");
@@ -467,11 +454,7 @@ export default function Marksheet() {
                   </table>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 mb-6">
-                  <div className="text-center">
-                    <p className="text-xs text-slate-500 mb-1">Credits Earned</p>
-                    <p className="text-2xl font-bold text-slate-800" data-testid="text-total-credits">{totalCreditsEarned}</p>
-                  </div>
+                <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 mb-6">
                   <div className="text-center">
                     <p className="text-xs text-slate-500 mb-1">Courses Passed</p>
                     <p className="text-2xl font-bold text-slate-800" data-testid="text-courses-passed">{totalCoursesCompleted}</p>
@@ -495,13 +478,6 @@ export default function Marksheet() {
                     >
                       {classification.label}
                     </Badge>
-                  </div>
-                  <div className="text-center col-span-2 sm:col-span-1">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <Coins className="w-3 h-3 text-amber-600" />
-                      <p className="text-xs text-slate-500">Reward Coins</p>
-                    </div>
-                    <p className="text-2xl font-bold text-amber-600" data-testid="text-reward-coins">{rewardCoins}</p>
                   </div>
                 </div>
 
