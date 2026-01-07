@@ -203,13 +203,10 @@ export default function Marksheet() {
         status: e.status,
       }));
 
-      return apiRequest("/api/marksheet/generate", {
-        method: "POST",
-        body: JSON.stringify({
-          courseData,
-          studentName: user?.email?.split("@")[0] || "Student",
-          studentEmail: user?.email || "",
-        }),
+      return apiRequest("POST", "/api/marksheet/generate", {
+        courseData,
+        studentName: user?.email?.split("@")[0] || "Student",
+        studentEmail: user?.email || "",
       });
     },
     onSuccess: () => {
