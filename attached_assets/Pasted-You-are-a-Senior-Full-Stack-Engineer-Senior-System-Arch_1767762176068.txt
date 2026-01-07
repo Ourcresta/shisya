@@ -1,0 +1,243 @@
+You are a Senior Full-Stack Engineer, Senior System Architect, Senior UI/UX Designer,
+Senior Security Engineer, Senior QA Engineer, and Senior Product Manager.
+
+Your task is to DESIGN, BUILD, and DELIVER a COMPLETE, PRODUCTION-READY system called:
+
+=====================================================
+OURSHIKSHA – TOTAL MARKSHEET & TRANSCRIPT ENGINE
+=====================================================
+
+This system will generate official, verifiable, tamper-proof academic marksheets
+for an online learning platform (OurShiksha).
+
+---------------------------------------
+CORE OBJECTIVES
+---------------------------------------
+1. Generate module-wise, project-wise, and total marksheets
+2. Auto-calculate grades, percentages, rewards, and eligibility
+3. Export as high-quality A4 PDF
+4. Support QR-based online verification
+5. Integrate with Student Portal + Admin Portal
+6. Use a Neon + Modern UI theme
+7. Be secure, scalable, and audit-ready
+
+---------------------------------------
+TECH STACK (MANDATORY)
+---------------------------------------
+Frontend:
+- React (Vite)
+- Tailwind CSS (Neon Modern Theme)
+- shadcn/ui components
+
+Backend:
+- Node.js + Express
+- REST API architecture
+
+Database:
+- PostgreSQL (via Prisma ORM)
+
+PDF Generation:
+- PDFKit or Puppeteer
+
+Auth:
+- JWT (Student, Admin, Verifier roles)
+
+---------------------------------------
+ROLES & ACCESS
+---------------------------------------
+1. Admin (Guru Portal)
+   - Define grading system
+   - Approve marks
+   - Issue marksheets
+   - Digitally sign marksheets
+
+2. Student (Shishya Portal)
+   - View marksheet
+   - Download PDF
+   - Share verification link
+
+3. Verifier (Public)
+   - Verify marksheet using QR or ID
+   - Read-only access
+
+---------------------------------------
+DATABASE DESIGN (MUST IMPLEMENT)
+---------------------------------------
+
+STUDENTS
+- id (UUID)
+- name
+- email
+- student_id
+- enrollment_date
+
+COURSES
+- id
+- title
+- level
+- duration_months
+
+MODULES
+- id
+- course_id
+- name
+- max_marks
+
+ASSESSMENTS
+- id
+- module_id
+- type (test/lab/project)
+- max_marks
+
+STUDENT_MARKS
+- id
+- student_id
+- assessment_id
+- obtained_marks
+- status
+
+MARKSHEETS
+- id
+- student_id
+- course_id
+- total_marks
+- obtained_marks
+- percentage
+- grade
+- result
+- rewards_coins
+- verification_code
+- issued_at
+- signed_by
+
+---------------------------------------
+GRADING LOGIC (AUTO)
+---------------------------------------
+90–100 → A+
+80–89  → A
+70–79  → B+
+60–69  → B
+<60    → FAIL
+
+---------------------------------------
+MARKSHEET UI (A4 PDF LAYOUT)
+---------------------------------------
+HEADER:
+- OurShiksha Logo
+- Title: FINAL MARKSHEET / ACADEMIC TRANSCRIPT
+- QR Code (Verification URL)
+
+STUDENT DETAILS SECTION:
+- Name
+- Student ID
+- Course Name
+- Duration
+- Completion Date
+
+MARKS TABLE:
+- Module Name
+- Max Marks
+- Obtained Marks
+- Grade
+- Status
+
+PROJECT & LAB SECTION:
+- Labs
+- Mini Project
+- Capstone Project
+
+PERFORMANCE SUMMARY:
+- Total Marks
+- Percentage
+- Grade
+- Result
+- Completion Time
+
+REWARDS SECTION:
+- Reward Coins
+- Badges Earned
+- Scholarship Eligibility
+
+FOOTER:
+- Digital Signature (Admin)
+- AI Verifier Signature (Acharya Usha)
+- Issue Date
+- Verification Code
+
+---------------------------------------
+QR VERIFICATION SYSTEM
+---------------------------------------
+- Each marksheet generates a unique verification_code
+- Public URL: /verify/:verification_code
+- Shows:
+  - Student name
+  - Course
+  - Grade
+  - Status
+  - Issued date
+- No marks editing allowed
+
+---------------------------------------
+SECURITY REQUIREMENTS
+---------------------------------------
+- JWT authentication
+- Role-based access
+- Read-only verification endpoint
+- PDF hash stored in DB
+- Prevent duplicate marksheets
+
+---------------------------------------
+API ENDPOINTS (MANDATORY)
+---------------------------------------
+POST   /auth/login
+GET    /students/:id
+GET    /courses/:id
+POST   /marksheet/generate
+GET    /marksheet/:id
+GET    /marksheet/:id/pdf
+GET    /verify/:code
+
+---------------------------------------
+UI THEME (NEON MODERN)
+---------------------------------------
+- Background: Dark
+- Primary: Neon Blue / Cyan
+- Accent: Purple / Gold
+- Font: Inter / Poppins
+- Smooth animations
+- Clean grid layout
+
+---------------------------------------
+DELIVERABLES
+---------------------------------------
+1. Full folder structure
+2. Backend code (Express + Prisma)
+3. Frontend UI (React + Tailwind)
+4. PDF generation logic
+5. QR verification system
+6. Seed data for testing
+7. README with setup steps
+8. ENV sample file
+
+---------------------------------------
+QUALITY RULES (DO NOT BREAK)
+---------------------------------------
+- Do NOT skip explanations
+- Do NOT give partial code
+- Do NOT use mock logic
+- Comment every major block
+- Ensure production readiness
+
+---------------------------------------
+FINAL OUTPUT EXPECTATION
+---------------------------------------
+Produce:
+- Architecture explanation
+- Database schema
+- API implementation
+- UI components
+- PDF layout
+- Verification flow
+- Testing checklist
+
+Build it completely.
