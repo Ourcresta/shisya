@@ -19,7 +19,8 @@ import {
   Sparkles,
   Star,
   Trophy,
-  Coins
+  Coins,
+  User
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ import { getCourseProgress } from "@/lib/progress";
 import { getTestAttempts } from "@/lib/testAttempts";
 import { getAllSubmissions } from "@/lib/submissions";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
+import { getProfile } from "@/lib/profile";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -114,6 +116,9 @@ export default function Marksheet() {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const profile = getProfile();
+  const studentPhoto = profile?.profilePhoto || "";
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -399,6 +404,17 @@ export default function Marksheet() {
                         OurShiksha Academy
                       </h2>
                       <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-2 text-left">CONSOLIDATED ACADEMIC MARKSHEET</h3>
+                    </div>
+                    <div className="w-24 h-28 rounded-lg border-2 border-blue-200 shadow-md overflow-hidden bg-slate-100 flex items-center justify-center">
+                      {studentPhoto ? (
+                        <img 
+                          src={studentPhoto} 
+                          alt="Student Photo" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-12 h-12 text-slate-400" />
+                      )}
                     </div>
                   </div>
                 </div>
