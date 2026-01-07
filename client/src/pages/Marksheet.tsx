@@ -398,7 +398,7 @@ export default function Marksheet() {
                     />
                     <div className="flex-1 text-center">
                       <h2 
-                        className="text-2xl sm:text-3xl font-bold text-slate-800 text-left"
+                        className="text-2xl sm:text-3xl font-bold text-slate-800 text-center"
                         style={{ fontFamily: "var(--font-display)" }}
                       >
                         OurShiksha Academy
