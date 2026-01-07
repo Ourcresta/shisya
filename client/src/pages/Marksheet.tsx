@@ -20,8 +20,7 @@ import {
   Star,
   Shield,
   Trophy,
-  Coins,
-  Stamp
+  Coins
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +33,7 @@ import { apiRequest } from "@/lib/queryClient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import type { Course, MarksheetCourseEntry } from "@shared/schema";
+import stampImage from "@assets/ourshiksha_stamp2_1767767723805.png";
 
 interface MarksheetEntry {
   sno: number;
@@ -574,13 +574,11 @@ export default function Marksheet() {
                     </div>
                     <div className="text-right">
                       <div className="relative inline-block">
-                        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full border-4 border-blue-600/30 flex items-center justify-center bg-blue-50/80">
-                          <div className="text-center">
-                            <Stamp className="w-6 h-6 text-blue-700 mx-auto" />
-                            <p className="text-[8px] font-bold text-blue-800 mt-0.5">VERIFIED</p>
-                            <p className="text-[6px] text-blue-600">OurShiksha</p>
-                          </div>
-                        </div>
+                        <img 
+                          src={stampImage} 
+                          alt="OurShiksha Official Stamp" 
+                          className="absolute -top-20 left-1/2 -translate-x-1/2 w-24 h-24 object-contain"
+                        />
                         <div className="border-t border-dashed border-slate-400 pt-2 px-4 min-w-[180px] mt-8">
                           <p className="font-medium text-slate-800">Controller of Examinations</p>
                           <p className="text-xs text-slate-600">OurShiksha Academy</p>
