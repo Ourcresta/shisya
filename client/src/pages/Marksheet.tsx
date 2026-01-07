@@ -391,7 +391,7 @@ export default function Marksheet() {
                       <img 
                         src={logoImage} 
                         alt="OurShiksha Logo" 
-                        className="w-14 h-14 object-contain rounded-lg shadow-md"
+                        className="w-20 h-20 object-contain rounded-lg shadow-md"
                       />
                       <div>
                         <h2 
