@@ -405,16 +405,13 @@ export default function Marksheet() {
                       </h2>
                       <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-2 text-center">CONSOLIDATED ACADEMIC MARKSHEET</h3>
                     </div>
-                    <div className="w-24 h-28 rounded-lg border-2 border-blue-200 shadow-md overflow-hidden bg-slate-100 flex items-center justify-center">
-                      {studentPhoto ? (
-                        <img 
-                          src={studentPhoto} 
-                          alt="Student Photo" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-12 h-12 text-slate-400" />
-                      )}
+                    <div className="p-2 bg-white rounded-lg shadow-md border border-slate-200">
+                      <QRCodeSVG 
+                        value={verificationUrl} 
+                        size={80} 
+                        bgColor="#ffffff"
+                        fgColor="#1e3a5f"
+                      />
                     </div>
                   </div>
                 </div>
@@ -434,13 +431,16 @@ export default function Marksheet() {
                       <span className="font-medium text-slate-800">Issue Date:</span> {issueDate}
                     </p>
                   </div>
-                  <div className="p-3 bg-white rounded-lg shadow-md border border-slate-200">
-                    <QRCodeSVG 
-                      value={verificationUrl} 
-                      size={90} 
-                      bgColor="#ffffff"
-                      fgColor="#1e3a5f"
-                    />
+                  <div className="w-24 h-28 rounded-lg border-2 border-blue-200 shadow-md overflow-hidden bg-slate-100 flex items-center justify-center">
+                    {studentPhoto ? (
+                      <img 
+                        src={studentPhoto} 
+                        alt="Student Photo" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-12 h-12 text-slate-400" />
+                    )}
                   </div>
                 </div>
 
