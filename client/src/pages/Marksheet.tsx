@@ -1,9 +1,8 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +12,6 @@ import {
   Copy, 
   Check,
   ArrowLeft,
-  BookOpen,
   CheckCircle,
   XCircle,
   Star,
@@ -31,7 +29,7 @@ import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { getProfile } from "@/lib/profile";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import type { Course, MarksheetCourseEntry } from "@shared/schema";
+import type { Course } from "@shared/schema";
 import stampImage from "@assets/ourshiksha_stamp2_1767767723805.png";
 import logoImage from "@assets/ChatGPT_Image_Dec_23,_2025,_10_28_31_PM_1767767974982.png";
 
