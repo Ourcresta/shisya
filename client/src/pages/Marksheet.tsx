@@ -385,13 +385,13 @@ export default function Marksheet() {
                 </div>
 
                 <div className="border-b border-blue-200 pb-6 mb-6">
-                  <div className="flex flex-col items-center justify-center gap-3">
+                  <div className="flex items-start gap-4">
                     <img 
                       src={logoImage} 
                       alt="OurShiksha Logo" 
                       className="w-28 h-28 object-contain rounded-lg shadow-md"
                     />
-                    <div className="text-center">
+                    <div className="flex-1 text-center">
                       <h2 
                         className="text-2xl sm:text-3xl font-bold text-slate-800"
                         style={{ fontFamily: "var(--font-display)" }}
@@ -399,10 +399,8 @@ export default function Marksheet() {
                         OurShiksha Academy
                       </h2>
                       <p className="text-xs text-slate-500">Digital Learning Platform</p>
+                      <h3 className="text-lg font-semibold text-slate-800 tracking-wider mt-4">CONSOLIDATED ACADEMIC MARKSHEET</h3>
                     </div>
-                  </div>
-                  <div className="text-center mt-4">
-                    <h3 className="text-lg font-semibold text-slate-800 tracking-wider">CONSOLIDATED ACADEMIC MARKSHEET</h3>
                   </div>
                 </div>
 
