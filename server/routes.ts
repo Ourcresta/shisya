@@ -782,5 +782,284 @@ export async function registerRoutes(
   // ============ AI MOTIVATION ENGINE ROUTES ============
   registerMotivationRoutes(app);
 
+  // ============ MARKSHEET ROUTES ============
+  
+  // Import marksheet schema
+  const { marksheets, marksheetVerifications } = await import("@shared/schema");
+  const crypto = await import("crypto");
+
+  // Helper functions for marksheet
+  function generateMarksheetId(userId: string): string {
+    const date = new Date();
+    const year = date.getFullYear();
+    const hash = userId.substring(0, 8).toUpperCase();
+    return `MS-${year}-${hash}`;
+  }
+
+  function generateVerificationCode(): string {
+    const crypto = require("crypto");
+    return crypto.randomBytes(8).toString("hex").toUpperCase();
+  }
+
+  function calculateGrade(score: number): string {
+    if (score >= 90) return "O";
+    if (score >= 80) return "A+";
+    if (score >= 70) return "A";
+    if (score >= 60) return "B+";
+    if (score >= 50) return "B";
+    if (score >= 40) return "C";
+    return "F";
+  }
+
+  function calculateGradePoints(grade: string): number {
+    const gradePointMap: Record<string, number> = {
+      "O": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "F": 0
+    };
+    return gradePointMap[grade] || 0;
+  }
+
+  function getClassification(percentage: number): string {
+    if (percentage >= 75) return "Distinction";
+    if (percentage >= 60) return "First Class";
+    if (percentage >= 50) return "Second Class";
+    if (percentage >= 40) return "Pass";
+    return "Below Pass";
+  }
+
+  function calculateRewardCoins(classification: string, cgpa: number): number {
+    const baseCoins: Record<string, number> = {
+      "Distinction": 500,
+      "First Class": 300,
+      "Second Class": 150,
+      "Pass": 50,
+      "Below Pass": 0
+    };
+    return Math.floor((baseCoins[classification] || 0) * (cgpa / 10));
+  }
+
+  // POST /api/marksheet/generate - Generate a marksheet for authenticated user
+  app.post("/api/marksheet/generate", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { courseData, studentName, studentEmail } = req.body;
+      
+      if (!courseData || !Array.isArray(courseData)) {
+        return res.status(400).json({ error: "Invalid course data" });
+      }
+
+      // Check if marksheet already exists for this user
+      const existingMarksheet = await db.select().from(marksheets).where(eq(marksheets.userId, userId)).limit(1);
+      
+      if (existingMarksheet.length > 0) {
+        // Return existing marksheet
+        return res.json({
+          success: true,
+          marksheet: existingMarksheet[0],
+          message: "Marksheet already exists"
+        });
+      }
+
+      // Calculate statistics
+      const completedCourses = courseData.filter((c: any) => c.status === "Pass");
+      const totalCredits = completedCourses.reduce((sum: number, c: any) => sum + (c.credits || 0), 0);
+      const totalMarks = courseData.length * 100;
+      const obtainedMarks = courseData.reduce((sum: number, c: any) => sum + (c.testScore || 0), 0);
+      const validScores = courseData.filter((c: any) => c.testScore !== null);
+      const percentage = validScores.length > 0 
+        ? Math.round(obtainedMarks / validScores.length)
+        : 0;
+      
+      const totalGradePoints = completedCourses.reduce((sum: number, c: any) => 
+        sum + calculateGradePoints(c.grade), 0);
+      const cgpa = completedCourses.length > 0 
+        ? (totalGradePoints / completedCourses.length).toFixed(2) 
+        : "0.00";
+
+      const overallGrade = calculateGrade(percentage);
+      const classification = getClassification(percentage);
+      const result = percentage >= 40 ? "Pass" : percentage > 0 ? "Fail" : "Pending";
+      const rewardCoins = calculateRewardCoins(classification, parseFloat(cgpa));
+      const scholarshipEligible = classification === "Distinction" || parseFloat(cgpa) >= 8.5;
+
+      const marksheetId = generateMarksheetId(userId);
+      const verificationCode = generateVerificationCode();
+
+      // Get current academic year
+      const now = new Date();
+      const month = now.getMonth();
+      const year = now.getFullYear();
+      const academicYear = month >= 6 ? `${year}-${(year + 1) % 100}` : `${year - 1}-${year % 100}`;
+
+      // Insert marksheet
+      const [newMarksheet] = await db.insert(marksheets).values({
+        marksheetId,
+        userId,
+        studentName: studentName || "Student",
+        studentEmail: studentEmail || "",
+        programName: "Full Stack Development",
+        academicYear,
+        courseData: JSON.stringify(courseData),
+        totalMarks,
+        obtainedMarks,
+        percentage,
+        grade: overallGrade,
+        cgpa,
+        result,
+        classification,
+        totalCredits,
+        coursesCompleted: completedCourses.length,
+        rewardCoins,
+        scholarshipEligible,
+        verificationCode,
+        signedBy: "Controller of Examinations",
+        aiVerifierName: "Acharya Usha",
+        status: "active"
+      }).returning();
+
+      res.json({
+        success: true,
+        marksheet: newMarksheet,
+        message: "Marksheet generated successfully"
+      });
+
+    } catch (error) {
+      console.error("Error generating marksheet:", error);
+      res.status(500).json({ error: "Failed to generate marksheet" });
+    }
+  });
+
+  // GET /api/marksheet - Get current user's marksheet
+  app.get("/api/marksheet", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const [marksheet] = await db.select().from(marksheets).where(eq(marksheets.userId, userId)).limit(1);
+      
+      if (!marksheet) {
+        return res.status(404).json({ error: "Marksheet not found" });
+      }
+
+      res.json(marksheet);
+    } catch (error) {
+      console.error("Error fetching marksheet:", error);
+      res.status(500).json({ error: "Failed to fetch marksheet" });
+    }
+  });
+
+  // GET /api/marksheet/verify/:code - Public verification endpoint
+  app.get("/api/marksheet/verify/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      const [marksheet] = await db.select().from(marksheets)
+        .where(eq(marksheets.verificationCode, code))
+        .limit(1);
+      
+      if (!marksheet) {
+        return res.status(404).json({ 
+          valid: false, 
+          error: "Marksheet not found or invalid verification code" 
+        });
+      }
+
+      // Check if marksheet is still valid
+      if (marksheet.status === "revoked") {
+        return res.status(400).json({ 
+          valid: false, 
+          error: "This marksheet has been revoked" 
+        });
+      }
+
+      if (marksheet.expiresAt && new Date(marksheet.expiresAt) < new Date()) {
+        return res.status(400).json({ 
+          valid: false, 
+          error: "This marksheet has expired" 
+        });
+      }
+
+      // Log verification
+      try {
+        await db.insert(marksheetVerifications).values({
+          marksheetId: marksheet.id,
+          verifierIp: req.ip || null,
+          verifierUserAgent: req.headers["user-agent"] || null,
+        });
+      } catch (logError) {
+        console.error("Error logging verification:", logError);
+      }
+
+      // Return public marksheet data (excluding sensitive info)
+      res.json({
+        valid: true,
+        marksheet: {
+          marksheetId: marksheet.marksheetId,
+          studentName: marksheet.studentName,
+          programName: marksheet.programName,
+          academicYear: marksheet.academicYear,
+          totalCredits: marksheet.totalCredits,
+          coursesCompleted: marksheet.coursesCompleted,
+          percentage: marksheet.percentage,
+          grade: marksheet.grade,
+          cgpa: marksheet.cgpa,
+          result: marksheet.result,
+          classification: marksheet.classification,
+          signedBy: marksheet.signedBy,
+          aiVerifierName: marksheet.aiVerifierName,
+          issuedAt: marksheet.issuedAt,
+          status: marksheet.status
+        }
+      });
+    } catch (error) {
+      console.error("Error verifying marksheet:", error);
+      res.status(500).json({ error: "Failed to verify marksheet" });
+    }
+  });
+
+  // GET /api/marksheet/by-id/:marksheetId - Get marksheet by marksheet ID (public)
+  app.get("/api/marksheet/by-id/:marksheetId", async (req, res) => {
+    try {
+      const { marksheetId: msId } = req.params;
+      
+      const [marksheet] = await db.select().from(marksheets)
+        .where(eq(marksheets.marksheetId, msId))
+        .limit(1);
+      
+      if (!marksheet) {
+        return res.status(404).json({ error: "Marksheet not found" });
+      }
+
+      // Return public data only
+      res.json({
+        marksheetId: marksheet.marksheetId,
+        studentName: marksheet.studentName,
+        programName: marksheet.programName,
+        academicYear: marksheet.academicYear,
+        totalCredits: marksheet.totalCredits,
+        coursesCompleted: marksheet.coursesCompleted,
+        percentage: marksheet.percentage,
+        grade: marksheet.grade,
+        cgpa: marksheet.cgpa,
+        result: marksheet.result,
+        classification: marksheet.classification,
+        courseData: JSON.parse(marksheet.courseData || "[]"),
+        signedBy: marksheet.signedBy,
+        aiVerifierName: marksheet.aiVerifierName,
+        issuedAt: marksheet.issuedAt,
+        status: marksheet.status,
+        verificationCode: marksheet.verificationCode
+      });
+    } catch (error) {
+      console.error("Error fetching marksheet by ID:", error);
+      res.status(500).json({ error: "Failed to fetch marksheet" });
+    }
+  });
+
   return httpServer;
 }
