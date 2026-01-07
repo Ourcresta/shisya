@@ -406,7 +406,6 @@ export default function Marksheet() {
                   </div>
                   <div className="text-center mt-4">
                     <h3 className="text-lg font-semibold text-slate-800 tracking-wider">CONSOLIDATED ACADEMIC MARKSHEET</h3>
-                    <p className="text-sm text-slate-600">Academic Year 2024-25</p>
                   </div>
                 </div>
 
