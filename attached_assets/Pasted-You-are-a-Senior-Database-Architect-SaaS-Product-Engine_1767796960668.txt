@@ -1,0 +1,178 @@
+You are a Senior Database Architect + SaaS Product Engineer.
+
+PROJECT NAME: OurShiksha – SHISHYA (Student Portal)
+
+GOAL:
+Redesign and optimize the SHISHYA Portal database while keeping it in the SAME PostgreSQL database as Admin and Main Site.
+The design must be scalable, AI-ready, secure, and production-grade.
+
+IMPORTANT RULES:
+1. Use ONE PostgreSQL database only
+2. Use SCHEMA-BASED separation (not multiple databases)
+3. SHISHYA schema must be independent but linkable to Admin and Courses schemas
+4. Use UUIDs for user identity
+5. Optimize for analytics, AI motivation engine, gamification, and marksheets
+6. Design must support millions of users in future
+7. No breaking changes for future Admin / AI / Analytics expansion
+
+--------------------------------------------------
+DATABASE STRUCTURE REQUIREMENTS
+--------------------------------------------------
+
+DATABASE NAME:
+ourshiksha_db
+
+SCHEMA TO DESIGN:
+shishya
+
+RELATED SCHEMAS (reference only, do not redesign):
+auth
+courses
+rewards
+ai_engine
+certification
+audit
+analytics
+
+--------------------------------------------------
+CORE DESIGN OBJECTIVES
+--------------------------------------------------
+
+1. SINGLE STUDENT IDENTITY
+- All student data must link to auth.users.id (UUID)
+- No duplicate user tables
+
+2. CLEAR SEPARATION OF CONCERNS
+- Profile data
+- Learning progress
+- Assessments
+- Labs & projects
+- Credits & economy
+- Motivation & streaks
+- Notifications
+- Academic trust (marksheets)
+
+3. AI-FIRST DESIGN
+- Store signals, scores, streaks, attempts
+- Enable AI to calculate:
+  - dropout risk
+  - motivation score
+  - learning velocity
+  - percentile rank
+
+--------------------------------------------------
+TABLES TO REDESIGN / CREATE (SHISHYA SCHEMA)
+--------------------------------------------------
+
+AUTH LINKING
+- user_profiles
+- student_settings
+- student_skills
+
+LEARNING PROGRESS
+- course_enrollments
+- lesson_progress
+- lab_progress
+- test_attempts
+- project_submissions
+
+ASSESSMENT INTELLIGENCE
+- test_attempt_answers (normalized)
+- test_attempt_summary
+- learning_metrics (computed scores)
+
+GAMIFICATION & ECONOMY (linked to rewards schema)
+- user_wallet
+- wallet_transactions
+- streaks
+- achievements_unlocked
+
+AI MOTIVATION ENGINE (student side)
+- motivation_state
+- ai_nudge_logs
+- motivation_history
+
+NOTIFICATIONS
+- notifications
+- notification_preferences
+
+ACADEMIC TRUST
+- certificates_earned
+- marksheets
+- marksheet_verifications
+
+--------------------------------------------------
+DESIGN OUTPUT EXPECTATIONS
+--------------------------------------------------
+
+For EACH table provide:
+1. Table purpose
+2. Columns with data types
+3. Primary key
+4. Foreign keys (with schema references)
+5. Index recommendations
+6. Partitioning suggestion (if required)
+7. Soft delete strategy (if applicable)
+
+--------------------------------------------------
+ADVANCED REQUIREMENTS
+--------------------------------------------------
+
+1. CREATE VIEWS
+- student_dashboard_view
+- student_learning_health_view
+- student_ai_signal_view
+
+2. MATERIALIZED VIEWS
+- student_performance_summary
+- course_completion_stats
+
+3. SECURITY
+- Role-based access for:
+  - shishya_service
+  - admin_service (read-only on shishya)
+  - ai_engine (analytics access)
+- No direct table access for public users
+
+4. PERFORMANCE
+- Index all foreign keys
+- Use JSONB only where structure is dynamic
+- Recommend partitioning for logs and attempts
+
+5. NAMING CONVENTION
+- snake_case
+- clear, self-explanatory names
+- no abbreviations
+
+--------------------------------------------------
+DELIVERABLES
+--------------------------------------------------
+
+1. Optimized SHISHYA schema diagram (textual)
+2. PostgreSQL DDL (CREATE TABLE statements)
+3. Index creation SQL
+4. Role & permission SQL
+5. View & materialized view SQL
+6. Short explanation of WHY this design is future-proof
+
+--------------------------------------------------
+QUALITY BAR
+--------------------------------------------------
+
+Design this as if:
+- 1 million students will use it
+- AI engines will continuously read this data
+- Marksheets must be legally verifiable
+- Platform must survive 5+ years without redesign
+
+Do NOT:
+- Suggest multiple databases
+- Overuse JSONB
+- Mix Admin logic into SHISHYA tables
+
+START WITH:
+1. High-level schema explanation
+2. Then detailed table-by-table design
+3. Then SQL
+
+This is a production system, not a demo.
