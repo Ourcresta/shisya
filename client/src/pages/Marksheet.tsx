@@ -13,7 +13,6 @@ import {
   Copy, 
   Check,
   ArrowLeft,
-  Award,
   BookOpen,
   CheckCircle,
   XCircle,
@@ -21,7 +20,8 @@ import {
   Star,
   Shield,
   Trophy,
-  Coins
+  Coins,
+  Stamp
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +40,7 @@ interface MarksheetEntry {
   courseCode: string;
   courseId: number;
   courseName: string;
+  programName: string;
   credits: number;
   maxMarks: number;
   obtainedMarks: number;
@@ -68,24 +69,24 @@ function calculateGradePoints(grade: string): number {
 }
 
 function getClassification(percentage: number): { label: string; variant: "default" | "secondary" | "outline"; color: string } {
-  if (percentage >= 75) return { label: "Distinction", variant: "default", color: "text-yellow-400" };
-  if (percentage >= 60) return { label: "First Class", variant: "secondary", color: "text-cyan-400" };
-  if (percentage >= 50) return { label: "Second Class", variant: "outline", color: "text-blue-400" };
-  if (percentage >= 40) return { label: "Pass", variant: "outline", color: "text-green-400" };
-  return { label: "Below Pass", variant: "outline", color: "text-red-400" };
+  if (percentage >= 75) return { label: "Distinction", variant: "default", color: "text-amber-600 bg-amber-100 border-amber-300" };
+  if (percentage >= 60) return { label: "First Class", variant: "secondary", color: "text-blue-600 bg-blue-100 border-blue-300" };
+  if (percentage >= 50) return { label: "Second Class", variant: "outline", color: "text-indigo-600 bg-indigo-100 border-indigo-300" };
+  if (percentage >= 40) return { label: "Pass", variant: "outline", color: "text-green-600 bg-green-100 border-green-300" };
+  return { label: "Below Pass", variant: "outline", color: "text-red-600 bg-red-100 border-red-300" };
 }
 
 function getGradeColor(grade: string): string {
   const colors: Record<string, string> = {
-    "O": "text-yellow-400 bg-yellow-500/20 border-yellow-500/50",
-    "A+": "text-emerald-400 bg-emerald-500/20 border-emerald-500/50",
-    "A": "text-cyan-400 bg-cyan-500/20 border-cyan-500/50",
-    "B+": "text-blue-400 bg-blue-500/20 border-blue-500/50",
-    "B": "text-purple-400 bg-purple-500/20 border-purple-500/50",
-    "C": "text-amber-400 bg-amber-500/20 border-amber-500/50",
-    "F": "text-red-400 bg-red-500/20 border-red-500/50",
+    "O": "text-amber-700 bg-amber-100 border-amber-400",
+    "A+": "text-emerald-700 bg-emerald-100 border-emerald-400",
+    "A": "text-teal-700 bg-teal-100 border-teal-400",
+    "B+": "text-blue-700 bg-blue-100 border-blue-400",
+    "B": "text-indigo-700 bg-indigo-100 border-indigo-400",
+    "C": "text-orange-700 bg-orange-100 border-orange-400",
+    "F": "text-red-700 bg-red-100 border-red-400",
   };
-  return colors[grade] || "text-muted-foreground";
+  return colors[grade] || "text-gray-600";
 }
 
 function calculateRewardCoins(classification: string, cgpa: number): number {
@@ -148,6 +149,7 @@ export default function Marksheet() {
       courseCode: `CS${100 + course.id}`,
       courseId: course.id,
       courseName: course.title,
+      programName: "Full Stack Development",
       credits: course.creditCost || (course.isFree ? 3 : 5),
       maxMarks: 100,
       obtainedMarks: testScore || 0,
@@ -190,6 +192,7 @@ export default function Marksheet() {
         courseCode: e.courseCode,
         courseId: e.courseId,
         courseName: e.courseName,
+        programName: e.programName,
         credits: e.credits,
         maxMarks: e.maxMarks,
         obtainedMarks: e.obtainedMarks,
@@ -250,7 +253,7 @@ export default function Marksheet() {
       const canvas = await html2canvas(marksheetRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#020617",
+        backgroundColor: "#ffffff",
       });
       
       const imgData = canvas.toDataURL("image/png");
@@ -317,14 +320,14 @@ export default function Marksheet() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg blur-lg opacity-50" />
-                <div className="relative p-3 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
-                  <GraduationCap className="w-7 h-7 text-cyan-400" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg blur-lg opacity-50" />
+                <div className="relative p-3 rounded-lg bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30">
+                  <GraduationCap className="w-7 h-7 text-blue-600" />
                 </div>
               </div>
               <div>
                 <h1 
-                  className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+                  className="text-2xl font-bold text-slate-800 dark:text-white"
                   style={{ fontFamily: "var(--font-display)" }}
                   data-testid="text-marksheet-title"
                 >
@@ -338,7 +341,7 @@ export default function Marksheet() {
             <div className="flex gap-2 flex-wrap">
               <Button
                 onClick={() => generateMutation.mutate()}
-                className="gap-2 bg-gradient-to-r from-cyan-600 to-cyan-500"
+                className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600"
                 disabled={generateMutation.isPending}
                 data-testid="button-generate"
               >
@@ -375,61 +378,61 @@ export default function Marksheet() {
           <motion.div variants={staggerItem}>
             <div 
               ref={marksheetRef} 
-              className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-8 rounded-xl overflow-hidden"
+              className="relative bg-white p-6 sm:p-8 rounded-xl overflow-hidden shadow-lg border border-slate-200"
             >
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0YjhhNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMDMiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLW9wYWNpdHk9IjAuMDUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
               
-              <div className="absolute top-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
-              
-              <div className="relative border-2 border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm bg-slate-900/50">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-slate-950 border border-cyan-500/30 rounded-full">
-                  <span className="text-xs font-medium text-cyan-400">OFFICIAL DOCUMENT</span>
+              <div className="relative border-2 border-blue-200 rounded-lg p-6 bg-gradient-to-b from-blue-50/50 to-white">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-white border border-blue-300 rounded-full">
+                  <span className="text-xs font-medium text-blue-700">OFFICIAL DOCUMENT</span>
                 </div>
 
-                <div className="text-center border-b border-cyan-500/20 pb-6 mb-6">
-                  <div className="flex items-center justify-center gap-3 mb-3">
-                    <div className="p-2 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20">
-                      <Award className="w-8 h-8 text-cyan-400" />
+                <div className="border-b border-blue-200 pb-6 mb-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md">
+                        <GraduationCap className="w-10 h-10 text-white" />
+                      </div>
+                      <div>
+                        <h2 
+                          className="text-2xl sm:text-3xl font-bold text-slate-800"
+                          style={{ fontFamily: "var(--font-display)" }}
+                        >
+                          OurShiksha Academy
+                        </h2>
+                        <p className="text-xs text-slate-500">Digital Learning Platform</p>
+                      </div>
                     </div>
-                    <h2 
-                      className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      OurShiksha Academy
-                    </h2>
                   </div>
-                  <p className="text-xs text-cyan-500/70 mb-1">Digital Learning Platform</p>
-                  <h3 className="text-lg font-semibold text-white mt-4 tracking-wider">CONSOLIDATED ACADEMIC MARKSHEET</h3>
-                  <p className="text-sm text-muted-foreground">Academic Year 2024-25</p>
+                  <div className="text-center mt-4">
+                    <h3 className="text-lg font-semibold text-slate-800 tracking-wider">CONSOLIDATED ACADEMIC MARKSHEET</h3>
+                    <p className="text-sm text-slate-600">Academic Year 2024-25</p>
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-6">
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-cyan-400" />
-                      <span className="text-muted-foreground">Marksheet ID:</span>
-                      <span className="font-mono font-medium text-white">{marksheetId}</span>
+                      <Shield className="w-4 h-4 text-blue-600" />
+                      <span className="text-slate-600">Marksheet ID:</span>
+                      <span className="font-mono font-medium text-slate-800">{marksheetId}</span>
                     </div>
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-white">Student:</span> {user?.email?.split('@')[0] || 'Student'}
+                    <p className="text-slate-600">
+                      <span className="font-medium text-slate-800">Student:</span> {user?.email?.split('@')[0] || 'Student'}
                     </p>
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-white">Email:</span> {user?.email || 'N/A'}
+                    <p className="text-slate-600">
+                      <span className="font-medium text-slate-800">Email:</span> {user?.email || 'N/A'}
                     </p>
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-white">Program:</span> Full Stack Development
-                    </p>
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-white">Issue Date:</span> {issueDate}
+                    <p className="text-slate-600">
+                      <span className="font-medium text-slate-800">Issue Date:</span> {issueDate}
                     </p>
                   </div>
-                  <div className="p-3 bg-white rounded-lg shadow-lg shadow-cyan-500/20">
+                  <div className="p-3 bg-white rounded-lg shadow-md border border-slate-200">
                     <QRCodeSVG 
                       value={verificationUrl} 
                       size={90} 
                       bgColor="#ffffff"
-                      fgColor="#020617"
+                      fgColor="#1e3a5f"
                     />
                   </div>
                 </div>
@@ -437,68 +440,70 @@ export default function Marksheet() {
                 <div className="overflow-x-auto mb-6">
                   <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10">
-                        <th className="border border-cyan-500/30 px-3 py-3 text-left font-semibold text-cyan-300">S.No</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-left font-semibold text-cyan-300">Code</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-left font-semibold text-cyan-300">Course Name</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Credits</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Max</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Score</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Grade</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Project</th>
-                        <th className="border border-cyan-500/30 px-3 py-3 text-center font-semibold text-cyan-300">Result</th>
+                      <tr className="bg-gradient-to-r from-blue-100 to-indigo-100">
+                        <th className="border border-blue-200 px-2 py-3 text-left font-semibold text-blue-800">S.No</th>
+                        <th className="border border-blue-200 px-2 py-3 text-left font-semibold text-blue-800">Code</th>
+                        <th className="border border-blue-200 px-2 py-3 text-left font-semibold text-blue-800">Program Name</th>
+                        <th className="border border-blue-200 px-2 py-3 text-left font-semibold text-blue-800">Course Name</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Credits</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Max</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Score</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Grade</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Project</th>
+                        <th className="border border-blue-200 px-2 py-3 text-center font-semibold text-blue-800">Result</th>
                       </tr>
                     </thead>
                     <tbody>
                       {entries.map((entry) => (
                         <tr 
                           key={entry.sno} 
-                          className="hover:bg-cyan-500/5 transition-colors"
+                          className="hover:bg-blue-50/50 transition-colors"
                           data-testid={`row-course-${entry.sno}`}
                         >
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center text-muted-foreground">{entry.sno}</td>
-                          <td className="border border-cyan-500/20 px-3 py-2 font-mono text-xs text-cyan-400">{entry.courseCode}</td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-white">{entry.courseName}</td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center text-muted-foreground">{entry.credits}</td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center text-muted-foreground">100</td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center font-medium text-white">
+                          <td className="border border-blue-100 px-2 py-2 text-center text-slate-600">{entry.sno}</td>
+                          <td className="border border-blue-100 px-2 py-2 font-mono text-xs text-blue-700">{entry.courseCode}</td>
+                          <td className="border border-blue-100 px-2 py-2 text-slate-700 text-xs">{entry.programName}</td>
+                          <td className="border border-blue-100 px-2 py-2 text-slate-800">{entry.courseName}</td>
+                          <td className="border border-blue-100 px-2 py-2 text-center text-slate-600">{entry.credits}</td>
+                          <td className="border border-blue-100 px-2 py-2 text-center text-slate-600">100</td>
+                          <td className="border border-blue-100 px-2 py-2 text-center font-medium text-slate-800">
                             {entry.testScore !== null ? entry.testScore : '-'}
                           </td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center">
+                          <td className="border border-blue-100 px-2 py-2 text-center">
                             {entry.grade !== "-" ? (
                               <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold border ${getGradeColor(entry.grade)}`}>
                                 {entry.grade}
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">-</span>
+                              <span className="text-slate-400">-</span>
                             )}
                           </td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center">
+                          <td className="border border-blue-100 px-2 py-2 text-center">
                             {entry.projectStatus === "Submitted" ? (
-                              <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-400 border-green-500/50">
+                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-300">
                                 Done
                               </Badge>
                             ) : entry.projectStatus === "Pending" ? (
-                              <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-400 border-amber-500/50">
+                              <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
                                 Pending
                               </Badge>
                             ) : (
-                              <span className="text-muted-foreground">N/A</span>
+                              <span className="text-slate-400">N/A</span>
                             )}
                           </td>
-                          <td className="border border-cyan-500/20 px-3 py-2 text-center">
+                          <td className="border border-blue-100 px-2 py-2 text-center">
                             {entry.status === "Pass" ? (
-                              <span className="inline-flex items-center gap-1 text-green-400 font-medium">
+                              <span className="inline-flex items-center gap-1 text-green-600 font-medium">
                                 <CheckCircle className="w-3.5 h-3.5" />
                                 Pass
                               </span>
                             ) : entry.status === "Fail" ? (
-                              <span className="inline-flex items-center gap-1 text-red-400 font-medium">
+                              <span className="inline-flex items-center gap-1 text-red-600 font-medium">
                                 <XCircle className="w-3.5 h-3.5" />
                                 Fail
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">-</span>
+                              <span className="text-slate-400">-</span>
                             )}
                           </td>
                         </tr>
@@ -507,26 +512,26 @@ export default function Marksheet() {
                   </table>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-4 rounded-lg bg-gradient-to-r from-cyan-500/10 via-purple-500/5 to-pink-500/10 border border-cyan-500/20 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 mb-6">
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Credits Earned</p>
-                    <p className="text-2xl font-bold text-white" data-testid="text-total-credits">{totalCreditsEarned}</p>
+                    <p className="text-xs text-slate-500 mb-1">Credits Earned</p>
+                    <p className="text-2xl font-bold text-slate-800" data-testid="text-total-credits">{totalCreditsEarned}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Courses Passed</p>
-                    <p className="text-2xl font-bold text-white" data-testid="text-courses-passed">{totalCoursesCompleted}</p>
+                    <p className="text-xs text-slate-500 mb-1">Courses Passed</p>
+                    <p className="text-2xl font-bold text-slate-800" data-testid="text-courses-passed">{totalCoursesCompleted}</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <Star className="w-3 h-3 text-cyan-400" />
-                      <p className="text-xs text-muted-foreground">CGPA</p>
+                      <Star className="w-3 h-3 text-blue-600" />
+                      <p className="text-xs text-slate-500">CGPA</p>
                     </div>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent" data-testid="text-cgpa">{cgpa}</p>
+                    <p className="text-2xl font-bold text-blue-700" data-testid="text-cgpa">{cgpa}</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <Trophy className="w-3 h-3 text-yellow-400" />
-                      <p className="text-xs text-muted-foreground">Classification</p>
+                      <Trophy className="w-3 h-3 text-amber-600" />
+                      <p className="text-xs text-slate-500">Classification</p>
                     </div>
                     <Badge 
                       variant={classification.variant} 
@@ -538,42 +543,52 @@ export default function Marksheet() {
                   </div>
                   <div className="text-center col-span-2 sm:col-span-1">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <Coins className="w-3 h-3 text-amber-400" />
-                      <p className="text-xs text-muted-foreground">Reward Coins</p>
+                      <Coins className="w-3 h-3 text-amber-600" />
+                      <p className="text-xs text-slate-500">Reward Coins</p>
                     </div>
-                    <p className="text-2xl font-bold text-amber-400" data-testid="text-reward-coins">{rewardCoins}</p>
+                    <p className="text-2xl font-bold text-amber-600" data-testid="text-reward-coins">{rewardCoins}</p>
                   </div>
                 </div>
 
                 {scholarshipEligible && (
-                  <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30">
+                  <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-amber-500/20">
-                        <Star className="w-5 h-5 text-amber-400" />
+                      <div className="p-2 rounded-full bg-amber-100">
+                        <Star className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-amber-300">Scholarship Eligible!</p>
-                        <p className="text-xs text-amber-400/70">You qualify for academic scholarships based on your performance.</p>
+                        <p className="font-medium text-amber-800">Scholarship Eligible!</p>
+                        <p className="text-xs text-amber-700/70">You qualify for academic scholarships based on your performance.</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="border-t border-cyan-500/20 pt-6">
+                <div className="border-t border-blue-200 pt-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p className="flex items-center gap-2">
-                        <Shield className="w-3 h-3 text-cyan-400" />
-                        Verification: <span className="text-cyan-400">{verificationUrl}</span>
-                      </p>
-                      <p>This is a digitally signed computer-generated document.</p>
-                      <p>Verified by Acharya Usha - AI Learning Assistant</p>
+                    <div className="p-3 bg-white rounded-lg shadow-sm border border-slate-200">
+                      <p className="text-xs text-slate-500 mb-2 text-center">Scan to Verify</p>
+                      <QRCodeSVG 
+                        value={verificationUrl} 
+                        size={80} 
+                        bgColor="#ffffff"
+                        fgColor="#1e3a5f"
+                      />
                     </div>
                     <div className="text-right">
-                      <div className="border-t border-dashed border-muted-foreground/50 pt-2 px-4 inline-block min-w-[180px]">
-                        <p className="font-medium text-white">Controller of Examinations</p>
-                        <p className="text-xs text-muted-foreground">OurShiksha Academy</p>
-                        <p className="text-[10px] text-cyan-400 mt-1 font-mono">Digitally Signed</p>
+                      <div className="relative inline-block">
+                        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full border-4 border-blue-600/30 flex items-center justify-center bg-blue-50/80">
+                          <div className="text-center">
+                            <Stamp className="w-6 h-6 text-blue-700 mx-auto" />
+                            <p className="text-[8px] font-bold text-blue-800 mt-0.5">VERIFIED</p>
+                            <p className="text-[6px] text-blue-600">OurShiksha</p>
+                          </div>
+                        </div>
+                        <div className="border-t border-dashed border-slate-400 pt-2 px-4 min-w-[180px] mt-8">
+                          <p className="font-medium text-slate-800">Controller of Examinations</p>
+                          <p className="text-xs text-slate-600">OurShiksha Academy</p>
+                          <p className="text-[10px] text-blue-600 mt-1 font-mono">Digitally Signed</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -591,15 +606,7 @@ export default function Marksheet() {
           transition={{ delay: 0.2 }}
         >
           <p>
-            Verify this marksheet at:{" "}
-            <a 
-              href={verificationUrl}
-              className="text-cyan-400 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {verificationUrl}
-            </a>
+            Scan the QR code or visit the verification URL to authenticate this marksheet.
           </p>
         </motion.div>
       </div>

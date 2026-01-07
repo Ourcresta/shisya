@@ -18,7 +18,7 @@ import { getAllPassedTests, getPassedTestsCount } from "@/lib/testAttempts";
 import type { StudentProfile, Certificate, ProjectSubmission, TestAttempt } from "@shared/schema";
 import { 
   ArrowLeft, MapPin, Github, Linkedin, ShieldCheck, 
-  GraduationCap, Copy, Check, ExternalLink, Eye, Sparkles
+  GraduationCap, Copy, Check, ExternalLink, Eye, Sparkles, Share2, Globe
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { staggerContainer, staggerItem } from "@/lib/animations";
@@ -141,29 +141,52 @@ export default function PortfolioPreviewPage() {
             </div>
           </div>
           
-          {profile.portfolioVisible && (
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleCopyLink}
-                data-testid="button-copy-public-link"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 mr-1" />
-                ) : (
-                  <Copy className="w-4 h-4 mr-1" />
-                )}
-                Copy Link
-              </Button>
-              <Button variant="default" size="sm" asChild>
-                <a href={`/portfolio/${profile.username}`} target="_blank" rel="noopener noreferrer" data-testid="button-view-public">
-                  <ExternalLink className="w-4 h-4 mr-1" />
-                  Open Public
-                </a>
-              </Button>
+          <div className="flex items-center gap-2">
+              {!profile.portfolioVisible ? (
+                <Link href="/shishya/profile">
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                    data-testid="button-publish-portfolio"
+                  >
+                    <Globe className="w-4 h-4 mr-1" />
+                    Publish Portfolio
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleCopyLink}
+                    data-testid="button-copy-public-link"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 mr-1" />
+                    ) : (
+                      <Copy className="w-4 h-4 mr-1" />
+                    )}
+                    Copy Link
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleCopyLink}
+                    data-testid="button-share-portfolio"
+                  >
+                    <Share2 className="w-4 h-4 mr-1" />
+                    Share
+                  </Button>
+                  <Button variant="default" size="sm" asChild>
+                    <a href={`/portfolio/${profile.username}`} target="_blank" rel="noopener noreferrer" data-testid="button-view-public">
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Open Public
+                    </a>
+                  </Button>
+                </>
+              )}
             </div>
-          )}
         </div>
 
         {!profile.portfolioVisible && (
