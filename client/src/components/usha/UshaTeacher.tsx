@@ -208,9 +208,9 @@ export function UshaTeacher() {
                 {messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <Sparkles className="w-12 h-12 mb-4 text-primary/40" />
-                    <p className="text-sm font-medium">Hi! I'm Usha, your AI teacher.</p>
-                    <p className="text-xs mt-1">Ask me anything about this lesson.</p>
-                    <p className="text-xs mt-4 italic">I'll guide you without giving direct answers.</p>
+                    <p className="text-sm font-medium">Hi! I'm Usha.</p>
+                    <p className="text-xs mt-1">I'm here to learn with you, talk, or just listen.</p>
+                    <p className="text-xs mt-4 italic">No rush. Whenever you're ready.</p>
                   </div>
                 )}
                 
@@ -256,7 +256,7 @@ export function UshaTeacher() {
                   <Input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask about this lesson..."
+                    placeholder="Say anything..."
                     className="flex-1"
                     disabled={isLoading}
                     data-testid="input-usha-question"
@@ -271,7 +271,7 @@ export function UshaTeacher() {
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  I guide learning — I won't give direct answers.
+                  I'm here with you.
                 </p>
               </form>
             </Card>
