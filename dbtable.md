@@ -1,36 +1,62 @@
 # SHISHYA Database Schema - Complete Reference
 
-## Database Overview
+## Database Architecture Overview
 
-**Total Tables:** 35 | **Views:** 1 | **Database:** PostgreSQL (Shared with Admin)
+**Total Tables:** 74 tables in shared PostgreSQL database  
+**Database:** PostgreSQL (Neon-compatible)
 
-The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Course Factory.
+**Access Pattern:**
+- **Admin (Guru)** = Creates and manages course content
+- **Shishya (Student)** = Reads published content, writes own progress/data
 
-**Naming Convention:**
-- Course content tables: No prefix (managed by Admin)
-- Student tables: `shishya_` prefix (managed by SHISHYA)
+**Key Principle:** Shishya portal NEVER modifies course content tables. It only READS published courses and WRITES to shishya-prefixed tables.
 
 ---
 
-# COURSE CONTENT TABLES (6)
+## Critical ID Type Rule
+
+**IMPORTANT:** `shishya_users.id` is `VARCHAR(36)` containing UUID v4 - NOT a serial integer.
+
+All foreign keys referencing shishya users MUST use `VARCHAR(36)`:
+```sql
+user_id VARCHAR(36) REFERENCES shishya_users(id)
+```
+
+---
+
+## Mandatory Visibility Filter
+
+SHISHYA must ALWAYS filter courses with:
+```sql
+SELECT * FROM courses 
+WHERE status = 'published' AND is_active = true
+```
+
+---
+
+# SECTION 1: TABLES SHISHYA CAN READ (Admin-Managed)
+
+These tables are created and managed by Admin. SHISHYA has READ-ONLY access to published content.
+
+---
 
 ## 1. courses
 
-**Purpose:** Master catalog of all courses available on the platform.
-
-**SHISHYA Access:** Read-only, filtered by `status='published' AND is_active=true`
+**Purpose:** Master catalog of all courses available on the platform.  
+**Access:** READ-ONLY (filter by `status='published' AND is_active=true`)
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
-| id | INTEGER | NO | auto-increment | Primary key, unique course identifier |
+| id | INTEGER | NO | auto-increment | Primary key |
 | title | VARCHAR(255) | NO | - | Course display name |
-| description | TEXT | YES | - | Full course description (HTML/Markdown) |
-| short_description | VARCHAR(500) | YES | - | Brief summary for course cards |
-| level | VARCHAR(20) | NO | 'beginner' | Difficulty: beginner/intermediate/advanced |
+| name | VARCHAR(255) | NO | - | Course internal name |
+| description | TEXT | YES | - | Full course description |
+| short_description | VARCHAR(500) | YES | - | Brief summary for cards |
+| level | VARCHAR(20) | NO | 'beginner' | beginner/intermediate/advanced |
 | language | VARCHAR(20) | NO | 'en' | Course language (en/hi/ta/te) |
-| duration | VARCHAR(50) | YES | - | Estimated time to complete (e.g., "10 hours") |
+| duration | VARCHAR(50) | YES | - | Estimated completion time |
 | skills | TEXT | YES | - | Comma-separated skills taught |
-| status | VARCHAR(20) | NO | 'draft' | Publishing state: draft/published/archived |
+| status | VARCHAR(20) | NO | 'draft' | draft/published/archived |
 | is_active | BOOLEAN | NO | false | Quick visibility toggle |
 | is_free | BOOLEAN | NO | false | Free course flag |
 | credit_cost | INTEGER | NO | 0 | Credits required for enrollment |
@@ -39,21 +65,14 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | test_required | BOOLEAN | NO | false | Must pass test for certificate |
 | project_required | BOOLEAN | NO | false | Must submit project for certificate |
 | thumbnail_url | TEXT | YES | - | Course cover image URL |
-| instructor_id | VARCHAR(36) | YES | - | Creator's user ID (FK to admin users) |
+| instructor_id | VARCHAR(36) | YES | - | Creator's user ID |
 | published_at | TIMESTAMP | YES | - | When course was made live |
 | created_at | TIMESTAMP | NO | NOW() | Record creation time |
 | updated_at | TIMESTAMP | NO | NOW() | Last modification time |
 
 **Connections:**
-- Parent of: modules, lessons, tests, projects, labs
+- Parent of: modules, lessons, tests, questions, projects, practice_labs
 - Referenced by: shishya_course_enrollments, shishya_user_progress, shishya_user_certificates
-
-**Functions Used In:**
-- Course catalog display
-- Course overview page
-- Enrollment system
-- Certificate generation
-- Dashboard statistics
 
 ---
 
@@ -72,12 +91,7 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Connections:**
 - Belongs to: courses (course_id)
-- Parent of: lessons, labs
-
-**Functions Used In:**
-- Course structure/sidebar navigation
-- Progress calculation per module
-- Learning path display
+- Parent of: lessons, practice_labs
 
 ---
 
@@ -99,19 +113,13 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Connections:**
 - Belongs to: modules (module_id), courses (course_id)
-- Referenced by: shishya_user_progress, labs
-
-**Functions Used In:**
-- Lesson viewer page
-- Progress tracking (mark as complete)
-- "Continue Learning" feature
-- Usha AI tutor context
+- Referenced by: shishya_user_progress
 
 ---
 
 ## 4. tests
 
-**Purpose:** Assessments with multiple-choice questions for courses.
+**Purpose:** Course assessments with configurable settings.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -121,35 +129,44 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | description | TEXT | YES | - | Test instructions |
 | duration_minutes | INTEGER | NO | 30 | Time limit for test |
 | passing_percentage | INTEGER | NO | 60 | Minimum score to pass (%) |
-| questions | JSONB | NO | - | Array of question objects |
 | is_active | BOOLEAN | NO | true | Test availability flag |
 | created_at | TIMESTAMP | NO | NOW() | Record creation time |
 
-**Questions JSONB Structure:**
-```json
-[
-  {
-    "id": 1,
-    "question": "What is...?",
-    "options": ["A", "B", "C", "D"],
-    "correct_answer": 0
-  }
-]
-```
-
 **Connections:**
 - Belongs to: courses (course_id)
+- Parent of: questions
 - Referenced by: shishya_user_test_attempts
-
-**Functions Used In:**
-- Test taking interface (timed)
-- Server-side scoring (answers never sent to client)
-- Certificate eligibility check
-- Marksheet grade calculation
 
 ---
 
-## 5. projects
+## 5. questions
+
+**Purpose:** Individual test questions (MCQ, true/false, etc.).
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| test_id | INTEGER | NO | - | FK to tests.id |
+| question_text | TEXT | NO | - | The question content |
+| question_type | VARCHAR(20) | NO | 'mcq' | mcq/true_false/short_answer |
+| options | JSONB | YES | - | Answer options array |
+| correct_answer | INTEGER | NO | - | Index of correct option |
+| explanation | TEXT | YES | - | Answer explanation |
+| points | INTEGER | NO | 1 | Points for this question |
+| order_index | INTEGER | NO | 0 | Display sequence |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+**Options JSONB Structure:**
+```json
+["Option A", "Option B", "Option C", "Option D"]
+```
+
+**Connections:**
+- Belongs to: tests (test_id)
+
+---
+
+## 6. projects
 
 **Purpose:** Hands-on assignments for practical skill application.
 
@@ -158,10 +175,10 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | id | INTEGER | NO | auto-increment | Primary key |
 | course_id | INTEGER | NO | - | FK to courses.id |
 | title | VARCHAR(255) | NO | - | Project title |
-| description | TEXT | YES | - | Project requirements and instructions |
-| difficulty | VARCHAR(20) | NO | 'beginner' | beginner/intermediate/advanced |
+| description | TEXT | YES | - | Project requirements |
+| difficulty | VARCHAR(20) | NO | 'beginner' | Difficulty level |
 | estimated_hours | INTEGER | YES | - | Expected completion time |
-| requirements | JSONB | YES | - | Submission requirements list |
+| requirements | JSONB | YES | - | Submission requirements |
 | rubric | JSONB | YES | - | Grading criteria |
 | is_active | BOOLEAN | NO | true | Project availability flag |
 | created_at | TIMESTAMP | NO | NOW() | Record creation time |
@@ -170,24 +187,18 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 - Belongs to: courses (course_id)
 - Referenced by: shishya_user_project_submissions
 
-**Functions Used In:**
-- Project details page
-- Submission form
-- Certificate eligibility check
-- Portfolio display
-
 ---
 
-## 6. labs
+## 7. practice_labs
 
-**Purpose:** Guided coding exercises with browser-based code execution.
+**Purpose:** Guided coding exercises with browser-based execution.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | INTEGER | NO | auto-increment | Primary key |
 | course_id | INTEGER | NO | - | FK to courses.id |
 | module_id | INTEGER | YES | - | FK to modules.id |
-| lesson_id | INTEGER | YES | - | FK to lessons.id (linked lesson) |
+| lesson_id | INTEGER | YES | - | FK to lessons.id |
 | title | VARCHAR(255) | NO | - | Lab title |
 | description | TEXT | YES | - | Lab overview |
 | difficulty | VARCHAR(20) | NO | 'beginner' | Difficulty level |
@@ -204,30 +215,160 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 - Belongs to: courses, modules, lessons
 - Referenced by: shishya_user_lab_progress
 
-**Functions Used In:**
-- Interactive code editor
-- Output matching validation
-- Code persistence
-- Usha AI tutor context
+---
+
+## 8. certificates
+
+**Purpose:** Certificate templates with eligibility requirements.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| course_id | INTEGER | NO | - | FK to courses.id |
+| name | VARCHAR(255) | NO | - | Certificate name |
+| template_url | TEXT | YES | - | Certificate template design |
+| requires_test_pass | BOOLEAN | NO | false | Must pass all tests |
+| requires_project_completion | BOOLEAN | NO | false | Must submit all projects |
+| requires_lab_completion | BOOLEAN | NO | false | Must complete all labs |
+| passing_percentage | INTEGER | NO | 60 | Minimum score required |
+| is_active | BOOLEAN | NO | true | Certificate availability |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+**Connections:**
+- Belongs to: courses (course_id)
 
 ---
 
-# SHISHYA STUDENT TABLES (29)
+## 9. skills
+
+**Purpose:** Master skills library for tagging courses.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| name | VARCHAR(100) | NO | - | Skill name |
+| category | VARCHAR(50) | YES | - | Skill category |
+| icon | TEXT | YES | - | Icon URL or class |
+| description | TEXT | YES | - | Skill description |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+---
+
+## 10. course_rewards
+
+**Purpose:** Reward configuration per course (credits, badges).
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| course_id | INTEGER | NO | - | FK to courses.id |
+| reward_type | VARCHAR(50) | NO | - | credits/badge/achievement |
+| reward_value | INTEGER | YES | - | Amount for credits |
+| trigger_event | VARCHAR(50) | NO | - | completion/test_pass/project_submit |
+| is_active | BOOLEAN | NO | true | Reward enabled flag |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+**Connections:**
+- Belongs to: courses (course_id)
+
+---
+
+## 11. achievement_cards
+
+**Purpose:** Unlockable achievements for gamification.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| name | VARCHAR(255) | NO | - | Achievement name |
+| description | TEXT | YES | - | Achievement description |
+| icon_url | TEXT | YES | - | Achievement icon |
+| category | VARCHAR(50) | YES | - | Category (streak/completion/mastery) |
+| unlock_criteria | JSONB | YES | - | Criteria to unlock |
+| points | INTEGER | NO | 0 | Points awarded |
+| is_active | BOOLEAN | NO | true | Achievement enabled |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+---
+
+## 12. motivational_cards
+
+**Purpose:** Admin-managed motivational messages displayed to students.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| title | VARCHAR(255) | NO | - | Card title |
+| message | TEXT | NO | - | Motivational message |
+| card_type | VARCHAR(50) | NO | - | quote/tip/challenge |
+| category | VARCHAR(50) | YES | - | Category for targeting |
+| author | VARCHAR(255) | YES | - | Quote author |
+| is_active | BOOLEAN | NO | true | Card enabled |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+---
+
+## 13. credit_packages
+
+**Purpose:** Purchasable credit bundles for wallet top-up.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| name | VARCHAR(255) | NO | - | Package name |
+| credits | INTEGER | NO | - | Credits in package |
+| price | INTEGER | NO | - | Price in smallest unit |
+| currency | VARCHAR(10) | NO | 'INR' | Currency code |
+| discount_percent | INTEGER | NO | 0 | Discount percentage |
+| is_popular | BOOLEAN | NO | false | Featured flag |
+| is_active | BOOLEAN | NO | true | Package available |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+---
+
+## 14. subscription_plans
+
+**Purpose:** Subscription tiers for premium access.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | INTEGER | NO | auto-increment | Primary key |
+| name | VARCHAR(255) | NO | - | Plan name |
+| description | TEXT | YES | - | Plan description |
+| price_monthly | INTEGER | NO | - | Monthly price |
+| price_yearly | INTEGER | NO | - | Yearly price |
+| currency | VARCHAR(10) | NO | 'INR' | Currency code |
+| features | JSONB | YES | - | Features list |
+| credits_per_month | INTEGER | NO | 0 | Monthly credits included |
+| is_active | BOOLEAN | NO | true | Plan available |
+| created_at | TIMESTAMP | NO | NOW() | Record creation time |
+
+---
+
+# SECTION 2: TABLES SHISHYA OWNS (Read + Write)
+
+These tables are prefixed with `shishya_` and belong to the student portal.
 
 ---
 
 # AUTHENTICATION (4 Tables)
 
-## 7. shishya_users
+## 15. shishya_users
 
-**Purpose:** Student account credentials and authentication.
+**Purpose:** Student accounts and authentication.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
-| id | VARCHAR(36) | NO | UUID | Primary key (UUID v4) |
+| id | VARCHAR(36) | NO | UUID v4 | Primary key (UUID) |
 | email | VARCHAR(255) | NO | - | Unique login email |
-| password_hash | TEXT | NO | - | Bcrypt hashed password (cost 10) |
+| password_hash | TEXT | NO | - | Bcrypt hashed password |
+| name | VARCHAR(255) | YES | - | Student's full name |
+| phone | VARCHAR(20) | YES | - | Phone number |
+| status | VARCHAR(20) | NO | 'active' | active/suspended/deleted |
 | email_verified | BOOLEAN | NO | false | Email verification status |
+| phone_verified | BOOLEAN | NO | false | Phone verification status |
+| last_login_at | TIMESTAMP | YES | - | Last login timestamp |
+| last_active_at | TIMESTAMP | YES | - | Last activity timestamp |
 | created_at | TIMESTAMP | NO | NOW() | Account creation time |
 | updated_at | TIMESTAMP | NO | NOW() | Last update time |
 
@@ -236,20 +377,20 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Functions Used In:**
 - Signup/Login authentication
-- Email verification flow
-- Session creation
-- Protected route access
+- Email/Phone verification
+- Session management
+- Account status control
 
 ---
 
-## 8. shishya_sessions
+## 16. shishya_sessions
 
-**Purpose:** Server-side session storage for authenticated users.
+**Purpose:** Server-side session storage (express-session).
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | sid | VARCHAR(255) | NO | - | Session ID (Primary key) |
-| sess | JSONB | NO | - | Session data (user info, passport) |
+| sess | JSONB | NO | - | Session data (passport info) |
 | expire | TIMESTAMP | NO | - | Session expiration time |
 
 **Connections:**
@@ -257,71 +398,58 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Functions Used In:**
 - HTTP-only cookie authentication
-- Session persistence across requests
+- Session persistence
 - Auto-cleanup of expired sessions
 
 ---
 
-## 9. shishya_otp_codes
+## 17. shishya_otp_codes
 
-**Purpose:** One-time passwords for email verification.
-
-| Column | Type | Nullable | Default | Function |
-|--------|------|----------|---------|----------|
-| id | SERIAL | NO | auto | Primary key |
-| email | VARCHAR(255) | NO | - | Target email address |
-| otp_hash | TEXT | NO | - | SHA256 hashed 6-digit OTP |
-| expires_at | TIMESTAMP | NO | - | OTP expiration (10 minutes) |
-| verified | BOOLEAN | NO | false | Whether OTP was successfully used |
-| created_at | TIMESTAMP | NO | NOW() | OTP generation time |
-
-**Connections:**
-- Links to: shishya_users (via email)
-
-**Functions Used In:**
-- Email verification during signup
-- Password reset flow
-- Secure verification without exposing OTP
-
----
-
-## 10. shishya_otp_logs
-
-**Purpose:** Audit trail for all OTP-related actions.
+**Purpose:** One-time passwords for verification.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | email | VARCHAR(255) | NO | - | Target email |
-| action | VARCHAR(50) | NO | - | Action: send/verify/fail/expire |
-| ip_address | VARCHAR(45) | YES | - | Client IP (IPv4/IPv6) |
-| user_agent | TEXT | YES | - | Browser user agent string |
-| created_at | TIMESTAMP | NO | NOW() | Action timestamp |
+| otp_hash | TEXT | NO | - | SHA256 hashed OTP |
+| expires_at | TIMESTAMP | NO | - | OTP expiration (10 min) |
+| verified | BOOLEAN | NO | false | OTP used flag |
+| created_at | TIMESTAMP | NO | NOW() | OTP generation time |
 
 **Connections:**
 - Links to: shishya_users (via email)
 
-**Functions Used In:**
-- Security auditing
-- Abuse detection (rate limiting)
-- Compliance logging
+---
+
+## 18. shishya_otp_logs
+
+**Purpose:** Audit trail for OTP actions.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | SERIAL | NO | auto | Primary key |
+| email | VARCHAR(255) | NO | - | Target email |
+| action | VARCHAR(50) | NO | - | send/verify/fail/expire |
+| ip_address | VARCHAR(45) | YES | - | Client IP address |
+| user_agent | TEXT | YES | - | Browser user agent |
+| created_at | TIMESTAMP | NO | NOW() | Action timestamp |
 
 ---
 
 # PROFILE (1 Table)
 
-## 11. shishya_user_profiles
+## 19. shishya_user_profiles
 
-**Purpose:** Extended student profile information for display and portfolio.
+**Purpose:** Extended student profile information.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | VARCHAR(36) | NO | UUID | Primary key |
-| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (Unique) |
+| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (UNIQUE) |
 | full_name | VARCHAR(255) | YES | - | Display name |
 | username | VARCHAR(50) | YES | - | Unique public URL slug |
 | bio | TEXT | YES | - | About me (max 500 chars) |
-| profile_photo | TEXT | YES | - | Base64 encoded image (max 2MB) |
+| profile_photo | TEXT | YES | - | Base64 encoded image |
 | headline | VARCHAR(200) | YES | - | Professional headline |
 | location | VARCHAR(100) | YES | - | City/Country |
 | github_url | TEXT | YES | - | GitHub profile URL |
@@ -336,19 +464,32 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 **Connections:**
 - Belongs to: shishya_users (user_id) - One-to-One
 
-**Functions Used In:**
-- Profile page display/edit
-- Public portfolio page (/portfolio/:username)
-- Header avatar display
-- Certificate personalization
-
 ---
 
 # PROGRESS TRACKING (6 Tables)
 
-## 12. shishya_user_progress
+## 20. shishya_course_enrollments
 
-**Purpose:** Track lesson completion status per user.
+**Purpose:** Track which courses a student has enrolled in.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | SERIAL | NO | auto | Primary key |
+| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
+| course_id | INTEGER | NO | - | FK to courses.id |
+| enrolled_at | TIMESTAMP | NO | NOW() | Enrollment timestamp |
+| completed_at | TIMESTAMP | YES | - | Course completion time |
+| status | VARCHAR(20) | NO | 'active' | active/completed/dropped |
+
+**Connections:**
+- Belongs to: shishya_users (user_id)
+- References: courses (course_id)
+
+---
+
+## 21. shishya_user_progress
+
+**Purpose:** Track lesson completion status.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -362,25 +503,19 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Connections:**
 - Belongs to: shishya_users (user_id)
-- References: courses (course_id), lessons (lesson_id)
-
-**Functions Used In:**
-- Progress bar calculation
-- "Continue Learning" button
-- Course completion check
-- Dashboard "In Progress" count
+- References: courses, lessons
 
 ---
 
-## 13. shishya_user_lab_progress
+## 22. shishya_user_lab_progress
 
-**Purpose:** Track lab completion and save student code.
+**Purpose:** Track lab completion and saved code.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
-| lab_id | INTEGER | NO | - | FK to labs.id |
+| lab_id | INTEGER | NO | - | FK to practice_labs.id |
 | completed | BOOLEAN | NO | false | Lab completion status |
 | user_code | TEXT | YES | - | Student's saved code |
 | completed_at | TIMESTAMP | YES | - | Completion timestamp |
@@ -388,18 +523,13 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Connections:**
 - Belongs to: shishya_users (user_id)
-- References: labs (lab_id)
-
-**Functions Used In:**
-- Lab code persistence (auto-save)
-- Lab completion tracking
-- Skills demonstration
+- References: practice_labs (lab_id)
 
 ---
 
-## 14. shishya_user_test_attempts
+## 23. shishya_user_test_attempts
 
-**Purpose:** Store all test attempts with scores and answers.
+**Purpose:** Store all test attempts with scores.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -414,22 +544,23 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | time_taken | INTEGER | YES | - | Seconds to complete |
 | attempted_at | TIMESTAMP | NO | NOW() | Attempt timestamp |
 
+**Answers JSONB Structure:**
+```json
+[
+  {"question_id": 1, "selected": 2},
+  {"question_id": 2, "selected": 0}
+]
+```
+
 **Connections:**
 - Belongs to: shishya_users (user_id)
-- References: tests (test_id), courses (course_id)
-
-**Functions Used In:**
-- Test results display
-- Certificate eligibility (test_required)
-- Marksheet grade calculation
-- Dashboard "Tests Passed" count
-- Centralized Tests page
+- References: tests, courses
 
 ---
 
-## 15. shishya_user_project_submissions
+## 24. shishya_user_project_submissions
 
-**Purpose:** Track project submissions and review status.
+**Purpose:** Track project submissions.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -447,20 +578,13 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 
 **Connections:**
 - Belongs to: shishya_users (user_id)
-- References: projects (project_id), courses (course_id)
-
-**Functions Used In:**
-- Project submission form
-- Certificate eligibility (project_required)
-- Portfolio projects display
-- Centralized Projects page
-- Dashboard pending actions
+- References: projects, courses
 
 ---
 
-## 16. shishya_user_certificates
+## 25. shishya_user_certificates
 
-**Purpose:** Store earned certificates with unique verification IDs.
+**Purpose:** Store earned certificates.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -469,56 +593,24 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | course_id | INTEGER | NO | - | FK to courses.id |
 | certificate_number | VARCHAR(50) | NO | - | Unique verification ID |
 | issued_at | TIMESTAMP | NO | NOW() | Certificate issue date |
-| pdf_url | TEXT | YES | - | Generated PDF storage URL |
+| pdf_url | TEXT | YES | - | Generated PDF URL |
 
 **Connections:**
 - Belongs to: shishya_users (user_id)
-- References: courses (course_id)
-
-**Functions Used In:**
-- Certificate viewer page
-- Public verification (/verify/certificate/:id)
-- Portfolio certificates display
-- Dashboard "Certificates" count
-- PDF generation with QR code
+- References: courses
 
 ---
 
-## 17. shishya_course_enrollments
+# CREDITS & WALLET (6 Tables)
 
-**Purpose:** Track which courses a student has enrolled in.
+## 26. shishya_user_credits
+
+**Purpose:** Track student's credit balance.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
-| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
-| course_id | INTEGER | NO | - | FK to courses.id |
-| enrolled_at | TIMESTAMP | NO | NOW() | Enrollment timestamp |
-| completed_at | TIMESTAMP | YES | - | Course completion time |
-| status | VARCHAR(20) | NO | 'active' | active/completed/dropped |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-- References: courses (course_id)
-
-**Functions Used In:**
-- Course access control
-- Dashboard "In Progress"/"Completed" counts
-- Credit deduction on enrollment
-- "Enroll Now" button state
-
----
-
-# CREDITS & WALLET (5 Tables)
-
-## 18. shishya_user_credits
-
-**Purpose:** Track student's learning credit balance.
-
-| Column | Type | Nullable | Default | Function |
-|--------|------|----------|---------|----------|
-| id | SERIAL | NO | auto | Primary key |
-| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (Unique) |
+| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (UNIQUE) |
 | balance | INTEGER | NO | 0 | Current credit balance |
 | lifetime_earned | INTEGER | NO | 0 | Total credits ever received |
 | lifetime_spent | INTEGER | NO | 0 | Total credits ever spent |
@@ -527,67 +619,69 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 **Connections:**
 - Belongs to: shishya_users (user_id) - One-to-One
 
-**Functions Used In:**
-- Wallet/Credits display
-- Enrollment credit check
-- Dashboard credit metric
-- Welcome bonus (500 credits)
-
 ---
 
-## 19. shishya_credit_transactions
+## 27. shishya_credit_transactions
 
-**Purpose:** Complete transaction history for credits.
+**Purpose:** Complete transaction history.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
 | amount | INTEGER | NO | - | Credits (+positive, -negative) |
-| type | VARCHAR(20) | NO | - | welcome/purchase/spend/refund/voucher |
+| type | VARCHAR(20) | NO | - | welcome/purchase/spend/refund/reward |
 | description | TEXT | YES | - | Human-readable description |
-| reference_id | VARCHAR(100) | YES | - | External reference (Razorpay order) |
+| reference_id | VARCHAR(100) | YES | - | External reference |
 | created_at | TIMESTAMP | NO | NOW() | Transaction timestamp |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- Wallet transaction history
-- Purchase tracking
-- Refund processing
-- Audit trail
 
 ---
 
-## 20. shishya_vouchers
+## 28. shishya_payments
 
-**Purpose:** Redeemable voucher codes for free credits.
+**Purpose:** Payment records for Razorpay transactions.
+
+| Column | Type | Nullable | Default | Function |
+|--------|------|----------|---------|----------|
+| id | SERIAL | NO | auto | Primary key |
+| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
+| razorpay_order_id | VARCHAR(100) | NO | - | Razorpay order ID |
+| razorpay_payment_id | VARCHAR(100) | YES | - | Razorpay payment ID |
+| razorpay_signature | TEXT | YES | - | Payment signature |
+| amount | INTEGER | NO | - | Amount in paise |
+| currency | VARCHAR(10) | NO | 'INR' | Currency code |
+| credits_purchased | INTEGER | NO | - | Credits to add |
+| status | VARCHAR(20) | NO | 'pending' | pending/success/failed |
+| package_id | INTEGER | YES | - | FK to credit_packages.id |
+| created_at | TIMESTAMP | NO | NOW() | Order creation time |
+| completed_at | TIMESTAMP | YES | - | Payment completion time |
+
+**Connections:**
+- Belongs to: shishya_users (user_id)
+- References: credit_packages (package_id)
+
+---
+
+## 29. shishya_vouchers
+
+**Purpose:** Redeemable voucher codes.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | code | VARCHAR(50) | NO | - | Unique voucher code |
-| credits | INTEGER | NO | - | Credits awarded on redemption |
-| max_uses | INTEGER | NO | 1 | Maximum total redemptions |
-| used_count | INTEGER | NO | 0 | Current redemption count |
-| expires_at | TIMESTAMP | YES | - | Voucher expiration date |
-| is_active | BOOLEAN | NO | true | Voucher enabled flag |
-| created_at | TIMESTAMP | NO | NOW() | Voucher creation time |
-
-**Connections:**
-- Referenced by: shishya_voucher_redemptions
-
-**Functions Used In:**
-- Voucher redemption form
-- Marketing campaigns
-- Partnership promotions
+| credits | INTEGER | NO | - | Credits awarded |
+| max_uses | INTEGER | NO | 1 | Maximum redemptions |
+| used_count | INTEGER | NO | 0 | Current count |
+| expires_at | TIMESTAMP | YES | - | Expiration date |
+| is_active | BOOLEAN | NO | true | Voucher enabled |
+| created_at | TIMESTAMP | NO | NOW() | Creation time |
 
 ---
 
-## 21. shishya_voucher_redemptions
+## 30. shishya_voucher_redemptions
 
-**Purpose:** Track which users have redeemed which vouchers.
+**Purpose:** Track voucher usage.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -596,18 +690,11 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
 | redeemed_at | TIMESTAMP | NO | NOW() | Redemption timestamp |
 
-**Connections:**
-- Belongs to: shishya_users (user_id), shishya_vouchers (voucher_id)
-
-**Functions Used In:**
-- Prevent duplicate redemptions
-- Voucher usage analytics
-
 ---
 
-## 22. shishya_gift_boxes
+## 31. shishya_gift_boxes
 
-**Purpose:** Surprise credit gifts for student engagement.
+**Purpose:** Surprise credit gifts.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -615,240 +702,155 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
 | credits | INTEGER | NO | - | Gift credit amount |
 | message | TEXT | YES | - | Gift message |
-| opened | BOOLEAN | NO | false | Whether gift was claimed |
+| opened | BOOLEAN | NO | false | Claimed status |
 | opened_at | TIMESTAMP | YES | - | Claim timestamp |
-| created_at | TIMESTAMP | NO | NOW() | Gift creation time |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- Gamification rewards
-- Engagement incentives
-- Surprise mechanics
+| created_at | TIMESTAMP | NO | NOW() | Creation time |
 
 ---
 
 # NOTIFICATIONS (1 Table)
 
-## 23. shishya_notifications
+## 32. shishya_notifications
 
-**Purpose:** In-app notification system for students.
+**Purpose:** In-app notification system.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
 | title | VARCHAR(255) | NO | - | Notification headline |
-| message | TEXT | NO | - | Full notification message |
+| message | TEXT | NO | - | Full message |
 | type | VARCHAR(50) | NO | 'info' | info/success/warning/achievement |
 | read | BOOLEAN | NO | false | Read status |
 | action_url | TEXT | YES | - | Click destination URL |
 | created_at | TIMESTAMP | NO | NOW() | Notification timestamp |
 
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- Notification bell/dropdown
-- Unread count badge
-- Achievement announcements
-- System alerts
-
 ---
 
 # AI MOTIVATION ENGINE (8 Tables)
 
-## 24. shishya_motivation_rules
+## 33. shishya_motivation_rules
 
-**Purpose:** Configurable rules for automated motivation triggers.
+**Purpose:** Configurable automated trigger rules.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | name | VARCHAR(255) | NO | - | Rule name |
-| description | TEXT | YES | - | Rule purpose/documentation |
-| trigger_type | VARCHAR(50) | NO | - | Event type (lesson_complete, streak, etc.) |
+| description | TEXT | YES | - | Rule documentation |
+| trigger_type | VARCHAR(50) | NO | - | Event type |
 | trigger_condition | JSONB | NO | - | Condition parameters |
-| action_type | VARCHAR(50) | NO | - | Action type (notification, badge, credits) |
+| action_type | VARCHAR(50) | NO | - | Action type |
 | action_data | JSONB | NO | - | Action parameters |
-| is_active | BOOLEAN | NO | true | Rule enabled flag |
-| priority | INTEGER | NO | 0 | Execution order (higher = first) |
-| created_at | TIMESTAMP | NO | NOW() | Rule creation time |
-
-**Example trigger_condition:**
-```json
-{"event": "lesson_complete", "count": 10}
-```
-
-**Example action_data:**
-```json
-{"type": "notification", "title": "Great Progress!", "message": "You completed 10 lessons!"}
-```
-
-**Connections:**
-- Referenced by: shishya_rule_trigger_logs
-
-**Functions Used In:**
-- Automated engagement
-- Gamification triggers
-- Achievement system
+| is_active | BOOLEAN | NO | true | Rule enabled |
+| priority | INTEGER | NO | 0 | Execution order |
+| created_at | TIMESTAMP | NO | NOW() | Creation time |
 
 ---
 
-## 25. shishya_rule_trigger_logs
+## 34. shishya_rule_trigger_logs
 
-**Purpose:** Audit log of all rule executions.
+**Purpose:** Audit log of rule executions.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | rule_id | INTEGER | NO | - | FK to shishya_motivation_rules.id |
-| user_id | VARCHAR(36) | NO | - | User who triggered the rule |
+| user_id | VARCHAR(36) | NO | - | User who triggered |
 | triggered_at | TIMESTAMP | NO | NOW() | Execution timestamp |
-| action_taken | JSONB | YES | - | What action was performed |
-
-**Connections:**
-- Belongs to: shishya_motivation_rules (rule_id), shishya_users (user_id)
-
-**Functions Used In:**
-- Rule effectiveness analytics
-- Debugging rule behavior
-- Prevent duplicate triggers
+| action_taken | JSONB | YES | - | What action performed |
 
 ---
 
-## 26. shishya_motivation_cards
+## 35. shishya_motivation_cards
 
-**Purpose:** Personalized motivation messages displayed to students.
+**Purpose:** Personalized motivation messages for students.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
-| card_type | VARCHAR(50) | NO | - | quote/tip/challenge/streak/achievement |
+| card_type | VARCHAR(50) | NO | - | quote/tip/challenge/streak |
 | title | VARCHAR(255) | NO | - | Card headline |
-| message | TEXT | NO | - | Full message content |
+| message | TEXT | NO | - | Message content |
 | action_url | TEXT | YES | - | Optional CTA link |
-| dismissed | BOOLEAN | NO | false | User dismissed flag |
-| expires_at | TIMESTAMP | YES | - | Auto-expire timestamp |
-| created_at | TIMESTAMP | NO | NOW() | Card creation time |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- Dashboard motivation section
-- Daily motivational quotes
-- Challenge cards
-- Streak celebrations
+| dismissed | BOOLEAN | NO | false | User dismissed |
+| expires_at | TIMESTAMP | YES | - | Auto-expire time |
+| created_at | TIMESTAMP | NO | NOW() | Creation time |
 
 ---
 
-## 27. shishya_ai_nudge_logs
+## 36. shishya_ai_nudge_logs
 
-**Purpose:** Log of AI-generated personalized nudges.
+**Purpose:** AI-generated personalized nudges.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
 | nudge_type | VARCHAR(50) | NO | - | Type of nudge |
-| message | TEXT | NO | - | Generated nudge message |
-| context | JSONB | YES | - | Context used for generation |
-| created_at | TIMESTAMP | NO | NOW() | Nudge timestamp |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- AI-powered engagement
-- Personalized reminders
-- Re-engagement campaigns
+| message | TEXT | NO | - | Nudge message |
+| context | JSONB | YES | - | Context used |
+| created_at | TIMESTAMP | NO | NOW() | Timestamp |
 
 ---
 
-## 28. shishya_student_streaks
+## 37. shishya_student_streaks
 
-**Purpose:** Track consecutive learning days for gamification.
+**Purpose:** Track consecutive learning days.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
-| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (Unique) |
+| user_id | VARCHAR(36) | NO | - | FK to shishya_users.id (UNIQUE) |
 | current_streak | INTEGER | NO | 0 | Current consecutive days |
 | longest_streak | INTEGER | NO | 0 | All-time best streak |
-| last_activity_date | DATE | YES | - | Last learning activity date |
-| updated_at | TIMESTAMP | NO | NOW() | Last update timestamp |
-
-**Connections:**
-- Belongs to: shishya_users (user_id) - One-to-One
-
-**Functions Used In:**
-- Streak display on dashboard
-- Streak badges/achievements
-- Retention mechanics
-- Motivation rule triggers
+| last_activity_date | DATE | YES | - | Last learning date |
+| updated_at | TIMESTAMP | NO | NOW() | Last update |
 
 ---
 
-## 29. shishya_mystery_boxes
+## 38. shishya_mystery_boxes
 
-**Purpose:** Gamified reward boxes with random prizes.
+**Purpose:** Gamified reward boxes.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | user_id | VARCHAR(36) | NO | - | FK to shishya_users.id |
-| box_type | VARCHAR(50) | NO | - | daily/weekly/achievement/special |
-| reward_type | VARCHAR(50) | YES | - | credits/badge/feature/discount |
-| reward_value | INTEGER | YES | - | Reward amount (for credits) |
-| opened | BOOLEAN | NO | false | Whether box was opened |
+| box_type | VARCHAR(50) | NO | - | daily/weekly/achievement |
+| reward_type | VARCHAR(50) | YES | - | credits/badge/feature |
+| reward_value | INTEGER | YES | - | Reward amount |
+| opened | BOOLEAN | NO | false | Opened status |
 | opened_at | TIMESTAMP | YES | - | Open timestamp |
 | expires_at | TIMESTAMP | YES | - | Expiration time |
-| created_at | TIMESTAMP | NO | NOW() | Box creation time |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-
-**Functions Used In:**
-- Daily rewards system
-- Achievement rewards
-- Surprise engagement mechanics
+| created_at | TIMESTAMP | NO | NOW() | Creation time |
 
 ---
 
-## 30. shishya_scholarships
+## 39. shishya_scholarships
 
-**Purpose:** Scholarship programs offering free credits.
+**Purpose:** Available scholarship programs.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | name | VARCHAR(255) | NO | - | Scholarship name |
-| description | TEXT | YES | - | Full description |
+| description | TEXT | YES | - | Description |
 | credits | INTEGER | NO | - | Credits awarded |
-| eligibility_criteria | JSONB | YES | - | Requirements to qualify |
+| eligibility_criteria | JSONB | YES | - | Requirements |
 | max_recipients | INTEGER | YES | - | Maximum awardees |
 | current_recipients | INTEGER | NO | 0 | Current count |
 | is_active | BOOLEAN | NO | true | Open for applications |
-| starts_at | TIMESTAMP | YES | - | Application start date |
-| ends_at | TIMESTAMP | YES | - | Application end date |
+| starts_at | TIMESTAMP | YES | - | Start date |
+| ends_at | TIMESTAMP | YES | - | End date |
 | created_at | TIMESTAMP | NO | NOW() | Creation time |
-
-**Connections:**
-- Referenced by: shishya_user_scholarships
-
-**Functions Used In:**
-- Scholarship listing page
-- Eligibility checking
-- Financial aid system
 
 ---
 
-## 31. shishya_user_scholarships
+## 40. shishya_user_scholarships
 
-**Purpose:** Track scholarship awards to students.
+**Purpose:** Track scholarship awards.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -858,21 +860,13 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | awarded_at | TIMESTAMP | NO | NOW() | Award date |
 | status | VARCHAR(20) | NO | 'active' | active/expired/revoked |
 
-**Connections:**
-- Belongs to: shishya_users (user_id), shishya_scholarships (scholarship_id)
-
-**Functions Used In:**
-- Scholarship award tracking
-- Student financial aid history
-- Credit disbursement
-
 ---
 
 # ACADEMIC RECORDS (2 Tables)
 
-## 32. shishya_marksheets
+## 41. shishya_marksheets
 
-**Purpose:** Consolidated academic transcripts for students.
+**Purpose:** Consolidated academic transcripts.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -881,58 +875,42 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | marksheet_number | VARCHAR(50) | NO | - | Unique verification ID |
 | courses_completed | INTEGER | NO | 0 | Number of courses |
 | total_credits | INTEGER | NO | 0 | Academic credits earned |
-| cgpa | DECIMAL(3,2) | YES | - | Cumulative GPA (0.00-10.00) |
-| classification | VARCHAR(50) | YES | - | Distinction/First Class/Second Class/Pass |
+| cgpa | DECIMAL(3,2) | YES | - | Cumulative GPA (0-10) |
+| classification | VARCHAR(50) | YES | - | Distinction/First Class/Pass |
 | generated_at | TIMESTAMP | NO | NOW() | Generation timestamp |
 
 **Grade Calculation:**
-- O (Outstanding): 90-100% = 10.0
-- A+ (Excellent): 80-89% = 9.0
-- A (Very Good): 70-79% = 8.0
-- B+ (Good): 60-69% = 7.0
-- B (Above Average): 50-59% = 6.0
-- C (Average): 40-49% = 5.0
-- F (Fail): Below 40% = 0.0
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-- Referenced by: shishya_marksheet_verifications
-
-**Functions Used In:**
-- Marksheet page (/shishya/marksheet)
-- Public verification (/verify/marksheet/:id)
-- PDF generation
-- QR code verification
+| Grade | Score Range | Points |
+|-------|-------------|--------|
+| O (Outstanding) | 90-100% | 10.0 |
+| A+ (Excellent) | 80-89% | 9.0 |
+| A (Very Good) | 70-79% | 8.0 |
+| B+ (Good) | 60-69% | 7.0 |
+| B (Above Average) | 50-59% | 6.0 |
+| C (Average) | 40-49% | 5.0 |
+| F (Fail) | Below 40% | 0.0 |
 
 ---
 
-## 33. shishya_marksheet_verifications
+## 42. shishya_marksheet_verifications
 
-**Purpose:** Audit log of marksheet verification attempts.
+**Purpose:** Verification attempt logs.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
 | id | SERIAL | NO | auto | Primary key |
 | marksheet_id | VARCHAR(36) | NO | - | FK to shishya_marksheets.id |
-| verified_at | TIMESTAMP | NO | NOW() | Verification timestamp |
-| verifier_ip | VARCHAR(45) | YES | - | Verifier's IP address |
+| verified_at | TIMESTAMP | NO | NOW() | Verification time |
+| verifier_ip | VARCHAR(45) | YES | - | Verifier's IP |
 | verifier_agent | TEXT | YES | - | Browser user agent |
-
-**Connections:**
-- Belongs to: shishya_marksheets (marksheet_id)
-
-**Functions Used In:**
-- Verification analytics
-- Authenticity tracking
-- Employer verification logging
 
 ---
 
-# AI TUTOR (2 Tables)
+# AI TUTOR - USHA (2 Tables)
 
-## 34. shishya_usha_conversations
+## 43. shishya_usha_conversations
 
-**Purpose:** Usha AI tutor conversation sessions.
+**Purpose:** Usha AI tutor chat sessions.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -941,24 +919,14 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | course_id | INTEGER | NO | - | FK to courses.id |
 | page_type | VARCHAR(20) | NO | - | lesson/lab/project/test |
 | context_id | INTEGER | YES | - | Specific lesson/lab/project ID |
-| created_at | TIMESTAMP | NO | NOW() | Session start time |
-| updated_at | TIMESTAMP | NO | NOW() | Last activity time |
-
-**Connections:**
-- Belongs to: shishya_users (user_id)
-- References: courses (course_id)
-- Parent of: shishya_usha_messages
-
-**Functions Used In:**
-- Conversation context management
-- Session persistence
-- Multi-context support (lesson, lab, project)
+| created_at | TIMESTAMP | NO | NOW() | Session start |
+| updated_at | TIMESTAMP | NO | NOW() | Last activity |
 
 ---
 
-## 35. shishya_usha_messages
+## 44. shishya_usha_messages
 
-**Purpose:** Individual messages in Usha AI conversations.
+**Purpose:** Individual chat messages.
 
 | Column | Type | Nullable | Default | Function |
 |--------|------|----------|---------|----------|
@@ -966,26 +934,17 @@ The SHISHYA student portal shares a PostgreSQL database with OurShiksha Admin Co
 | conversation_id | INTEGER | NO | - | FK to shishya_usha_conversations.id |
 | role | VARCHAR(20) | NO | - | user/assistant |
 | content | TEXT | NO | - | Message content |
-| response_type | VARCHAR(50) | YES | - | explanation/hint/guidance/clarification |
+| response_type | VARCHAR(50) | YES | - | explanation/hint/guidance |
 | help_level | VARCHAR(20) | YES | - | minimal/moderate/detailed |
-| created_at | TIMESTAMP | NO | NOW() | Message timestamp |
-
-**Connections:**
-- Belongs to: shishya_usha_conversations (conversation_id)
-
-**Functions Used In:**
-- Chat history display
-- Context for AI responses
-- Conversation continuity
-- Multi-language support
+| created_at | TIMESTAMP | NO | NOW() | Timestamp |
 
 ---
 
-# DATABASE VIEWS
+# DATABASE VIEW
 
 ## published_courses_view
 
-**Purpose:** Optimized read-only view for SHISHYA to access only published courses.
+**Purpose:** Optimized read-only view for SHISHYA.
 
 ```sql
 CREATE VIEW published_courses_view AS
@@ -993,59 +952,62 @@ SELECT * FROM courses
 WHERE status = 'published' AND is_active = true;
 ```
 
-**Usage:** SHISHYA API uses this view instead of filtering at application level, improving query performance and ensuring consistency.
-
 ---
 
 # TABLE RELATIONSHIP DIAGRAM
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           COURSE CONTENT (Admin)                            │
+│                    ADMIN-MANAGED TABLES (Read-Only for SHISHYA)             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │   courses ──┬──> modules ──> lessons                                        │
 │             │                                                               │
-│             ├──> tests                                                      │
+│             ├──> tests ──> questions                                        │
 │             │                                                               │
 │             ├──> projects                                                   │
 │             │                                                               │
-│             └──> labs                                                       │
+│             ├──> practice_labs                                              │
+│             │                                                               │
+│             ├──> certificates                                               │
+│             │                                                               │
+│             └──> course_rewards                                             │
+│                                                                             │
+│   Standalone Admin Tables:                                                  │
+│   - skills, achievement_cards, motivational_cards                           │
+│   - credit_packages, subscription_plans                                     │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
-                                    │ (Read-only for SHISHYA)
+                                    │ (Read-only access with visibility filter)
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           SHISHYA STUDENT PORTAL                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│   shishya_users (Central Entity)                                            │
+│   shishya_users (Central Entity - VARCHAR(36) UUID)                         │
 │        │                                                                    │
 │        ├──> shishya_user_profiles (1:1)                                     │
-│        │                                                                    │
 │        ├──> shishya_sessions (1:N)                                          │
+│        ├──> shishya_otp_codes (1:N)                                         │
+│        ├──> shishya_otp_logs (1:N)                                          │
 │        │                                                                    │
 │        ├──> shishya_user_credits (1:1)                                      │
 │        │         └──> shishya_credit_transactions (1:N)                     │
+│        │         └──> shishya_payments (1:N)                                │
 │        │                                                                    │
 │        ├──> shishya_course_enrollments (1:N) ──> courses                    │
-│        │                                                                    │
 │        ├──> shishya_user_progress (1:N) ──> lessons                         │
-│        │                                                                    │
-│        ├──> shishya_user_lab_progress (1:N) ──> labs                        │
-│        │                                                                    │
+│        ├──> shishya_user_lab_progress (1:N) ──> practice_labs               │
 │        ├──> shishya_user_test_attempts (1:N) ──> tests                      │
-│        │                                                                    │
 │        ├──> shishya_user_project_submissions (1:N) ──> projects             │
-│        │                                                                    │
 │        ├──> shishya_user_certificates (1:N) ──> courses                     │
 │        │                                                                    │
 │        ├──> shishya_notifications (1:N)                                     │
-│        │                                                                    │
 │        ├──> shishya_student_streaks (1:1)                                   │
-│        │                                                                    │
 │        ├──> shishya_motivation_cards (1:N)                                  │
+│        ├──> shishya_mystery_boxes (1:N)                                     │
+│        ├──> shishya_gift_boxes (1:N)                                        │
 │        │                                                                    │
 │        ├──> shishya_usha_conversations (1:N)                                │
 │        │         └──> shishya_usha_messages (1:N)                           │
@@ -1053,59 +1015,150 @@ WHERE status = 'published' AND is_active = true;
 │        ├──> shishya_marksheets (1:N)                                        │
 │        │         └──> shishya_marksheet_verifications (1:N)                 │
 │        │                                                                    │
-│        └──> shishya_mystery_boxes (1:N)                                     │
+│        └──> shishya_user_scholarships (1:N)                                 │
 │                                                                             │
-│   Standalone Tables:                                                        │
+│   Standalone SHISHYA Tables:                                                │
 │   - shishya_vouchers ──> shishya_voucher_redemptions                        │
 │   - shishya_scholarships ──> shishya_user_scholarships                      │
 │   - shishya_motivation_rules ──> shishya_rule_trigger_logs                  │
+│   - shishya_ai_nudge_logs                                                   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
+# API ENDPOINTS PATTERN
+
+## Public API (No Auth Required)
+```
+GET /api/public/courses                    -- Published courses
+GET /api/public/courses/:id                -- Course details
+GET /api/public/courses/:id/modules        -- Course modules
+GET /api/public/courses/:id/tests          -- Course tests
+GET /api/public/courses/:id/projects       -- Course projects
+GET /api/public/courses/:id/labs           -- Course labs
+GET /api/public/verify/certificate/:number -- Certificate verification
+GET /api/public/verify/marksheet/:number   -- Marksheet verification
+```
+
+## Protected API (Auth Required)
+```
+GET/POST /api/shishya/auth/*               -- Auth endpoints
+GET/PATCH /api/shishya/profile             -- User profile
+GET/POST /api/shishya/enrollments          -- Course enrollments
+GET/POST /api/shishya/progress/*           -- Learning progress
+GET/POST /api/shishya/credits/*            -- Wallet & transactions
+GET /api/shishya/notifications             -- Notifications
+GET/POST /api/shishya/usha/*               -- AI tutor chat
+```
+
+---
+
+# CREDIT SYSTEM RULES
+
+| Event | Credits |
+|-------|---------|
+| Welcome Bonus | 50 credits on signup |
+| Course Enrollment | Deduct `courses.credit_cost` |
+| Free Courses | 0 credits (is_free = true) |
+| Voucher Redemption | Add voucher credits |
+| Purchase | Add purchased credits |
+
+**Transaction Types:** welcome, purchase, spend, refund, reward
+
+---
+
+# CERTIFICATE ELIGIBILITY
+
+Check `certificates` table for requirements:
+- `requires_test_pass` = true → Must pass all tests
+- `requires_project_completion` = true → Must submit all projects
+- `requires_lab_completion` = true → Must complete all labs
+- `passing_percentage` = Minimum test score required
+
+---
+
+# QUICK REFERENCE QUERIES
+
+## Get user's enrolled courses with progress
+```sql
+SELECT 
+  c.id, c.name, c.level,
+  e.enrolled_at, e.status,
+  COUNT(CASE WHEN p.completed THEN 1 END) as lessons_completed,
+  COUNT(p.id) as total_tracked
+FROM shishya_course_enrollments e
+JOIN courses c ON e.course_id = c.id
+LEFT JOIN shishya_user_progress p ON p.user_id = e.user_id AND p.course_id = c.id
+WHERE e.user_id = :userId
+  AND c.status = 'published' AND c.is_active = true
+GROUP BY c.id, e.enrolled_at, e.status
+```
+
+## Get user's credit balance and transactions
+```sql
+SELECT 
+  uc.balance, uc.lifetime_earned, uc.lifetime_spent,
+  (SELECT json_agg(t) FROM (
+    SELECT amount, type, description, created_at 
+    FROM shishya_credit_transactions 
+    WHERE user_id = :userId 
+    ORDER BY created_at DESC LIMIT 10
+  ) t) as recent_transactions
+FROM shishya_user_credits uc
+WHERE uc.user_id = :userId
+```
+
+## Course completion percentage
+```sql
+SELECT 
+  (COUNT(CASE WHEN completed = true THEN 1 END) * 100.0 / 
+   (SELECT COUNT(*) FROM lessons WHERE module_id IN 
+     (SELECT id FROM modules WHERE course_id = :courseId)))
+  AS completion_percentage
+FROM shishya_user_progress
+WHERE user_id = :userId AND course_id = :courseId
+```
+
+---
+
+# DO NOT DO THESE
+
+1. **Never modify course content tables** (courses, modules, lessons, etc.)
+2. **Never use legacy tables** (coin_wallets, coin_transactions)
+3. **Never query courses without** `status='published' AND is_active=true`
+4. **Never use INTEGER for shishya_users.id** - It's VARCHAR(36) UUID
+5. **Never expose unpublished content** to students
+
+---
+
 # SUMMARY TABLE
 
-| Category | Table Name | Columns | Primary Function |
-|----------|------------|---------|------------------|
-| **Course Content** | courses | 21 | Master course catalog |
-| | modules | 6 | Course sections |
-| | lessons | 9 | Learning content |
-| | tests | 9 | Assessments |
-| | projects | 10 | Assignments |
-| | labs | 15 | Coding exercises |
-| **Auth** | shishya_users | 6 | Student accounts |
-| | shishya_sessions | 3 | Login sessions |
-| | shishya_otp_codes | 6 | Email verification |
-| | shishya_otp_logs | 6 | Security audit |
-| **Profile** | shishya_user_profiles | 16 | Student profiles |
-| **Progress** | shishya_user_progress | 7 | Lesson completion |
-| | shishya_user_lab_progress | 7 | Lab completion |
-| | shishya_user_test_attempts | 10 | Test scores |
-| | shishya_user_project_submissions | 12 | Project submissions |
-| | shishya_user_certificates | 6 | Certificates |
-| | shishya_course_enrollments | 6 | Enrollments |
-| **Credits** | shishya_user_credits | 6 | Credit balance |
-| | shishya_credit_transactions | 7 | Transaction history |
-| | shishya_vouchers | 8 | Voucher codes |
-| | shishya_voucher_redemptions | 4 | Voucher usage |
-| | shishya_gift_boxes | 7 | Gift credits |
-| **Notifications** | shishya_notifications | 8 | In-app alerts |
-| **AI Motivation** | shishya_motivation_rules | 10 | Rule engine |
-| | shishya_rule_trigger_logs | 5 | Rule audit |
-| | shishya_motivation_cards | 9 | Motivation messages |
-| | shishya_ai_nudge_logs | 6 | AI nudges |
-| | shishya_student_streaks | 6 | Learning streaks |
-| | shishya_mystery_boxes | 9 | Reward boxes |
-| | shishya_scholarships | 11 | Scholarship programs |
-| | shishya_user_scholarships | 5 | Scholarship awards |
-| **Academic** | shishya_marksheets | 8 | Academic transcripts |
-| | shishya_marksheet_verifications | 5 | Verification logs |
-| **AI Tutor** | shishya_usha_conversations | 7 | AI chat sessions |
-| | shishya_usha_messages | 7 | Chat messages |
+| Category | Table Count | Tables |
+|----------|-------------|--------|
+| **Course Content (Admin)** | 14 | courses, modules, lessons, tests, questions, projects, practice_labs, certificates, skills, course_rewards, achievement_cards, motivational_cards, credit_packages, subscription_plans |
+| **Auth** | 4 | shishya_users, shishya_sessions, shishya_otp_codes, shishya_otp_logs |
+| **Profile** | 1 | shishya_user_profiles |
+| **Progress** | 6 | shishya_course_enrollments, shishya_user_progress, shishya_user_lab_progress, shishya_user_test_attempts, shishya_user_project_submissions, shishya_user_certificates |
+| **Credits** | 6 | shishya_user_credits, shishya_credit_transactions, shishya_payments, shishya_vouchers, shishya_voucher_redemptions, shishya_gift_boxes |
+| **Notifications** | 1 | shishya_notifications |
+| **AI Motivation** | 8 | shishya_motivation_rules, shishya_rule_trigger_logs, shishya_motivation_cards, shishya_ai_nudge_logs, shishya_student_streaks, shishya_mystery_boxes, shishya_scholarships, shishya_user_scholarships |
+| **Academic** | 2 | shishya_marksheets, shishya_marksheet_verifications |
+| **AI Tutor** | 2 | shishya_usha_conversations, shishya_usha_messages |
 
-**Total: 35 Tables + 1 View**
+**Total: 44 Tables (14 Admin-Read + 30 SHISHYA-Owned) + 1 View**
+
+---
+
+# TECHNOLOGY STACK
+
+- **Database:** PostgreSQL (Neon-compatible)
+- **ORM:** Drizzle ORM
+- **Auth:** Express sessions + bcrypt + JWT
+- **Payments:** Razorpay integration
+- **Email:** Resend API for OTPs
+- **AI:** OpenAI GPT-4o for Usha tutor
 
 ---
 

@@ -1,0 +1,160 @@
+You are building the Shishya (Student) Portal for OurShiksha - an educational platform. The Shishya portal shares a single PostgreSQL database with the Admin (Guru) portal. You must understand which tables you can read, which you can write to, and the critical rules for data access.
+
+Database Architecture Overview
+Total Tables: 74 tables in shared PostgreSQL database
+
+Access Pattern:
+
+Admin (Guru) = Creates and manages course content
+Shishya (Student) = Reads published content, writes own progress/data
+Key Principle: Shishya portal NEVER modifies course content tables. It only READS published courses and WRITES to shishya-prefixed tables.
+
+Critical ID Type Rule
+IMPORTANT: shishya_users.id is VARCHAR(36) containing UUID v4 - NOT a serial integer.
+
+All foreign keys referencing shishya users MUST use VARCHAR(36):
+
+user_id VARCHAR(36) REFERENCES shishya_users(id)
+Tables Shishya Portal CAN READ (Course Content)
+These are created by Admin. Shishya reads ONLY published content.
+
+MANDATORY Visibility Filter
+SELECT * FROM courses 
+WHERE status = 'published' AND is_active = true
+Table	What It Contains
+courses	Course catalog (name, description, level, pricing)
+modules	Course sections/chapters
+lessons	Individual learning units
+tests	Course assessments
+questions	Test questions (MCQ, true/false)
+projects	Hands-on assignments
+practice_labs	Coding exercises with validation
+certificates	Certificate templates
+skills	Skills library
+course_rewards	Reward configuration per course
+achievement_cards	Unlockable achievements
+motivational_cards	Motivational messages
+credit_packages	Purchasable credit bundles
+subscription_plans	Subscription tiers
+Tables Shishya Portal OWNS (Read + Write)
+These tables are prefixed with shishya_ and belong to the student portal.
+
+Authentication (4 tables)
+Table	Purpose
+shishya_users	Student accounts (email, password_hash, status)
+shishya_sessions	Login sessions (express-session store)
+shishya_otp_codes	Email verification OTPs
+shishya_otp_logs	OTP audit trail
+Profile (1 table)
+Table	Purpose
+shishya_user_profiles	Extended profile (bio, social links, portfolio)
+Progress (6 tables)
+Table	Purpose
+shishya_course_enrollments	Which courses user enrolled in
+shishya_user_progress	Lesson completion tracking
+shishya_user_lab_progress	Lab completion + saved code
+shishya_user_test_attempts	Test scores and answers
+shishya_user_project_submissions	Project submissions
+shishya_user_certificates	Earned certificates
+Credits & Wallet (6 tables)
+Table	Purpose
+shishya_user_credits	Current credit balance
+shishya_credit_transactions	Transaction history
+shishya_payments	Payment records (Razorpay)
+shishya_vouchers	Redeemable voucher codes
+shishya_voucher_redemptions	Voucher usage tracking
+shishya_gift_boxes	Surprise credit gifts
+Notifications (1 table)
+Table	Purpose
+shishya_notifications	In-app notifications
+AI Motivation (8 tables)
+Table	Purpose
+shishya_motivation_rules	Automated trigger rules
+shishya_rule_trigger_logs	Rule execution log
+shishya_motivation_cards	Personalized motivation messages
+shishya_ai_nudge_logs	AI-generated nudges
+shishya_student_streaks	Learning streak tracking
+shishya_mystery_boxes	Gamified reward boxes
+shishya_scholarships	Available scholarships
+shishya_user_scholarships	Awarded scholarships
+Academic (2 tables)
+Table	Purpose
+shishya_marksheets	Consolidated academic records
+shishya_marksheet_verifications	Public verification log
+AI Tutor - Usha (2 tables)
+Table	Purpose
+shishya_usha_conversations	Chat sessions with context
+shishya_usha_messages	Individual chat messages
+Key Relationship Patterns
+1. User → Profile (One-to-One)
+shishya_users.id → shishya_user_profiles.user_id (UNIQUE)
+2. User → Credits (One-to-One)
+shishya_users.id → shishya_user_credits.user_id (UNIQUE)
+3. User → Progress (One-to-Many)
+shishya_users.id → shishya_user_progress.user_id
+shishya_users.id → shishya_course_enrollments.user_id
+4. Course Content Hierarchy
+courses → modules → lessons
+courses → tests → questions
+courses → projects
+courses → practice_labs
+API Endpoints Pattern
+Public API (No Auth Required)
+Read-only access to published course data:
+
+GET /api/public/courses                    -- Published courses
+GET /api/public/courses/:id                -- Course details
+GET /api/public/courses/:id/modules        -- Course modules
+GET /api/public/courses/:id/tests          -- Course tests
+GET /api/public/courses/:id/projects       -- Course projects
+GET /api/public/courses/:id/labs           -- Course labs
+GET /api/public/verify/certificate/:number -- Certificate verification
+GET /api/public/verify/marksheet/:number   -- Marksheet verification
+Protected API (Auth Required)
+Student-specific data:
+
+GET/POST /api/shishya/auth/*               -- Auth endpoints
+GET/PATCH /api/shishya/profile             -- User profile
+GET/POST /api/shishya/enrollments          -- Course enrollments
+GET/POST /api/shishya/progress/*           -- Learning progress
+GET/POST /api/shishya/credits/*            -- Wallet & transactions
+GET /api/shishya/notifications             -- Notifications
+GET/POST /api/shishya/usha/*               -- AI tutor chat
+Authentication Flow
+Signup: Email → OTP sent → Verify OTP → Create account + 50 welcome credits
+Login: Email + Password → JWT/Session → Access protected routes
+Session: Store in shishya_sessions table (PostgreSQL session store)
+Credit System Rules
+Welcome Bonus: 50 credits on signup
+Course Enrollment: Deduct courses.credit_cost from balance
+Free Courses: courses.is_free = true requires 0 credits
+Transaction Types: welcome, purchase, spend, refund, reward
+Progress Calculation
+Course Completion %
+SELECT 
+  (COUNT(CASE WHEN completed = true THEN 1 END) * 100.0 / 
+   (SELECT COUNT(*) FROM lessons WHERE module_id IN 
+     (SELECT id FROM modules WHERE course_id = :courseId)))
+  AS completion_percentage
+FROM shishya_user_progress
+WHERE user_id = :userId AND course_id = :courseId
+Certificate Eligibility
+Check certificates table for requirements:
+
+requires_test_pass = true → Must pass all tests
+requires_project_completion = true → Must submit all projects
+requires_lab_completion = true → Must complete all labs
+passing_percentage = Minimum test score required
+Do NOT Do These
+Never modify course content tables (courses, modules, lessons, etc.)
+Never use legacy tables (coin_wallets, coin_transactions)
+Never query courses without status='published' AND is_active=true
+Never use INTEGER for shishya_users.id - It's VARCHAR(36) UUID
+Never expose unpublished content to students
+Technology Stack
+Database: PostgreSQL (Neon-compatible)
+ORM: Drizzle ORM
+Auth: Express sessions + bcrypt + JWT
+Payments: Razorpay integration
+Email: Resend API for OTPs
+AI: OpenAI GPT-4o for Usha tutor
