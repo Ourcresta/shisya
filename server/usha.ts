@@ -420,7 +420,30 @@ function buildContextPrompt(
     contextDesc += `- Current lesson: "${context.lessonTitle}"\n`;
   }
   
-  if (context.labTitle) {
+  if (context.pageType === "lab" && context.labTitle) {
+    contextDesc += `\n=== LAB DETAILS (FOCUS ON THIS) ===\n`;
+    contextDesc += `- Lab Title: "${context.labTitle}"\n`;
+    contextDesc += `- Programming Language: ${context.labLanguage || "JavaScript"}\n`;
+    if (context.labDifficulty) {
+      contextDesc += `- Difficulty: ${context.labDifficulty}\n`;
+    }
+    if (context.labObjective) {
+      contextDesc += `- Objective: ${context.labObjective}\n`;
+    }
+    if (context.labInstructions && context.labInstructions.length > 0) {
+      contextDesc += `- Instructions:\n`;
+      context.labInstructions.forEach((instruction, i) => {
+        contextDesc += `  ${i + 1}. ${instruction}\n`;
+      });
+    }
+    if (context.labExpectedOutput) {
+      contextDesc += `- Expected Output: "${context.labExpectedOutput}"\n`;
+    }
+    if (context.currentCode) {
+      contextDesc += `- Student's Current Code:\n\`\`\`${context.labLanguage || "javascript"}\n${context.currentCode}\n\`\`\`\n`;
+    }
+    contextDesc += `=== END LAB DETAILS ===\n`;
+  } else if (context.labTitle) {
     contextDesc += `- Current lab: "${context.labTitle}"\n`;
   }
   
@@ -458,7 +481,14 @@ function buildContextPrompt(
     contextDesc += `\n\nPAGE-SPECIFIC REMINDER:\n`;
     switch (context.pageType) {
       case "lab":
-        contextDesc += `For labs, only provide hints and pseudocode. NEVER give complete working code.`;
+        contextDesc += `For labs:
+- Focus ONLY on the lab's objective, instructions, and expected output
+- Reference the specific programming language (${context.labLanguage || "JavaScript"})
+- Guide through the numbered instructions step by step
+- If they ask about a concept, explain it in context of THIS lab
+- Provide hints and pseudocode, NEVER complete working code
+- If they share code, analyze it against the lab's expected output
+- Use real-world analogies relevant to the lab topic`;
         break;
       case "project":
         contextDesc += `For projects, only suggest approaches and architecture. NEVER write the implementation.`;
@@ -469,6 +499,41 @@ function buildContextPrompt(
       default:
         contextDesc += `Explain concepts freely and encourage exploration.`;
     }
+  }
+
+  if (context.pageType === "lab") {
+    contextDesc += `\n\n=== MANDATORY RULES FOR LABS ===
+
+FORBIDDEN (NEVER DO THIS):
+- NEVER ask "which part are you working on?"
+- NEVER ask "what specific concept?"
+- NEVER ask "can you tell me which step?"
+- NEVER ask any clarifying questions about what they need help with
+- NEVER ask them to restate their question
+
+INSTEAD (ALWAYS DO THIS):
+- You KNOW the lab details - use them!
+- When they say "help me" or ask vaguely, START with instruction #1
+- Proactively guide them step by step through the instructions
+- Reference SPECIFIC instructions by number: "Let's start with step 1..."
+- Use the lab's language (${context.labLanguage || "JavaScript"}) in your explanation
+
+RESPONSE FORMAT:
+1. Acknowledge their request warmly
+2. Provide IMMEDIATE, SPECIFIC guidance about the lab
+3. Reference the actual instructions or objective
+4. End with encouragement + a quoted follow-up question
+
+Example good response:
+"I'd love to help! This lab is about ${context.labObjective || "practicing code"}. Let's start with step 1 - you need to declare a variable. In JavaScript, you can use 'let' or 'const' like a labeled box that holds a value..."
+
+"You're making great progress! Consider asking: 'How do I use console.log to print my variable?'"
+
+The suggested question MUST be in quotes and relate to:
+- The lab's objective
+- A specific instruction step
+- The expected output
+=== END MANDATORY RULES ===`;
   }
 
   return contextDesc;
@@ -570,6 +635,11 @@ export function registerUshaRoutes(app: Express): void {
         questionId: context?.questionId,
         lessonTitle: context?.lessonTitle,
         labTitle: context?.labTitle,
+        labObjective: context?.labObjective,
+        labInstructions: context?.labInstructions,
+        labLanguage: context?.labLanguage,
+        labDifficulty: context?.labDifficulty,
+        labExpectedOutput: context?.labExpectedOutput,
         projectTitle: context?.projectTitle,
         courseTitle: context?.courseTitle,
         courseLevel: context?.courseLevel,

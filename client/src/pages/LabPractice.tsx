@@ -295,6 +295,12 @@ export default function LabPractice() {
             pageType: "lab",
             courseTitle: course?.title,
             labTitle: lab.title,
+            labObjective: lab.description,
+            labInstructions: lab.instructions,
+            labLanguage: lab.language,
+            labDifficulty: lab.difficulty,
+            labExpectedOutput: lab.expectedOutput,
+            currentCode: code,
           }}
         />
       )}

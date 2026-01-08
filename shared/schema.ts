@@ -1161,6 +1161,11 @@ export const ushaRequestSchema = z.object({
     questionId: z.string().optional(),
     lessonTitle: z.string().optional(),
     labTitle: z.string().optional(),
+    labObjective: z.string().optional(),
+    labInstructions: z.array(z.string()).optional(),
+    labLanguage: z.string().optional(),
+    labDifficulty: z.string().optional(),
+    labExpectedOutput: z.string().optional(),
     projectTitle: z.string().optional(),
     courseTitle: z.string().optional(),
     courseLevel: z.string().optional(),
@@ -1200,6 +1205,11 @@ export interface UshaContext {
   courseLevel?: string;
   lessonTitle?: string;
   labTitle?: string;
+  labObjective?: string;
+  labInstructions?: string[];
+  labLanguage?: string;
+  labDifficulty?: string;
+  labExpectedOutput?: string;
   projectTitle?: string;
   pageType?: UshaPageType;
   studentId?: string;
