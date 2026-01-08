@@ -110,35 +110,33 @@ function calculateHelpLevel(context: UshaContext): UshaHelpLevel {
   const progress = context.studentProgressSummary;
   
   if (!progress || !progress.totalLessons) {
-    return "beginner";
+    return "detailed";
   }
 
   const completionRatio = progress.totalLessons > 0 
     ? progress.lessonsCompleted / progress.totalLessons 
     : 0;
   
-  const hasRecentFailures = progress.recentFailures > 0;
-  const stuckOnPage = (progress.timeOnCurrentPage || 0) > 300;
   const previousTurns = context.previousUshaTurns?.length || 0;
   const repeatedQuestions = previousTurns > 2;
 
   if (courseLevel === "beginner") {
-    return "beginner";
+    return "detailed";
   }
 
-  if (courseLevel === "advanced" && completionRatio > 0.7 && !hasRecentFailures) {
-    return "advanced";
+  if (courseLevel === "advanced" && completionRatio > 0.7) {
+    return "minimal";
   }
 
-  if (hasRecentFailures || stuckOnPage || repeatedQuestions || completionRatio < 0.3) {
-    return "beginner";
+  if (repeatedQuestions || completionRatio < 0.3) {
+    return "detailed";
   }
 
-  if (completionRatio > 0.5 && !hasRecentFailures) {
-    return courseLevel === "advanced" ? "advanced" : "intermediate";
+  if (completionRatio > 0.5) {
+    return courseLevel === "advanced" ? "minimal" : "moderate";
   }
 
-  return "intermediate";
+  return "moderate";
 }
 
 function detectMisuse(question: string, userId: string): { isMisuse: boolean; isRepeated: boolean } {
@@ -178,7 +176,7 @@ function detectMisuse(question: string, userId: string): { isMisuse: boolean; is
   return { isMisuse: false, isRepeated: false };
 }
 
-function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, language: SupportedLanguage = "english"): string {
+function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, language: SupportedLanguage = "en"): string {
   let contextDesc = `CURRENT CONTEXT:\n`;
   contextDesc += `- Page type: ${context.pageType}\n`;
   contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
@@ -213,20 +211,17 @@ function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, lang
     if (progress.labsCompleted > 0 || progress.totalLabs > 0) {
       contextDesc += `- Labs completed: ${progress.labsCompleted}/${progress.totalLabs}\n`;
     }
-    if (progress.recentFailures > 0) {
-      contextDesc += `- Recent struggles: Student has had ${progress.recentFailures} recent failed attempts\n`;
-    }
   }
 
   contextDesc += `\nHELP LEVEL INSTRUCTION:\n`;
   switch (helpLevel) {
-    case "beginner":
+    case "detailed":
       contextDesc += `Provide more explanation with analogies. Use simpler language. Break concepts into smaller steps. Be encouraging.`;
       break;
-    case "intermediate":
+    case "moderate":
       contextDesc += `Balance concepts with structured guidance. Provide moderate detail. Encourage independent thinking.`;
       break;
-    case "advanced":
+    case "minimal":
       contextDesc += `Give minimal hints. Focus on edge cases and strategic thinking. Assume prior knowledge. Challenge the student.`;
       break;
   }
@@ -239,7 +234,7 @@ function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, lang
     case "project":
       contextDesc += `For projects, only suggest approaches and architecture. NEVER write the implementation.`;
       break;
-    case "test_prep":
+    case "test":
       contextDesc += `Help understand concepts for test preparation. NEVER reveal actual test answers.`;
       break;
     default:
@@ -290,7 +285,13 @@ function determineResponseType(question: string, answer: string): UshaResponseTy
   return "explanation";
 }
 
-function getMisuseResponse(isRepeated: boolean, helpLevel: UshaHelpLevel): UshaResponse {
+interface UshaApiResponse {
+  answer: string;
+  type: UshaResponseType;
+  helpLevel: UshaHelpLevel;
+}
+
+function getMisuseResponse(isRepeated: boolean, helpLevel: UshaHelpLevel): UshaApiResponse {
   if (isRepeated) {
     return {
       answer: "I notice you're looking for direct answers, but my role is to help you truly understand and learn. Direct answers might seem faster, but they won't help you in the long run. Let's take a different approach - can you tell me which specific concept is confusing you? I can break it down step by step, and I think you'll find that much more helpful.",
@@ -324,24 +325,33 @@ export function registerUshaRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid request", details: parseResult.error.issues });
       }
 
-      const { context, question } = parseResult.data;
+      const { courseId, pageType, message, context, language: reqLanguage } = parseResult.data;
 
-      if (context.studentId !== userId) {
-        return res.status(403).json({ error: "Context mismatch" });
-      }
+      const ushaContext: UshaContext = {
+        courseId,
+        pageType,
+        studentId: userId,
+        lessonId: context?.lessonId,
+        labId: context?.labId,
+        projectId: context?.projectId,
+        testId: context?.testId,
+        currentCode: context?.currentCode,
+        errorMessage: context?.errorMessage,
+        questionId: context?.questionId,
+      };
 
-      const helpLevel = calculateHelpLevel(context);
-      const language = (context.language || "english") as SupportedLanguage;
+      const helpLevel = calculateHelpLevel(ushaContext);
+      const language = reqLanguage || "en";
 
-      const misuseCheck = detectMisuse(question, userId);
+      const misuseCheck = detectMisuse(message, userId);
       if (misuseCheck.isMisuse) {
         const warningResponse = getMisuseResponse(misuseCheck.isRepeated, helpLevel);
-        await saveConversation(userId, context.courseId, context.pageType, question, warningResponse);
+        await saveConversation(userId, courseId, pageType, message, warningResponse);
         return res.json(warningResponse);
       }
 
-      const contextPrompt = buildContextPrompt(context, helpLevel, language);
-      const messages = buildConversationMessages(context.previousUshaTurns, contextPrompt, question);
+      const contextPrompt = buildContextPrompt(ushaContext, helpLevel, language);
+      const messages = buildConversationMessages(undefined, contextPrompt, message);
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1-mini",
@@ -351,15 +361,15 @@ export function registerUshaRoutes(app: Express): void {
       });
 
       const answer = completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
-      const responseType = determineResponseType(question, answer);
+      const responseType = determineResponseType(message, answer);
 
-      const response: UshaResponse = {
+      const response = {
         answer,
         type: responseType,
         helpLevel,
       };
 
-      await saveConversation(userId, context.courseId, context.pageType, question, response);
+      await saveConversation(userId, courseId, pageType, message, response);
 
       const responseWithMeta = {
         ...response,
@@ -417,7 +427,7 @@ async function saveConversation(
   courseId: number,
   pageType: string,
   question: string,
-  response: UshaResponse
+  response: UshaApiResponse
 ): Promise<void> {
   try {
     let conversation = await db.query.ushaConversations.findFirst({
@@ -447,7 +457,7 @@ async function saveConversation(
       {
         conversationId: conversation.id,
         role: "assistant",
-        content: response.answer,
+        content: response.answer || "",
         responseType: response.type,
         helpLevel: response.helpLevel,
       }

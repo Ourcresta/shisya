@@ -12,9 +12,12 @@ import {
   SkipBack,
   SkipForward,
   Check,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import ushaAvatarImage from "@assets/image_1767697725032.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -302,7 +305,7 @@ export function UshaVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="relative bg-black rounded-lg overflow-hidden group"
+      className="relative bg-black rounded-xl overflow-hidden group border-2 border-border shadow-lg"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
       onKeyDown={handleKeyDown}
@@ -314,7 +317,7 @@ export function UshaVideoPlayer({
         ref={videoRef}
         src={videoUrl}
         poster={poster}
-        className="w-full aspect-video"
+        className="w-full aspect-video bg-gradient-to-br from-slate-900 to-slate-800"
         muted
         playsInline
         onClick={togglePlay}
@@ -602,6 +605,38 @@ export function UshaVideoPlayer({
           </div>
         </div>
       )}
+
+      {/* Usha Avatar Guide Overlay */}
+      <div className="absolute bottom-20 right-4 flex items-end gap-2 pointer-events-none">
+        {/* Speech Bubble */}
+        <div className="relative bg-white dark:bg-slate-800 rounded-xl px-3 py-2 shadow-lg max-w-[180px] animate-pulse">
+          <p className="text-xs text-slate-700 dark:text-slate-200 font-medium">
+            {isPlaying ? "I am explaining the lesson..." : "Click play to start learning!"}
+          </p>
+          {/* Speech bubble tail */}
+          <div className="absolute -right-2 bottom-3 w-0 h-0 border-t-[8px] border-t-transparent border-l-[10px] border-l-white dark:border-l-slate-800 border-b-[8px] border-b-transparent" />
+        </div>
+
+        {/* Avatar with label */}
+        <div className="flex flex-col items-center">
+          <div className="relative">
+            <Avatar className="h-16 w-16 border-2 border-primary shadow-lg">
+              <AvatarImage src={ushaAvatarImage} alt="Usha" />
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">U</AvatarFallback>
+            </Avatar>
+            {/* Live indicator when playing */}
+            {isPlaying && (
+              <div className="absolute -top-1 -right-1 flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                <Radio className="w-2.5 h-2.5 animate-pulse" />
+                LIVE
+              </div>
+            )}
+          </div>
+          <div className="mt-1 bg-primary/90 backdrop-blur px-2 py-0.5 rounded-md">
+            <span className="text-[10px] font-semibold text-primary-foreground">Usha Guide</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

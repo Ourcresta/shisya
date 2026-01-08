@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X, Lock } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UshaChatPanel } from "./UshaChatPanel";
-import type { UshaAllowedPage, StudentProgressSummary } from "@shared/schema";
+import type { UshaPageType, StudentProgressSummary } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
 
 interface UshaContext {
@@ -12,7 +12,7 @@ interface UshaContext {
   lessonId?: number;
   labId?: number;
   projectId?: number;
-  pageType: UshaAllowedPage;
+  pageType: UshaPageType;
   courseTitle?: string;
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;

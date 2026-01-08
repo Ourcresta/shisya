@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Send, X, AlertCircle, Globe } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { UshaAllowedPage, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn, SupportedLanguage } from "@shared/schema";
+import type { UshaPageType, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn, SupportedLanguage } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
 
 interface UshaContext {
@@ -25,7 +25,7 @@ interface UshaContext {
   lessonId?: number;
   labId?: number;
   projectId?: number;
-  pageType: UshaAllowedPage;
+  pageType: UshaPageType;
   courseTitle?: string;
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
@@ -35,9 +35,16 @@ interface UshaContext {
 }
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
-  english: "English",
-  hindi: "Hindi",
-  tamil: "Tamil",
+  en: "English",
+  hi: "Hindi",
+  ta: "Tamil",
+  te: "Telugu",
+  kn: "Kannada",
+  ml: "Malayalam",
+  bn: "Bengali",
+  mr: "Marathi",
+  gu: "Gujarati",
+  pa: "Punjabi",
 };
 
 interface Message {
@@ -78,11 +85,11 @@ function getResponseTypeBadge(type: UshaResponseType): { label: string; variant:
 
 function getHelpLevelLabel(level: UshaHelpLevel): string {
   switch (level) {
-    case "beginner":
+    case "detailed":
       return "Detailed";
-    case "intermediate":
+    case "moderate":
       return "Balanced";
-    case "advanced":
+    case "minimal":
       return "Concise";
     default:
       return "";
@@ -93,7 +100,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [language, setLanguage] = useState<SupportedLanguage>("english");
+  const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [remainingRequests, setRemainingRequests] = useState<number | null>(null);
   const [nearLimit, setNearLimit] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -119,13 +126,15 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
       const response = await apiRequest("POST", "/api/usha/ask", {
+        courseId: context.courseId,
+        pageType: context.pageType,
+        message: question,
+        language,
         context: {
-          studentId: user?.id,
-          ...context,
-          language,
-          previousUshaTurns: getPreviousTurns(),
+          lessonId: context.lessonId,
+          labId: context.labId,
+          projectId: context.projectId,
         },
-        question,
       });
       return await response.json() as UshaApiResponse;
     },
@@ -172,12 +181,12 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
     }
   };
 
-  const getPageTypeLabel = (pageType: UshaAllowedPage): string => {
+  const getPageTypeLabel = (pageType: UshaPageType): string => {
     switch (pageType) {
       case "lesson": return "Lesson";
       case "lab": return "Lab";
       case "project": return "Project";
-      case "test_prep": return "Test Prep";
+      case "test": return "Test";
       default: return "Learning";
     }
   };
@@ -204,9 +213,12 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="english" data-testid="option-english">English</SelectItem>
-              <SelectItem value="hindi" data-testid="option-hindi">Hindi</SelectItem>
-              <SelectItem value="tamil" data-testid="option-tamil">Tamil</SelectItem>
+              <SelectItem value="en" data-testid="option-english">English</SelectItem>
+              <SelectItem value="hi" data-testid="option-hindi">Hindi</SelectItem>
+              <SelectItem value="ta" data-testid="option-tamil">Tamil</SelectItem>
+              <SelectItem value="te" data-testid="option-telugu">Telugu</SelectItem>
+              <SelectItem value="kn" data-testid="option-kannada">Kannada</SelectItem>
+              <SelectItem value="ml" data-testid="option-malayalam">Malayalam</SelectItem>
             </SelectContent>
           </Select>
           <Button

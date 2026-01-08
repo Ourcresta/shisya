@@ -1,0 +1,124 @@
+You are a senior frontend engineer building the VIDEO PLAYER for the SHISHYA PORTAL.
+
+GOAL
+Create a modern lesson video player where ONE Usha avatar video can play with MULTIPLE switchable audio languages without reloading the video.
+
+--------------------------------------------------
+VIDEO PLAYER REQUIREMENTS
+--------------------------------------------------
+
+1. CORE PLAYER
+- Use a single HTML5 / React video player.
+- Video source = lesson.video_url (Usha avatar video).
+- Video must NOT reload when language changes.
+
+2. AUDIO TRACK SYSTEM
+- Audio is NOT embedded in the video.
+- Audio is loaded separately as an external audio track.
+- Each lesson has multiple audio tracks, one per language.
+
+Example languages:
+- English (en)
+- Hindi (hi)
+- Tamil (ta)
+- Telugu (te)
+- Kannada (kn)
+- Malayalam (ml)
+- Marathi (mr)
+
+3. LANGUAGE SELECTOR (MANDATORY)
+- Show a 🌐 language dropdown inside the video player UI.
+- Default language = English.
+- When user selects a language:
+  - Fetch audio_url for that language
+  - Switch audio instantly
+  - Maintain current video timestamp
+
+NO:
+- Page refresh
+- Video reload
+- UI flicker
+
+--------------------------------------------------
+PLAYER CONTROLS
+--------------------------------------------------
+
+Required controls:
+- Play / Pause
+- Seek bar
+- Volume control
+- Fullscreen
+- Playback speed (0.75x, 1x, 1.25x, 1.5x)
+- Language selector 🌐
+
+--------------------------------------------------
+SYNC RULES
+--------------------------------------------------
+
+- Audio must always stay in sync with the video timestamp.
+- On pause → pause audio
+- On seek → sync audio
+- On play → resume both
+- If audio not found → fallback to English
+
+--------------------------------------------------
+USER EXPERIENCE
+--------------------------------------------------
+
+- Clean, modern UI (dark theme preferred)
+- Mobile + desktop responsive
+- Language selector clearly visible
+- Smooth transitions when switching language
+- Show loading indicator while audio switches
+
+--------------------------------------------------
+ERROR HANDLING
+--------------------------------------------------
+
+- If selected language audio is missing:
+  - Show toast message
+  - Auto-fallback to English
+- If audio fails to load:
+  - Continue video muted + show error
+
+--------------------------------------------------
+PERFORMANCE RULES
+--------------------------------------------------
+
+- Preload audio metadata
+- Lazy load audio streams
+- Do not preload all languages at once
+- Video must be CDN friendly
+
+--------------------------------------------------
+DATA FLOW
+--------------------------------------------------
+
+- Fetch lesson metadata on page load
+- Fetch available audio languages for lesson
+- Store current language in state
+- Dynamically update audio source
+
+--------------------------------------------------
+CODE QUALITY
+--------------------------------------------------
+
+- Modular components
+- Clean state management
+- Clear comments
+- No hardcoded language values
+- Easy to extend with new languages
+
+--------------------------------------------------
+FINAL OUTPUT
+--------------------------------------------------
+
+Generate:
+1. Video Player component
+2. Audio sync logic
+3. Language switch handler
+4. UI layout for controls
+5. Error handling logic
+
+This video player is the heart of Shishya learning.
+Build it production-ready and scalable.
