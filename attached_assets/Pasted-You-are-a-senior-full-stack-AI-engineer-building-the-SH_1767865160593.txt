@@ -1,0 +1,138 @@
+You are a senior full-stack AI engineer building the SHISHYA PORTAL.
+
+OBJECTIVE
+Build a feature where ONE lesson video (Usha avatar) supports MULTIPLE dynamically switchable audio languages, without duplicating the video file.
+
+The learner must be able to select a language and instantly hear Usha explain the same video in that language.
+
+--------------------------------------------------
+CORE FUNCTIONAL REQUIREMENTS
+--------------------------------------------------
+
+1. VIDEO + MULTI-AUDIO ARCHITECTURE
+- Use ONE video per lesson (Usha avatar video).
+- Store multiple audio tracks per lesson, one per language.
+- Switching language must change ONLY the audio, NOT reload the video.
+
+2. DATABASE (Neon PostgreSQL)
+Create optimized tables under the SHISHYA namespace:
+
+TABLE: shishya_courses
+- id (pk)
+- title
+- description
+- created_at
+
+TABLE: shishya_lessons
+- id (pk)
+- course_id (fk)
+- title
+- video_url
+- script_master (base lesson text in English)
+- created_at
+
+TABLE: shishya_lesson_audio_tracks
+- id (pk)
+- lesson_id (fk)
+- language_code (en, hi, ta, te, kn, ml, mr)
+- audio_url
+- voice_name
+- duration
+- created_at
+
+Ensure:
+- One lesson → many audio tracks
+- Proper indexing on lesson_id + language_code
+- No duplicate video storage
+
+--------------------------------------------------
+AUDIO GENERATION LOGIC
+--------------------------------------------------
+
+- Use the lesson script_master as the source.
+- Audio tracks are generated externally via TTS and stored as files.
+- Audio URLs are saved in shishya_lesson_audio_tracks.
+- System must support adding new languages without schema changes.
+
+--------------------------------------------------
+FRONTEND (SHISHYA PORTAL)
+--------------------------------------------------
+
+Build a modern lesson player UI with:
+
+- Video player (HTML5 or React-based)
+- Language selector dropdown 🌐
+- On language change:
+  - Fetch matching audio_url
+  - Replace audio track instantly
+  - Keep video playback position intact
+
+UX RULES:
+- No page reload
+- No video reload
+- Smooth audio switching
+- Default language = English
+
+--------------------------------------------------
+API / BACKEND LOGIC
+--------------------------------------------------
+
+Create APIs:
+- GET lesson details
+- GET available audio languages for a lesson
+- GET audio track by lesson_id + language_code
+
+Implement:
+- Secure access
+- Clean separation of concerns
+- Error handling if audio missing (fallback to English)
+
+--------------------------------------------------
+ADMIN SUPPORT (FUTURE-READY)
+--------------------------------------------------
+
+Design code so that Admin Course Factory can:
+- Add new languages later
+- Upload or regenerate audio per lesson
+- Enable/disable specific languages
+
+--------------------------------------------------
+SCALABILITY & PERFORMANCE
+--------------------------------------------------
+
+- Optimize for 1000+ courses
+- Low bandwidth friendly
+- Cache lesson metadata
+- Stream audio efficiently
+- Video remains CDN-friendly
+
+--------------------------------------------------
+NAMING & CONVENTIONS
+--------------------------------------------------
+
+- Prefix all tables with shishya_
+- Use clean, readable, documented code
+- Follow modular architecture
+- Use environment variables for URLs
+
+--------------------------------------------------
+FINAL OUTPUT EXPECTATION
+--------------------------------------------------
+
+Generate:
+1. Database schema (SQL)
+2. Backend APIs
+3. Frontend lesson player logic
+4. Audio switching mechanism
+5. Clear inline comments
+6. Clean, production-ready code
+
+DO NOT:
+- Duplicate videos
+- Hardcode languages
+- Mix admin and shishya schemas
+
+This feature represents:
+"One Usha avatar video, many languages, seamless learning."
+
+Proceed step-by-step and ensure the system is robust, scalable, and easy to extend.

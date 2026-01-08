@@ -20,7 +20,6 @@ import {
   Coins,
   Target,
   Lightbulb,
-  Video,
   ExternalLink,
   LinkIcon
 } from "lucide-react";
@@ -49,6 +48,7 @@ import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { UshaAvatar } from "@/components/usha";
+import { UshaVideoPlayer, type AudioTrack, type SubtitleTrack } from "@/components/video/UshaVideoPlayer";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
 
 const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
@@ -395,6 +395,83 @@ export default function LearnView() {
   );
 }
 
+function getMockAudioTracks(lessonId: number): AudioTrack[] {
+  return [
+    {
+      id: `${lessonId}-en`,
+      languageCode: "en",
+      languageName: "English",
+      audioUrl: `https://example.com/audio/${lessonId}/en.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-hi`,
+      languageCode: "hi",
+      languageName: "Hindi",
+      audioUrl: `https://example.com/audio/${lessonId}/hi.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-ta`,
+      languageCode: "ta",
+      languageName: "Tamil",
+      audioUrl: `https://example.com/audio/${lessonId}/ta.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-te`,
+      languageCode: "te",
+      languageName: "Telugu",
+      audioUrl: `https://example.com/audio/${lessonId}/te.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-kn`,
+      languageCode: "kn",
+      languageName: "Kannada",
+      audioUrl: `https://example.com/audio/${lessonId}/kn.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-ml`,
+      languageCode: "ml",
+      languageName: "Malayalam",
+      audioUrl: `https://example.com/audio/${lessonId}/ml.mp3`,
+      voiceName: "Usha",
+    },
+    {
+      id: `${lessonId}-mr`,
+      languageCode: "mr",
+      languageName: "Marathi",
+      audioUrl: `https://example.com/audio/${lessonId}/mr.mp3`,
+      voiceName: "Usha",
+    },
+  ];
+}
+
+function getMockSubtitleTracks(lessonId: number): SubtitleTrack[] {
+  return [
+    {
+      id: `${lessonId}-sub-en`,
+      languageCode: "en",
+      languageName: "English",
+      subtitleUrl: `https://example.com/subtitles/${lessonId}/en.vtt`,
+    },
+    {
+      id: `${lessonId}-sub-hi`,
+      languageCode: "hi",
+      languageName: "Hindi",
+      subtitleUrl: `https://example.com/subtitles/${lessonId}/hi.vtt`,
+    },
+    {
+      id: `${lessonId}-sub-ta`,
+      languageCode: "ta",
+      languageName: "Tamil",
+      subtitleUrl: `https://example.com/subtitles/${lessonId}/ta.vtt`,
+    },
+  ];
+}
+
 interface LessonContentProps {
   lessonId: number;
   courseTitle?: string;
@@ -466,6 +543,27 @@ function LessonContent({
 
       <Separator />
 
+      {/* Usha Video Player - Multi-language audio support */}
+      {lesson.videoUrl && (
+        <UshaVideoPlayer
+          videoUrl={lesson.videoUrl}
+          title={lesson.title}
+          poster={undefined}
+          audioTracks={getMockAudioTracks(lessonId)}
+          subtitleTracks={getMockSubtitleTracks(lessonId)}
+          onProgress={(progress) => {
+            if (progress >= 90 && !isCompleted) {
+              // Auto-mark as complete when 90% watched
+            }
+          }}
+          onComplete={() => {
+            if (!isCompleted) {
+              onToggleComplete();
+            }
+          }}
+        />
+      )}
+
       {/* Objectives */}
       {lesson.objectives && lesson.objectives.length > 0 && (
         <Card>
@@ -524,30 +622,6 @@ function LessonContent({
               dangerouslySetInnerHTML={{ __html: aiNotes.content }}
               data-testid="content-ai-notes"
             />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Video */}
-      {lesson.videoUrl && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Video className="w-5 h-5 text-rose-500" />
-              Video Lesson
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <a 
-              href={lesson.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary hover:underline"
-              data-testid="link-video"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Watch Video
-            </a>
           </CardContent>
         </Card>
       )}
