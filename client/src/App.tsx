@@ -8,6 +8,7 @@ import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { CreditProvider } from "@/contexts/CreditContext";
+import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/LandingPage";
@@ -218,8 +219,10 @@ function App() {
             <CreditProvider>
               <ProgressProvider>
                 <TestAttemptProvider>
-                  <Toaster />
-                  <Router />
+                  <UshaProvider>
+                    <Toaster />
+                    <Router />
+                  </UshaProvider>
                 </TestAttemptProvider>
               </ProgressProvider>
             </CreditProvider>

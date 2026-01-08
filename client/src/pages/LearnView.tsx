@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
 import { 
@@ -47,7 +47,8 @@ import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { UshaAvatar } from "@/components/usha";
+import { UshaProvider, useUsha } from "@/contexts/UshaContext";
+import { UshaTeacher } from "@/components/usha/UshaTeacher";
 import { UshaVideoPlayer, type AudioTrack, type SubtitleTrack } from "@/components/video/UshaVideoPlayer";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
 
@@ -380,15 +381,12 @@ export default function LearnView() {
         </main>
       </div>
 
-      {/* Usha AI Tutor Avatar */}
+      {/* Usha AI Teacher */}
       {user && selectedLessonId && course && (
-        <UshaAvatar
-          context={{
-            courseId: courseIdNum,
-            lessonId: selectedLessonId,
-            pageType: "lesson",
-            courseTitle: course.title,
-          }}
+        <UshaTeacherWrapper
+          courseId={courseIdNum}
+          lessonId={selectedLessonId}
+          lessonTitle={allLessons.find(l => l.id === selectedLessonId)?.title || ""}
         />
       )}
     </div>
@@ -877,4 +875,24 @@ function LearnViewSidebarSkeleton() {
       </div>
     </div>
   );
+}
+
+function UshaTeacherWrapper({ 
+  courseId, 
+  lessonId, 
+  lessonTitle 
+}: { 
+  courseId: number; 
+  lessonId: number; 
+  lessonTitle: string;
+}) {
+  const { setCourseId, setLessonId, setLessonTitle } = useUsha();
+
+  useEffect(() => {
+    setCourseId(courseId);
+    setLessonId(lessonId);
+    setLessonTitle(lessonTitle);
+  }, [courseId, lessonId, lessonTitle, setCourseId, setLessonId, setLessonTitle]);
+
+  return <UshaTeacher />;
 }

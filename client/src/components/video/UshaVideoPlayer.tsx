@@ -53,6 +53,7 @@ interface UshaVideoPlayerProps {
   title?: string;
   onProgress?: (progress: number) => void;
   onComplete?: () => void;
+  onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
 const AVAILABLE_LANGUAGES = [
@@ -79,6 +80,7 @@ export function UshaVideoPlayer({
   title,
   onProgress,
   onComplete,
+  onPlayStateChange,
 }: UshaVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -136,6 +138,7 @@ export function UshaVideoPlayer({
 
     const handleEnded = () => {
       setIsPlaying(false);
+      onPlayStateChange?.(false);
       if (onComplete) onComplete();
     };
 
@@ -155,7 +158,7 @@ export function UshaVideoPlayer({
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
     };
-  }, [duration, onProgress, onComplete, syncAudioWithVideo]);
+  }, [duration, onProgress, onComplete, onPlayStateChange, syncAudioWithVideo]);
 
   useEffect(() => {
     if (audioRef.current && currentAudioTrack) {
@@ -177,6 +180,7 @@ export function UshaVideoPlayer({
 
     if (!video) return;
 
+    const newPlayState = !isPlaying;
     if (isPlaying) {
       video.pause();
       audio?.pause();
@@ -184,8 +188,9 @@ export function UshaVideoPlayer({
       video.play().catch(console.error);
       audio?.play().catch(console.error);
     }
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+    setIsPlaying(newPlayState);
+    onPlayStateChange?.(newPlayState);
+  }, [isPlaying, onPlayStateChange]);
 
   const toggleMute = useCallback(() => {
     if (audioRef.current) {
