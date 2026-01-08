@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUsha, LANGUAGE_NAMES, type UshaLanguage, type UshaState } from "@/contexts/UshaContext";
-
-const USHA_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=usha-teacher&backgroundColor=b6e3f4&clothingColor=3498db&hairColor=2c1810&skinColor=f8d5c2";
+import ushaAvatarImage from "@assets/image_1767697725032.png";
 
 const STATE_MESSAGES: Record<UshaState, string> = {
   idle: "Ask me to explain",
@@ -115,11 +115,10 @@ export function UshaTeacher() {
             data-testid="button-usha-avatar"
           >
             <div className="relative w-full h-full">
-              <img
-                src={USHA_AVATAR}
-                alt="Usha - AI Teacher"
-                className="w-full h-full rounded-full object-cover"
-              />
+              <Avatar className="w-full h-full">
+                <AvatarImage src={ushaAvatarImage} alt="Usha - AI Teacher" className="object-cover" />
+                <AvatarFallback className="bg-primary/20 text-primary text-lg font-semibold">U</AvatarFallback>
+              </Avatar>
               
               {isSpeaking && (
                 <motion.div
@@ -161,11 +160,10 @@ export function UshaTeacher() {
               <div className="flex items-center justify-between gap-2 p-4 border-b bg-muted/30">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <img
-                      src={USHA_AVATAR}
-                      alt="Usha"
-                      className="w-10 h-10 rounded-full border-2 border-primary/20"
-                    />
+                    <Avatar className="w-10 h-10 border-2 border-primary/20">
+                      <AvatarImage src={ushaAvatarImage} alt="Usha" />
+                      <AvatarFallback className="bg-primary/20 text-primary">U</AvatarFallback>
+                    </Avatar>
                     <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ${getStateColor()} border-2 border-background`} />
                   </div>
                   <div>
