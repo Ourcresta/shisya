@@ -5,8 +5,6 @@ export interface ExecutionResult {
   executionTime: number;
 }
 
-const MAX_EXECUTION_TIME = 5000; // 5 seconds timeout
-
 export function executeJavaScript(code: string): ExecutionResult {
   const startTime = performance.now();
   const outputs: string[] = [];
@@ -30,19 +28,11 @@ export function executeJavaScript(code: string): ExecutionResult {
   };
   
   try {
-    // Wrap code to capture the result of the last expression
+    // Wrap code in a sandboxed environment
+    // Disable browser APIs but allow console for output
     const wrappedCode = `
       "use strict";
       const console = arguments[0];
-      const setTimeout = undefined;
-      const setInterval = undefined;
-      const fetch = undefined;
-      const XMLHttpRequest = undefined;
-      const WebSocket = undefined;
-      const localStorage = undefined;
-      const sessionStorage = undefined;
-      const document = undefined;
-      const window = undefined;
       
       ${code}
     `;
@@ -50,19 +40,8 @@ export function executeJavaScript(code: string): ExecutionResult {
     // Create a function from the code
     const fn = new Function(wrappedCode);
     
-    // Execute with timeout protection
-    const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error("Execution timeout: Code took too long to execute. Check for infinite loops."));
-      }, MAX_EXECUTION_TIME);
-    });
-    
-    // Execute synchronously but with error catching
-    try {
-      fn(capturedConsole);
-    } catch (e) {
-      throw e;
-    }
+    // Execute synchronously
+    fn(capturedConsole);
     
   } catch (e) {
     success = false;

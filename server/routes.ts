@@ -407,6 +407,17 @@ export async function registerRoutes(
     }
   });
 
+  // GET /api/lessons/all - Fetch all lessons as a map by ID (must be before :lessonId route)
+  app.get("/api/lessons/all", async (req, res) => {
+    try {
+      const allLessons = getAllLessons();
+      res.json(allLessons);
+    } catch (error) {
+      console.error("Error fetching all lessons:", error);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
   // GET /api/lessons/:lessonId - Fetch single lesson
   app.get("/api/lessons/:lessonId", async (req, res) => {
     try {
@@ -766,17 +777,6 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching lab:", error);
       res.status(500).json({ error: "Failed to fetch lab" });
-    }
-  });
-
-  // GET /api/lessons/all - Fetch all lessons as a map by ID
-  app.get("/api/lessons/all", async (req, res) => {
-    try {
-      const allLessons = getAllLessons();
-      res.json(allLessons);
-    } catch (error) {
-      console.error("Error fetching all lessons:", error);
-      res.status(500).json({ error: "Failed to fetch lessons" });
     }
   });
 
