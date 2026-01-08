@@ -1,7 +1,23 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
-import { ChevronRight, Clock, CheckCircle2, Circle, BookOpen, ArrowLeft } from "lucide-react";
-import { Layout } from "@/components/layout/Layout";
+import { 
+  ChevronRight, 
+  Clock, 
+  CheckCircle2, 
+  Circle, 
+  BookOpen, 
+  ArrowLeft,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  Monitor,
+  Palette,
+  Check,
+  GraduationCap,
+  Coins
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,12 +29,29 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { useCourseProgress } from "@/contexts/ProgressContext";
+import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
+import { useCredits } from "@/contexts/CreditContext";
 import type { Course, ModuleWithLessons } from "@shared/schema";
+
+const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
+  { id: "light", label: "Light", icon: Sun },
+  { id: "dark", label: "Dark", icon: Moon },
+  { id: "system", label: "System", icon: Monitor },
+];
 
 export default function LearnView() {
   const { courseId } = useParams<{ courseId: string }>();
   const courseIdNum = parseInt(courseId || "0", 10);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/courses", courseId],
@@ -29,8 +62,9 @@ export default function LearnView() {
     enabled: !!course,
   });
 
-  // Use centralized progress context for reactive updates
   const { completedCount, isLessonCompleted } = useCourseProgress(courseIdNum);
+  const { themeMode, themeColor, setThemeMode, setThemeColor, resolvedMode } = useTheme();
+  const { balance } = useCredits();
 
   const isLoading = courseLoading || modulesLoading;
 
@@ -38,30 +72,168 @@ export default function LearnView() {
     return <Redirect to="/" />;
   }
 
-  // Calculate total lessons
   const totalLessons = modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
   const progressPercent = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
 
   return (
-    <Layout fullWidth>
-      {isLoading ? (
-        <LearnViewSkeleton />
-      ) : course && modules ? (
-        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-8rem)]">
-          {/* Sidebar - Modules */}
-          <aside className="w-full lg:w-80 xl:w-96 border-r bg-card/50 lg:min-h-full">
-            <div className="p-4 lg:p-6 space-y-6 sticky top-16">
+    <div className="h-screen flex flex-col bg-background">
+      {/* Custom Compact Header */}
+      <header className="sticky top-0 z-50 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="h-full px-4 flex items-center justify-between gap-4">
+          {/* Left: Back + Course Title */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Link href={course ? `/courses/${course.id}` : "/shishya/dashboard"}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="shrink-0"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Link>
+            
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <GraduationCap className="w-4 h-4 text-primary-foreground" />
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-5 w-40" />
+              ) : (
+                <h1 
+                  className="text-sm font-semibold truncate"
+                  style={{ fontFamily: "var(--font-display)" }}
+                  data-testid="text-header-course-title"
+                >
+                  {course?.title}
+                </h1>
+              )}
+            </div>
+          </div>
+
+          {/* Center: Progress Bar (hidden on mobile) */}
+          <div className="hidden md:flex items-center gap-3 flex-1 max-w-xs">
+            <Progress value={progressPercent} className="h-2 flex-1" />
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {Math.round(progressPercent)}%
+            </span>
+          </div>
+
+          {/* Right: Credits + Theme + Sidebar Toggle */}
+          <div className="flex items-center gap-2">
+            {/* Credits Badge */}
+            <Link href="/shishya/wallet">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-1.5 text-amber-600 dark:text-amber-400"
+                data-testid="button-credits"
+              >
+                <Coins className="w-4 h-4" />
+                <span className="font-semibold text-xs">{balance.toLocaleString()}</span>
+              </Button>
+            </Link>
+
+            {/* Theme Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" data-testid="button-theme">
+                  <Palette className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  {themeMode === "system" ? <Monitor className="h-4 w-4" /> : resolvedMode === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                  Mode
+                </DropdownMenuLabel>
+                {modeOptions.map((mode) => (
+                  <DropdownMenuItem
+                    key={mode.id}
+                    onClick={() => setThemeMode(mode.id)}
+                    className="flex items-center justify-between cursor-pointer"
+                    data-testid={`menu-theme-mode-${mode.id}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <mode.icon className="h-4 w-4" />
+                      {mode.label}
+                    </span>
+                    {themeMode === mode.id && <Check className="h-4 w-4 text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Color Theme</DropdownMenuLabel>
+                <div className="grid grid-cols-3 gap-2 p-2">
+                  {themeColors.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setThemeColor(theme.id)}
+                      className={`
+                        relative flex flex-col items-center gap-1 p-2 rounded-md
+                        hover-elevate active-elevate-2 transition-all
+                        ${themeColor === theme.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}
+                      `}
+                      title={theme.description}
+                      data-testid={`button-theme-color-${theme.id}`}
+                    >
+                      <div
+                        className="w-6 h-6 rounded-full border-2 border-background shadow-sm"
+                        style={{ backgroundColor: theme.primary }}
+                      />
+                      <span className="text-xs text-muted-foreground">{theme.name}</span>
+                      {themeColor === theme.id && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Sidebar Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              data-testid="button-sidebar-toggle"
+            >
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar Overlay for Mobile */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <aside 
+          className={`
+            fixed lg:relative inset-y-0 left-0 z-50 lg:z-0
+            w-80 xl:w-96 border-r bg-card/50
+            transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            lg:transform-none
+            top-14 lg:top-0 h-[calc(100vh-3.5rem)] lg:h-full
+          `}
+        >
+          {isLoading ? (
+            <LearnViewSidebarSkeleton />
+          ) : course && modules ? (
+            <div className="h-full overflow-y-auto p-4 lg:p-6 space-y-6">
               {/* Course Title & Progress */}
               <div className="space-y-4">
-                <Link href={`/courses/${course.id}`}>
-                  <Button variant="ghost" size="sm" className="gap-2 -ml-2">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Overview
-                  </Button>
-                </Link>
-                
                 <h2 
-                  className="text-xl font-semibold"
+                  className="text-lg font-semibold"
                   style={{ fontFamily: "var(--font-display)" }}
                   data-testid="text-course-title"
                 >
@@ -106,16 +278,23 @@ export default function LearnView() {
                         module={module} 
                         courseId={courseIdNum}
                         isLessonCompleted={isLessonCompleted}
+                        onLessonClick={() => setSidebarOpen(false)}
                       />
                     ))}
                   </Accordion>
                 )}
               </div>
             </div>
-          </aside>
+          ) : null}
+        </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 p-4 lg:p-8">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+          {isLoading ? (
+            <div className="max-w-3xl mx-auto">
+              <Skeleton className="h-48 rounded-lg" />
+            </div>
+          ) : (
             <div className="max-w-3xl mx-auto">
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
@@ -132,13 +311,24 @@ export default function LearnView() {
                     Choose a lesson from the sidebar to begin learning. 
                     Track your progress as you complete each lesson.
                   </p>
+                  
+                  {/* Mobile: Show button to open sidebar */}
+                  <Button
+                    variant="outline"
+                    className="lg:hidden mt-4"
+                    onClick={() => setSidebarOpen(true)}
+                    data-testid="button-open-lessons"
+                  >
+                    <Menu className="w-4 h-4 mr-2" />
+                    Browse Lessons
+                  </Button>
                 </CardContent>
               </Card>
             </div>
-          </main>
-        </div>
-      ) : null}
-    </Layout>
+          )}
+        </main>
+      </div>
+    </div>
   );
 }
 
@@ -146,9 +336,10 @@ interface ModuleAccordionItemProps {
   module: ModuleWithLessons;
   courseId: number;
   isLessonCompleted: (lessonId: number) => boolean;
+  onLessonClick?: () => void;
 }
 
-function ModuleAccordionItem({ module, courseId, isLessonCompleted }: ModuleAccordionItemProps) {
+function ModuleAccordionItem({ module, courseId, isLessonCompleted, onLessonClick }: ModuleAccordionItemProps) {
   const lessons = module.lessons || [];
   const completedCount = lessons.filter(l => isLessonCompleted(l.id)).length;
 
@@ -182,6 +373,7 @@ function ModuleAccordionItem({ module, courseId, isLessonCompleted }: ModuleAcco
               lesson={lesson} 
               courseId={courseId}
               isCompleted={isLessonCompleted(lesson.id)}
+              onClick={onLessonClick}
             />
           ))}
         </ul>
@@ -198,13 +390,15 @@ interface LessonListItemProps {
   };
   courseId: number;
   isCompleted: boolean;
+  onClick?: () => void;
 }
 
-function LessonListItem({ lesson, courseId, isCompleted }: LessonListItemProps) {
+function LessonListItem({ lesson, courseId, isCompleted, onClick }: LessonListItemProps) {
   return (
     <li>
       <Link 
         href={`/shishya/learn/${courseId}/${lesson.id}`}
+        onClick={onClick}
         className="flex items-center gap-3 px-3 py-2.5 rounded-md hover-elevate active-elevate-2 transition-colors group"
         data-testid={`link-lesson-${lesson.id}`}
       >
@@ -227,32 +421,26 @@ function LessonListItem({ lesson, courseId, isCompleted }: LessonListItemProps) 
   );
 }
 
-function LearnViewSkeleton() {
+function LearnViewSidebarSkeleton() {
   return (
-    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-8rem)]">
-      <aside className="w-full lg:w-80 xl:w-96 border-r bg-card/50 p-4 lg:p-6 space-y-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-6 w-full" />
-          <div className="flex items-center gap-4">
-            <Skeleton className="w-14 h-14 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-16" />
-            </div>
+    <div className="p-4 lg:p-6 space-y-6">
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-full" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-14 h-14 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-16" />
           </div>
-          <Skeleton className="h-2 w-full" />
         </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-28" />
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 rounded-lg" />
-          ))}
-        </div>
-      </aside>
-      <main className="flex-1 p-8">
-        <Skeleton className="h-48 max-w-3xl mx-auto rounded-lg" />
-      </main>
+        <Skeleton className="h-2 w-full" />
+      </div>
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-28" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 rounded-lg" />
+        ))}
+      </div>
     </div>
   );
 }
