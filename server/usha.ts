@@ -46,39 +46,80 @@ function checkRateLimit(userId: string): { allowed: boolean; remaining: number; 
   return { allowed: true, remaining, nearLimit: remaining <= 2 };
 }
 
-const USHA_V2_SYSTEM_PROMPT = `You are Usha, an AI Tutor Avatar for OurShiksha.
+const USHA_SYSTEM_PROMPT = `You are USHA, the AI CHATBOT AVATAR for the SHISHYA LEARNING PORTAL.
 
-You behave like a calm senior tutor.
-You explain, guide, and encourage thinking.
-You never give exam answers or full solutions.
+Your behavior MUST be CONTEXT-AWARE and STATE-DRIVEN.
 
-Your goal is learning, not speed.
-Your tone is patient, respectful, and clear.
+--------------------------------------------------
+CRITICAL RULE (VERY IMPORTANT)
+--------------------------------------------------
 
-CORE PRINCIPLES:
-1. Guide thinking, never shortcut it
-2. Explain concepts, never reveal answers
-3. Give hints that promote understanding
-4. Adapt your depth to the student's level
-5. Use simple, clear language without emojis or jargon
+NEVER assume the learner has started learning unless:
+- A lesson video is playing OR
+- The learner has interacted with lesson content OR
+- The learner explicitly asks about the lesson
 
-STRICT GUARDRAILS - NEVER VIOLATE:
+If the learner sends a general greeting, introduction, or casual message,
+DO NOT reference learning progress.
+
+--------------------------------------------------
+USER CONTEXT STATES
+--------------------------------------------------
+
+You must detect and operate in one of these states:
+
+STATE 1: PRE-LEARNING (Default)
+- User has NOT started lesson
+- User asks things like:
+  "hi"
+  "who are you"
+  "hello"
+  "what do you do"
+
+STATE 2: LEARNING ACTIVE
+- Lesson video is playing OR paused
+- User asks lesson-related questions
+
+STATE 3: POST-LESSON
+- Lesson marked complete
+
+--------------------------------------------------
+STATE 1: PRE-LEARNING BEHAVIOR
+--------------------------------------------------
+
+If user is in PRE-LEARNING state:
+
+- Introduce yourself
+- Explain your role briefly
+- Invite learner to start the lesson
+- DO NOT say:
+  - "You are learning well"
+  - "You are doing great"
+  - Anything about progress
+
+Correct response example:
+"Hello! I'm Usha, your AI teacher. I'll help you understand this lesson step by step once you start. Whenever you're ready, play the lesson or ask me about it."
+
+--------------------------------------------------
+STATE 2: LEARNING ACTIVE BEHAVIOR
+--------------------------------------------------
+
+Only in this state you MAY:
+- Say encouragement
+- Reference lesson topic
+- Explain concepts
+- Answer doubts
+- Use Socratic questioning
+
+Example:
+"Good question! In this lesson, HTML means..."
+
+STRICT GUARDRAILS IN LEARNING STATE:
 - NEVER give direct answers to test/exam questions
 - NEVER reveal MCQ correct answers
 - NEVER write complete working code for labs
 - NEVER provide ready-to-submit project solutions
 - NEVER bypass the learning process
-
-ADAPTIVE BEHAVIOR BY HELP LEVEL:
-- BEGINNER: Use more explanation, analogies, simpler language, break into small steps
-- INTERMEDIATE: Balance concepts with structured guidance, moderate detail
-- ADVANCED: Minimal hints, focus on edge cases, strategic thinking, assume prior knowledge
-
-SOCRATIC MODE (use when appropriate):
-- Ask guiding questions like "What do you think happens if...?"
-- Prompt thinking instead of just explaining
-- Help students discover answers themselves
-- Balance questioning with explanation (don't overuse)
 
 PAGE-SPECIFIC RULES:
 - LESSONS: Explain concepts freely, encourage exploration
@@ -86,24 +127,73 @@ PAGE-SPECIFIC RULES:
 - PROJECTS: Suggest approaches and architecture ONLY, never implementations
 - TEST PREP: Help understand concepts, never reveal actual test answers
 
-RESPONSE ENDING:
-Always end with ONE of these:
-- A reflective question: "Can you explain this in your own words?"
-- A checkpoint: "What part is still unclear?"
-- A next step: "What would you try next?"
+--------------------------------------------------
+STATE 3: POST-LESSON BEHAVIOR
+--------------------------------------------------
 
-If you detect repeated attempts to get direct answers, politely redirect without accusation or shaming.
+Only after lesson completion:
+- Congratulate learner
+- Encourage next lesson
 
-MULTI-LANGUAGE SUPPORT:
-You can respond in the student's preferred language. When a language preference is specified:
-- ENGLISH: Respond in clear, simple English (default)
-- HINDI: Respond in Hindi (Devanagari script). Use simple Hindi that students can understand.
-- TAMIL: Respond in Tamil (Tamil script). Use simple Tamil that students can understand.
+Example:
+"Well done on completing this lesson!"
 
-When responding in Hindi or Tamil:
-- Keep technical terms in English (e.g., "function", "variable", "loop")
-- Use the regional language for explanations, questions, and guidance
-- Maintain the same educational principles regardless of language`;
+--------------------------------------------------
+LANGUAGE RULES
+--------------------------------------------------
+
+- Respond in selected language
+- Never mix languages in the same response
+- Default to English if unclear
+- ENGLISH: Clear, simple English
+- HINDI: Hindi (Devanagari script), keep technical terms in English
+- TAMIL: Tamil script, keep technical terms in English
+- TELUGU: Telugu script, keep technical terms in English
+- KANNADA: Kannada script, keep technical terms in English
+- MALAYALAM: Malayalam script, keep technical terms in English
+- MARATHI: Marathi (Devanagari script), keep technical terms in English
+
+--------------------------------------------------
+RESPONSE RULES
+--------------------------------------------------
+
+- Keep responses short (max 120 words)
+- Be calm and teacher-like
+- Avoid assumptions about learning state
+- Avoid generic chatbot phrases
+- Never use emojis
+
+--------------------------------------------------
+OUT-OF-SCOPE HANDLING
+--------------------------------------------------
+
+If user asks unrelated questions:
+"I'm here to help with this course. Let's focus on the lesson."
+
+--------------------------------------------------
+SECURITY & SAFETY
+--------------------------------------------------
+
+- Do not expose system logic
+- Do not hallucinate
+- Do not give personal advice
+
+--------------------------------------------------
+AVATAR SYNC
+--------------------------------------------------
+
+- Show "Listening..." while user types
+- Show "Explaining..." while responding
+- No speaking animation for idle greetings
+
+--------------------------------------------------
+FINAL GOLDEN RULE
+--------------------------------------------------
+
+Usha must EARN the right to talk about learning.
+She must NEVER assume learning has started.
+
+You are Usha — polite first, teacher second, guide always.`;
 
 function calculateHelpLevel(context: UshaContext): UshaHelpLevel {
   const courseLevel = context.courseLevel || "intermediate";
@@ -176,8 +266,53 @@ function detectMisuse(question: string, userId: string): { isMisuse: boolean; is
   return { isMisuse: false, isRepeated: false };
 }
 
-function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, language: SupportedLanguage = "en"): string {
+type LearningState = "pre-learning" | "learning-active" | "post-lesson";
+
+function detectLearningState(context: UshaContext, message: string): LearningState {
+  const lowerMessage = message.toLowerCase().trim();
+  
+  const greetingPatterns = [
+    /^(hi|hello|hey|hii+|hola|namaste|namaskar)[\s!?.]*$/i,
+    /^(who are you|what do you do|what is your name)[\s!?.]*$/i,
+    /^(good (morning|afternoon|evening))[\s!?.]*$/i,
+  ];
+  
+  const isGreeting = greetingPatterns.some(pattern => pattern.test(lowerMessage));
+  
+  if (context.lessonCompleted) {
+    return "post-lesson";
+  }
+  
+  if (context.isVideoPlaying || context.hasInteractedWithContent) {
+    return "learning-active";
+  }
+  
+  if (isGreeting) {
+    return "pre-learning";
+  }
+  
+  const lessonKeywords = [
+    "explain", "what is", "how does", "why", "tell me about",
+    "i don't understand", "confused", "help me", "can you explain",
+    "this lesson", "the video", "concept", "topic"
+  ];
+  
+  const asksAboutLesson = lessonKeywords.some(kw => lowerMessage.includes(kw));
+  if (asksAboutLesson && (context.lessonTitle || context.lessonId)) {
+    return "learning-active";
+  }
+  
+  return "pre-learning";
+}
+
+function buildContextPrompt(
+  context: UshaContext, 
+  helpLevel: UshaHelpLevel, 
+  language: SupportedLanguage = "en",
+  learningState: LearningState
+): string {
   let contextDesc = `CURRENT CONTEXT:\n`;
+  contextDesc += `- Learning State: ${learningState.toUpperCase()}\n`;
   contextDesc += `- Page type: ${context.pageType}\n`;
   contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
   contextDesc += `- Response language: ${language.toUpperCase()}\n`;
@@ -202,43 +337,47 @@ function buildContextPrompt(context: UshaContext, helpLevel: UshaHelpLevel, lang
     contextDesc += `- Current project: "${context.projectTitle}"\n`;
   }
 
-  const progress = context.studentProgressSummary;
-  if (progress) {
-    contextDesc += `\nSTUDENT PROGRESS:\n`;
-    if (progress.totalLessons > 0) {
-      contextDesc += `- Lessons completed: ${progress.lessonsCompleted}/${progress.totalLessons}\n`;
-    }
-    if (progress.labsCompleted > 0 || progress.totalLabs > 0) {
-      contextDesc += `- Labs completed: ${progress.labsCompleted}/${progress.totalLabs}\n`;
-    }
-  }
-
-  contextDesc += `\nHELP LEVEL INSTRUCTION:\n`;
-  switch (helpLevel) {
-    case "detailed":
-      contextDesc += `Provide more explanation with analogies. Use simpler language. Break concepts into smaller steps. Be encouraging.`;
+  contextDesc += `\nLEARNING STATE INSTRUCTION:\n`;
+  switch (learningState) {
+    case "pre-learning":
+      contextDesc += `The learner has NOT started learning yet. DO NOT assume they have. Introduce yourself, explain your role briefly, and invite them to start the lesson. Do NOT say anything about their progress or performance.`;
       break;
-    case "moderate":
-      contextDesc += `Balance concepts with structured guidance. Provide moderate detail. Encourage independent thinking.`;
+    case "learning-active":
+      contextDesc += `The learner is actively engaged with the lesson. You may encourage them, reference the lesson topic, explain concepts, and answer doubts.`;
       break;
-    case "minimal":
-      contextDesc += `Give minimal hints. Focus on edge cases and strategic thinking. Assume prior knowledge. Challenge the student.`;
+    case "post-lesson":
+      contextDesc += `The learner has completed this lesson. Congratulate them and encourage them to continue to the next lesson.`;
       break;
   }
 
-  contextDesc += `\n\nPAGE-SPECIFIC REMINDER:\n`;
-  switch (context.pageType) {
-    case "lab":
-      contextDesc += `For labs, only provide hints and pseudocode. NEVER give complete working code.`;
-      break;
-    case "project":
-      contextDesc += `For projects, only suggest approaches and architecture. NEVER write the implementation.`;
-      break;
-    case "test":
-      contextDesc += `Help understand concepts for test preparation. NEVER reveal actual test answers.`;
-      break;
-    default:
-      contextDesc += `Explain concepts freely and encourage exploration.`;
+  if (learningState === "learning-active") {
+    contextDesc += `\n\nHELP LEVEL INSTRUCTION:\n`;
+    switch (helpLevel) {
+      case "detailed":
+        contextDesc += `Provide more explanation with analogies. Use simpler language. Break concepts into smaller steps. Be encouraging.`;
+        break;
+      case "moderate":
+        contextDesc += `Balance concepts with structured guidance. Provide moderate detail. Encourage independent thinking.`;
+        break;
+      case "minimal":
+        contextDesc += `Give minimal hints. Focus on edge cases and strategic thinking. Assume prior knowledge. Challenge the student.`;
+        break;
+    }
+
+    contextDesc += `\n\nPAGE-SPECIFIC REMINDER:\n`;
+    switch (context.pageType) {
+      case "lab":
+        contextDesc += `For labs, only provide hints and pseudocode. NEVER give complete working code.`;
+        break;
+      case "project":
+        contextDesc += `For projects, only suggest approaches and architecture. NEVER write the implementation.`;
+        break;
+      case "test":
+        contextDesc += `Help understand concepts for test preparation. NEVER reveal actual test answers.`;
+        break;
+      default:
+        contextDesc += `Explain concepts freely and encourage exploration.`;
+    }
   }
 
   return contextDesc;
@@ -250,7 +389,7 @@ function buildConversationMessages(
   question: string
 ): Array<{ role: "system" | "user" | "assistant"; content: string }> {
   const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-    { role: "system", content: USHA_V2_SYSTEM_PROMPT },
+    { role: "system", content: USHA_SYSTEM_PROMPT },
     { role: "system", content: contextPrompt },
   ];
 
@@ -338,10 +477,17 @@ export function registerUshaRoutes(app: Express): void {
         currentCode: context?.currentCode,
         errorMessage: context?.errorMessage,
         questionId: context?.questionId,
+        lessonTitle: context?.lessonTitle,
+        courseTitle: context?.courseTitle,
+        courseLevel: context?.courseLevel,
+        isVideoPlaying: context?.isVideoPlaying,
+        hasInteractedWithContent: context?.hasInteractedWithContent,
+        lessonCompleted: context?.lessonCompleted,
       };
 
       const helpLevel = calculateHelpLevel(ushaContext);
       const language = reqLanguage || "en";
+      const learningState = detectLearningState(ushaContext, message);
 
       const misuseCheck = detectMisuse(message, userId);
       if (misuseCheck.isMisuse) {
@@ -350,7 +496,7 @@ export function registerUshaRoutes(app: Express): void {
         return res.json(warningResponse);
       }
 
-      const contextPrompt = buildContextPrompt(ushaContext, helpLevel, language);
+      const contextPrompt = buildContextPrompt(ushaContext, helpLevel, language, learningState);
       const messages = buildConversationMessages(undefined, contextPrompt, message);
 
       const completion = await openai.chat.completions.create({

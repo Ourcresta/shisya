@@ -1159,6 +1159,12 @@ export const ushaRequestSchema = z.object({
     currentCode: z.string().optional(),
     errorMessage: z.string().optional(),
     questionId: z.string().optional(),
+    lessonTitle: z.string().optional(),
+    courseTitle: z.string().optional(),
+    courseLevel: z.string().optional(),
+    isVideoPlaying: z.boolean().optional(),
+    hasInteractedWithContent: z.boolean().optional(),
+    lessonCompleted: z.boolean().optional(),
   }).optional(),
   helpLevel: z.enum(USHA_HELP_LEVELS).optional(),
   language: z.enum(SUPPORTED_LANGUAGES).optional().default("en"),
@@ -1198,6 +1204,9 @@ export interface UshaContext {
   language?: SupportedLanguage;
   studentProgressSummary?: StudentProgressSummary;
   previousUshaTurns?: UshaTurn[];
+  isVideoPlaying?: boolean;
+  hasInteractedWithContent?: boolean;
+  lessonCompleted?: boolean;
 }
 
 // Student progress summary for Usha

@@ -20,6 +20,14 @@ interface UshaContextType {
   setCourseId: (id: number | null) => void;
   lessonTitle: string;
   setLessonTitle: (title: string) => void;
+  courseTitle: string;
+  setCourseTitle: (title: string) => void;
+  courseLevel: string;
+  setCourseLevel: (level: string) => void;
+  hasInteractedWithContent: boolean;
+  setHasInteractedWithContent: (interacted: boolean) => void;
+  lessonCompleted: boolean;
+  setLessonCompleted: (completed: boolean) => void;
   showChat: boolean;
   setShowChat: (show: boolean) => void;
   toggleChat: () => void;
@@ -52,6 +60,10 @@ export function UshaProvider({ children }: { children: ReactNode }) {
   const [lessonId, setLessonId] = useState<number | null>(null);
   const [courseId, setCourseId] = useState<number | null>(null);
   const [lessonTitle, setLessonTitle] = useState("");
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseLevel, setCourseLevel] = useState("beginner");
+  const [hasInteractedWithContent, setHasInteractedWithContent] = useState(false);
+  const [lessonCompleted, setLessonCompleted] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
@@ -100,6 +112,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     setState("responding");
     setIsLoading(true);
     setCurrentMessage("Let me think about that...");
+    setHasInteractedWithContent(true);
 
     try {
       const res = await fetch("/api/usha/ask", {
@@ -114,6 +127,12 @@ export function UshaProvider({ children }: { children: ReactNode }) {
           language,
           context: {
             lessonId,
+            lessonTitle,
+            courseTitle,
+            courseLevel,
+            isVideoPlaying,
+            hasInteractedWithContent: true,
+            lessonCompleted,
           },
         }),
       });
@@ -140,7 +159,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [courseId, lessonId, language]);
+  }, [courseId, lessonId, language, lessonTitle, courseTitle, courseLevel, isVideoPlaying, lessonCompleted]);
 
   useEffect(() => {
     if (isVideoPlaying && state === "idle") {
@@ -175,6 +194,14 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     setCourseId,
     lessonTitle,
     setLessonTitle,
+    courseTitle,
+    setCourseTitle,
+    courseLevel,
+    setCourseLevel,
+    hasInteractedWithContent,
+    setHasInteractedWithContent,
+    lessonCompleted,
+    setLessonCompleted,
     showChat,
     setShowChat,
     toggleChat,
