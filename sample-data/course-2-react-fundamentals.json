@@ -1,0 +1,247 @@
+{
+  "course": {
+    "id": 2,
+    "title": "React Fundamentals",
+    "description": "Master React.js from the ground up. Learn components, state management, hooks, and build modern user interfaces.",
+    "level": "intermediate",
+    "duration": "12 hours",
+    "skills": ["React", "JSX", "Hooks", "State Management", "Component Design"],
+    "status": "published",
+    "isFree": false,
+    "creditCost": 120,
+    "testRequired": true,
+    "projectRequired": true,
+    "language": "en"
+  },
+  "modules": [
+    {
+      "id": 5,
+      "title": "React Basics",
+      "description": "Introduction to React",
+      "orderIndex": 1,
+      "lessons": [
+        {
+          "id": 16,
+          "title": "What is React?",
+          "content": "Component-based architecture and virtual DOM.",
+          "durationMinutes": 30,
+          "orderIndex": 1,
+          "isPreview": true
+        },
+        {
+          "id": 17,
+          "title": "Your First Component",
+          "content": "Create and render React components.",
+          "durationMinutes": 35,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 18,
+          "title": "Styling in React",
+          "content": "CSS modules and styled-components.",
+          "durationMinutes": 30,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Components & Props",
+      "description": "Building with components",
+      "orderIndex": 2,
+      "lessons": [
+        {
+          "id": 19,
+          "title": "Understanding Props",
+          "content": "Pass data to components with props.",
+          "durationMinutes": 35,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 20,
+          "title": "Component Composition",
+          "content": "Compose and reuse components.",
+          "durationMinutes": 40,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 21,
+          "title": "Conditional Rendering",
+          "content": "Render content conditionally.",
+          "durationMinutes": 30,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "State & Lifecycle",
+      "description": "Managing state",
+      "orderIndex": 3,
+      "lessons": [
+        {
+          "id": 22,
+          "title": "Introduction to State",
+          "content": "useState hook and state updates.",
+          "durationMinutes": 35,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 23,
+          "title": "useEffect Hook",
+          "content": "Side effects and cleanup.",
+          "durationMinutes": 40,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 24,
+          "title": "Lifting State Up",
+          "content": "Share state between components.",
+          "durationMinutes": 35,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Hooks Deep Dive",
+      "description": "Modern React hooks",
+      "orderIndex": 4,
+      "lessons": [
+        {
+          "id": 25,
+          "title": "useContext Hook",
+          "content": "Context API for global state.",
+          "durationMinutes": 40,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 26,
+          "title": "useReducer Hook",
+          "content": "Complex state with reducers.",
+          "durationMinutes": 45,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 27,
+          "title": "Custom Hooks",
+          "content": "Create and share custom hooks.",
+          "durationMinutes": 40,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": 9,
+      "lessonId": 16,
+      "title": "First React Component",
+      "instructions": "Create a functional component called Greeting\nReturn a div with text \"Hello, React!\"\nExport the component",
+      "starterCode": "function Greeting() {\n  // Return JSX here\n}\n\nconsole.log(Greeting());\n",
+      "expectedOutput": "<div>Hello, React!</div>",
+      "language": "javascript",
+      "orderIndex": 1
+    },
+    {
+      "id": 10,
+      "lessonId": 17,
+      "title": "Component with Props",
+      "instructions": "Create a Welcome component that accepts a name prop\nDisplay \"Welcome, {name}!\" in the component\nTest with name=\"Student\"",
+      "starterCode": "function Welcome(props) {\n  // Use props.name\n}\n\nconsole.log(Welcome({ name: \"Student\" }));\n",
+      "expectedOutput": "<h1>Welcome, Student!</h1>",
+      "language": "javascript",
+      "orderIndex": 2
+    },
+    {
+      "id": 11,
+      "lessonId": 19,
+      "title": "Passing Props",
+      "instructions": "Create a Card component with title and content props\nRender both props in the component\nStyle with className",
+      "starterCode": "function Card({ title, content }) {\n  // Return card JSX\n}\n\nconsole.log(Card({ title: \"My Card\", content: \"Card content here\" }));\n",
+      "expectedOutput": "<div class=\"card\"><h2>My Card</h2><p>Card content here</p></div>",
+      "language": "javascript",
+      "orderIndex": 3
+    },
+    {
+      "id": 12,
+      "lessonId": 22,
+      "title": "Using useState",
+      "instructions": "Create a Counter component\nUse useState to track count\nAdd increment button",
+      "starterCode": "function Counter() {\n  // Implement useState and return JSX\n}\n",
+      "expectedOutput": "Count: 0",
+      "language": "javascript",
+      "orderIndex": 4
+    }
+  ],
+  "test": {
+    "id": 2,
+    "title": "React Fundamentals Test",
+    "description": "Assess your understanding of React components, state, and hooks.",
+    "durationMinutes": 45,
+    "passingPercentage": 70,
+    "maxAttempts": 3,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "What is the correct way to create a functional component?",
+        "options": ["function MyComponent() {}", "class MyComponent extends React.Component", "new Component()", "React.createComponent()"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q2",
+        "question": "Which hook is used to manage state in functional components?",
+        "options": ["useEffect", "useContext", "useState", "useReducer"],
+        "correctAnswer": 2
+      },
+      {
+        "id": "q3",
+        "question": "What is JSX?",
+        "options": ["JavaScript XML", "Java Syntax Extension", "JSON XML", "JavaScript Extension"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q4",
+        "question": "How do you pass data from parent to child component?",
+        "options": ["Using state", "Using props", "Using context", "Using refs"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q5",
+        "question": "What does useEffect hook do?",
+        "options": ["Manages state", "Handles side effects", "Creates context", "Optimizes performance"],
+        "correctAnswer": 1
+      }
+    ]
+  },
+  "project": {
+    "id": 2,
+    "title": "Task Management App",
+    "description": "Build a React task management application with CRUD operations.",
+    "difficulty": "intermediate",
+    "estimatedHours": 12,
+    "requirements": [
+      "Create components for task list and task items",
+      "Implement add, edit, delete functionality",
+      "Use useState and useEffect hooks",
+      "Add task filtering (all, completed, pending)",
+      "Persist data to localStorage"
+    ],
+    "resources": [
+      "React Documentation",
+      "TanStack Query Docs",
+      "Tailwind CSS"
+    ]
+  }
+}

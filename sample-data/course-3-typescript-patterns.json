@@ -1,0 +1,187 @@
+{
+  "course": {
+    "id": 3,
+    "title": "Advanced TypeScript Patterns",
+    "description": "Deep dive into TypeScript advanced features. Learn generics, utility types, decorators, and design patterns for large-scale applications.",
+    "level": "advanced",
+    "duration": "10 hours",
+    "skills": ["TypeScript", "Generics", "Design Patterns", "Type Safety", "Advanced Types"],
+    "status": "published",
+    "isFree": false,
+    "creditCost": 200,
+    "testRequired": true,
+    "projectRequired": false,
+    "language": "en"
+  },
+  "modules": [
+    {
+      "id": 9,
+      "title": "Generics Mastery",
+      "description": "Advanced generics",
+      "orderIndex": 1,
+      "lessons": [
+        {
+          "id": 28,
+          "title": "Generic Functions",
+          "content": "Create generic functions with type parameters.",
+          "durationMinutes": 40,
+          "orderIndex": 1,
+          "isPreview": true
+        },
+        {
+          "id": 29,
+          "title": "Generic Classes",
+          "content": "Build generic classes for reusable code.",
+          "durationMinutes": 45,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Utility Types",
+      "description": "Built-in utility types",
+      "orderIndex": 2,
+      "lessons": [
+        {
+          "id": 30,
+          "title": "Partial and Required",
+          "content": "Use Partial and Required utility types.",
+          "durationMinutes": 30,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 31,
+          "title": "Pick and Omit",
+          "content": "Select or exclude properties with Pick and Omit.",
+          "durationMinutes": 30,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Design Patterns in TS",
+      "description": "Common patterns",
+      "orderIndex": 3,
+      "lessons": [
+        {
+          "id": 32,
+          "title": "Singleton Pattern",
+          "content": "Implement the Singleton pattern in TypeScript.",
+          "durationMinutes": 35,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 33,
+          "title": "Factory Pattern",
+          "content": "Create objects with the Factory pattern.",
+          "durationMinutes": 40,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Type-Safe Architecture",
+      "description": "Building type-safe apps",
+      "orderIndex": 4,
+      "lessons": [
+        {
+          "id": 34,
+          "title": "Building Type-Safe APIs",
+          "content": "Design type-safe API interfaces.",
+          "durationMinutes": 45,
+          "orderIndex": 1,
+          "isPreview": false
+        }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": 13,
+      "lessonId": null,
+      "title": "Generic Functions",
+      "instructions": "Create a generic identity function\nTest with number and string types\nLog the results",
+      "starterCode": "function identity<T>(arg: T): T {\n  // Implement here\n}\n\nconsole.log(identity(5));\nconsole.log(identity(\"hello\"));\n",
+      "expectedOutput": "5\nhello",
+      "language": "javascript",
+      "orderIndex": 1
+    },
+    {
+      "id": 14,
+      "lessonId": null,
+      "title": "Generic Arrays",
+      "instructions": "Create a function that returns the first element of any array\nUse generics for type safety\nTest with different array types",
+      "starterCode": "function first<T>(arr: T[]): T {\n  // Return first element\n}\n\nconsole.log(first([1, 2, 3]));\nconsole.log(first([\"a\", \"b\", \"c\"]));\n",
+      "expectedOutput": "1\na",
+      "language": "javascript",
+      "orderIndex": 2
+    }
+  ],
+  "test": {
+    "id": 3,
+    "title": "TypeScript Advanced Patterns Test",
+    "description": "Test your knowledge of TypeScript generics and utility types.",
+    "durationMinutes": 40,
+    "passingPercentage": 75,
+    "maxAttempts": 2,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "What is a generic type in TypeScript?",
+        "options": ["A type that can work with multiple types", "A type that only works with objects", "A type for generic functions only", "A type that cannot be changed"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q2",
+        "question": "Which utility type makes all properties optional?",
+        "options": ["Required", "Readonly", "Partial", "Pick"],
+        "correctAnswer": 2
+      },
+      {
+        "id": "q3",
+        "question": "What does the Pick utility type do?",
+        "options": ["Picks random properties", "Creates a type with selected properties", "Removes properties", "Makes properties required"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q4",
+        "question": "How do you constrain a generic type?",
+        "options": ["Using extends keyword", "Using implements keyword", "Using typeof", "Using instanceof"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q5",
+        "question": "What is the Omit utility type used for?",
+        "options": ["Including specific properties", "Excluding specific properties", "Making properties optional", "Making properties required"],
+        "correctAnswer": 1
+      }
+    ]
+  },
+  "project": {
+    "id": 3,
+    "title": "Type-Safe API Client",
+    "description": "Build a fully type-safe API client library using advanced TypeScript patterns.",
+    "difficulty": "advanced",
+    "estimatedHours": 10,
+    "requirements": [
+      "Create generic request/response types",
+      "Implement type-safe route definitions",
+      "Add error handling with discriminated unions",
+      "Create utility types for API responses",
+      "Write comprehensive type tests"
+    ],
+    "resources": [
+      "TypeScript Handbook",
+      "Axios Documentation",
+      "Type Challenges"
+    ]
+  }
+}

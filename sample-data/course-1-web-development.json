@@ -1,0 +1,311 @@
+{
+  "course": {
+    "id": 1,
+    "title": "Introduction to Web Development",
+    "description": "Learn the fundamentals of web development including HTML, CSS, and JavaScript. Build your first responsive website from scratch.",
+    "level": "beginner",
+    "duration": "8 hours",
+    "skills": ["HTML5", "CSS3", "JavaScript", "Responsive Design", "Git Basics"],
+    "status": "published",
+    "isFree": true,
+    "creditCost": 0,
+    "testRequired": true,
+    "projectRequired": true,
+    "language": "en"
+  },
+  "modules": [
+    {
+      "id": 1,
+      "title": "Getting Started with HTML",
+      "description": "Learn HTML basics",
+      "orderIndex": 1,
+      "lessons": [
+        {
+          "id": 1,
+          "title": "What is HTML?",
+          "content": "HTML (HyperText Markup Language) is the standard markup language for creating web pages.",
+          "durationMinutes": 20,
+          "orderIndex": 1,
+          "isPreview": true
+        },
+        {
+          "id": 2,
+          "title": "HTML Document Structure",
+          "content": "Learn about DOCTYPE, head, and body sections.",
+          "durationMinutes": 25,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 3,
+          "title": "Common HTML Elements",
+          "content": "Headings, paragraphs, links, images, and lists.",
+          "durationMinutes": 30,
+          "orderIndex": 3,
+          "isPreview": false
+        },
+        {
+          "id": 4,
+          "title": "Forms and Input Elements",
+          "content": "Create HTML forms with various input types.",
+          "durationMinutes": 35,
+          "orderIndex": 4,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Styling with CSS",
+      "description": "CSS fundamentals",
+      "orderIndex": 2,
+      "lessons": [
+        {
+          "id": 5,
+          "title": "Introduction to CSS",
+          "content": "CSS purpose, syntax, and applying styles.",
+          "durationMinutes": 25,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 6,
+          "title": "CSS Box Model",
+          "content": "Content, padding, border, and margin.",
+          "durationMinutes": 30,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 7,
+          "title": "Flexbox Layout",
+          "content": "Create flexible layouts with flexbox.",
+          "durationMinutes": 35,
+          "orderIndex": 3,
+          "isPreview": false
+        },
+        {
+          "id": 8,
+          "title": "Responsive Design",
+          "content": "Media queries and mobile-first design.",
+          "durationMinutes": 30,
+          "orderIndex": 4,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "JavaScript Essentials",
+      "description": "JavaScript basics",
+      "orderIndex": 3,
+      "lessons": [
+        {
+          "id": 9,
+          "title": "JavaScript Basics",
+          "content": "Variables, data types, and operators.",
+          "durationMinutes": 30,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 10,
+          "title": "Functions and Scope",
+          "content": "Create functions and understand scope.",
+          "durationMinutes": 35,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 11,
+          "title": "DOM Manipulation",
+          "content": "Select and modify DOM elements.",
+          "durationMinutes": 40,
+          "orderIndex": 3,
+          "isPreview": false
+        },
+        {
+          "id": 12,
+          "title": "Working with Arrays",
+          "content": "Array methods and iteration.",
+          "durationMinutes": 35,
+          "orderIndex": 4,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Building Your First Website",
+      "description": "Putting it all together",
+      "orderIndex": 4,
+      "lessons": [
+        {
+          "id": 13,
+          "title": "Project Setup",
+          "content": "Plan your website and set up structure.",
+          "durationMinutes": 15,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 14,
+          "title": "Building the Homepage",
+          "content": "Create layout and navigation.",
+          "durationMinutes": 25,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 15,
+          "title": "Adding Interactivity",
+          "content": "JavaScript functionality and user input.",
+          "durationMinutes": 20,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": 1,
+      "lessonId": 9,
+      "title": "Variables and Output",
+      "instructions": "Declare a variable called 'greeting' and set it to 'Hello, World!'\nDeclare a variable called 'number' and set it to 42\nUse console.log() to print the greeting\nUse console.log() to print the number",
+      "starterCode": "// Declare your variables below\n// greeting should be \"Hello, World!\"\n// number should be 42\n\n// Print the greeting\n\n// Print the number\n",
+      "expectedOutput": "Hello, World!\n42",
+      "language": "javascript",
+      "orderIndex": 1
+    },
+    {
+      "id": 2,
+      "lessonId": 9,
+      "title": "Basic Math Operations",
+      "instructions": "Create two variables: a = 10 and b = 5\nCalculate and log the sum of a and b\nCalculate and log the product of a and b\nCalculate and log a divided by b",
+      "starterCode": "// Declare variables a and b\n\n// Calculate and log the sum\n\n// Calculate and log the product\n\n// Calculate and log the division\n",
+      "expectedOutput": "15\n50\n2",
+      "language": "javascript",
+      "orderIndex": 2
+    },
+    {
+      "id": 3,
+      "lessonId": 10,
+      "title": "Creating Functions",
+      "instructions": "Create a function called 'greet' that takes a name parameter\nThe function should return 'Hello, [name]!'\nCall the function with 'Alice' and log the result\nCall the function with 'Bob' and log the result",
+      "starterCode": "// Create the greet function\n\n\n// Call greet with 'Alice' and log it\n\n// Call greet with 'Bob' and log it\n",
+      "expectedOutput": "Hello, Alice!\nHello, Bob!",
+      "language": "javascript",
+      "orderIndex": 3
+    },
+    {
+      "id": 4,
+      "lessonId": 12,
+      "title": "Working with Arrays",
+      "instructions": "Create an array called 'fruits' with: 'apple', 'banana', 'orange'\nLog the first element of the array\nLog the length of the array\nAdd 'grape' to the end of the array\nLog the updated array",
+      "starterCode": "// Create the fruits array\n\n// Log the first element\n\n// Log the length\n\n// Add 'grape' to the array\n\n// Log the updated array\n",
+      "expectedOutput": "apple\n3\n[\"apple\", \"banana\", \"orange\", \"grape\"]",
+      "language": "javascript",
+      "orderIndex": 4
+    },
+    {
+      "id": 5,
+      "lessonId": 12,
+      "title": "Array Methods - Map",
+      "instructions": "Create an array called 'numbers' with values [1, 2, 3, 4, 5]\nUse map() to create a new array 'doubled' with each number multiplied by 2\nLog the doubled array",
+      "starterCode": "const numbers = [1, 2, 3, 4, 5];\n\n// Use map to double each number\n\n// Log the doubled array\n",
+      "expectedOutput": "[2, 4, 6, 8, 10]",
+      "language": "javascript",
+      "orderIndex": 5
+    },
+    {
+      "id": 6,
+      "lessonId": 12,
+      "title": "Array Methods - Filter",
+      "instructions": "Given the numbers array [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nUse filter() to create 'evenNumbers' containing only even numbers\nLog the evenNumbers array",
+      "starterCode": "const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\n// Use filter to get even numbers\n\n// Log the even numbers\n",
+      "expectedOutput": "[2, 4, 6, 8, 10]",
+      "language": "javascript",
+      "orderIndex": 6
+    },
+    {
+      "id": 7,
+      "lessonId": 11,
+      "title": "DOM Selection",
+      "instructions": "Use document.getElementById to select an element\nUse document.querySelector to select by class\nLog both elements to console",
+      "starterCode": "// Use getElementById for element with id \"header\"\n\n// Use querySelector for element with class \"content\"\n",
+      "expectedOutput": "[object HTMLDivElement]\n[object HTMLDivElement]",
+      "language": "javascript",
+      "orderIndex": 7
+    },
+    {
+      "id": 8,
+      "lessonId": 11,
+      "title": "Event Handling",
+      "instructions": "Create a click handler function\nAdd an event listener to a button\nLog \"Button clicked!\" when clicked",
+      "starterCode": "// Create the click handler function\n\n// Add event listener to button\n",
+      "expectedOutput": "Button clicked!",
+      "language": "javascript",
+      "orderIndex": 8
+    }
+  ],
+  "test": {
+    "id": 1,
+    "title": "Web Development Fundamentals Test",
+    "description": "Test your knowledge of HTML, CSS, and JavaScript basics.",
+    "durationMinutes": 30,
+    "passingPercentage": 70,
+    "maxAttempts": 3,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "What does HTML stand for?",
+        "options": ["Hyper Text Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q2",
+        "question": "Which CSS property is used to change the text color?",
+        "options": ["font-color", "text-color", "color", "foreground-color"],
+        "correctAnswer": 2
+      },
+      {
+        "id": "q3",
+        "question": "Which keyword is used to declare a variable in JavaScript?",
+        "options": ["var", "let", "const", "All of the above"],
+        "correctAnswer": 3
+      },
+      {
+        "id": "q4",
+        "question": "What is the correct HTML element for the largest heading?",
+        "options": ["<heading>", "<h6>", "<h1>", "<head>"],
+        "correctAnswer": 2
+      },
+      {
+        "id": "q5",
+        "question": "Which property is used to change the background color in CSS?",
+        "options": ["bgcolor", "background-color", "color", "background"],
+        "correctAnswer": 1
+      }
+    ]
+  },
+  "project": {
+    "id": 1,
+    "title": "Personal Portfolio Website",
+    "description": "Build a responsive personal portfolio website showcasing your skills and projects.",
+    "difficulty": "beginner",
+    "estimatedHours": 8,
+    "requirements": [
+      "Create a responsive navigation bar",
+      "Add a hero section with your introduction",
+      "Include a projects section with at least 3 project cards",
+      "Add a contact form",
+      "Make the site mobile-responsive"
+    ],
+    "resources": [
+      "MDN Web Docs",
+      "CSS Tricks Flexbox Guide",
+      "Google Fonts"
+    ]
+  }
+}

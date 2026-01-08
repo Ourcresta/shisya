@@ -1,0 +1,187 @@
+{
+  "course": {
+    "id": 6,
+    "title": "Cloud Architecture with AWS",
+    "description": "Master AWS cloud services and architecture patterns. Deploy, scale, and manage applications in the cloud.",
+    "level": "advanced",
+    "duration": "20 hours",
+    "skills": ["AWS", "EC2", "S3", "Lambda", "CloudFormation", "DevOps"],
+    "status": "published",
+    "isFree": false,
+    "creditCost": 300,
+    "testRequired": true,
+    "projectRequired": true,
+    "language": "en"
+  },
+  "modules": [
+    {
+      "id": 21,
+      "title": "AWS Fundamentals",
+      "description": "Cloud basics",
+      "orderIndex": 1,
+      "lessons": [
+        {
+          "id": 50,
+          "title": "Introduction to AWS",
+          "content": "Overview of AWS services.",
+          "durationMinutes": 40,
+          "orderIndex": 1,
+          "isPreview": true
+        },
+        {
+          "id": 51,
+          "title": "IAM Basics",
+          "content": "Identity and Access Management.",
+          "durationMinutes": 45,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Compute Services",
+      "description": "EC2 and Lambda",
+      "orderIndex": 2,
+      "lessons": [
+        {
+          "id": 52,
+          "title": "EC2 Instances",
+          "content": "Launch and manage EC2 instances.",
+          "durationMinutes": 50,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 53,
+          "title": "Lambda Functions",
+          "content": "Create serverless functions.",
+          "durationMinutes": 55,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Storage & Databases",
+      "description": "S3 and RDS",
+      "orderIndex": 3,
+      "lessons": [
+        {
+          "id": 54,
+          "title": "S3 Storage",
+          "content": "Use S3 for object storage.",
+          "durationMinutes": 45,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 55,
+          "title": "RDS Databases",
+          "content": "Managed relational databases.",
+          "durationMinutes": 50,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Infrastructure as Code",
+      "description": "CloudFormation",
+      "orderIndex": 4,
+      "lessons": [
+        {
+          "id": 56,
+          "title": "CloudFormation Basics",
+          "content": "Define infrastructure with templates.",
+          "durationMinutes": 55,
+          "orderIndex": 1,
+          "isPreview": false
+        }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": 19,
+      "lessonId": null,
+      "title": "S3 Bucket Config",
+      "instructions": "Create an S3 bucket configuration object\nInclude bucket name and region\nAdd versioning enabled",
+      "starterCode": "const s3Config = {\n  // Add configuration\n};\n\nconsole.log(JSON.stringify(s3Config, null, 2));\n",
+      "expectedOutput": "{\"bucketName\":\"my-bucket\",\"region\":\"us-east-1\",\"versioning\":true}",
+      "language": "javascript",
+      "orderIndex": 1
+    },
+    {
+      "id": 20,
+      "lessonId": null,
+      "title": "Lambda Function",
+      "instructions": "Create a Lambda handler function\nProcess event and return response\nInclude statusCode and body",
+      "starterCode": "async function handler(event) {\n  // Process event and return response\n}\n\nhandler({ name: \"test\" }).then(r => console.log(JSON.stringify(r)));\n",
+      "expectedOutput": "{\"statusCode\":200,\"body\":\"Hello, test!\"}",
+      "language": "javascript",
+      "orderIndex": 2
+    }
+  ],
+  "test": {
+    "id": 6,
+    "title": "AWS Cloud Architecture Test",
+    "description": "Assess your AWS services knowledge.",
+    "durationMinutes": 50,
+    "passingPercentage": 75,
+    "maxAttempts": 2,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "What is Amazon S3 used for?",
+        "options": ["Computing", "Object storage", "Database", "Networking"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q2",
+        "question": "What is AWS Lambda?",
+        "options": ["Virtual machine", "Serverless compute", "Database service", "Storage service"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q3",
+        "question": "What does EC2 stand for?",
+        "options": ["Elastic Compute Cloud", "Electronic Computer Center", "Easy Cloud Computing", "Enterprise Cloud Container"],
+        "correctAnswer": 0
+      },
+      {
+        "id": "q4",
+        "question": "Which service is used for managed databases?",
+        "options": ["S3", "Lambda", "RDS", "EC2"],
+        "correctAnswer": 2
+      },
+      {
+        "id": "q5",
+        "question": "What is CloudFormation used for?",
+        "options": ["Storage", "Infrastructure as Code", "Computing", "Networking"],
+        "correctAnswer": 1
+      }
+    ]
+  },
+  "project": {
+    "id": 6,
+    "title": "Serverless Web Application",
+    "description": "Deploy a serverless web application using AWS services.",
+    "difficulty": "advanced",
+    "estimatedHours": 20,
+    "requirements": [
+      "Create Lambda functions for backend logic",
+      "Set up API Gateway endpoints",
+      "Use S3 for static website hosting",
+      "Implement DynamoDB for data storage",
+      "Configure CloudFormation templates"
+    ],
+    "resources": [
+      "AWS Lambda Developer Guide",
+      "Serverless Framework",
+      "AWS SAM"
+    ]
+  }
+}

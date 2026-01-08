@@ -1,0 +1,195 @@
+{
+  "course": {
+    "id": 4,
+    "title": "Python for Data Science",
+    "description": "Learn Python programming with a focus on data science. Cover NumPy, Pandas, and data visualization techniques.",
+    "level": "beginner",
+    "duration": "15 hours",
+    "skills": ["Python", "NumPy", "Pandas", "Data Visualization", "Statistics"],
+    "status": "published",
+    "isFree": true,
+    "creditCost": 0,
+    "testRequired": true,
+    "projectRequired": true,
+    "language": "en"
+  },
+  "modules": [
+    {
+      "id": 13,
+      "title": "Python Fundamentals",
+      "description": "Python basics",
+      "orderIndex": 1,
+      "lessons": [
+        {
+          "id": 35,
+          "title": "Python Basics",
+          "content": "Variables, data types, and operators in Python.",
+          "durationMinutes": 35,
+          "orderIndex": 1,
+          "isPreview": true
+        },
+        {
+          "id": 36,
+          "title": "Control Flow",
+          "content": "If statements, loops, and conditions.",
+          "durationMinutes": 40,
+          "orderIndex": 2,
+          "isPreview": false
+        },
+        {
+          "id": 37,
+          "title": "Functions in Python",
+          "content": "Define and use functions.",
+          "durationMinutes": 35,
+          "orderIndex": 3,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "NumPy for Numerical Computing",
+      "description": "Working with arrays",
+      "orderIndex": 2,
+      "lessons": [
+        {
+          "id": 38,
+          "title": "NumPy Arrays",
+          "content": "Create and manipulate NumPy arrays.",
+          "durationMinutes": 45,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 39,
+          "title": "Array Operations",
+          "content": "Perform mathematical operations on arrays.",
+          "durationMinutes": 40,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Pandas for Data Analysis",
+      "description": "DataFrames and analysis",
+      "orderIndex": 3,
+      "lessons": [
+        {
+          "id": 40,
+          "title": "DataFrames Basics",
+          "content": "Create and explore DataFrames.",
+          "durationMinutes": 45,
+          "orderIndex": 1,
+          "isPreview": false
+        },
+        {
+          "id": 41,
+          "title": "Data Manipulation",
+          "content": "Filter, sort, and transform data.",
+          "durationMinutes": 50,
+          "orderIndex": 2,
+          "isPreview": false
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Data Visualization",
+      "description": "Charts and plots",
+      "orderIndex": 4,
+      "lessons": [
+        {
+          "id": 42,
+          "title": "Matplotlib Basics",
+          "content": "Create basic plots with Matplotlib.",
+          "durationMinutes": 40,
+          "orderIndex": 1,
+          "isPreview": false
+        }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": 15,
+      "lessonId": null,
+      "title": "Python Variables",
+      "instructions": "Create variables for name, age, and is_student\nPrint all variables with labels",
+      "starterCode": "// Simulate Python-style variables\nlet name = \"Alice\";\nlet age = 25;\nlet is_student = true;\n\nconsole.log(\"Name:\", name);\nconsole.log(\"Age:\", age);\nconsole.log(\"Is Student:\", is_student);\n",
+      "expectedOutput": "Name: Alice\nAge: 25\nIs Student: true",
+      "language": "javascript",
+      "orderIndex": 1
+    },
+    {
+      "id": 16,
+      "lessonId": null,
+      "title": "Python Lists",
+      "instructions": "Create a list of numbers\nFind the sum and average\nPrint the results",
+      "starterCode": "let numbers = [10, 20, 30, 40, 50];\n// Calculate sum and average\n",
+      "expectedOutput": "Sum: 150\nAverage: 30",
+      "language": "javascript",
+      "orderIndex": 2
+    }
+  ],
+  "test": {
+    "id": 4,
+    "title": "Python for Data Science Test",
+    "description": "Evaluate your Python and data analysis skills.",
+    "durationMinutes": 35,
+    "passingPercentage": 70,
+    "maxAttempts": 3,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "Which library is used for numerical computing in Python?",
+        "options": ["Pandas", "NumPy", "Matplotlib", "Scikit-learn"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q2",
+        "question": "What is a DataFrame in Pandas?",
+        "options": ["A 1D array", "A 2D labeled data structure", "A Python dictionary", "A NumPy array"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q3",
+        "question": "How do you import NumPy conventionally?",
+        "options": ["import numpy", "import numpy as np", "from numpy import *", "import np"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q4",
+        "question": "Which method is used to read CSV files in Pandas?",
+        "options": ["pd.load_csv()", "pd.read_csv()", "pd.import_csv()", "pd.open_csv()"],
+        "correctAnswer": 1
+      },
+      {
+        "id": "q5",
+        "question": "What does df.head() return?",
+        "options": ["First row", "Last 5 rows", "First 5 rows", "Column names"],
+        "correctAnswer": 2
+      }
+    ]
+  },
+  "project": {
+    "id": 4,
+    "title": "Data Analysis Dashboard",
+    "description": "Create a data analysis project using Python, Pandas, and visualization libraries.",
+    "difficulty": "beginner",
+    "estimatedHours": 15,
+    "requirements": [
+      "Load and clean a dataset using Pandas",
+      "Perform exploratory data analysis",
+      "Create at least 5 different visualizations",
+      "Generate statistical summaries",
+      "Export results to a report"
+    ],
+    "resources": [
+      "Pandas Documentation",
+      "Matplotlib Gallery",
+      "Kaggle Datasets"
+    ]
+  }
+}
