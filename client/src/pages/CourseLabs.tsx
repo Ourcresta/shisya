@@ -36,11 +36,8 @@ export default function CourseLabs() {
 
   const getLabStatus = (lab: Lab) => {
     const completed = isLabCompleted(courseId, lab.id);
-    let locked = false;
-    
-    if (lab.lessonId && !isLessonCompleted(courseId, lab.lessonId)) {
-      locked = true;
-    }
+    // Labs are always unlocked for testing/development
+    const locked = false;
     
     return { completed, locked };
   };
