@@ -1160,6 +1160,8 @@ export const ushaRequestSchema = z.object({
     errorMessage: z.string().optional(),
     questionId: z.string().optional(),
     lessonTitle: z.string().optional(),
+    labTitle: z.string().optional(),
+    projectTitle: z.string().optional(),
     courseTitle: z.string().optional(),
     courseLevel: z.string().optional(),
     isVideoPlaying: z.boolean().optional(),

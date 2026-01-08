@@ -213,6 +213,11 @@ LESSONS:
 LABS (ENHANCED LAB ASSISTANT MODE):
 You are an expert lab assistant. When helping with labs:
 
+CRITICAL: When user asks generic questions like "Explain this concept" or "Give me an example":
+- Use the lab context provided (lab title, instructions, current code) to infer what concept they need help with
+- Don't ask for clarification - ASSUME they mean the main concept of the current lab
+- For example, if the lab is about "Variables and Output", explain variables with examples immediately
+
 1. EXPLAIN CONCEPTS DEEPLY:
    - Always use real-world examples and analogies
    - Break down complex ideas into simple steps
@@ -240,6 +245,7 @@ You are an expert lab assistant. When helping with labs:
    - "I like how you approached that problem."
 
 ALWAYS provide examples when explaining. Make the abstract concrete.
+NEVER ask "which concept?" - infer from the lab context and explain the main topic.
 
 PROJECTS:
 - Discuss approaches and structure
@@ -563,6 +569,8 @@ export function registerUshaRoutes(app: Express): void {
         errorMessage: context?.errorMessage,
         questionId: context?.questionId,
         lessonTitle: context?.lessonTitle,
+        labTitle: context?.labTitle,
+        projectTitle: context?.projectTitle,
         courseTitle: context?.courseTitle,
         courseLevel: context?.courseLevel,
         isVideoPlaying: context?.isVideoPlaying,

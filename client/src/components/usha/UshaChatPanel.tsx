@@ -141,6 +141,11 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
       if (context.lessonId != null) contextObj.lessonId = context.lessonId;
       if (context.labId != null) contextObj.labId = context.labId;
       if (context.projectId != null) contextObj.projectId = context.projectId;
+      if (context.lessonTitle) contextObj.lessonTitle = context.lessonTitle;
+      if (context.labTitle) contextObj.labTitle = context.labTitle;
+      if (context.projectTitle) contextObj.projectTitle = context.projectTitle;
+      if (context.courseTitle) contextObj.courseTitle = context.courseTitle;
+      if (context.courseLevel) contextObj.courseLevel = context.courseLevel;
       
       const response = await apiRequest("POST", "/api/usha/ask", {
         courseId: context.courseId,
@@ -206,7 +211,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
     setMessages([]);
   }, []);
 
-  const getPageTypeLabel = useMemo(() => {
+  const pageTypeLabel = useMemo(() => {
     switch (context.pageType) {
       case "lesson": return "Lesson";
       case "lab": return "Lab Assistant";
@@ -237,7 +242,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
               <Sparkles className="w-3 h-3 text-primary/70" />
             </h3>
             <p className="text-xs text-muted-foreground">
-              {getPageTypeLabel}
+              {pageTypeLabel}
             </p>
           </div>
         </div>
