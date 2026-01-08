@@ -672,65 +672,66 @@ function LessonContent({
       )}
 
       {/* Navigation Buttons */}
-      <div className="flex items-center justify-between gap-3 pt-2">
-        {/* Previous Lesson */}
-        {prevLesson ? (
-          <Button 
-            variant="outline" 
-            className="gap-2" 
-            onClick={onPrevLesson}
-            data-testid="button-prev-lesson"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Previous</span>
-          </Button>
-        ) : (
-          <div />
-        )}
+      <Card className="mt-4">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-center gap-3">
+            {/* Previous Lesson */}
+            <Button 
+              variant="outline" 
+              className="gap-2 flex-1 max-w-[140px]" 
+              onClick={onPrevLesson}
+              disabled={!prevLesson}
+              data-testid="button-prev-lesson"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </Button>
 
-        {/* Mark Complete */}
-        <Button
-          onClick={onToggleComplete}
-          variant={isCompleted ? "secondary" : "default"}
-          className="gap-2"
-          data-testid="button-mark-complete"
-        >
-          {isCompleted ? (
-            <>
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span>Completed</span>
-            </>
-          ) : (
-            <>
-              <Circle className="w-4 h-4" />
-              <span>Mark Complete</span>
-            </>
-          )}
-        </Button>
+            {/* Mark Complete */}
+            <Button
+              onClick={onToggleComplete}
+              variant={isCompleted ? "secondary" : "default"}
+              className="gap-2 flex-1 max-w-[180px]"
+              data-testid="button-mark-complete"
+            >
+              {isCompleted ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>Completed</span>
+                </>
+              ) : (
+                <>
+                  <Circle className="w-4 h-4" />
+                  <span>Mark Complete</span>
+                </>
+              )}
+            </Button>
 
-        {/* Next Lesson */}
-        {nextLesson ? (
-          <Button 
-            variant="default" 
-            className="gap-2" 
-            onClick={onNextLesson}
-            data-testid="button-next-lesson"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        ) : (
-          <Button 
-            variant="outline" 
-            className="gap-2" 
-            onClick={onFinish}
-            data-testid="button-finish"
-          >
-            <span className="hidden sm:inline">Finish</span>
-            <CheckCircle2 className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
+            {/* Next Lesson */}
+            {nextLesson ? (
+              <Button 
+                variant="default" 
+                className="gap-2 flex-1 max-w-[140px]" 
+                onClick={onNextLesson}
+                data-testid="button-next-lesson"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button 
+                variant="default" 
+                className="gap-2 flex-1 max-w-[140px]" 
+                onClick={onFinish}
+                data-testid="button-finish"
+              >
+                <span>Finish</span>
+                <CheckCircle2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
