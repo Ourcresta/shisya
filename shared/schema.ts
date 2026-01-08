@@ -1128,7 +1128,7 @@ export interface AuthUser {
 }
 
 // Usha AI Tutor constants
-export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "clarification", "encouragement"] as const;
+export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "clarification", "encouragement", "warning"] as const;
 export type UshaResponseType = typeof USHA_RESPONSE_TYPES[number];
 
 export const USHA_HELP_LEVELS = ["minimal", "moderate", "detailed"] as const;
@@ -1136,3 +1136,77 @@ export type UshaHelpLevel = typeof USHA_HELP_LEVELS[number];
 
 export const USHA_PAGE_TYPES = ["lesson", "lab", "project", "test"] as const;
 export type UshaPageType = typeof USHA_PAGE_TYPES[number];
+
+// Supported languages for Usha AI Tutor
+export const SUPPORTED_LANGUAGES = ["en", "hi", "ta", "te", "kn", "ml", "bn", "mr", "gu", "pa"] as const;
+export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+
+// Usha request schema
+export const ushaRequestSchema = z.object({
+  courseId: z.number(),
+  pageType: z.enum(USHA_PAGE_TYPES),
+  message: z.string().min(1).max(1000),
+  context: z.object({
+    lessonId: z.number().optional(),
+    labId: z.number().optional(),
+    projectId: z.number().optional(),
+    testId: z.number().optional(),
+    currentCode: z.string().optional(),
+    errorMessage: z.string().optional(),
+    questionId: z.string().optional(),
+  }).optional(),
+  helpLevel: z.enum(USHA_HELP_LEVELS).optional(),
+  language: z.enum(SUPPORTED_LANGUAGES).optional().default("en"),
+});
+
+export type UshaRequest = z.infer<typeof ushaRequestSchema>;
+
+// Usha response interface
+export interface UshaResponse {
+  message: string;
+  responseType: UshaResponseType;
+  helpLevel: UshaHelpLevel;
+  suggestions?: string[];
+  remainingRequests?: number;
+  nearRateLimit?: boolean;
+  answer?: string;
+  type?: string;
+}
+
+// Usha context interface
+export interface UshaContext {
+  lessonId?: number;
+  labId?: number;
+  projectId?: number;
+  testId?: number;
+  currentCode?: string;
+  errorMessage?: string;
+  questionId?: string;
+  courseId?: number;
+  courseTitle?: string;
+  courseLevel?: string;
+  lessonTitle?: string;
+  labTitle?: string;
+  projectTitle?: string;
+  pageType?: UshaPageType;
+  studentId?: string;
+  language?: SupportedLanguage;
+  studentProgressSummary?: StudentProgressSummary;
+  previousUshaTurns?: UshaTurn[];
+}
+
+// Student progress summary for Usha
+export interface StudentProgressSummary {
+  lessonsCompleted: number;
+  totalLessons: number;
+  labsCompleted: number;
+  totalLabs: number;
+  testsPassed: number;
+  projectsSubmitted: number;
+}
+
+// Usha conversation turn
+export interface UshaTurn {
+  role: "user" | "assistant";
+  content: string;
+}
