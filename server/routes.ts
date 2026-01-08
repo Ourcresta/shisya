@@ -681,11 +681,12 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Answers are required" });
       }
 
-      if (USE_MOCK_DATA) {
+      // Helper function to score test locally
+      const scoreTestLocally = () => {
         const allTests = getAllTests();
         const test = allTests[testIdNum];
         if (!test) {
-          return res.status(404).json({ error: "Test not found" });
+          return null;
         }
 
         // Calculate score
@@ -705,7 +706,7 @@ export async function registerRoutes(
         const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
         const passed = scorePercentage >= test.passingPercentage;
 
-        return res.json({
+        return {
           success: true,
           result: {
             testId: testIdNum,
@@ -717,16 +718,17 @@ export async function registerRoutes(
             passed,
             attemptedAt: new Date().toISOString()
           }
-        });
+        };
+      };
+
+      // Always score locally since we have the correct answers
+      // Admin API doesn't have a submit endpoint
+      const localResult = scoreTestLocally();
+      if (localResult) {
+        return res.json(localResult);
       }
 
-      // For real backend, forward the submission
-      const response = await fetchFromAdmin(`/tests/${testId}/submit`);
-      if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to submit test" });
-      }
-      const result = await response.json();
-      res.json(result);
+      return res.status(404).json({ error: "Test not found" });
     } catch (error) {
       console.error("Error submitting test:", error);
       res.status(500).json({ error: "Failed to submit test" });
