@@ -525,7 +525,7 @@ function LessonContent({
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-32">
+    <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-8">
       {/* Lesson Header */}
       <div className="space-y-1.5">
         <h1 
@@ -671,67 +671,65 @@ function LessonContent({
         </Card>
       )}
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 bg-background/95 backdrop-blur-md border-t z-40">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          {/* Previous Lesson */}
-          {prevLesson ? (
-            <Button 
-              variant="outline" 
-              className="gap-2 min-w-[100px]" 
-              onClick={onPrevLesson}
-              data-testid="button-prev-lesson"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Previous</span>
-            </Button>
-          ) : (
-            <div className="min-w-[100px]" />
-          )}
-
-          {/* Mark Complete */}
-          <Button
-            onClick={onToggleComplete}
-            variant={isCompleted ? "secondary" : "default"}
-            className="gap-2 flex-1 max-w-[200px]"
-            data-testid="button-mark-complete"
+      {/* Navigation Buttons */}
+      <div className="flex items-center justify-between gap-3 pt-2">
+        {/* Previous Lesson */}
+        {prevLesson ? (
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={onPrevLesson}
+            data-testid="button-prev-lesson"
           >
-            {isCompleted ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Completed</span>
-              </>
-            ) : (
-              <>
-                <Circle className="w-4 h-4" />
-                <span>Mark Complete</span>
-              </>
-            )}
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Previous</span>
           </Button>
+        ) : (
+          <div />
+        )}
 
-          {/* Next Lesson */}
-          {nextLesson ? (
-            <Button 
-              variant="default" 
-              className="gap-2 min-w-[100px]" 
-              onClick={onNextLesson}
-              data-testid="button-next-lesson"
-            >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+        {/* Mark Complete */}
+        <Button
+          onClick={onToggleComplete}
+          variant={isCompleted ? "secondary" : "default"}
+          className="gap-2"
+          data-testid="button-mark-complete"
+        >
+          {isCompleted ? (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <span>Completed</span>
+            </>
           ) : (
-            <Button 
-              variant="outline" 
-              className="gap-2 min-w-[100px]" 
-              onClick={onFinish}
-              data-testid="button-finish"
-            >
-              <span className="hidden sm:inline">Finish</span>
-              <CheckCircle2 className="w-4 h-4" />
-            </Button>
+            <>
+              <Circle className="w-4 h-4" />
+              <span>Mark Complete</span>
+            </>
           )}
-        </div>
+        </Button>
+
+        {/* Next Lesson */}
+        {nextLesson ? (
+          <Button 
+            variant="default" 
+            className="gap-2" 
+            onClick={onNextLesson}
+            data-testid="button-next-lesson"
+          >
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={onFinish}
+            data-testid="button-finish"
+          >
+            <span className="hidden sm:inline">Finish</span>
+            <CheckCircle2 className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
