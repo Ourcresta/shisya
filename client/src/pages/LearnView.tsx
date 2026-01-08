@@ -58,10 +58,10 @@ const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
 ];
 
 export default function LearnView() {
-  const { courseId, lessonId } = useParams<{ courseId: string; lessonId?: string }>();
+  const { courseId } = useParams<{ courseId: string }>();
   const courseIdNum = parseInt(courseId || "0", 10);
-  const lessonIdNum = lessonId ? parseInt(lessonId, 10) : null;
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const { user } = useAuth();
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -87,11 +87,32 @@ export default function LearnView() {
   const progressPercent = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
 
   const allLessons = modules?.flatMap(m => m.lessons || []) || [];
-  const currentLessonIndex = lessonIdNum ? allLessons.findIndex(l => l.id === lessonIdNum) : -1;
+  const currentLessonIndex = selectedLessonId ? allLessons.findIndex(l => l.id === selectedLessonId) : -1;
   const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
   const nextLesson = currentLessonIndex >= 0 && currentLessonIndex < allLessons.length - 1 
     ? allLessons[currentLessonIndex + 1] 
     : null;
+
+  const handleSelectLesson = (lessonId: number) => {
+    setSelectedLessonId(lessonId);
+    setSidebarOpen(false);
+  };
+
+  const handlePrevLesson = () => {
+    if (prevLesson) {
+      setSelectedLessonId(prevLesson.id);
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (nextLesson) {
+      setSelectedLessonId(nextLesson.id);
+    }
+  };
+
+  const handleFinish = () => {
+    setSelectedLessonId(null);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -294,10 +315,9 @@ export default function LearnView() {
                       <ModuleAccordionItem 
                         key={module.id} 
                         module={module} 
-                        courseId={courseIdNum}
-                        activeLessonId={lessonIdNum}
+                        activeLessonId={selectedLessonId}
                         isLessonCompleted={isLessonCompleted}
-                        onLessonClick={() => setSidebarOpen(false)}
+                        onSelectLesson={handleSelectLesson}
                       />
                     ))}
                   </Accordion>
@@ -313,16 +333,17 @@ export default function LearnView() {
             <div className="max-w-3xl mx-auto p-4 lg:p-8">
               <Skeleton className="h-48 rounded-lg" />
             </div>
-          ) : lessonIdNum ? (
+          ) : selectedLessonId ? (
             <LessonContent 
-              courseId={courseIdNum}
-              lessonId={lessonIdNum}
+              lessonId={selectedLessonId}
               courseTitle={course?.title}
-              isCompleted={isLessonCompleted(lessonIdNum)}
-              onToggleComplete={() => toggleLessonComplete(lessonIdNum)}
+              isCompleted={isLessonCompleted(selectedLessonId)}
+              onToggleComplete={() => toggleLessonComplete(selectedLessonId)}
               prevLesson={prevLesson}
               nextLesson={nextLesson}
-              user={user}
+              onPrevLesson={handlePrevLesson}
+              onNextLesson={handleNextLesson}
+              onFinish={handleFinish}
             />
           ) : (
             <div className="max-w-3xl mx-auto p-4 lg:p-8">
@@ -360,11 +381,11 @@ export default function LearnView() {
       </div>
 
       {/* Usha AI Tutor Avatar */}
-      {user && lessonIdNum && course && (
+      {user && selectedLessonId && course && (
         <UshaAvatar
           context={{
             courseId: courseIdNum,
-            lessonId: lessonIdNum,
+            lessonId: selectedLessonId,
             pageType: "lesson",
             courseTitle: course.title,
           }}
@@ -375,23 +396,26 @@ export default function LearnView() {
 }
 
 interface LessonContentProps {
-  courseId: number;
   lessonId: number;
   courseTitle?: string;
   isCompleted: boolean;
   onToggleComplete: () => void;
   prevLesson: { id: number; title: string } | null;
   nextLesson: { id: number; title: string } | null;
-  user: any;
+  onPrevLesson: () => void;
+  onNextLesson: () => void;
+  onFinish: () => void;
 }
 
 function LessonContent({ 
-  courseId, 
   lessonId, 
   isCompleted, 
   onToggleComplete,
   prevLesson,
-  nextLesson
+  nextLesson,
+  onPrevLesson,
+  onNextLesson,
+  onFinish
 }: LessonContentProps) {
   const { data: lesson, isLoading: lessonLoading } = useQuery<Lesson>({
     queryKey: ["/api/lessons", lessonId.toString()],
@@ -414,9 +438,7 @@ function LessonContent({
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">Lesson not found</p>
-            <Link href={`/shishya/learn/${courseId}`}>
-              <Button variant="outline">Back to Course</Button>
-            </Link>
+            <Button variant="outline" onClick={onFinish}>Back to Course</Button>
           </CardContent>
         </Card>
       </div>
@@ -564,12 +586,16 @@ function LessonContent({
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
           {/* Previous Lesson */}
           {prevLesson ? (
-            <Link href={`/shishya/learn/${courseId}/${prevLesson.id}`}>
-              <Button variant="outline" size="sm" className="gap-2" data-testid="button-prev-lesson">
-                <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Previous</span>
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2" 
+              onClick={onPrevLesson}
+              data-testid="button-prev-lesson"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Previous</span>
+            </Button>
           ) : (
             <div />
           )}
@@ -596,19 +622,27 @@ function LessonContent({
 
           {/* Next Lesson */}
           {nextLesson ? (
-            <Link href={`/shishya/learn/${courseId}/${nextLesson.id}`}>
-              <Button variant="default" size="sm" className="gap-2" data-testid="button-next-lesson">
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="gap-2" 
+              onClick={onNextLesson}
+              data-testid="button-next-lesson"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           ) : (
-            <Link href={`/shishya/learn/${courseId}`}>
-              <Button variant="outline" size="sm" className="gap-2" data-testid="button-finish">
-                <span className="hidden sm:inline">Finish</span>
-                <CheckCircle2 className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2" 
+              onClick={onFinish}
+              data-testid="button-finish"
+            >
+              <span className="hidden sm:inline">Finish</span>
+              <CheckCircle2 className="w-4 h-4" />
+            </Button>
           )}
         </div>
       </div>
@@ -618,13 +652,12 @@ function LessonContent({
 
 interface ModuleAccordionItemProps {
   module: ModuleWithLessons;
-  courseId: number;
   activeLessonId: number | null;
   isLessonCompleted: (lessonId: number) => boolean;
-  onLessonClick?: () => void;
+  onSelectLesson: (lessonId: number) => void;
 }
 
-function ModuleAccordionItem({ module, courseId, activeLessonId, isLessonCompleted, onLessonClick }: ModuleAccordionItemProps) {
+function ModuleAccordionItem({ module, activeLessonId, isLessonCompleted, onSelectLesson }: ModuleAccordionItemProps) {
   const lessons = module.lessons || [];
   const completedCount = lessons.filter(l => isLessonCompleted(l.id)).length;
 
@@ -656,10 +689,9 @@ function ModuleAccordionItem({ module, courseId, activeLessonId, isLessonComplet
             <LessonListItem 
               key={lesson.id} 
               lesson={lesson} 
-              courseId={courseId}
               isActive={lesson.id === activeLessonId}
               isCompleted={isLessonCompleted(lesson.id)}
-              onClick={onLessonClick}
+              onSelect={() => onSelectLesson(lesson.id)}
             />
           ))}
         </ul>
@@ -674,26 +706,24 @@ interface LessonListItemProps {
     title: string;
     estimatedTime: string | null;
   };
-  courseId: number;
   isActive: boolean;
   isCompleted: boolean;
-  onClick?: () => void;
+  onSelect: () => void;
 }
 
-function LessonListItem({ lesson, courseId, isActive, isCompleted, onClick }: LessonListItemProps) {
+function LessonListItem({ lesson, isActive, isCompleted, onSelect }: LessonListItemProps) {
   return (
     <li>
-      <Link 
-        href={`/shishya/learn/${courseId}/${lesson.id}`}
-        onClick={onClick}
+      <button 
+        onClick={onSelect}
         className={`
-          flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors group
+          w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors group text-left
           ${isActive 
             ? 'bg-primary/10 text-primary' 
             : 'hover-elevate active-elevate-2'
           }
         `}
-        data-testid={`link-lesson-${lesson.id}`}
+        data-testid={`button-lesson-${lesson.id}`}
       >
         {isCompleted ? (
           <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
@@ -709,7 +739,7 @@ function LessonListItem({ lesson, courseId, isActive, isCompleted, onClick }: Le
           )}
         </div>
         <ChevronRight className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground opacity-0 group-hover:opacity-100'} transition-opacity`} />
-      </Link>
+      </button>
     </li>
   );
 }
