@@ -17,6 +17,12 @@ interface UshaContext {
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
   labTitle?: string;
+  labObjective?: string;
+  labInstructions?: string[];
+  labLanguage?: string;
+  labDifficulty?: string;
+  labExpectedOutput?: string;
+  currentCode?: string;
   projectTitle?: string;
   studentProgressSummary?: StudentProgressSummary;
 }

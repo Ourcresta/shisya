@@ -41,6 +41,12 @@ interface UshaContext {
   courseLevel?: "beginner" | "intermediate" | "advanced";
   lessonTitle?: string;
   labTitle?: string;
+  labObjective?: string;
+  labInstructions?: string[];
+  labLanguage?: string;
+  labDifficulty?: string;
+  labExpectedOutput?: string;
+  currentCode?: string;
   projectTitle?: string;
   studentProgressSummary?: StudentProgressSummary;
 }
@@ -143,6 +149,12 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
       if (context.projectId != null) contextObj.projectId = context.projectId;
       if (context.lessonTitle) contextObj.lessonTitle = context.lessonTitle;
       if (context.labTitle) contextObj.labTitle = context.labTitle;
+      if (context.labObjective) contextObj.labObjective = context.labObjective;
+      if (context.labInstructions?.length) contextObj.labInstructions = context.labInstructions;
+      if (context.labLanguage) contextObj.labLanguage = context.labLanguage;
+      if (context.labDifficulty) contextObj.labDifficulty = context.labDifficulty;
+      if (context.labExpectedOutput) contextObj.labExpectedOutput = context.labExpectedOutput;
+      if (context.currentCode) contextObj.currentCode = context.currentCode;
       if (context.projectTitle) contextObj.projectTitle = context.projectTitle;
       if (context.courseTitle) contextObj.courseTitle = context.courseTitle;
       if (context.courseLevel) contextObj.courseLevel = context.courseLevel;
