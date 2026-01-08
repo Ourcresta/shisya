@@ -395,6 +395,10 @@ export default function LearnView() {
   );
 }
 
+function getDefaultVideoUrl(lessonId: number): string {
+  return `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
+}
+
 function getMockAudioTracks(lessonId: number): AudioTrack[] {
   return [
     {
@@ -544,25 +548,23 @@ function LessonContent({
       <Separator />
 
       {/* Usha Video Player - Multi-language audio support */}
-      {lesson.videoUrl && (
-        <UshaVideoPlayer
-          videoUrl={lesson.videoUrl}
-          title={lesson.title}
-          poster={undefined}
-          audioTracks={getMockAudioTracks(lessonId)}
-          subtitleTracks={getMockSubtitleTracks(lessonId)}
-          onProgress={(progress) => {
-            if (progress >= 90 && !isCompleted) {
-              // Auto-mark as complete when 90% watched
-            }
-          }}
-          onComplete={() => {
-            if (!isCompleted) {
-              onToggleComplete();
-            }
-          }}
-        />
-      )}
+      <UshaVideoPlayer
+        videoUrl={lesson.videoUrl || getDefaultVideoUrl(lessonId)}
+        title={lesson.title}
+        poster={undefined}
+        audioTracks={getMockAudioTracks(lessonId)}
+        subtitleTracks={getMockSubtitleTracks(lessonId)}
+        onProgress={(progress) => {
+          if (progress >= 90 && !isCompleted) {
+            // Auto-mark as complete when 90% watched
+          }
+        }}
+        onComplete={() => {
+          if (!isCompleted) {
+            onToggleComplete();
+          }
+        }}
+      />
 
       {/* Objectives */}
       {lesson.objectives && lesson.objectives.length > 0 && (
