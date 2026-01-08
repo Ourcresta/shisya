@@ -539,10 +539,10 @@ export function registerUshaRoutes(app: Express): void {
       const messages = buildConversationMessages(undefined, contextPrompt, message);
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4.1-mini",
+        model: "gpt-4o-mini",
         messages,
-        max_tokens: 400,
-        temperature: 0.3,
+        max_tokens: 500,
+        temperature: 0.7,
       });
 
       const answer = completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";

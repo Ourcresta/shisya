@@ -38,6 +38,7 @@ interface UshaContextType {
   askQuestion: (question: string) => Promise<void>;
   isLoading: boolean;
   response: string | null;
+  error: string | null;
   startExplaining: () => void;
   stopExplaining: () => void;
   markComplete: () => void;
@@ -73,6 +74,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -125,6 +127,21 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     const pageType = labId ? "lab" : "lesson";
 
     try {
+      // Build context object, filtering out null/undefined values
+      const context: Record<string, unknown> = {
+        hasInteractedWithContent: true,
+      };
+      
+      // Only include non-null values
+      if (lessonId !== null && lessonId !== undefined) context.lessonId = lessonId;
+      if (lessonTitle) context.lessonTitle = lessonTitle;
+      if (courseTitle) context.courseTitle = courseTitle;
+      if (courseLevel) context.courseLevel = courseLevel;
+      if (labId !== null && labId !== undefined) context.labId = labId;
+      if (labTitle) context.labTitle = labTitle;
+      if (isVideoPlaying !== undefined) context.isVideoPlaying = isVideoPlaying;
+      if (lessonCompleted !== undefined) context.lessonCompleted = lessonCompleted;
+
       const res = await fetch("/api/usha/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,17 +152,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
           pageType,
           message: question,
           language,
-          context: {
-            lessonId,
-            lessonTitle,
-            courseTitle,
-            courseLevel,
-            labId,
-            labTitle,
-            isVideoPlaying,
-            hasInteractedWithContent: true,
-            lessonCompleted,
-          },
+          context,
         }),
       });
 
@@ -154,6 +161,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await res.json();
+      setError(null);
       setResponse(data.answer);
       setCurrentMessage(data.answer.substring(0, 100) + (data.answer.length > 100 ? "..." : ""));
       setIsSpeaking(true);
@@ -163,9 +171,10 @@ export function UshaProvider({ children }: { children: ReactNode }) {
         setState("idle");
       }, 3000);
 
-    } catch (error: unknown) {
-      if (error instanceof Error && error.name === "AbortError") return;
-      console.error("Usha ask error:", error);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      console.error("Usha ask error:", err);
+      setError("I had trouble connecting. Please try again.");
       setCurrentMessage("I had trouble understanding. Could you rephrase that?");
       setState("idle");
     } finally {
@@ -224,6 +233,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     askQuestion,
     isLoading,
     response,
+    error,
     startExplaining,
     stopExplaining,
     markComplete,
