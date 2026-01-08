@@ -1,0 +1,183 @@
+You are a senior full-stack architect and product engineer.
+
+Build a production-ready web application for an EdTech platform called **OurShiksha**, implementing an **Avatar-based video learning system** with the following FINAL, LOCKED behavior.
+
+────────────────────────────────
+🎯 CORE CONCEPT (DO NOT CHANGE)
+────────────────────────────────
+
+1. All lesson videos are **MUTED by default**.
+2. Teaching is done via **audio narration by a single AI avatar called “Usha”**.
+3. Usha explains the lesson using **Text-to-Speech (TTS) generated audio**.
+4. The SAME video is reused across **multiple languages** by switching only audio.
+5. The system must be **TTS-engine agnostic**:
+   - Phase 1: Lovevoice AI (manual upload supported)
+   - Phase 2+: Google / Azure / ElevenLabs (plug-and-play, no refactor)
+
+────────────────────────────────
+🧩 USER ROLES
+────────────────────────────────
+
+1. **Admin (Guru / Creator)**
+2. **Student (Shishya)**
+
+────────────────────────────────
+🗂️ DATABASE DESIGN (MANDATORY)
+────────────────────────────────
+
+Design a clean relational schema. DO NOT add unnecessary or enterprise-grade tables.
+
+Tables:
+
+1. courses
+   - course_id (PK)
+   - title
+   - description
+   - status (draft | published)
+   - created_at
+
+2. lessons
+   - lesson_id (PK)
+   - course_id (FK)
+   - title
+   - order_no
+
+3. lesson_videos
+   - lesson_id (FK)
+   - video_url
+   - is_muted (boolean, default true)
+
+4. lesson_scripts
+   - lesson_id (FK)
+   - base_language (ex: EN)
+   - script_text
+
+5. lesson_audio
+   - audio_id (PK)
+   - lesson_id (FK)
+   - language_code (EN, HI, TA, TE, etc.)
+   - audio_url
+   - voice_name (default: Usha)
+   - tts_engine (lovevoice | google | azure | elevenlabs)
+
+6. ai_avatar
+   - avatar_name (Usha)
+   - avatar_image_url
+   - default_position (bottom-right)
+
+7. users
+   - user_id
+   - role (admin | student)
+   - name
+   - email
+   - password_hash
+
+────────────────────────────────
+🛠️ ADMIN PORTAL (MUST BUILD)
+────────────────────────────────
+
+Admin must be able to:
+
+1. Create Course
+2. Create Lessons inside Course
+3. Upload **Muted Video** for lesson
+4. Add / edit **Usha’s explanation script**
+5. For each lesson:
+   - Upload audio manually (Lovevoice Phase-1)
+   - OR later auto-generate audio via TTS engine
+6. Add multiple languages per lesson audio
+7. Select TTS engine per audio (stored only as metadata)
+8. Publish / Unpublish course
+
+Admin UI must clearly show:
+- Video uploaded ✅
+- Script added ✅
+- Audio available per language ✅
+
+────────────────────────────────
+🎓 STUDENT PORTAL (MUST BUILD)
+────────────────────────────────
+
+Student experience must look like an **OTT video player**.
+
+For each lesson:
+1. Video auto-plays muted
+2. Usha avatar appears at **bottom-right**
+3. Audio plays automatically in selected language
+4. Student can:
+   - Play / Pause
+   - Change audio language 🌍
+   - Change playback speed
+   - Mute / Unmute Usha
+5. Changing language:
+   - DOES NOT reload video
+   - Only switches audio source
+
+────────────────────────────────
+🎨 UI / UX RULES
+────────────────────────────────
+
+- Clean, modern UI
+- Netflix / Prime-style video player
+- Usha avatar is friendly, small, non-blocking
+- Avatar does NOT lip-sync (Phase-1)
+- Optional speech bubble support (future)
+
+────────────────────────────────
+⚙️ TECH STACK (SUGGESTED, NOT STRICT)
+────────────────────────────────
+
+Frontend:
+- React or Vanilla JS
+- Custom video player controls
+
+Backend:
+- Node.js / Express OR Python Flask
+- REST APIs
+
+Storage:
+- Local or cloud object storage (video/audio URLs)
+
+Authentication:
+- Simple login (email/password)
+
+────────────────────────────────
+🔮 FUTURE-PROOFING (CRITICAL)
+────────────────────────────────
+
+1. DO NOT hard-code Lovevoice logic
+2. Always call a generic function:
+   generateAudio(text, language, voice)
+3. Store only audio URLs and engine name
+4. No logic change required when new TTS engines are added
+
+────────────────────────────────
+📦 OUTPUT EXPECTATIONS
+────────────────────────────────
+
+1. Full backend APIs
+2. Admin dashboard pages
+3. Student video player
+4. Database schema
+5. Clear folder structure
+6. Sample seed data
+7. Clean, commented code
+
+────────────────────────────────
+🚫 DO NOT DO
+────────────────────────────────
+
+- Do NOT build enterprise features
+- Do NOT add unnecessary tables
+- Do NOT add lip-sync or heavy animation
+- Do NOT auto-translate scripts (manual for now)
+
+────────────────────────────────
+🎯 GOAL
+────────────────────────────────
+
+Build a **scalable, multilingual, avatar-driven learning system** where:
+
+“One muted video + Usha’s voice = infinite languages.”
+
+Start building now.
