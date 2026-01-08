@@ -3,6 +3,8 @@ import { pgTable, text, serial, boolean, timestamp, varchar, integer } from "dri
 import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
+// All SHISHYA (student) tables use the shishya_ prefix
+// Course content tables remain unprefixed (shared with Admin)
 
 // ============ COURSE CONTENT TABLES (Admin manages, SHISHYA reads) ============
 
@@ -93,10 +95,10 @@ export const labs = pgTable("labs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// ============ AUTHENTICATION TABLES ============
+// ============ SHISHYA AUTHENTICATION TABLES ============
 
-// Users table for authentication
-export const users = pgTable("users", {
+// Shishya Users table for authentication
+export const shishyaUsers = pgTable("shishya_users", {
   id: varchar("id", { length: 36 }).primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
@@ -104,10 +106,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// OTP logs table for email verification with purpose tracking
-export const otpLogs = pgTable("otp_logs", {
+// Shishya OTP logs table for email verification with purpose tracking
+export const shishyaOtpLogs = pgTable("shishya_otp_logs", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).references(() => shishyaUsers.id),
   contactType: varchar("contact_type", { length: 10 }).notNull().default("email"),
   destination: varchar("destination", { length: 255 }).notNull(),
   otpHash: text("otp_hash").notNull(),
@@ -118,10 +120,10 @@ export const otpLogs = pgTable("otp_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Keep old otpCodes for backward compatibility during migration
-export const otpCodes = pgTable("otp_codes", {
+// Shishya OTP codes (backward compatibility)
+export const shishyaOtpCodes = pgTable("shishya_otp_codes", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   otpHash: text("otp_hash").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").notNull().default(false),
@@ -129,76 +131,20 @@ export const otpCodes = pgTable("otp_codes", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Sessions table for authentication
-export const sessions = pgTable("sessions", {
+// Shishya Sessions table for authentication
+export const shishyaSessions = pgTable("shishya_sessions", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
 });
 
-// User progress table (migrated from localStorage)
-export const userProgress = pgTable("user_progress", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  courseId: integer("course_id").notNull(),
-  lessonId: integer("lesson_id").notNull(),
-  completedAt: timestamp("completed_at").defaultNow().notNull(),
-});
+// ============ SHISHYA PROFILE TABLES ============
 
-// User lab progress table
-export const userLabProgress = pgTable("user_lab_progress", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  courseId: integer("course_id").notNull(),
-  labId: integer("lab_id").notNull(),
-  completed: boolean("completed").notNull().default(false),
-  userCode: text("user_code"),
-  completedAt: timestamp("completed_at"),
-});
-
-// User test attempts table
-export const userTestAttempts = pgTable("user_test_attempts", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  testId: integer("test_id").notNull(),
-  courseId: integer("course_id").notNull(),
-  answers: text("answers").notNull(), // JSON string
-  scorePercentage: integer("score_percentage").notNull(),
-  passed: boolean("passed").notNull(),
-  attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
-});
-
-// User project submissions table
-export const userProjectSubmissions = pgTable("user_project_submissions", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  projectId: integer("project_id").notNull(),
-  courseId: integer("course_id").notNull(),
-  githubUrl: text("github_url").notNull(),
-  liveUrl: text("live_url"),
-  notes: text("notes"),
-  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
-});
-
-// User certificates table
-export const userCertificates = pgTable("user_certificates", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  certificateId: varchar("certificate_id", { length: 20 }).notNull().unique(),
-  courseId: integer("course_id").notNull(),
-  courseTitle: text("course_title").notNull(),
-  certificateTitle: text("certificate_title").notNull(),
-  certificateType: varchar("certificate_type", { length: 20 }).notNull(),
-  level: varchar("level", { length: 20 }).notNull(),
-  skills: text("skills").notNull(), // JSON array string
-  issuedAt: timestamp("issued_at").defaultNow().notNull(),
-});
-
-// User profiles table
-export const userProfiles = pgTable("user_profiles", {
+// Shishya User profiles table
+export const shishyaUserProfiles = pgTable("shishya_user_profiles", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id).unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id).unique(),
   fullName: text("full_name").notNull(),
   username: varchar("username", { length: 30 }).notNull().unique(),
   bio: text("bio"),
@@ -212,10 +158,81 @@ export const userProfiles = pgTable("user_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// User credits table - Learning Credits wallet
-export const userCredits = pgTable("user_credits", {
+// ============ SHISHYA LEARNING PROGRESS TABLES ============
+
+// Shishya User progress table
+export const shishyaUserProgress = pgTable("shishya_user_progress", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id).unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  courseId: integer("course_id").notNull(),
+  lessonId: integer("lesson_id").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});
+
+// Shishya User lab progress table
+export const shishyaUserLabProgress = pgTable("shishya_user_lab_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  courseId: integer("course_id").notNull(),
+  labId: integer("lab_id").notNull(),
+  completed: boolean("completed").notNull().default(false),
+  userCode: text("user_code"),
+  completedAt: timestamp("completed_at"),
+});
+
+// Shishya User test attempts table
+export const shishyaUserTestAttempts = pgTable("shishya_user_test_attempts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  testId: integer("test_id").notNull(),
+  courseId: integer("course_id").notNull(),
+  answers: text("answers").notNull(),
+  scorePercentage: integer("score_percentage").notNull(),
+  passed: boolean("passed").notNull(),
+  attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
+});
+
+// Shishya User project submissions table
+export const shishyaUserProjectSubmissions = pgTable("shishya_user_project_submissions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  projectId: integer("project_id").notNull(),
+  courseId: integer("course_id").notNull(),
+  githubUrl: text("github_url").notNull(),
+  liveUrl: text("live_url"),
+  notes: text("notes"),
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+});
+
+// Shishya User certificates table
+export const shishyaUserCertificates = pgTable("shishya_user_certificates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  certificateId: varchar("certificate_id", { length: 20 }).notNull().unique(),
+  courseId: integer("course_id").notNull(),
+  courseTitle: text("course_title").notNull(),
+  certificateTitle: text("certificate_title").notNull(),
+  certificateType: varchar("certificate_type", { length: 20 }).notNull(),
+  level: varchar("level", { length: 20 }).notNull(),
+  skills: text("skills").notNull(),
+  issuedAt: timestamp("issued_at").defaultNow().notNull(),
+});
+
+// Shishya Course enrollments table
+export const shishyaCourseEnrollments = pgTable("shishya_course_enrollments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  courseId: integer("course_id").notNull(),
+  creditsPaid: integer("credits_paid").notNull().default(0),
+  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+});
+
+// ============ SHISHYA CREDITS & WALLET TABLES ============
+
+// Shishya User credits table - Learning Credits wallet
+export const shishyaUserCredits = pgTable("shishya_user_credits", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id).unique(),
   balance: integer("balance").notNull().default(0),
   totalEarned: integer("total_earned").notNull().default(0),
   totalSpent: integer("total_spent").notNull().default(0),
@@ -223,30 +240,21 @@ export const userCredits = pgTable("user_credits", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Credit transactions table - transaction history
-export const creditTransactions = pgTable("credit_transactions", {
+// Shishya Credit transactions table - transaction history
+export const shishyaCreditTransactions = pgTable("shishya_credit_transactions", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   amount: integer("amount").notNull(),
-  type: varchar("type", { length: 20 }).notNull(), // BONUS, DEBIT, CREDIT
-  reason: varchar("reason", { length: 50 }).notNull(), // WELCOME_BONUS, COURSE_ENROLLMENT, REFUND, etc.
+  type: varchar("type", { length: 20 }).notNull(),
+  reason: varchar("reason", { length: 50 }).notNull(),
   description: text("description"),
-  referenceId: integer("reference_id"), // courseId or other reference
+  referenceId: integer("reference_id"),
   balanceAfter: integer("balance_after").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Course enrollments table
-export const courseEnrollments = pgTable("course_enrollments", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  courseId: integer("course_id").notNull(),
-  creditsPaid: integer("credits_paid").notNull().default(0),
-  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
-});
-
-// Vouchers table
-export const vouchers = pgTable("vouchers", {
+// Shishya Vouchers table
+export const shishyaVouchers = pgTable("shishya_vouchers", {
   id: serial("id").primaryKey(),
   code: varchar("code", { length: 50 }).notNull().unique(),
   points: integer("points").notNull(),
@@ -258,153 +266,155 @@ export const vouchers = pgTable("vouchers", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Voucher redemptions table
-export const voucherRedemptions = pgTable("voucher_redemptions", {
+// Shishya Voucher redemptions table
+export const shishyaVoucherRedemptions = pgTable("shishya_voucher_redemptions", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   voucherCode: varchar("voucher_code", { length: 50 }).notNull(),
   pointsReceived: integer("points_received").notNull(),
   redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
 });
 
-// Gift boxes table
-export const giftBoxes = pgTable("gift_boxes", {
+// Shishya Gift boxes table
+export const shishyaGiftBoxes = pgTable("shishya_gift_boxes", {
   id: serial("id").primaryKey(),
-  senderId: varchar("sender_id", { length: 36 }).notNull().references(() => users.id),
+  senderId: varchar("sender_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   recipientEmail: varchar("recipient_email", { length: 255 }).notNull(),
   points: integer("points").notNull(),
   paymentId: varchar("payment_id", { length: 100 }),
   status: varchar("status", { length: 20 }).notNull().default("CREATED"),
-  claimedBy: varchar("claimed_by", { length: 36 }).references(() => users.id),
+  claimedBy: varchar("claimed_by", { length: 36 }).references(() => shishyaUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   claimedAt: timestamp("claimed_at"),
 });
 
-// Notifications table
-export const notifications = pgTable("notifications", {
+// ============ SHISHYA NOTIFICATIONS TABLE ============
+
+// Shishya Notifications table
+export const shishyaNotifications = pgTable("shishya_notifications", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).references(() => users.id), // null for global notifications
-  role: varchar("role", { length: 20 }).notNull().default("all"), // 'guru', 'shishya', 'all'
+  userId: varchar("user_id", { length: 36 }).references(() => shishyaUsers.id),
+  role: varchar("role", { length: 20 }).notNull().default("all"),
   title: varchar("title", { length: 200 }).notNull(),
   message: text("message").notNull(),
-  type: varchar("type", { length: 30 }).notNull(), // 'product', 'offer', 'payment', 'payment_failed', 'course', 'certificate', 'system'
+  type: varchar("type", { length: 30 }).notNull(),
   link: text("link"),
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// ============ AI MOTIVATION RULES ENGINE TABLES ============
+// ============ SHISHYA AI MOTIVATION RULES ENGINE TABLES ============
 
-// Motivation Rules - configurable rules with conditions and actions
-export const motivationRules = pgTable("motivation_rules", {
+// Shishya Motivation Rules - configurable rules with conditions and actions
+export const shishyaMotivationRules = pgTable("shishya_motivation_rules", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  ruleType: varchar("rule_type", { length: 30 }).notNull(), // 'progress', 'time', 'performance', 'streak', 'milestone'
-  conditions: text("conditions").notNull(), // JSON: {field, operator, value}[]
-  actions: text("actions").notNull(), // JSON: {type, value, message}[]
+  ruleType: varchar("rule_type", { length: 30 }).notNull(),
+  conditions: text("conditions").notNull(),
+  actions: text("actions").notNull(),
   priority: integer("priority").notNull().default(0),
-  cooldownHours: integer("cooldown_hours").notNull().default(24), // Hours before rule can trigger again
-  maxTriggerCount: integer("max_trigger_count"), // null = unlimited
+  cooldownHours: integer("cooldown_hours").notNull().default(24),
+  maxTriggerCount: integer("max_trigger_count"),
   isActive: boolean("is_active").notNull().default(true),
-  isGlobal: boolean("is_global").notNull().default(true), // applies to all courses or specific
-  courseId: integer("course_id"), // null for global rules
+  isGlobal: boolean("is_global").notNull().default(true),
+  courseId: integer("course_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Rule Trigger Logs - track rule executions for idempotency
-export const ruleTriggerLogs = pgTable("rule_trigger_logs", {
+// Shishya Rule Trigger Logs - track rule executions for idempotency
+export const shishyaRuleTriggerLogs = pgTable("shishya_rule_trigger_logs", {
   id: serial("id").primaryKey(),
-  ruleId: integer("rule_id").notNull().references(() => motivationRules.id),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  ruleId: integer("rule_id").notNull().references(() => shishyaMotivationRules.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   courseId: integer("course_id"),
   triggerCount: integer("trigger_count").notNull().default(1),
-  actionsExecuted: text("actions_executed").notNull(), // JSON: what actions were taken
-  inputSignals: text("input_signals"), // JSON: snapshot of data that triggered rule
+  actionsExecuted: text("actions_executed").notNull(),
+  inputSignals: text("input_signals"),
   triggeredAt: timestamp("triggered_at").defaultNow().notNull(),
 });
 
-// Motivation Cards - shareable achievement cards
-export const motivationCards = pgTable("motivation_cards", {
+// Shishya Motivation Cards - shareable achievement cards
+export const shishyaMotivationCards = pgTable("shishya_motivation_cards", {
   id: serial("id").primaryKey(),
   cardId: varchar("card_id", { length: 20 }).notNull().unique(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   courseId: integer("course_id"),
   courseTitle: text("course_title"),
-  cardType: varchar("card_type", { length: 30 }).notNull(), // 'streak', 'milestone', 'completion', 'performance', 'speedster', 'comeback'
+  cardType: varchar("card_type", { length: 30 }).notNull(),
   title: text("title").notNull(),
   subtitle: text("subtitle"),
-  badge: varchar("badge", { length: 50 }), // badge name or icon
-  stats: text("stats"), // JSON: {label, value}[] for display
+  badge: varchar("badge", { length: 50 }),
+  stats: text("stats"),
   message: text("message"),
-  percentileRank: integer("percentile_rank"), // e.g., "Top 13%"
+  percentileRank: integer("percentile_rank"),
   isShareable: boolean("is_shareable").notNull().default(true),
   shareUrl: text("share_url"),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Scholarships - rule-based discounts and free access
-export const scholarships = pgTable("scholarships", {
+// Shishya Scholarships - rule-based discounts and free access
+export const shishyaScholarships = pgTable("shishya_scholarships", {
   id: serial("id").primaryKey(),
   scholarshipId: varchar("scholarship_id", { length: 20 }).notNull().unique(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  discountPercent: integer("discount_percent").notNull(), // 0-100
-  courseId: integer("course_id"), // null for any course
-  maxRedemptions: integer("max_redemptions"), // null = unlimited
+  discountPercent: integer("discount_percent").notNull(),
+  courseId: integer("course_id"),
+  maxRedemptions: integer("max_redemptions"),
   redemptionCount: integer("redemption_count").notNull().default(0),
   validFrom: timestamp("valid_from"),
   validUntil: timestamp("valid_until"),
-  ruleId: integer("rule_id").references(() => motivationRules.id), // link to triggering rule
+  ruleId: integer("rule_id").references(() => shishyaMotivationRules.id),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// User Scholarships - scholarships awarded to users
-export const userScholarships = pgTable("user_scholarships", {
+// Shishya User Scholarships - scholarships awarded to users
+export const shishyaUserScholarships = pgTable("shishya_user_scholarships", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  scholarshipId: integer("scholarship_id").notNull().references(() => scholarships.id),
-  courseId: integer("course_id"), // null if applicable to any course
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  scholarshipId: integer("scholarship_id").notNull().references(() => shishyaScholarships.id),
+  courseId: integer("course_id"),
   isUsed: boolean("is_used").notNull().default(false),
   usedAt: timestamp("used_at"),
   awardedAt: timestamp("awarded_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at"),
 });
 
-// AI Nudge Logs - track motivation messages sent
-export const aiNudgeLogs = pgTable("ai_nudge_logs", {
+// Shishya AI Nudge Logs - track motivation messages sent
+export const shishyaAiNudgeLogs = pgTable("shishya_ai_nudge_logs", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   courseId: integer("course_id"),
-  nudgeType: varchar("nudge_type", { length: 30 }).notNull(), // 'encouragement', 'reminder', 'celebration', 'comeback', 'streak'
+  nudgeType: varchar("nudge_type", { length: 30 }).notNull(),
   message: text("message").notNull(),
-  channel: varchar("channel", { length: 20 }).notNull().default("app"), // 'app', 'email', 'push'
-  ruleId: integer("rule_id").references(() => motivationRules.id),
+  channel: varchar("channel", { length: 20 }).notNull().default("app"),
+  ruleId: integer("rule_id").references(() => shishyaMotivationRules.id),
   isRead: boolean("is_read").notNull().default(false),
   sentAt: timestamp("sent_at").defaultNow().notNull(),
 });
 
-// Mystery Reward Boxes - gamification rewards
-export const mysteryBoxes = pgTable("mystery_boxes", {
+// Shishya Mystery Reward Boxes - gamification rewards
+export const shishyaMysteryBoxes = pgTable("shishya_mystery_boxes", {
   id: serial("id").primaryKey(),
   boxId: varchar("box_id", { length: 20 }).notNull().unique(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  ruleId: integer("rule_id").references(() => motivationRules.id),
-  rewardType: varchar("reward_type", { length: 30 }), // 'coins', 'scholarship', 'badge', 'coupon'
-  rewardValue: text("reward_value"), // JSON with reward details
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  ruleId: integer("rule_id").references(() => shishyaMotivationRules.id),
+  rewardType: varchar("reward_type", { length: 30 }),
+  rewardValue: text("reward_value"),
   isOpened: boolean("is_opened").notNull().default(false),
   openedAt: timestamp("opened_at"),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Student Streaks - track learning consistency
-export const studentStreaks = pgTable("student_streaks", {
+// Shishya Student Streaks - track learning consistency
+export const shishyaStudentStreaks = pgTable("shishya_student_streaks", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id).unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id).unique(),
   currentStreak: integer("current_streak").notNull().default(0),
   longestStreak: integer("longest_streak").notNull().default(0),
   lastActivityDate: timestamp("last_activity_date"),
@@ -413,46 +423,103 @@ export const studentStreaks = pgTable("student_streaks", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// ============ ACADEMIC MARKSHEET TABLES ============
+// ============ SHISHYA ACADEMIC MARKSHEET TABLES ============
 
-// Marksheets - Official academic transcripts with verification
-export const marksheets = pgTable("marksheets", {
+// Shishya Marksheets - Official academic transcripts with verification
+export const shishyaMarksheets = pgTable("shishya_marksheets", {
   id: serial("id").primaryKey(),
-  marksheetId: varchar("marksheet_id", { length: 30 }).notNull().unique(), // MS-2024-XXXXXXXX
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  marksheetId: varchar("marksheet_id", { length: 30 }).notNull().unique(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   studentName: text("student_name").notNull(),
   studentEmail: varchar("student_email", { length: 255 }).notNull(),
   programName: text("program_name").notNull().default("Full Stack Development"),
-  academicYear: varchar("academic_year", { length: 10 }).notNull(), // 2024-25
-  courseData: text("course_data").notNull(), // JSON array of course entries
+  academicYear: varchar("academic_year", { length: 10 }).notNull(),
+  courseData: text("course_data").notNull(),
   totalMarks: integer("total_marks").notNull().default(0),
   obtainedMarks: integer("obtained_marks").notNull().default(0),
   percentage: integer("percentage").notNull().default(0),
-  grade: varchar("grade", { length: 5 }).notNull(), // O, A+, A, B+, B, C, F
-  cgpa: varchar("cgpa", { length: 5 }).notNull(), // 0.00 - 10.00
-  result: varchar("result", { length: 20 }).notNull(), // Pass, Fail, Pending
-  classification: varchar("classification", { length: 30 }).notNull(), // Distinction, First Class, Pass
+  grade: varchar("grade", { length: 5 }).notNull(),
+  cgpa: varchar("cgpa", { length: 5 }).notNull(),
+  result: varchar("result", { length: 20 }).notNull(),
+  classification: varchar("classification", { length: 30 }).notNull(),
   totalCredits: integer("total_credits").notNull().default(0),
   coursesCompleted: integer("courses_completed").notNull().default(0),
   rewardCoins: integer("reward_coins").notNull().default(0),
   scholarshipEligible: boolean("scholarship_eligible").notNull().default(false),
-  verificationCode: varchar("verification_code", { length: 20 }).notNull().unique(), // For QR verification
-  pdfHash: text("pdf_hash"), // SHA256 hash of generated PDF for tampering detection
-  signedBy: text("signed_by").default("Controller of Examinations"), // Digital signature authority
-  aiVerifierName: text("ai_verifier_name").default("Acharya Usha"), // AI Verifier signature
+  verificationCode: varchar("verification_code", { length: 20 }).notNull().unique(),
+  pdfHash: text("pdf_hash"),
+  signedBy: text("signed_by").default("Controller of Examinations"),
+  aiVerifierName: text("ai_verifier_name").default("Acharya Usha"),
   issuedAt: timestamp("issued_at").defaultNow().notNull(),
-  expiresAt: timestamp("expires_at"), // Optional expiry
-  status: varchar("status", { length: 20 }).notNull().default("active"), // active, revoked, expired
+  expiresAt: timestamp("expires_at"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
 });
 
-// Marksheet verification logs - Track who verified marksheets
-export const marksheetVerifications = pgTable("marksheet_verifications", {
+// Shishya Marksheet verification logs - Track who verified marksheets
+export const shishyaMarksheetVerifications = pgTable("shishya_marksheet_verifications", {
   id: serial("id").primaryKey(),
-  marksheetId: integer("marksheet_id").notNull().references(() => marksheets.id),
+  marksheetId: integer("marksheet_id").notNull().references(() => shishyaMarksheets.id),
   verifierIp: varchar("verifier_ip", { length: 45 }),
   verifierUserAgent: text("verifier_user_agent"),
   verifiedAt: timestamp("verified_at").defaultNow().notNull(),
 });
+
+// ============ SHISHYA AI TUTOR TABLES ============
+
+// Shishya Usha conversations table
+export const shishyaUshaConversations = pgTable("shishya_usha_conversations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  courseId: integer("course_id").notNull(),
+  pageType: varchar("page_type", { length: 20 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Shishya Usha messages table
+export const shishyaUshaMessages = pgTable("shishya_usha_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => shishyaUshaConversations.id),
+  role: varchar("role", { length: 20 }).notNull(),
+  content: text("content").notNull(),
+  responseType: varchar("response_type", { length: 30 }),
+  helpLevel: varchar("help_level", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ============ BACKWARD COMPATIBILITY ALIASES ============
+// These aliases allow existing code to work with new table names
+
+export const users = shishyaUsers;
+export const otpLogs = shishyaOtpLogs;
+export const otpCodes = shishyaOtpCodes;
+export const sessions = shishyaSessions;
+export const userProfiles = shishyaUserProfiles;
+export const userProgress = shishyaUserProgress;
+export const userLabProgress = shishyaUserLabProgress;
+export const userTestAttempts = shishyaUserTestAttempts;
+export const userProjectSubmissions = shishyaUserProjectSubmissions;
+export const userCertificates = shishyaUserCertificates;
+export const courseEnrollments = shishyaCourseEnrollments;
+export const userCredits = shishyaUserCredits;
+export const creditTransactions = shishyaCreditTransactions;
+export const vouchers = shishyaVouchers;
+export const voucherRedemptions = shishyaVoucherRedemptions;
+export const giftBoxes = shishyaGiftBoxes;
+export const notifications = shishyaNotifications;
+export const motivationRules = shishyaMotivationRules;
+export const ruleTriggerLogs = shishyaRuleTriggerLogs;
+export const motivationCards = shishyaMotivationCards;
+export const scholarships = shishyaScholarships;
+export const userScholarships = shishyaUserScholarships;
+export const aiNudgeLogs = shishyaAiNudgeLogs;
+export const mysteryBoxes = shishyaMysteryBoxes;
+export const studentStreaks = shishyaStudentStreaks;
+export const marksheets = shishyaMarksheets;
+export const marksheetVerifications = shishyaMarksheetVerifications;
+export const ushaConversations = shishyaUshaConversations;
+export const ushaMessages = shishyaUshaMessages;
+
+// ============ INSERT SCHEMAS ============
 
 // Course Content insert schemas
 export const insertCourseSchema = createInsertSchema(courses).omit({ id: true, createdAt: true, updatedAt: true });
@@ -462,32 +529,44 @@ export const insertTestSchema = createInsertSchema(tests).omit({ id: true, creat
 export const insertProjectSchema = createInsertSchema(projects).omit({ id: true, createdAt: true });
 export const insertLabSchema = createInsertSchema(labs).omit({ id: true, createdAt: true });
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true });
-export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({ id: true, createdAt: true });
-export const insertOtpLogSchema = createInsertSchema(otpLogs).omit({ id: true, createdAt: true });
-export const insertSessionSchema = createInsertSchema(sessions).omit({ createdAt: true });
-export const insertUserCreditsSchema = createInsertSchema(userCredits).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({ id: true, createdAt: true });
-export const insertCourseEnrollmentSchema = createInsertSchema(courseEnrollments).omit({ id: true, enrolledAt: true });
-export const insertVoucherSchema = createInsertSchema(vouchers).omit({ id: true, createdAt: true });
-export const insertVoucherRedemptionSchema = createInsertSchema(voucherRedemptions).omit({ id: true, redeemedAt: true });
-export const insertGiftBoxSchema = createInsertSchema(giftBoxes).omit({ id: true, createdAt: true });
-export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+// Shishya insert schemas
+export const insertUserSchema = createInsertSchema(shishyaUsers).omit({ createdAt: true });
+export const insertOtpCodeSchema = createInsertSchema(shishyaOtpCodes).omit({ id: true, createdAt: true });
+export const insertOtpLogSchema = createInsertSchema(shishyaOtpLogs).omit({ id: true, createdAt: true });
+export const insertSessionSchema = createInsertSchema(shishyaSessions).omit({ createdAt: true });
+export const insertUserProfileSchema = createInsertSchema(shishyaUserProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserProgressSchema = createInsertSchema(shishyaUserProgress).omit({ id: true, completedAt: true });
+export const insertUserLabProgressSchema = createInsertSchema(shishyaUserLabProgress).omit({ id: true });
+export const insertUserTestAttemptSchema = createInsertSchema(shishyaUserTestAttempts).omit({ id: true, attemptedAt: true });
+export const insertUserProjectSubmissionSchema = createInsertSchema(shishyaUserProjectSubmissions).omit({ id: true, submittedAt: true });
+export const insertUserCertificateSchema = createInsertSchema(shishyaUserCertificates).omit({ id: true, issuedAt: true });
+export const insertCourseEnrollmentSchema = createInsertSchema(shishyaCourseEnrollments).omit({ id: true, enrolledAt: true });
+export const insertUserCreditsSchema = createInsertSchema(shishyaUserCredits).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCreditTransactionSchema = createInsertSchema(shishyaCreditTransactions).omit({ id: true, createdAt: true });
+export const insertVoucherSchema = createInsertSchema(shishyaVouchers).omit({ id: true, createdAt: true });
+export const insertVoucherRedemptionSchema = createInsertSchema(shishyaVoucherRedemptions).omit({ id: true, redeemedAt: true });
+export const insertGiftBoxSchema = createInsertSchema(shishyaGiftBoxes).omit({ id: true, createdAt: true });
+export const insertNotificationSchema = createInsertSchema(shishyaNotifications).omit({ id: true, createdAt: true });
 
 // AI Motivation Rules Engine insert schemas
-export const insertMotivationRuleSchema = createInsertSchema(motivationRules).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertRuleTriggerLogSchema = createInsertSchema(ruleTriggerLogs).omit({ id: true, triggeredAt: true });
-export const insertMotivationCardSchema = createInsertSchema(motivationCards).omit({ id: true, createdAt: true });
-export const insertScholarshipSchema = createInsertSchema(scholarships).omit({ id: true, createdAt: true });
-export const insertUserScholarshipSchema = createInsertSchema(userScholarships).omit({ id: true, awardedAt: true });
-export const insertAiNudgeLogSchema = createInsertSchema(aiNudgeLogs).omit({ id: true, sentAt: true });
-export const insertMysteryBoxSchema = createInsertSchema(mysteryBoxes).omit({ id: true, createdAt: true });
-export const insertStudentStreakSchema = createInsertSchema(studentStreaks).omit({ id: true, updatedAt: true });
+export const insertMotivationRuleSchema = createInsertSchema(shishyaMotivationRules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertRuleTriggerLogSchema = createInsertSchema(shishyaRuleTriggerLogs).omit({ id: true, triggeredAt: true });
+export const insertMotivationCardSchema = createInsertSchema(shishyaMotivationCards).omit({ id: true, createdAt: true });
+export const insertScholarshipSchema = createInsertSchema(shishyaScholarships).omit({ id: true, createdAt: true });
+export const insertUserScholarshipSchema = createInsertSchema(shishyaUserScholarships).omit({ id: true, awardedAt: true });
+export const insertAiNudgeLogSchema = createInsertSchema(shishyaAiNudgeLogs).omit({ id: true, sentAt: true });
+export const insertMysteryBoxSchema = createInsertSchema(shishyaMysteryBoxes).omit({ id: true, createdAt: true });
+export const insertStudentStreakSchema = createInsertSchema(shishyaStudentStreaks).omit({ id: true, updatedAt: true });
 
 // Marksheet insert schemas
-export const insertMarksheetSchema = createInsertSchema(marksheets).omit({ id: true, issuedAt: true });
-export const insertMarksheetVerificationSchema = createInsertSchema(marksheetVerifications).omit({ id: true, verifiedAt: true });
+export const insertMarksheetSchema = createInsertSchema(shishyaMarksheets).omit({ id: true, issuedAt: true });
+export const insertMarksheetVerificationSchema = createInsertSchema(shishyaMarksheetVerifications).omit({ id: true, verifiedAt: true });
+
+// Usha AI Tutor insert schemas
+export const insertUshaConversationSchema = createInsertSchema(shishyaUshaConversations).omit({ id: true, createdAt: true });
+export const insertUshaMessageSchema = createInsertSchema(shishyaUshaMessages).omit({ id: true, createdAt: true });
+
+// ============ TYPE DEFINITIONS ============
 
 // OTP Purpose enum
 export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
@@ -509,41 +588,41 @@ export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertLab = z.infer<typeof insertLabSchema>;
 
 // Types from database
-export type User = typeof users.$inferSelect;
+export type User = typeof shishyaUsers.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type OtpCode = typeof otpCodes.$inferSelect;
-export type OtpLog = typeof otpLogs.$inferSelect;
-export type Session = typeof sessions.$inferSelect;
-export type UserProgress = typeof userProgress.$inferSelect;
-export type UserLabProgress = typeof userLabProgress.$inferSelect;
-export type UserTestAttempt = typeof userTestAttempts.$inferSelect;
-export type UserProjectSubmission = typeof userProjectSubmissions.$inferSelect;
-export type UserCertificate = typeof userCertificates.$inferSelect;
-export type UserProfile = typeof userProfiles.$inferSelect;
-export type UserCredits = typeof userCredits.$inferSelect;
-export type CreditTransaction = typeof creditTransactions.$inferSelect;
-export type CourseEnrollment = typeof courseEnrollments.$inferSelect;
+export type OtpCode = typeof shishyaOtpCodes.$inferSelect;
+export type OtpLog = typeof shishyaOtpLogs.$inferSelect;
+export type Session = typeof shishyaSessions.$inferSelect;
+export type UserProgress = typeof shishyaUserProgress.$inferSelect;
+export type UserLabProgress = typeof shishyaUserLabProgress.$inferSelect;
+export type UserTestAttempt = typeof shishyaUserTestAttempts.$inferSelect;
+export type UserProjectSubmission = typeof shishyaUserProjectSubmissions.$inferSelect;
+export type UserCertificate = typeof shishyaUserCertificates.$inferSelect;
+export type UserProfile = typeof shishyaUserProfiles.$inferSelect;
+export type UserCredits = typeof shishyaUserCredits.$inferSelect;
+export type CreditTransaction = typeof shishyaCreditTransactions.$inferSelect;
+export type CourseEnrollment = typeof shishyaCourseEnrollments.$inferSelect;
 export type InsertUserCredits = z.infer<typeof insertUserCreditsSchema>;
 export type InsertCreditTransaction = z.infer<typeof insertCreditTransactionSchema>;
 export type InsertCourseEnrollment = z.infer<typeof insertCourseEnrollmentSchema>;
-export type Voucher = typeof vouchers.$inferSelect;
-export type VoucherRedemption = typeof voucherRedemptions.$inferSelect;
-export type GiftBox = typeof giftBoxes.$inferSelect;
+export type Voucher = typeof shishyaVouchers.$inferSelect;
+export type VoucherRedemption = typeof shishyaVoucherRedemptions.$inferSelect;
+export type GiftBox = typeof shishyaGiftBoxes.$inferSelect;
 export type InsertVoucher = z.infer<typeof insertVoucherSchema>;
 export type InsertVoucherRedemption = z.infer<typeof insertVoucherRedemptionSchema>;
 export type InsertGiftBox = z.infer<typeof insertGiftBoxSchema>;
-export type Notification = typeof notifications.$inferSelect;
+export type Notification = typeof shishyaNotifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 // AI Motivation Rules Engine types
-export type MotivationRule = typeof motivationRules.$inferSelect;
-export type RuleTriggerLog = typeof ruleTriggerLogs.$inferSelect;
-export type MotivationCard = typeof motivationCards.$inferSelect;
-export type Scholarship = typeof scholarships.$inferSelect;
-export type UserScholarship = typeof userScholarships.$inferSelect;
-export type AiNudgeLog = typeof aiNudgeLogs.$inferSelect;
-export type MysteryBox = typeof mysteryBoxes.$inferSelect;
-export type StudentStreak = typeof studentStreaks.$inferSelect;
+export type MotivationRule = typeof shishyaMotivationRules.$inferSelect;
+export type RuleTriggerLog = typeof shishyaRuleTriggerLogs.$inferSelect;
+export type MotivationCard = typeof shishyaMotivationCards.$inferSelect;
+export type Scholarship = typeof shishyaScholarships.$inferSelect;
+export type UserScholarship = typeof shishyaUserScholarships.$inferSelect;
+export type AiNudgeLog = typeof shishyaAiNudgeLogs.$inferSelect;
+export type MysteryBox = typeof shishyaMysteryBoxes.$inferSelect;
+export type StudentStreak = typeof shishyaStudentStreaks.$inferSelect;
 
 export type InsertMotivationRule = z.infer<typeof insertMotivationRuleSchema>;
 export type InsertRuleTriggerLog = z.infer<typeof insertRuleTriggerLogSchema>;
@@ -555,10 +634,18 @@ export type InsertMysteryBox = z.infer<typeof insertMysteryBoxSchema>;
 export type InsertStudentStreak = z.infer<typeof insertStudentStreakSchema>;
 
 // Marksheet types
-export type Marksheet = typeof marksheets.$inferSelect;
-export type MarksheetVerification = typeof marksheetVerifications.$inferSelect;
+export type Marksheet = typeof shishyaMarksheets.$inferSelect;
+export type MarksheetVerification = typeof shishyaMarksheetVerifications.$inferSelect;
 export type InsertMarksheet = z.infer<typeof insertMarksheetSchema>;
 export type InsertMarksheetVerification = z.infer<typeof insertMarksheetVerificationSchema>;
+
+// Usha AI Tutor types
+export type UshaConversation = typeof shishyaUshaConversations.$inferSelect;
+export type UshaMessage = typeof shishyaUshaMessages.$inferSelect;
+export type InsertUshaConversation = z.infer<typeof insertUshaConversationSchema>;
+export type InsertUshaMessage = z.infer<typeof insertUshaMessageSchema>;
+
+// ============ CONSTANTS ============
 
 // Marksheet grades
 export const MARKSHEET_GRADES = ["O", "A+", "A", "B+", "B", "C", "F"] as const;
@@ -655,14 +742,14 @@ export const ruleConditionSchema = z.object({
   field: z.enum(CONDITION_FIELDS),
   operator: z.enum(CONDITION_OPERATORS),
   value: z.union([z.number(), z.string(), z.array(z.number()), z.array(z.string())]),
-  value2: z.union([z.number(), z.string()]).optional(), // For 'between' operator
+  value2: z.union([z.number(), z.string()]).optional(),
 });
 export type RuleCondition = z.infer<typeof ruleConditionSchema>;
 
 // Rule action schema for validation
 export const ruleActionSchema = z.object({
   type: z.enum(ACTION_TYPES),
-  value: z.union([z.number(), z.string(), z.object({})]).optional(), // Coins amount, card type, etc.
+  value: z.union([z.number(), z.string(), z.object({})]).optional(),
   message: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -883,7 +970,7 @@ export const testSchema = z.object({
   description: z.string().nullable(),
   instructions: z.string().nullable(),
   passingPercentage: z.number(),
-  timeLimit: z.number().nullable(), // in minutes, null = no time limit
+  timeLimit: z.number().nullable(),
   questionCount: z.number(),
   createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
@@ -984,7 +1071,7 @@ export const labSchema = z.object({
   expectedOutput: z.string(),
   language: z.literal("javascript"),
   status: z.enum(["locked", "available"]),
-  estimatedTime: z.number(), // in minutes
+  estimatedTime: z.number(),
   orderIndex: z.number(),
 });
 
@@ -1040,103 +1127,12 @@ export interface AuthUser {
   emailVerified: boolean;
 }
 
-// ============ USHA AI TUTOR SCHEMAS (v2) ============
-
-// Usha conversations table (keeping db table name for compatibility)
-export const ushaConversations = pgTable("mithra_conversations", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
-  courseId: integer("course_id").notNull(),
-  pageType: varchar("page_type", { length: 20 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Usha messages table (keeping db table name for compatibility)
-export const ushaMessages = pgTable("mithra_messages", {
-  id: serial("id").primaryKey(),
-  conversationId: integer("conversation_id").notNull().references(() => ushaConversations.id),
-  role: varchar("role", { length: 10 }).notNull(),
-  content: text("content").notNull(),
-  responseType: varchar("response_type", { length: 20 }),
-  helpLevel: varchar("help_level", { length: 20 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Usha allowed page types
-export const USHA_ALLOWED_PAGES = ["lesson", "lab", "project", "test_prep"] as const;
-export type UshaAllowedPage = typeof USHA_ALLOWED_PAGES[number];
-
-// Usha help levels for adaptive tutoring
-export const USHA_HELP_LEVELS = ["beginner", "intermediate", "advanced"] as const;
-export type UshaHelpLevel = typeof USHA_HELP_LEVELS[number];
-
-// Student progress summary for learning-aware responses
-export const studentProgressSummarySchema = z.object({
-  lessonsCompleted: z.number().default(0),
-  totalLessons: z.number().default(0),
-  labsCompleted: z.number().default(0),
-  totalLabs: z.number().default(0),
-  testsPassed: z.number().default(0),
-  projectsSubmitted: z.number().default(0),
-  recentFailures: z.number().default(0),
-  timeOnCurrentPage: z.number().optional(),
-});
-
-export type StudentProgressSummary = z.infer<typeof studentProgressSummarySchema>;
-
-// Previous Usha conversation turn for session memory
-export const ushaTurnSchema = z.object({
-  role: z.enum(["user", "assistant"]),
-  content: z.string(),
-});
-
-export type UshaTurn = z.infer<typeof ushaTurnSchema>;
-
-// Supported languages for Usha AI Tutor
-export const SUPPORTED_LANGUAGES = ["english", "hindi", "tamil"] as const;
-export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
-
-// Usha request context schema (v2 enhanced)
-export const ushaContextSchema = z.object({
-  studentId: z.string(),
-  courseId: z.number(),
-  moduleId: z.number().optional(),
-  lessonId: z.number().optional(),
-  labId: z.number().optional(),
-  projectId: z.number().optional(),
-  pageType: z.enum(["lesson", "lab", "project", "test_prep"]),
-  courseTitle: z.string().optional(),
-  courseLevel: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-  lessonTitle: z.string().optional(),
-  labTitle: z.string().optional(),
-  projectTitle: z.string().optional(),
-  language: z.enum(SUPPORTED_LANGUAGES).optional().default("english"),
-  studentProgressSummary: studentProgressSummarySchema.optional(),
-  previousUshaTurns: z.array(ushaTurnSchema).optional(),
-});
-
-export type UshaContext = z.infer<typeof ushaContextSchema>;
-
-// Usha request schema
-export const ushaRequestSchema = z.object({
-  context: ushaContextSchema,
-  question: z.string().min(1, "Question is required").max(500, "Question too long"),
-});
-
-export type UshaRequest = z.infer<typeof ushaRequestSchema>;
-
-// Usha response types
-export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "warning"] as const;
+// Usha AI Tutor constants
+export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "clarification", "encouragement"] as const;
 export type UshaResponseType = typeof USHA_RESPONSE_TYPES[number];
 
-// Usha response interface (v2 with help level)
-export interface UshaResponse {
-  answer: string;
-  type: UshaResponseType;
-  helpLevel: UshaHelpLevel;
-}
+export const USHA_HELP_LEVELS = ["minimal", "moderate", "detailed"] as const;
+export type UshaHelpLevel = typeof USHA_HELP_LEVELS[number];
 
-// Usha table types
-export type UshaConversation = typeof ushaConversations.$inferSelect;
-export type UshaMessage = typeof ushaMessages.$inferSelect;
-
+export const USHA_PAGE_TYPES = ["lesson", "lab", "project", "test"] as const;
+export type UshaPageType = typeof USHA_PAGE_TYPES[number];
