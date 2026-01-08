@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, X, AlertCircle, Globe } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2, Send, X, AlertCircle, Globe, Trash2, Lightbulb, Code, HelpCircle, Sparkles } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { motion, AnimatePresence } from "framer-motion";
 import type { UshaPageType, UshaResponseType, UshaHelpLevel, StudentProgressSummary, UshaTurn, SupportedLanguage } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
+
+const LAB_SUGGESTIONS = [
+  { text: "Explain this concept with an example", icon: Lightbulb },
+  { text: "Why is my code not working?", icon: Code },
+  { text: "What should I try next?", icon: HelpCircle },
+  { text: "Give me a hint for this step", icon: Sparkles },
+  { text: "Help me understand the logic", icon: Lightbulb },
+  { text: "What's the best approach here?", icon: Code },
+];
 
 interface UshaContext {
   courseId: number;
@@ -166,7 +177,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     const question = input.trim();
     if (!question || askMutation.isPending) return;
@@ -174,43 +185,65 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
     setMessages((prev) => [...prev, { role: "user", content: question }]);
     setInput("");
     askMutation.mutate(question);
-  };
+  }, [input, askMutation]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
-  };
+    if (e.key === "Escape") {
+      onClose();
+    }
+  }, [handleSubmit, onClose]);
 
-  const getPageTypeLabel = (pageType: UshaPageType): string => {
-    switch (pageType) {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    setInput(suggestion);
+    inputRef.current?.focus();
+  }, []);
+
+  const handleClearChat = useCallback(() => {
+    setMessages([]);
+  }, []);
+
+  const getPageTypeLabel = useMemo(() => {
+    switch (context.pageType) {
       case "lesson": return "Lesson";
-      case "lab": return "Lab";
+      case "lab": return "Lab Assistant";
       case "project": return "Project";
       case "test": return "Test";
       default: return "Learning";
     }
-  };
+  }, [context.pageType]);
+
+  const hasMessages = messages.length > 0;
 
   return (
     <Card className="fixed bottom-24 right-6 w-96 max-h-[70vh] z-50 flex flex-col shadow-xl">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 py-3 px-4 border-b">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 py-3 px-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 border border-primary">
-            <AvatarImage src={ushaAvatarImage} alt="Usha" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Avatar className="h-9 w-9 border-2 border-primary/30 shadow-sm">
+              <AvatarImage src={ushaAvatarImage} alt="Usha" />
+              <AvatarFallback className="bg-primary/20 text-primary">U</AvatarFallback>
+            </Avatar>
+          </motion.div>
           <div>
-            <h3 className="font-semibold text-sm">Usha</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-1">
+              Usha
+              <Sparkles className="w-3 h-3 text-primary/70" />
+            </h3>
             <p className="text-xs text-muted-foreground">
-              {getPageTypeLabel(context.pageType)} Assistant
+              {getPageTypeLabel}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Select value={language} onValueChange={(v) => setLanguage(v as SupportedLanguage)}>
-            <SelectTrigger className="w-[100px] h-8 text-xs" data-testid="select-usha-language">
+            <SelectTrigger className="w-[90px] h-8 text-xs" data-testid="select-usha-language">
               <Globe className="h-3 w-3 mr-1" />
               <SelectValue />
             </SelectTrigger>
@@ -223,14 +256,34 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
               <SelectItem value="ml" data-testid="option-malayalam">Malayalam</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={onClose}
-            data-testid="button-usha-close"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {hasMessages && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleClearChat}
+                  data-testid="button-usha-clear"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Clear chat</TooltipContent>
+            </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onClose}
+                data-testid="button-usha-close"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Close (Esc)</TooltipContent>
+          </Tooltip>
         </div>
       </CardHeader>
 
@@ -245,24 +298,67 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
 
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-80 p-4" ref={scrollRef}>
-          {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/30">
-                <AvatarImage src={ushaAvatarImage} alt="Usha" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-              <p className="text-sm mb-2">Hi, I am Usha, your learning companion.</p>
-              <p className="text-xs mb-4">
-                I explain concepts, give hints, and guide your thinking.
-                I am here to help you learn, not to solve for you.
+          {!hasMessages ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center h-full text-center py-4"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Avatar className="h-16 w-16 border-4 border-primary/20 shadow-lg mb-3">
+                  <AvatarImage src={ushaAvatarImage} alt="Usha" />
+                  <AvatarFallback className="bg-primary/20 text-primary text-xl">U</AvatarFallback>
+                </Avatar>
+              </motion.div>
+              
+              <h4 className="font-semibold text-foreground mb-1">Hi! I'm Usha</h4>
+              <p className="text-sm text-muted-foreground mb-3 max-w-[280px]">
+                Your Lab Assistant - I explain concepts deeply with examples, give hints, and guide your thinking.
               </p>
-              <div className="text-xs space-y-1">
-                <p className="font-medium">Try asking:</p>
-                <p className="italic">"Can you explain this concept?"</p>
-                <p className="italic">"I am stuck on this step. Any hints?"</p>
-                <p className="italic">"What approach should I take?"</p>
+              
+              <div className="w-full space-y-2">
+                <p className="text-xs text-muted-foreground/70 font-medium">Try asking:</p>
+                <div className="grid grid-cols-2 gap-2 px-2">
+                  {LAB_SUGGESTIONS.slice(0, 4).map((suggestion) => {
+                    const Icon = suggestion.icon;
+                    return (
+                      <motion.button
+                        key={suggestion.text}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleSuggestionClick(suggestion.text)}
+                        className="flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-foreground transition-colors border border-primary/10 text-left"
+                        data-testid={`button-suggestion-${suggestion.text.toLowerCase().replace(/\s+/g, '-').replace(/[?',]/g, '')}`}
+                      >
+                        <Icon className="w-3 h-3 text-primary shrink-0" />
+                        <span className="line-clamp-2">{suggestion.text}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-2 gap-2 px-2">
+                  {LAB_SUGGESTIONS.slice(4).map((suggestion) => {
+                    const Icon = suggestion.icon;
+                    return (
+                      <motion.button
+                        key={suggestion.text}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleSuggestionClick(suggestion.text)}
+                        className="flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors text-left"
+                        data-testid={`button-suggestion-${suggestion.text.toLowerCase().replace(/\s+/g, '-').replace(/[?',]/g, '')}`}
+                      >
+                        <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <span className="line-clamp-2">{suggestion.text}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </motion.div>
           ) : (
             <div className="space-y-4">
               {messages.map((message, index) => (
