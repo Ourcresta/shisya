@@ -525,25 +525,23 @@ function LessonContent({
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 lg:p-8 space-y-6 pb-24">
+    <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-32">
       {/* Lesson Header */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <h1 
-          className="text-2xl md:text-3xl font-bold"
+          className="text-xl md:text-2xl font-bold leading-tight"
           style={{ fontFamily: "var(--font-display)" }}
           data-testid="text-lesson-title"
         >
           {lesson.title}
         </h1>
         {lesson.estimatedTime && (
-          <p className="text-muted-foreground flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Estimated time: {lesson.estimatedTime}
+          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            {lesson.estimatedTime}
           </p>
         )}
       </div>
-
-      <Separator />
 
       {/* Usha Video Player - Multi-language audio support */}
       <UshaVideoPlayer
@@ -564,59 +562,71 @@ function LessonContent({
         }}
       />
 
-      {/* Objectives */}
-      {lesson.objectives && lesson.objectives.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Target className="w-5 h-5 text-primary" />
-              Learning Objectives
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2" data-testid="list-objectives">
-              {lesson.objectives.map((objective, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <span>{objective}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+      {/* Content Cards Grid */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Objectives */}
+        {lesson.objectives && lesson.objectives.length > 0 && (
+          <Card className="md:col-span-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-primary" />
+                </div>
+                Learning Objectives
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ul className="space-y-2" data-testid="list-objectives">
+                {lesson.objectives.map((objective, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <span>{objective}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Key Concepts */}
-      {lesson.keyConcepts && lesson.keyConcepts.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Lightbulb className="w-5 h-5 text-amber-500" />
-              Key Concepts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="space-y-2 list-decimal list-inside" data-testid="list-concepts">
-              {lesson.keyConcepts.map((concept, index) => (
-                <li key={index} className="text-foreground">
-                  {concept}
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
-      )}
+        {/* Key Concepts */}
+        {lesson.keyConcepts && lesson.keyConcepts.length > 0 && (
+          <Card className="md:col-span-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                <div className="w-7 h-7 rounded-md bg-amber-500/10 flex items-center justify-center">
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
+                </div>
+                Key Concepts
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ul className="space-y-2" data-testid="list-concepts">
+                {lesson.keyConcepts.map((concept, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <span className="w-5 h-5 rounded-full bg-muted text-xs font-medium flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {index + 1}
+                    </span>
+                    <span>{concept}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* AI Notes / Content */}
       {aiNotes && aiNotes.content && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-primary" />
+              </div>
               Lesson Content
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div 
               className="prose prose-sm dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: aiNotes.content }}
@@ -628,25 +638,31 @@ function LessonContent({
 
       {/* External Resources */}
       {lesson.externalResources && lesson.externalResources.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <LinkIcon className="w-5 h-5 text-blue-500" />
+        <Card className="border-blue-500/20 bg-blue-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <div className="w-7 h-7 rounded-md bg-blue-500/10 flex items-center justify-center">
+                <LinkIcon className="w-4 h-4 text-blue-500" />
+              </div>
               Additional Resources
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ul className="space-y-2" data-testid="list-resources">
+          <CardContent className="pt-0">
+            <ul className="space-y-3" data-testid="list-resources">
               {lesson.externalResources.map((resource, index) => (
                 <li key={index}>
                   <a
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary hover:underline"
+                    className="flex items-center gap-3 p-2.5 rounded-md bg-background border hover-elevate transition-colors group"
+                    data-testid={`link-resource-${index}`}
                   >
-                    <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                    {resource.title}
+                    <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                      <ExternalLink className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <span className="text-sm font-medium flex-1">{resource.title}</span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </a>
                 </li>
               ))}
@@ -656,14 +672,13 @@ function LessonContent({
       )}
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 bg-background/95 backdrop-blur border-t p-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+      <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 bg-background/95 backdrop-blur-md border-t z-40">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           {/* Previous Lesson */}
           {prevLesson ? (
             <Button 
               variant="outline" 
-              size="sm" 
-              className="gap-2" 
+              className="gap-2 min-w-[100px]" 
               onClick={onPrevLesson}
               data-testid="button-prev-lesson"
             >
@@ -671,25 +686,25 @@ function LessonContent({
               <span className="hidden sm:inline">Previous</span>
             </Button>
           ) : (
-            <div />
+            <div className="min-w-[100px]" />
           )}
 
           {/* Mark Complete */}
           <Button
             onClick={onToggleComplete}
             variant={isCompleted ? "secondary" : "default"}
-            className="gap-2"
+            className="gap-2 flex-1 max-w-[200px]"
             data-testid="button-mark-complete"
           >
             {isCompleted ? (
               <>
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="hidden sm:inline">Completed</span>
+                <span>Completed</span>
               </>
             ) : (
               <>
                 <Circle className="w-4 h-4" />
-                <span className="hidden sm:inline">Mark Complete</span>
+                <span>Mark Complete</span>
               </>
             )}
           </Button>
@@ -698,8 +713,7 @@ function LessonContent({
           {nextLesson ? (
             <Button 
               variant="default" 
-              size="sm" 
-              className="gap-2" 
+              className="gap-2 min-w-[100px]" 
               onClick={onNextLesson}
               data-testid="button-next-lesson"
             >
@@ -709,8 +723,7 @@ function LessonContent({
           ) : (
             <Button 
               variant="outline" 
-              size="sm" 
-              className="gap-2" 
+              className="gap-2 min-w-[100px]" 
               onClick={onFinish}
               data-testid="button-finish"
             >
