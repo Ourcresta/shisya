@@ -638,7 +638,7 @@ export function UshaVideoPlayer({
             )}
           </div>
           <div className="mt-1 bg-primary/90 backdrop-blur px-2 py-0.5 rounded-md">
-            <span className="text-[10px] font-semibold text-primary-foreground">Usha Guide</span>
+            <span className="text-[10px] font-semibold text-primary-foreground">Usha</span>
           </div>
         </div>
       </div>
