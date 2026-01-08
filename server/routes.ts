@@ -213,11 +213,12 @@ export async function registerRoutes(
     }
   });
   
-  // GET /api/courses - Fetch only published courses
+  // GET /api/courses - Fetch only published and active courses
+  // SHISHYA RULE: WHERE status = 'published' AND is_active = true
   app.get("/api/courses", async (req, res) => {
     try {
       if (USE_MOCK_DATA) {
-        // Return mock published courses
+        // Return mock published courses (mock data doesn't have is_active, assume true)
         const publishedCourses = mockCourses.filter(c => c.status === "published");
         return res.json(publishedCourses);
       }
@@ -232,9 +233,9 @@ export async function registerRoutes(
       const data = await response.json();
       // API returns { success: true, courses: [...] }
       const courses = data.courses || data;
-      // Filter to only show published courses
+      // Filter to only show published AND active courses
       const publishedCourses = Array.isArray(courses) 
-        ? courses.filter((c: any) => c.status === "published")
+        ? courses.filter((c: any) => c.status === "published" && c.isActive !== false)
         : [];
       console.log(`[AISiksha] Fetched ${publishedCourses.length} published courses`);
       res.json(publishedCourses);
@@ -247,6 +248,7 @@ export async function registerRoutes(
   });
 
   // GET /api/courses/:courseId - Fetch single course with full content
+  // SHISHYA RULE: WHERE status = 'published' AND is_active = true
   app.get("/api/courses/:courseId", async (req, res) => {
     try {
       const { courseId } = req.params;
@@ -273,8 +275,8 @@ export async function registerRoutes(
       const data = await response.json();
       // API returns { success: true, course: {...} }
       const course = data.course || data;
-      // Only return if published
-      if (course.status !== "published") {
+      // Only return if published AND active
+      if (course.status !== "published" || course.isActive === false) {
         return res.status(404).json({ error: "Course not found" });
       }
       console.log(`[AISiksha] Fetched course: ${course.title}`);
