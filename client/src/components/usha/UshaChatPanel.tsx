@@ -125,16 +125,18 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
 
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
+      // Build context object, only including non-null values
+      const contextObj: Record<string, any> = {};
+      if (context.lessonId != null) contextObj.lessonId = context.lessonId;
+      if (context.labId != null) contextObj.labId = context.labId;
+      if (context.projectId != null) contextObj.projectId = context.projectId;
+      
       const response = await apiRequest("POST", "/api/usha/ask", {
         courseId: context.courseId,
         pageType: context.pageType,
         message: question,
         language,
-        context: {
-          lessonId: context.lessonId,
-          labId: context.labId,
-          projectId: context.projectId,
-        },
+        context: contextObj,
       });
       return await response.json() as UshaApiResponse;
     },

@@ -207,10 +207,32 @@ export function UshaTeacher() {
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                    <Sparkles className="w-12 h-12 mb-4 text-primary/40" />
+                    <Sparkles className="w-12 h-12 mb-3 text-primary/40" />
                     <p className="text-sm font-medium">Hi! I'm Usha.</p>
                     <p className="text-xs mt-1">I'm here to learn with you, talk, or just listen.</p>
-                    <p className="text-xs mt-4 italic">No rush. Whenever you're ready.</p>
+                    
+                    <div className="mt-4 space-y-2 w-full px-2">
+                      <p className="text-xs text-muted-foreground/70">Try asking:</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {[
+                          "Explain this simply",
+                          "I'm confused",
+                          "Give me an example",
+                          "How are you?",
+                        ].map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            onClick={() => {
+                              setInputValue(suggestion);
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-foreground transition-colors"
+                            data-testid={`button-suggestion-${suggestion.toLowerCase().replace(/\s+/g, '-').replace(/[?']/g, '')}`}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
                 
