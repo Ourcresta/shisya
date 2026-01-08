@@ -17,6 +17,7 @@ import {
 } from "@/lib/labProgress";
 import { executeJavaScript, compareOutput } from "@/lib/labRunner";
 import { UshaAvatar } from "@/components/usha";
+import { useUsha } from "@/contexts/UshaContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lab, Course } from "@shared/schema";
 import { 
@@ -33,6 +34,7 @@ export default function LabPractice() {
   const courseId = params?.courseId ? parseInt(params.courseId, 10) : 0;
   const labId = params?.labId ? parseInt(params.labId, 10) : 0;
   const { user } = useAuth();
+  const { setCourseId, setLabId, setLabTitle, setCourseTitle, setHasInteractedWithContent } = useUsha();
 
   const { toast } = useToast();
   
@@ -61,6 +63,24 @@ export default function LabPractice() {
       setCompleted(isLabCompleted(courseId, labId));
     }
   }, [lab, courseId, labId]);
+
+  // Set Usha context for lab
+  useEffect(() => {
+    if (courseId && labId && lab) {
+      setCourseId(courseId);
+      setLabId(labId);
+      setLabTitle(lab.title);
+      setHasInteractedWithContent(true);
+      if (course) {
+        setCourseTitle(course.title);
+      }
+    }
+    // Cleanup when leaving lab
+    return () => {
+      setLabId(null);
+      setLabTitle("");
+    };
+  }, [courseId, labId, lab, course, setCourseId, setLabId, setLabTitle, setCourseTitle, setHasInteractedWithContent]);
 
   const handleRunCode = () => {
     if (!lab) return;

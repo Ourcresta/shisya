@@ -283,6 +283,11 @@ function detectLearningState(context: UshaContext, message: string): LearningSta
     return "post-lesson";
   }
   
+  // If on a lab page with lab context, treat as active learning
+  if (context.labId && context.labTitle) {
+    return "learning-active";
+  }
+  
   if (context.isVideoPlaying || context.hasInteractedWithContent) {
     return "learning-active";
   }
@@ -294,11 +299,11 @@ function detectLearningState(context: UshaContext, message: string): LearningSta
   const lessonKeywords = [
     "explain", "what is", "how does", "why", "tell me about",
     "i don't understand", "confused", "help me", "can you explain",
-    "this lesson", "the video", "concept", "topic"
+    "this lesson", "the video", "concept", "topic", "lab", "code"
   ];
   
   const asksAboutLesson = lessonKeywords.some(kw => lowerMessage.includes(kw));
-  if (asksAboutLesson && (context.lessonTitle || context.lessonId)) {
+  if (asksAboutLesson && (context.lessonTitle || context.lessonId || context.labTitle || context.labId)) {
     return "learning-active";
   }
   

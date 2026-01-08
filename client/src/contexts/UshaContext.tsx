@@ -24,6 +24,10 @@ interface UshaContextType {
   setCourseTitle: (title: string) => void;
   courseLevel: string;
   setCourseLevel: (level: string) => void;
+  labId: number | null;
+  setLabId: (id: number | null) => void;
+  labTitle: string;
+  setLabTitle: (title: string) => void;
   hasInteractedWithContent: boolean;
   setHasInteractedWithContent: (interacted: boolean) => void;
   lessonCompleted: boolean;
@@ -62,6 +66,8 @@ export function UshaProvider({ children }: { children: ReactNode }) {
   const [lessonTitle, setLessonTitle] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
   const [courseLevel, setCourseLevel] = useState("beginner");
+  const [labId, setLabId] = useState<number | null>(null);
+  const [labTitle, setLabTitle] = useState("");
   const [hasInteractedWithContent, setHasInteractedWithContent] = useState(false);
   const [lessonCompleted, setLessonCompleted] = useState(false);
   const [showChat, setShowChat] = useState(false);
@@ -102,7 +108,8 @@ export function UshaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const askQuestion = useCallback(async (question: string) => {
-    if (!courseId || !lessonId) return;
+    // Allow questions for labs even without lessonId
+    if (!courseId || (!lessonId && !labId)) return;
     
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -114,6 +121,9 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     setCurrentMessage("Let me think about that...");
     setHasInteractedWithContent(true);
 
+    // Determine page type based on context
+    const pageType = labId ? "lab" : "lesson";
+
     try {
       const res = await fetch("/api/usha/ask", {
         method: "POST",
@@ -122,7 +132,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
         signal: abortControllerRef.current.signal,
         body: JSON.stringify({
           courseId,
-          pageType: "lesson",
+          pageType,
           message: question,
           language,
           context: {
@@ -130,6 +140,8 @@ export function UshaProvider({ children }: { children: ReactNode }) {
             lessonTitle,
             courseTitle,
             courseLevel,
+            labId,
+            labTitle,
             isVideoPlaying,
             hasInteractedWithContent: true,
             lessonCompleted,
@@ -159,7 +171,7 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [courseId, lessonId, language, lessonTitle, courseTitle, courseLevel, isVideoPlaying, lessonCompleted]);
+  }, [courseId, lessonId, labId, language, lessonTitle, courseTitle, courseLevel, labTitle, isVideoPlaying, lessonCompleted]);
 
   useEffect(() => {
     if (isVideoPlaying && state === "idle") {
@@ -198,6 +210,10 @@ export function UshaProvider({ children }: { children: ReactNode }) {
     setCourseTitle,
     courseLevel,
     setCourseLevel,
+    labId,
+    setLabId,
+    labTitle,
+    setLabTitle,
     hasInteractedWithContent,
     setHasInteractedWithContent,
     lessonCompleted,
