@@ -18,13 +18,6 @@ const STATE_MESSAGES: Record<UshaState, string> = {
   completion: "Well done!",
 };
 
-const ENCOURAGEMENTS = [
-  "Good question!",
-  "You're learning well.",
-  "This is an important concept.",
-  "Let me help you understand.",
-  "Great curiosity!",
-];
 
 export function UshaTeacher() {
   const {
@@ -64,9 +57,6 @@ export function UshaTeacher() {
     const question = inputValue.trim();
     setInputValue("");
     setMessages(prev => [...prev, { role: "user", content: question }]);
-    
-    const encouragement = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
-    setMessages(prev => [...prev, { role: "usha", content: encouragement }]);
     
     await askQuestion(question);
   };
