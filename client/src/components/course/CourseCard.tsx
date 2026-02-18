@@ -15,8 +15,13 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
-  const skills = course.skills?.slice(0, 3) || [];
-  const hasMoreSkills = (course.skills?.length || 0) > 3;
+  const skillsList = Array.isArray(course.skills)
+    ? course.skills
+    : typeof course.skills === "string"
+      ? course.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [];
+  const skills = skillsList.slice(0, 3);
+  const hasMoreSkills = skillsList.length > 3;
   const { user } = useAuth();
   const { balance, enrollments } = useCredits();
 
@@ -206,7 +211,7 @@ export function CourseCard({ course }: CourseCardProps) {
             ))}
             {hasMoreSkills && (
               <span className="text-xs text-muted-foreground self-center">
-                +{(course.skills?.length || 0) - 3} more
+                +{skillsList.length - 3} more
               </span>
             )}
           </div>
