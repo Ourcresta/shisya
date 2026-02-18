@@ -50,12 +50,20 @@ import {
   Trash2,
   BookOpen,
   FileText,
+  Cloud,
+  ExternalLink,
+  Tag,
+  Clock,
+  CreditCard,
+  Languages,
+  Zap,
 } from "lucide-react";
 
 interface Course {
   id: number;
   title: string;
   description: string | null;
+  shortDescription: string | null;
   level: string;
   status: string;
   isActive: boolean;
@@ -64,6 +72,15 @@ interface Course {
   duration: string | null;
   testRequired: boolean;
   projectRequired: boolean;
+  zohoId: string | null;
+  category: string | null;
+  thumbnailUrl: string | null;
+  language: string | null;
+  skills: string | null;
+  price: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Lesson {
@@ -367,7 +384,13 @@ export default function GuruCourseDetail() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {course.zohoId && (
+              <Badge variant="outline" className="gap-1 no-default-hover-elevate no-default-active-elevate" data-testid="badge-synced">
+                <Cloud className="w-3 h-3" />
+                Synced
+              </Badge>
+            )}
             <Badge
               variant={course.status === "published" ? "default" : "secondary"}
               className={
@@ -388,10 +411,90 @@ export default function GuruCourseDetail() {
             </Button>
           </div>
         </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {course.duration && (
+              <div className="flex items-center gap-2 text-sm" data-testid="info-duration">
+                <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">Duration:</span>
+                <span>{course.duration}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm" data-testid="info-credits">
+              <CreditCard className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Cost:</span>
+              <span>{course.isFree ? "Free" : `${course.creditCost} credits`}</span>
+            </div>
+            {course.category && (
+              <div className="flex items-center gap-2 text-sm" data-testid="info-category">
+                <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">Category:</span>
+                <span>{course.category}</span>
+              </div>
+            )}
+            {course.language && (
+              <div className="flex items-center gap-2 text-sm" data-testid="info-language">
+                <Languages className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">Language:</span>
+                <span className="uppercase">{course.language}</span>
+              </div>
+            )}
+            {course.testRequired && (
+              <div className="flex items-center gap-2 text-sm" data-testid="info-test-required">
+                <Zap className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Test required</span>
+              </div>
+            )}
+            {course.projectRequired && (
+              <div className="flex items-center gap-2 text-sm" data-testid="info-project-required">
+                <Zap className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Project required</span>
+              </div>
+            )}
+          </div>
+          {course.zohoId && (
+            <div className="mt-4 p-3 rounded-md border border-dashed" data-testid="info-zoho-sync">
+              <div className="flex items-center gap-2 text-sm">
+                <Cloud className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">TrainerCentral ID:</span>
+                <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{course.zohoId}</code>
+                <a
+                  href={`https://our-shiksha.trainercentral.in`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="link-trainer-central"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+              {course.skills && (
+                <div className="flex items-center gap-2 text-sm mt-2 flex-wrap">
+                  <span className="text-muted-foreground shrink-0">Skills:</span>
+                  {course.skills.split(",").map((skill, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">{skill.trim()}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold" data-testid="text-modules-heading">Modules</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold" data-testid="text-modules-heading">Modules</h2>
+          {modulesData && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate" data-testid="badge-total-modules">
+                {modulesData.length} module{modulesData.length !== 1 ? "s" : ""}
+              </Badge>
+              <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate" data-testid="badge-total-lessons">
+                {modulesData.reduce((sum, m) => sum + m.lessons.length, 0)} lesson{modulesData.reduce((sum, m) => sum + m.lessons.length, 0) !== 1 ? "s" : ""}
+              </Badge>
+            </div>
+          )}
+        </div>
         <Button onClick={openCreateModule} data-testid="button-add-module">
           <Plus className="w-4 h-4 mr-2" />
           Add Module

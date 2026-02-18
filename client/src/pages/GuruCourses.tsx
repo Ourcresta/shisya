@@ -52,6 +52,7 @@ import {
   GlobeLock,
   GraduationCap,
   Eye,
+  Cloud,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -71,6 +72,8 @@ interface Course {
   testRequired: boolean;
   projectRequired: boolean;
   createdAt: string;
+  zohoId: string | null;
+  category: string | null;
 }
 
 interface CourseForm {
@@ -263,6 +266,7 @@ export default function GuruCourses() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Level</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Credit Cost</TableHead>
@@ -279,6 +283,16 @@ export default function GuruCourses() {
                           {course.title}
                         </span>
                       </Link>
+                    </TableCell>
+                    <TableCell data-testid={`text-source-${course.id}`}>
+                      {course.zohoId ? (
+                        <Badge variant="outline" className="gap-1 no-default-hover-elevate no-default-active-elevate">
+                          <Cloud className="w-3 h-3" />
+                          TrainerCentral
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">Manual</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize" data-testid={`badge-level-${course.id}`}>
