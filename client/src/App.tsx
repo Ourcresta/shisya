@@ -21,6 +21,7 @@ import GuruCredits from "@/pages/GuruCredits";
 import GuruTests from "@/pages/GuruTests";
 import GuruLabs from "@/pages/GuruLabs";
 import GuruProjects from "@/pages/GuruProjects";
+import GuruSettings from "@/pages/GuruSettings";
 import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -205,6 +206,7 @@ function Router() {
       <Route path="/guru/tests" component={() => <GuruPage component={GuruTests} />} />
       <Route path="/guru/labs" component={() => <GuruPage component={GuruLabs} />} />
       <Route path="/guru/projects" component={() => <GuruPage component={GuruProjects} />} />
+      <Route path="/guru/settings" component={() => <GuruPage component={GuruSettings} />} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
