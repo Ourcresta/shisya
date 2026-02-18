@@ -491,6 +491,26 @@ export const shishyaUshaMessages = pgTable("shishya_usha_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ============ GURU ADMIN TABLES ============
+
+export const guruAdminUsers = pgTable("guru_admin_users", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  role: varchar("role", { length: 20 }).notNull().default("admin"),
+  isActive: boolean("is_active").notNull().default(true),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const guruAdminSessions = pgTable("guru_admin_sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  adminId: integer("admin_id").notNull().references(() => guruAdminUsers.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 // ============ BACKWARD COMPATIBILITY ALIASES ============
 // These aliases allow existing code to work with new table names
 
@@ -571,6 +591,10 @@ export const insertMarksheetVerificationSchema = createInsertSchema(shishyaMarks
 export const insertUshaConversationSchema = createInsertSchema(shishyaUshaConversations).omit({ id: true, createdAt: true });
 export const insertUshaMessageSchema = createInsertSchema(shishyaUshaMessages).omit({ id: true, createdAt: true });
 
+// Guru Admin insert schemas
+export const insertGuruAdminSchema = createInsertSchema(guruAdminUsers).omit({ id: true, createdAt: true, lastLoginAt: true });
+export const insertGuruAdminSessionSchema = createInsertSchema(guruAdminSessions).omit({ createdAt: true });
+
 // ============ TYPE DEFINITIONS ============
 
 // OTP Purpose enum
@@ -649,6 +673,10 @@ export type UshaConversation = typeof shishyaUshaConversations.$inferSelect;
 export type UshaMessage = typeof shishyaUshaMessages.$inferSelect;
 export type InsertUshaConversation = z.infer<typeof insertUshaConversationSchema>;
 export type InsertUshaMessage = z.infer<typeof insertUshaMessageSchema>;
+
+// Guru Admin types
+export type GuruAdmin = typeof guruAdminUsers.$inferSelect;
+export type InsertGuruAdmin = z.infer<typeof insertGuruAdminSchema>;
 
 // ============ CONSTANTS ============
 

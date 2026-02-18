@@ -33,10 +33,19 @@ export default function GuruLogin() {
   const onSubmit = async (data: GuruLoginInput) => {
     setIsLoading(true);
     try {
-      toast({
-        title: "Coming Soon",
-        description: "Guru Admin Portal is under development",
+      const response = await fetch("/api/guru/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
       });
+      const result = await response.json();
+      if (!response.ok) {
+        toast({ title: "Login failed", description: result.error || "Invalid credentials", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Welcome to Guru", description: `Logged in as ${result.admin.name}` });
+      setLocation("/guru/dashboard");
     } catch (error) {
       toast({
         title: "Login failed",

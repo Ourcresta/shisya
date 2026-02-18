@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
+import { guruAuthRouter } from "./guruAuth";
+import { seedGuruAdmin } from "./seedGuru";
 import { registerUshaRoutes } from "./usha";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
@@ -47,8 +49,14 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  // Seed Guru admin user
+  seedGuruAdmin();
+
   // Auth routes
   app.use("/api/auth", authRouter);
+
+  // Guru Admin auth routes
+  app.use("/api/guru/auth", guruAuthRouter);
   
   // Credits and enrollments routes
   app.use("/api/user/credits", creditsRouter);
