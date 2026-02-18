@@ -12,6 +12,8 @@ import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import GuruLogin from "@/pages/GuruLogin";
+import GuruLayout from "@/components/guru/GuruLayout";
+import GuruDashboard from "@/pages/GuruDashboard";
 import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -137,6 +139,10 @@ function ProtectedNeonPortfolioPreview() {
   return <ProtectedRoute><NeonPortfolioPreview /></ProtectedRoute>;
 }
 
+function GuruPage({ component: Component }: { component: React.ComponentType }) {
+  return <GuruLayout><Component /></GuruLayout>;
+}
+
 function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
@@ -184,6 +190,7 @@ function Router() {
       
       {/* Guru Admin Portal */}
       <Route path="/guru" component={GuruLogin} />
+      <Route path="/guru/dashboard" component={() => <GuruPage component={GuruDashboard} />} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
