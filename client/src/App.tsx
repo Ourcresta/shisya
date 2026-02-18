@@ -11,6 +11,7 @@ import { CreditProvider } from "@/contexts/CreditContext";
 import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
+import GuruLogin from "@/pages/GuruLogin";
 import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -180,6 +181,9 @@ function Router() {
       <Route path="/profile/:username" component={PublicProfilePage} />
       <Route path="/portfolio/:username" component={PublicProfilePage} />
       <Route path="/neon-portfolio/:username" component={PublicNeonPortfolio} />
+      
+      {/* Guru Admin Portal */}
+      <Route path="/guru" component={GuruLogin} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />

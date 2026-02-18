@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader as CardHeaderUI, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
+import { Loader2, Mail, Lock, GraduationCap, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Header } from "@/components/layout/Header";
 
@@ -180,6 +180,18 @@ export default function Login() {
               Sign up
             </Link>
           </p>
+          <div className="w-full border-t pt-4">
+            <Link href="/guru">
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                data-testid="button-guru"
+              >
+                <Shield className="w-4 h-4" />
+                Guru
+              </Button>
+            </Link>
+          </div>
         </CardFooter>
         </Card>
       </div>
