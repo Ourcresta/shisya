@@ -72,6 +72,18 @@ guruRouter.get("/courses", async (req: Request, res: Response) => {
   }
 });
 
+guruRouter.get("/courses/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [course] = await db.select().from(courses).where(eq(courses.id, id));
+    if (!course) return res.status(404).json({ error: "Course not found" });
+    res.json(course);
+  } catch (error) {
+    console.error("[Guru] Get course error:", error);
+    res.status(500).json({ error: "Failed to fetch course" });
+  }
+});
+
 guruRouter.post("/courses", async (req: Request, res: Response) => {
   try {
     const { title, description, shortDescription, level, duration, skills, isFree, creditCost, price, testRequired, projectRequired } = req.body;
