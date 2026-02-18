@@ -28,6 +28,8 @@ export const courses = pgTable("courses", {
   projectRequired: boolean("project_required").notNull().default(false),
   thumbnailUrl: text("thumbnail_url"),
   instructorId: varchar("instructor_id", { length: 36 }),
+  zohoId: varchar("zoho_id", { length: 100 }),
+  category: varchar("category", { length: 100 }),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -509,6 +511,17 @@ export const guruAdminSessions = pgTable("guru_admin_sessions", {
   adminId: integer("admin_id").notNull().references(() => guruAdminUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const zohoTokens = pgTable("zoho_tokens", {
+  id: serial("id").primaryKey(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  scope: text("scope"),
+  apiDomain: varchar("api_domain", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // ============ BACKWARD COMPATIBILITY ALIASES ============
