@@ -65,13 +65,13 @@ export async function registerRoutes(
     try {
       const code = req.query.code as string;
       if (!code) {
-        return res.redirect("/guru/settings?zoho=error&reason=no_code");
+        return res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px;"><h2 style="color:#e11d48;">Connection Failed</h2><p>No authorization code received from Zoho.</p><p>You can close this tab and try again.</p></body></html>`);
       }
       await exchangeCodeForTokens(code);
-      res.redirect("/guru/settings?zoho=connected");
+      res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px;"><h2 style="color:#16a34a;">Connected Successfully!</h2><p>Zoho TrainerCentral is now connected.</p><p>You can close this tab and return to the Settings page.</p><script>setTimeout(function(){window.close()},3000);</script></body></html>`);
     } catch (error: any) {
       console.error("[Zoho] OAuth callback error:", error);
-      res.redirect(`/guru/settings?zoho=error&reason=${encodeURIComponent(error.message)}`);
+      res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px;"><h2 style="color:#e11d48;">Connection Failed</h2><p>${error.message}</p><p>You can close this tab and try again.</p></body></html>`);
     }
   });
   

@@ -30,6 +30,7 @@ export default function GuruSettings() {
 
   const { data: integrations, isLoading: integrationsLoading } = useQuery<IntegrationStatus>({
     queryKey: ["/api/guru/settings/integrations"],
+    refetchInterval: 10000,
   });
 
   const zohoConnected = integrations?.zoho?.connected ?? false;
@@ -62,7 +63,11 @@ export default function GuruSettings() {
       return res.json();
     },
     onSuccess: (data: { url: string }) => {
-      window.location.href = data.url;
+      window.open(data.url, "_blank", "noopener,noreferrer");
+      toast({
+        title: "Zoho Authorization",
+        description: "A new tab has opened for Zoho login. After authorizing, you'll be redirected back here.",
+      });
     },
     onError: (error: Error) => {
       toast({
