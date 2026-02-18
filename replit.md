@@ -1,7 +1,9 @@
-# SHISHYA - Student Portal
+# OurShiksha Platform - SHISHYA + GURU
 
 ## Overview
-SHISHYA is the learner-facing portal of the OurShiksha platform, designed for content consumption. It enables students to browse courses, view modules and lessons, track learning progress, and submit course projects. The platform's vision is to empower learners through a structured and engaging educational experience, facilitating skill development and career readiness.
+OurShiksha is a comprehensive learning platform with two integrated portals sharing a PostgreSQL database:
+- **SHISHYA** (Student Portal): Learner-facing portal for content consumption, course enrollment, progress tracking, and skill development.
+- **GURU** (Admin Control Panel): Admin portal at `/guru/*` routes for managing courses, students, credits, tests, labs, projects, and platform settings.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -78,6 +80,32 @@ The SHISHYA student portal is built with a React + Vite frontend, utilizing Type
 - **PostgreSQL:** Database used for session storage and potentially other backend data.
 - **Drizzle ORM:** Used for interacting with the PostgreSQL database.
 - **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
+
+## GURU Admin Portal
+The GURU admin panel is accessible at `/guru` with session-based authentication (HTTP-only cookies). Test credentials: admin@ourshiksha.com / guru@123.
+
+**Guru Pages:**
+- **Dashboard** (`/guru/dashboard`): Real-time stats (courses, modules, lessons, labs, tests, projects, students, enrollments, credits), action command center, platform overview, recent courses.
+- **Courses** (`/guru/courses`): Full CRUD for courses with search, create/edit dialogs, publish/unpublish, delete. Table view with status badges.
+- **Course Detail** (`/guru/courses/:courseId`): Module and lesson editor. Collapsible modules with nested lessons. Add/edit/delete for both.
+- **Students** (`/guru/students`): Student list with profiles, credits, enrollment counts. Search by name/email. Detail dialog with progress stats.
+- **Credits** (`/guru/credits`): Credit governance with wallets table, transaction history tabs. Grant/deduct credits to any student.
+- **Tests** (`/guru/tests`): Test builder with question editor. MCQ questions with 4 options. Configure duration, passing %, shuffle, max attempts.
+- **Labs** (`/guru/labs`): Lab builder with starter code, expected output, solution code. Supports JavaScript, Python, HTML, CSS.
+- **Projects** (`/guru/projects`): Project manager with difficulty levels, requirements, resources, estimated hours.
+- **Settings** (`/guru/settings`): Admin account info, platform integration status (AISiksha, Resend, Zoho), quick actions.
+
+**Guru Backend (server/guruRoutes.ts):**
+- All routes protected by `requireGuruAuth` middleware
+- Full CRUD APIs for courses, modules, lessons, tests, labs, projects
+- Student management and credit governance APIs
+- Zoho TrainerCentral integration framework (test connection, sync stubs)
+- Integration status endpoint
+
+**Zoho TrainerCentral Integration:**
+- Framework ready in Settings page and backend API stubs
+- Requires ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_ORG_ID secrets to activate
+- Test connection and sync buttons available when credentials are configured
 
 ## Documentation Files
 - **document.md:** Comprehensive project documentation with full feature specs, routes, database schema, and deployment guide.
