@@ -10,6 +10,7 @@ import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
+import { guruRouter } from "./guruRoutes";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
 import { userProfiles, marksheets, marksheetVerifications } from "@shared/schema";
@@ -57,6 +58,9 @@ export async function registerRoutes(
 
   // Guru Admin auth routes
   app.use("/api/guru/auth", guruAuthRouter);
+  
+  // Guru Admin dashboard routes
+  app.use("/api/guru", guruRouter);
   
   // Credits and enrollments routes
   app.use("/api/user/credits", creditsRouter);
