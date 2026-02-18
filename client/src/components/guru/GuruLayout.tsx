@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,6 +38,7 @@ const menuItems = [
   { title: "Tests", url: "/guru/tests", icon: ClipboardCheck },
   { title: "Labs", url: "/guru/labs", icon: FlaskConical },
   { title: "Projects", url: "/guru/projects", icon: FolderKanban },
+  { title: "Pricing", url: "/guru/pricing", icon: CreditCard },
   { title: "Settings", url: "/guru/settings", icon: Settings },
 ];
 
