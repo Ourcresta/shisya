@@ -11,6 +11,7 @@ import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { guruRouter } from "./guruRoutes";
+import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
 import { userProfiles, marksheets, marksheetVerifications } from "@shared/schema";
@@ -58,6 +59,21 @@ export async function registerRoutes(
 
   // Guru Admin auth routes
   app.use("/api/guru/auth", guruAuthRouter);
+
+  // Zoho OAuth callback (no auth required - Zoho redirects here)
+  app.get("/api/guru/zoho/callback", async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      if (!code) {
+        return res.redirect("/guru/settings?zoho=error&reason=no_code");
+      }
+      await exchangeCodeForTokens(code);
+      res.redirect("/guru/settings?zoho=connected");
+    } catch (error: any) {
+      console.error("[Zoho] OAuth callback error:", error);
+      res.redirect(`/guru/settings?zoho=error&reason=${encodeURIComponent(error.message)}`);
+    }
+  });
   
   // Guru Admin dashboard routes
   app.use("/api/guru", guruRouter);

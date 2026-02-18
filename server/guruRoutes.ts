@@ -8,6 +8,7 @@ import {
 } from "@shared/schema";
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
+import * as zohoService from "./zohoService";
 
 export const guruRouter = Router();
 
@@ -587,11 +588,13 @@ guruRouter.delete("/projects/:id", async (req: Request, res: Response) => {
 
 guruRouter.get("/settings/integrations", async (req: Request, res: Response) => {
   try {
-    const zohoConfigured = !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_ORG_ID);
+    const zohoCredsConfigured = !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_ORG_ID);
+    const zohoConnected = await zohoService.isConnected();
     res.json({
       zoho: {
-        configured: zohoConfigured,
-        status: zohoConfigured ? "connected" : "not_connected",
+        configured: zohoCredsConfigured,
+        connected: zohoConnected,
+        status: zohoConnected ? "connected" : zohoCredsConfigured ? "credentials_ready" : "not_configured",
       },
       aisiksha: {
         configured: !!(process.env.AISIKSHA_ADMIN_URL && process.env.AISIKSHA_API_KEY),
@@ -606,49 +609,64 @@ guruRouter.get("/settings/integrations", async (req: Request, res: Response) => 
   }
 });
 
+guruRouter.get("/zoho/authorize", async (req: Request, res: Response) => {
+  try {
+    const authUrl = zohoService.getAuthorizationUrl();
+    res.json({ url: authUrl });
+  } catch (error: any) {
+    console.error("[Guru] Zoho authorize error:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 guruRouter.post("/zoho/test-connection", async (req: Request, res: Response) => {
   try {
-    const clientId = process.env.ZOHO_CLIENT_ID;
-    const clientSecret = process.env.ZOHO_CLIENT_SECRET;
-    const orgId = process.env.ZOHO_ORG_ID;
-
-    if (!clientId || !clientSecret || !orgId) {
-      return res.status(400).json({
-        success: false,
-        error: "Zoho credentials not configured. Add ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_ORG_ID to your secrets."
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Zoho credentials are configured. Full API connection will be established when TrainerCentral integration is activated."
-    });
-  } catch (error) {
+    const result = await zohoService.testConnection();
+    res.json(result);
+  } catch (error: any) {
     console.error("[Guru] Zoho test connection error:", error);
-    res.status(500).json({ success: false, error: "Failed to test Zoho connection" });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
 guruRouter.post("/zoho/sync", async (req: Request, res: Response) => {
   try {
-    const clientId = process.env.ZOHO_CLIENT_ID;
-    const clientSecret = process.env.ZOHO_CLIENT_SECRET;
-    const orgId = process.env.ZOHO_ORG_ID;
-
-    if (!clientId || !clientSecret || !orgId) {
+    const connected = await zohoService.isConnected();
+    if (!connected) {
       return res.status(400).json({
         success: false,
-        error: "Zoho credentials not configured"
+        error: "Not connected to Zoho. Please connect first."
       });
     }
 
+    const result = await zohoService.syncCoursesFromTrainerCentral();
     res.json({
       success: true,
-      message: "Zoho sync framework is ready. Full sync will be available when TrainerCentral API integration is completed.",
+      message: `Sync complete: ${result.created} courses created, ${result.updated} updated.`,
+      ...result,
       syncedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Guru] Zoho sync error:", error);
-    res.status(500).json({ success: false, error: "Failed to sync with Zoho" });
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+guruRouter.post("/zoho/disconnect", async (req: Request, res: Response) => {
+  try {
+    await zohoService.disconnect();
+    res.json({ success: true, message: "Disconnected from Zoho TrainerCentral." });
+  } catch (error: any) {
+    console.error("[Guru] Zoho disconnect error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+guruRouter.get("/zoho/status", async (req: Request, res: Response) => {
+  try {
+    const connected = await zohoService.isConnected();
+    res.json({ connected });
+  } catch (error: any) {
+    res.json({ connected: false });
   }
 });
