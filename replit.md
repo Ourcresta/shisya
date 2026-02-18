@@ -93,6 +93,7 @@ The GURU admin panel is accessible at `/guru` with session-based authentication 
 - **Tests** (`/guru/tests`): Test builder with question editor. MCQ questions with 4 options. Configure duration, passing %, shuffle, max attempts.
 - **Labs** (`/guru/labs`): Lab builder with starter code, expected output, solution code. Supports JavaScript, Python, HTML, CSS.
 - **Projects** (`/guru/projects`): Project manager with difficulty levels, requirements, resources, estimated hours.
+- **Pricing** (`/guru/pricing`): Credit pricing governance with overview stats (total courses, free courses, avg credit cost, total revenue), course pricing table with inline editing, free/paid toggle, bulk actions (Set All Free, Bulk Update Credits).
 - **Settings** (`/guru/settings`): Admin account info, platform integration status (AISiksha, Resend, Zoho), quick actions.
 
 **Guru Backend (server/guruRoutes.ts):**
