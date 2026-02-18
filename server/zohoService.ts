@@ -46,7 +46,7 @@ function getConfig(): ZohoConfig {
 
 export function getAuthorizationUrl(): string {
   const config = getConfig();
-  const scopes = "TrainerCentral.courseapi.ALL,TrainerCentral.userapi.ALL";
+  const scopes = "TrainerCentral.courseapi.ALL,TrainerCentral.userapi.ALL,TrainerCentral.sectionapi.ALL,TrainerCentral.sessionapi.ALL";
   const params = new URLSearchParams({
     response_type: "code",
     client_id: config.clientId,
@@ -230,7 +230,8 @@ export async function fetchCourseSections(courseId: string): Promise<any[]> {
       `/api/v4/${orgId}/course/${courseId}/sections.json`
     );
     console.log(`[Zoho] Sections response keys:`, Object.keys(data));
-    console.log(`[Zoho] Sections response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
+    const jsonStr = JSON.stringify(data);
+    console.log(`[Zoho] Sections full response (${jsonStr.length} chars):`, jsonStr.substring(0, 3000));
     const sections = data.sections || data.data || [];
     return Array.isArray(sections) ? sections : [];
   } catch (error: any) {
@@ -248,29 +249,12 @@ export async function fetchCourseSessions(courseId: string): Promise<any[]> {
       `/api/v4/${orgId}/course/${courseId}/sessions.json`
     );
     console.log(`[Zoho] Sessions response keys:`, Object.keys(data));
-    console.log(`[Zoho] Sessions response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
+    const jsonStr = JSON.stringify(data);
+    console.log(`[Zoho] Sessions full response (${jsonStr.length} chars):`, jsonStr.substring(0, 3000));
     const sessions = data.sessions || data.data || [];
     return Array.isArray(sessions) ? sessions : [];
   } catch (error: any) {
     console.error(`[Zoho] Failed to fetch sessions for course ${courseId}:`, error.message);
-    return [];
-  }
-}
-
-export async function fetchCourseSessionInfos(courseId: string): Promise<any[]> {
-  const config = getConfig();
-  const orgId = config.orgId;
-
-  try {
-    const data = await zohoApiRequest(
-      `/api/v4/${orgId}/course/${courseId}/sessionInfos.json`
-    );
-    console.log(`[Zoho] SessionInfos response keys:`, Object.keys(data));
-    console.log(`[Zoho] SessionInfos response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
-    const sessionInfos = data.sessionInfos || data.sessions || data.data || [];
-    return Array.isArray(sessionInfos) ? sessionInfos : [];
-  } catch (error: any) {
-    console.error(`[Zoho] Failed to fetch sessionInfos for course ${courseId}:`, error.message);
     return [];
   }
 }
@@ -390,13 +374,10 @@ async function deleteRemovedCourses(activeZohoIds: string[]): Promise<number> {
 async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number): Promise<void> {
   const tcSections = await fetchCourseSections(zohoCoureId);
   const tcSessions = await fetchCourseSessions(zohoCoureId);
-  const tcSessionInfos = await fetchCourseSessionInfos(zohoCoureId);
 
-  const allLessons = [...tcSessions, ...tcSessionInfos];
+  console.log(`[Zoho] Curriculum data for course ${localCourseId}: ${tcSections.length} sections, ${tcSessions.length} sessions`);
 
-  console.log(`[Zoho] Curriculum data for course ${localCourseId}: ${tcSections.length} sections, ${tcSessions.length} sessions, ${tcSessionInfos.length} sessionInfos`);
-
-  if (tcSections.length === 0 && allLessons.length === 0) {
+  if (tcSections.length === 0 && tcSessions.length === 0) {
     console.log(`[Zoho] No curriculum data found for course ${localCourseId}, skipping`);
     return;
   }
@@ -415,9 +396,9 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
       const sectionTitle = section.sectionName || section.name || section.title || `Section ${sIdx + 1}`;
       const sectionDesc = section.description || "";
 
+      console.log(`[Zoho] Section ${sIdx}: keys=${Object.keys(section).join(',')}, title="${sectionTitle}"`);
       if (sIdx === 0) {
-        console.log(`[Zoho] First section keys:`, Object.keys(section));
-        console.log(`[Zoho] First section data:`, JSON.stringify(section).substring(0, 500));
+        console.log(`[Zoho] First section full data:`, JSON.stringify(section).substring(0, 1000));
       }
 
       const [newModule] = await db.insert(modules).values({
@@ -429,28 +410,55 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
 
       const sectionId = String(section.sectionId || section.id);
 
-      const sectionLessons = section.lessons || section.sessions || section.materials || [];
+      const sectionLessons = section.lessons || section.sessions || section.materials || section.sessionMaterials || [];
 
       if (Array.isArray(sectionLessons) && sectionLessons.length > 0) {
         console.log(`[Zoho] Section "${sectionTitle}" has ${sectionLessons.length} inline lessons`);
         for (let lIdx = 0; lIdx < sectionLessons.length; lIdx++) {
-          const lesson = sectionLessons[lIdx];
-          await insertLesson(lesson, newModule.id, localCourseId, lIdx);
+          await insertLesson(sectionLessons[lIdx], newModule.id, localCourseId, lIdx);
         }
       } else {
-        const matchedLessons = allLessons.filter((l: any) => {
-          const lessonSectionId = String(l.sectionId || l.section_id || l.sectionID || "");
-          return lessonSectionId === sectionId;
+        const matchedLessons = tcSessions.filter((l: any) => {
+          const lSectionId = String(l.sectionId || l.section_id || l.sectionID || l.section || "");
+          return lSectionId === sectionId;
         });
 
         console.log(`[Zoho] Section "${sectionTitle}" matched ${matchedLessons.length} lessons from sessions (sectionId: ${sectionId})`);
+        
+        if (matchedLessons.length === 0 && tcSessions.length > 0 && sIdx === 0) {
+          console.log(`[Zoho] DEBUG: First session keys:`, Object.keys(tcSessions[0]).join(','));
+          console.log(`[Zoho] DEBUG: First session data:`, JSON.stringify(tcSessions[0]).substring(0, 500));
+          console.log(`[Zoho] DEBUG: Looking for sectionId "${sectionId}" in sessions`);
+          const sessionSectionIds = tcSessions.map((s: any) => String(s.sectionId || s.section_id || s.sectionID || s.section || "NONE"));
+          console.log(`[Zoho] DEBUG: Session sectionIds found:`, Array.from(new Set(sessionSectionIds)));
+        }
+
         for (let lIdx = 0; lIdx < matchedLessons.length; lIdx++) {
           await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx);
         }
       }
     }
-  } else if (allLessons.length > 0) {
-    console.log(`[Zoho] No sections found, creating default module with ${allLessons.length} lessons`);
+
+    const assignedSectionIds = tcSections.map((s: any) => String(s.sectionId || s.id));
+    const unassignedSessions = tcSessions.filter((l: any) => {
+      const lSectionId = String(l.sectionId || l.section_id || l.sectionID || l.section || "");
+      return !assignedSectionIds.includes(lSectionId);
+    });
+
+    if (unassignedSessions.length > 0) {
+      console.log(`[Zoho] ${unassignedSessions.length} sessions don't match any section, creating "Other Lessons" module`);
+      const [extraModule] = await db.insert(modules).values({
+        courseId: localCourseId,
+        title: "Other Lessons",
+        description: "Additional lessons from TrainerCentral",
+        orderIndex: tcSections.length + 1,
+      }).returning();
+      for (let lIdx = 0; lIdx < unassignedSessions.length; lIdx++) {
+        await insertLesson(unassignedSessions[lIdx], extraModule.id, localCourseId, lIdx);
+      }
+    }
+  } else if (tcSessions.length > 0) {
+    console.log(`[Zoho] No sections found, creating default module with ${tcSessions.length} lessons`);
 
     const [defaultModule] = await db.insert(modules).values({
       courseId: localCourseId,
@@ -459,8 +467,8 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
       orderIndex: 1,
     }).returning();
 
-    for (let lIdx = 0; lIdx < allLessons.length; lIdx++) {
-      await insertLesson(allLessons[lIdx], defaultModule.id, localCourseId, lIdx);
+    for (let lIdx = 0; lIdx < tcSessions.length; lIdx++) {
+      await insertLesson(tcSessions[lIdx], defaultModule.id, localCourseId, lIdx);
     }
   }
 }
@@ -493,6 +501,38 @@ async function insertLesson(lesson: any, moduleId: number, courseId: number, ind
     orderIndex: index + 1,
     isPreview: index === 0,
   });
+}
+
+export async function debugCourseCurriculum(courseZohoId: string): Promise<any> {
+  const config = getConfig();
+  const orgId = config.orgId;
+  const accessToken = await getValidAccessToken();
+
+  const results: any = { courseZohoId, sections: null, sessions: null, sessionInfos: null };
+
+  const endpoints = [
+    { key: 'sections', url: `/api/v4/${orgId}/course/${courseZohoId}/sections.json` },
+    { key: 'sessions', url: `/api/v4/${orgId}/course/${courseZohoId}/sessions.json` },
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const url = `${TRAINERCENTRAL_BASE_URL}${ep.url}`;
+      console.log(`[Zoho Debug] Fetching: ${url}`);
+      const response = await fetch(url, {
+        headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
+      });
+      if (response.ok) {
+        results[ep.key] = await response.json();
+      } else {
+        results[ep.key] = { error: response.status, statusText: response.statusText, body: (await response.text()).substring(0, 1000) };
+      }
+    } catch (e: any) {
+      results[ep.key] = { error: e.message };
+    }
+  }
+
+  return results;
 }
 
 export async function testConnection(): Promise<{ success: boolean; message: string; details?: any }> {

@@ -14,8 +14,8 @@ import { guruRouter } from "./guruRoutes";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications } from "@shared/schema";
-import { eq, like, or } from "drizzle-orm";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable } from "@shared/schema";
+import { eq, like, or, and, desc as descOrder } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -245,31 +245,47 @@ export async function registerRoutes(
   // SHISHYA RULE: WHERE status = 'published' AND is_active = true
   app.get("/api/courses", async (req, res) => {
     try {
+      let externalCourses: any[] = [];
+
       if (USE_MOCK_DATA) {
-        // Return mock published courses (mock data doesn't have is_active, assume true)
-        const publishedCourses = mockCourses.filter(c => c.status === "published");
-        return res.json(publishedCourses);
+        externalCourses = mockCourses.filter(c => c.status === "published");
+      } else {
+        try {
+          const response = await fetchFromAdmin("/courses");
+          if (response.ok) {
+            const data = await response.json();
+            const courses = data.courses || data;
+            externalCourses = Array.isArray(courses) 
+              ? courses.filter((c: any) => c.status === "published" && c.isActive !== false)
+              : [];
+          }
+        } catch (e) {
+          console.error("[AISiksha] External API failed, using mock fallback:", e);
+          externalCourses = mockCourses.filter(c => c.status === "published");
+        }
       }
 
-      const response = await fetchFromAdmin("/courses");
-      if (!response.ok) {
-        console.error(`[AISiksha] Failed to fetch courses: ${response.status}`);
-        // Fallback to mock data
-        const publishedCourses = mockCourses.filter(c => c.status === "published");
-        return res.json(publishedCourses);
+      let dbCourses: any[] = [];
+      try {
+        dbCourses = await db.select().from(coursesTable)
+          .where(eq(coursesTable.status, "published"))
+          .orderBy(descOrder(coursesTable.createdAt));
+      } catch (e) {
+        console.error("[DB] Failed to fetch courses from database:", e);
       }
-      const data = await response.json();
-      // API returns { success: true, courses: [...] }
-      const courses = data.courses || data;
-      // Filter to only show published AND active courses
-      const publishedCourses = Array.isArray(courses) 
-        ? courses.filter((c: any) => c.status === "published" && c.isActive !== false)
-        : [];
-      console.log(`[AISiksha] Fetched ${publishedCourses.length} published courses`);
-      res.json(publishedCourses);
+
+      const externalIds = new Set(externalCourses.map((c: any) => c.id));
+      const mergedCourses = [...externalCourses];
+      for (const dbCourse of dbCourses) {
+        if (!externalIds.has(dbCourse.id)) {
+          mergedCourses.push(dbCourse);
+        }
+      }
+
+      console.log(`[Courses] Serving ${mergedCourses.length} courses (${externalCourses.length} external + ${dbCourses.length} from DB)`);
+      res.json(mergedCourses);
     } catch (error) {
       console.error("Error fetching courses:", error);
-      // Fallback to mock data
       const publishedCourses = mockCourses.filter(c => c.status === "published");
       return res.json(publishedCourses);
     }
@@ -282,6 +298,13 @@ export async function registerRoutes(
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
+      const [dbCourse] = await db.select().from(coursesTable)
+        .where(and(eq(coursesTable.id, courseIdNum), eq(coursesTable.status, "published")))
+        .limit(1);
+      if (dbCourse) {
+        return res.json(dbCourse);
+      }
+
       if (USE_MOCK_DATA) {
         const course = mockCourses.find(c => c.id === courseIdNum);
         if (!course || course.status !== "published") {
@@ -292,8 +315,6 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/courses/${courseId}`);
       if (!response.ok) {
-        console.error(`[AISiksha] Failed to fetch course ${courseId}: ${response.status}`);
-        // Fallback to mock data
         const course = mockCourses.find(c => c.id === courseIdNum);
         if (!course || course.status !== "published") {
           return res.status(404).json({ error: "Course not found" });
@@ -301,17 +322,13 @@ export async function registerRoutes(
         return res.json(course);
       }
       const data = await response.json();
-      // API returns { success: true, course: {...} }
       const course = data.course || data;
-      // Only return if published AND active
       if (course.status !== "published" || course.isActive === false) {
         return res.status(404).json({ error: "Course not found" });
       }
-      console.log(`[AISiksha] Fetched course: ${course.title}`);
       res.json(course);
     } catch (error) {
       console.error("Error fetching course:", error);
-      // Fallback to mock data
       const courseIdNum = parseInt(req.params.courseId, 10);
       const course = mockCourses.find(c => c.id === courseIdNum);
       if (course && course.status === "published") {
@@ -327,35 +344,51 @@ export async function registerRoutes(
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
+      const dbModules = await db.select().from(modulesTable)
+        .where(eq(modulesTable.courseId, courseIdNum))
+        .orderBy(modulesTable.orderIndex);
+      if (dbModules.length > 0) {
+        return res.json(dbModules);
+      }
+
       if (USE_MOCK_DATA) {
-        const modules = mockModules[courseIdNum] || [];
-        return res.json(modules);
+        return res.json(mockModules[courseIdNum] || []);
       }
 
       const response = await fetchFromAdmin(`/courses/${courseId}/modules`);
       if (!response.ok) {
-        console.log(`[AISiksha] Modules API failed, using mock data for course ${courseId}`);
-        const modules = mockModules[courseIdNum] || [];
-        return res.json(modules);
+        return res.json(mockModules[courseIdNum] || []);
       }
       const data = await response.json();
-      const modules = data.modules || data;
-      res.json(modules);
+      res.json(data.modules || data);
     } catch (error) {
       console.error("Error fetching modules:", error);
       const courseIdNum = parseInt(req.params.courseId, 10);
-      const modules = mockModules[courseIdNum] || [];
-      return res.json(modules);
+      return res.json(mockModules[courseIdNum] || []);
     }
   });
 
-  // GET /api/courses/:courseId/modules-with-lessons - Fetch modules with their lessons
   app.get("/api/courses/:courseId/modules-with-lessons", async (req, res) => {
     try {
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
-      // Helper to return mock data
+      const dbModules = await db.select().from(modulesTable)
+        .where(eq(modulesTable.courseId, courseIdNum))
+        .orderBy(modulesTable.orderIndex);
+
+      if (dbModules.length > 0) {
+        const modulesWithLessons = await Promise.all(
+          dbModules.map(async (mod) => {
+            const dbLessons = await db.select().from(lessonsTable)
+              .where(eq(lessonsTable.moduleId, mod.id))
+              .orderBy(lessonsTable.orderIndex);
+            return { ...mod, lessons: dbLessons };
+          })
+        );
+        return res.json(modulesWithLessons);
+      }
+
       const getMockModulesWithLessons = () => {
         const modules = mockModules[courseIdNum] || [];
         return modules.map(module => ({
@@ -368,16 +401,13 @@ export async function registerRoutes(
         return res.json(getMockModulesWithLessons());
       }
       
-      // First fetch modules
       const modulesResponse = await fetchFromAdmin(`/courses/${courseId}/modules`);
       if (!modulesResponse.ok) {
-        console.log(`[AISiksha] Modules-with-lessons API failed, using mock data for course ${courseId}`);
         return res.json(getMockModulesWithLessons());
       }
       const modulesData = await modulesResponse.json();
       const modules = modulesData.modules || modulesData;
       
-      // Then fetch lessons for each module
       const modulesWithLessons = await Promise.all(
         (modules || []).map(async (module: any) => {
           try {
@@ -386,8 +416,7 @@ export async function registerRoutes(
               return { ...module, lessons: mockLessons[module.id] || [] };
             }
             const lessonsData = await lessonsResponse.json();
-            const lessons = lessonsData.lessons || lessonsData;
-            return { ...module, lessons: lessons || [] };
+            return { ...module, lessons: lessonsData.lessons || lessonsData || [] };
           } catch {
             return { ...module, lessons: mockLessons[module.id] || [] };
           }
@@ -399,39 +428,39 @@ export async function registerRoutes(
       console.error("Error fetching modules with lessons:", error);
       const courseIdNum = parseInt(req.params.courseId, 10);
       const modules = mockModules[courseIdNum] || [];
-      const modulesWithLessons = modules.map(module => ({
+      return res.json(modules.map(module => ({
         ...module,
         lessons: mockLessons[module.id] || [],
-      }));
-      return res.json(modulesWithLessons);
+      })));
     }
   });
 
-  // GET /api/modules/:moduleId/lessons - Fetch lessons for a module
   app.get("/api/modules/:moduleId/lessons", async (req, res) => {
     try {
       const { moduleId } = req.params;
       const moduleIdNum = parseInt(moduleId, 10);
 
+      const dbLessons = await db.select().from(lessonsTable)
+        .where(eq(lessonsTable.moduleId, moduleIdNum))
+        .orderBy(lessonsTable.orderIndex);
+      if (dbLessons.length > 0) {
+        return res.json(dbLessons);
+      }
+
       if (USE_MOCK_DATA) {
-        const lessons = mockLessons[moduleIdNum] || [];
-        return res.json(lessons);
+        return res.json(mockLessons[moduleIdNum] || []);
       }
 
       const response = await fetchFromAdmin(`/modules/${moduleId}/lessons`);
       if (!response.ok) {
-        console.log(`[AISiksha] Lessons API failed, using mock data for module ${moduleId}`);
-        const lessons = mockLessons[moduleIdNum] || [];
-        return res.json(lessons);
+        return res.json(mockLessons[moduleIdNum] || []);
       }
       const data = await response.json();
-      const lessons = data.lessons || data;
-      res.json(lessons);
+      res.json(data.lessons || data);
     } catch (error) {
       console.error("Error fetching lessons:", error);
       const moduleIdNum = parseInt(req.params.moduleId, 10);
-      const lessons = mockLessons[moduleIdNum] || [];
-      return res.json(lessons);
+      return res.json(mockLessons[moduleIdNum] || []);
     }
   });
 
@@ -452,6 +481,13 @@ export async function registerRoutes(
       const { lessonId } = req.params;
       const lessonIdNum = parseInt(lessonId, 10);
 
+      const [dbLesson] = await db.select().from(lessonsTable)
+        .where(eq(lessonsTable.id, lessonIdNum))
+        .limit(1);
+      if (dbLesson) {
+        return res.json(dbLesson);
+      }
+
       if (USE_MOCK_DATA) {
         const allLessons = getAllLessons();
         const lesson = allLessons[lessonIdNum];
@@ -463,7 +499,6 @@ export async function registerRoutes(
 
       const response = await fetchFromAdmin(`/lessons/${lessonId}`);
       if (!response.ok) {
-        console.log(`[AISiksha] Lesson API failed, using mock data for lesson ${lessonId}`);
         const allLessons = getAllLessons();
         const lesson = allLessons[lessonIdNum];
         if (!lesson) {
@@ -472,8 +507,7 @@ export async function registerRoutes(
         return res.json(lesson);
       }
       const data = await response.json();
-      const lesson = data.lesson || data;
-      res.json(lesson);
+      res.json(data.lesson || data);
     } catch (error) {
       console.error("Error fetching lesson:", error);
       const lessonIdNum = parseInt(req.params.lessonId, 10);

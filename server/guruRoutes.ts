@@ -682,3 +682,14 @@ guruRouter.get("/zoho/status", async (req: Request, res: Response) => {
     res.json({ connected: false });
   }
 });
+
+guruRouter.get("/zoho/debug-curriculum/:courseZohoId", async (req: Request, res: Response) => {
+  try {
+    const { courseZohoId } = req.params;
+    const rawData = await zohoService.debugCourseCurriculum(courseZohoId);
+    res.json(rawData);
+  } catch (error: any) {
+    console.error("[Guru] Debug curriculum error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
