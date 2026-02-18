@@ -247,21 +247,27 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
 
   for (const tcCourse of tcCourses) {
     try {
-      const zohoId = String(tcCourse.id || tcCourse.courseId);
-      const title = tcCourse.name || tcCourse.title || "Untitled Course";
-      const description = tcCourse.description || tcCourse.summary || "";
-      const thumbnailUrl = tcCourse.thumbnail || tcCourse.image || null;
+      const zohoId = String(tcCourse.courseId || tcCourse.id);
+      const title = tcCourse.courseName || tcCourse.name || tcCourse.title || "Untitled Course";
+      const rawDescription = tcCourse.description || tcCourse.summary || "";
+      const description = rawDescription.replace(/<[^>]*>/g, '').trim() || tcCourse.subTitle || "";
+      const thumbnailUrl = tcCourse.thumbnail || tcCourse.image || tcCourse.courseImageURL || null;
+      const courseUrl = tcCourse.courseURL || null;
+      const isPublished = tcCourse.publishStatus === "1" || tcCourse.publishStatus === 1;
 
       const [existing] = await db.select()
         .from(courses)
         .where(eq(courses.zohoId, zohoId))
         .limit(1);
 
+      console.log(`[Zoho] Syncing course: "${title}" (zohoId: ${zohoId}, published: ${isPublished})`);
+
       if (existing) {
         await db.update(courses).set({
           title,
           description,
           thumbnailUrl: thumbnailUrl || existing.thumbnailUrl,
+          status: isPublished ? "published" : existing.status,
           updatedAt: new Date(),
         }).where(eq(courses.id, existing.id));
         result.updated++;
@@ -270,7 +276,7 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
           title,
           description,
           thumbnailUrl,
-          status: "draft",
+          status: isPublished ? "published" : "draft",
           zohoId,
           category: tcCourse.category || "General",
           level: "beginner",
