@@ -48,5 +48,5 @@ AISIKSHA_ADMIN_URL = "https://db050753-70df-44c9-8785-7ab6fe741fd1-00-34cllu3yq8
 SUPPORT_EMAIL = "support@ourshiksha.com"
 PRIVACY_EMAIL = "privacy@ourshiksha.com"
 LEGAL_EMAIL = "legal@ourshiksha.com"
-COMPANY_LOCATION = "Chennai, Tamil Nadu, India"
+COMPANY_LOCATION = "Mumbai, Maharastra, India"
 ADMIN_DATABASE_URL = "postgresql://postgres:password@helium/heliumdb?sslmode=disable"
