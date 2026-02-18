@@ -18,8 +18,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useCourseProgress } from "@/contexts/ProgressContext";
 import { UshaAvatar } from "@/components/usha";
+import { UshaVideoPlayer } from "@/components/video/UshaVideoPlayer";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
+
+function isEmbeddableVideo(url: string): boolean {
+  return /youtube\.com|youtu\.be|vimeo\.com|dailymotion\.com|trainercentral\.com.*\/embed/i.test(url);
+}
+
+function isDirectVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url);
+}
+
+function getEmbedUrl(url: string): string {
+  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+  return url;
+}
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -178,17 +197,35 @@ export default function LessonViewer() {
                   Video Lesson
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <a 
-                  href={lesson.videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                  data-testid="link-video"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Watch Video
-                </a>
+              <CardContent className="space-y-3">
+                {isEmbeddableVideo(lesson.videoUrl) ? (
+                  <div className="aspect-video rounded-lg overflow-hidden border">
+                    <iframe
+                      src={getEmbedUrl(lesson.videoUrl)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      title={lesson.title}
+                      data-testid="video-embed"
+                    />
+                  </div>
+                ) : isDirectVideo(lesson.videoUrl) ? (
+                  <UshaVideoPlayer
+                    videoUrl={lesson.videoUrl}
+                    title={lesson.title}
+                  />
+                ) : (
+                  <a 
+                    href={lesson.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:underline"
+                    data-testid="link-video"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Watch Video
+                  </a>
+                )}
               </CardContent>
             </Card>
           )}

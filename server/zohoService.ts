@@ -471,8 +471,16 @@ async function insertLesson(lesson: any, moduleId: number, courseId: number, ind
   const lessonContent = rawContent.replace(/<[^>]*>/g, '').trim();
   const lessonType = lesson.type || lesson.sessionType || lesson.lessonType || "TEXT";
 
+  const videoUrl = lesson.videoUrl || lesson.video_url || lesson.videoURL
+    || lesson.mediaUrl || lesson.media_url || lesson.streamUrl || lesson.stream_url
+    || lesson.contentUrl || lesson.content_url || lesson.url || null;
+
+  const durationMinutes = lesson.durationMinutes || lesson.duration_minutes
+    || lesson.duration || lesson.sessionDuration || null;
+
   if (index === 0) {
     console.log(`[Zoho] First lesson keys:`, Object.keys(lesson));
+    console.log(`[Zoho] First lesson data (500 chars):`, JSON.stringify(lesson).substring(0, 500));
   }
 
   await db.insert(lessons).values({
@@ -480,6 +488,8 @@ async function insertLesson(lesson: any, moduleId: number, courseId: number, ind
     courseId,
     title: lessonTitle,
     content: lessonContent || `${lessonType} lesson from TrainerCentral`,
+    videoUrl: typeof videoUrl === 'string' && videoUrl.startsWith('http') ? videoUrl : null,
+    durationMinutes: typeof durationMinutes === 'number' ? durationMinutes : null,
     orderIndex: index + 1,
     isPreview: index === 0,
   });

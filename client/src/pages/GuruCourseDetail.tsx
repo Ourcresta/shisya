@@ -57,6 +57,7 @@ import {
   CreditCard,
   Languages,
   Zap,
+  Video,
 } from "lucide-react";
 
 interface Course {
@@ -571,6 +572,12 @@ export default function GuruCourseDetail() {
                               <div className="flex items-center gap-2 flex-wrap">
                                 {lesson.durationMinutes && (
                                   <span className="text-xs text-muted-foreground">{lesson.durationMinutes} min</span>
+                                )}
+                                {lesson.videoUrl && (
+                                  <Badge variant="outline" className="text-xs gap-1 no-default-hover-elevate no-default-active-elevate" data-testid={`badge-video-${lesson.id}`}>
+                                    <Video className="w-3 h-3" />
+                                    Video
+                                  </Badge>
                                 )}
                                 {lesson.isPreview && (
                                   <Badge variant="outline" className="text-xs" data-testid={`badge-preview-${lesson.id}`}>
