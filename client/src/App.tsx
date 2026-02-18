@@ -16,6 +16,8 @@ import GuruLayout from "@/components/guru/GuruLayout";
 import GuruDashboard from "@/pages/GuruDashboard";
 import GuruCourses from "@/pages/GuruCourses";
 import GuruCourseDetail from "@/pages/GuruCourseDetail";
+import GuruStudents from "@/pages/GuruStudents";
+import GuruCredits from "@/pages/GuruCredits";
 import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
 import CourseOverview from "@/pages/CourseOverview";
@@ -195,6 +197,8 @@ function Router() {
       <Route path="/guru/dashboard" component={() => <GuruPage component={GuruDashboard} />} />
       <Route path="/guru/courses" component={() => <GuruPage component={GuruCourses} />} />
       <Route path="/guru/courses/:courseId" component={() => <GuruPage component={GuruCourseDetail} />} />
+      <Route path="/guru/students" component={() => <GuruPage component={GuruStudents} />} />
+      <Route path="/guru/credits" component={() => <GuruPage component={GuruCredits} />} />
       
       {/* Shishya Portal - Login Required */}
       <Route path="/shishya/dashboard" component={ProtectedDashboard} />
