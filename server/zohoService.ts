@@ -4,6 +4,7 @@ import { eq, desc } from "drizzle-orm";
 
 const ZOHO_ACCOUNTS_URL = "https://accounts.zoho.in";
 const ZOHO_API_DOMAIN = "https://www.zohoapis.in";
+const TRAINERCENTRAL_BASE_URL = "https://our-shiksha.trainercentral.in";
 
 interface ZohoTokenResponse {
   access_token: string;
@@ -158,12 +159,14 @@ export async function disconnect(): Promise<void> {
   console.log("[Zoho] Disconnected - tokens removed");
 }
 
-async function zohoApiRequest(endpoint: string): Promise<any> {
+async function zohoApiRequest(endpoint: string, useTrainerCentral = true): Promise<any> {
   const accessToken = await getValidAccessToken();
-  const stored = await getStoredTokens();
-  const apiDomain = stored?.apiDomain || ZOHO_API_DOMAIN;
+  const baseUrl = useTrainerCentral ? TRAINERCENTRAL_BASE_URL : ZOHO_API_DOMAIN;
+  const url = `${baseUrl}${endpoint}`;
 
-  const response = await fetch(`${apiDomain}${endpoint}`, {
+  console.log(`[Zoho] API request: ${url}`);
+
+  const response = await fetch(url, {
     headers: {
       Authorization: `Zoho-oauthtoken ${accessToken}`,
     },
@@ -171,12 +174,14 @@ async function zohoApiRequest(endpoint: string): Promise<any> {
 
   if (response.status === 401) {
     const newToken = await refreshAccessToken();
-    const retryResponse = await fetch(`${apiDomain}${endpoint}`, {
+    const retryResponse = await fetch(url, {
       headers: {
         Authorization: `Zoho-oauthtoken ${newToken}`,
       },
     });
     if (!retryResponse.ok) {
+      const errorText = await retryResponse.text();
+      console.error("[Zoho] API retry error:", retryResponse.status, errorText.substring(0, 500));
       throw new Error(`Zoho API error: ${retryResponse.status} ${retryResponse.statusText}`);
     }
     return retryResponse.json();
@@ -184,7 +189,7 @@ async function zohoApiRequest(endpoint: string): Promise<any> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("[Zoho] API error:", response.status, errorText);
+    console.error("[Zoho] API error:", response.status, errorText.substring(0, 500));
     throw new Error(`Zoho API error: ${response.status} ${response.statusText}`);
   }
 
@@ -201,7 +206,7 @@ export async function fetchTrainerCentralCourses(): Promise<any[]> {
 
   while (true) {
     const data = await zohoApiRequest(
-      `/trainercentral/api/v4/${orgId}/courses.json?limit=${limit}&si=${startIndex}`
+      `/api/v4/${orgId}/courses.json?limit=${limit}&si=${startIndex}`
     );
 
     const fetchedCourses = data.courses || data.data || [];
@@ -222,7 +227,7 @@ export async function fetchCourseLessons(courseId: string): Promise<any[]> {
 
   try {
     const data = await zohoApiRequest(
-      `/trainercentral/api/v4/${orgId}/course/${courseId}/lessons.json`
+      `/api/v4/${orgId}/course/${courseId}/lessons.json`
     );
     return data.lessons || data.data || [];
   } catch (error) {
@@ -294,9 +299,9 @@ export async function testConnection(): Promise<{ success: boolean; message: str
     const accessToken = await getValidAccessToken();
     const config = getConfig();
 
-    const stored = await getStoredTokens();
-    const apiDomain = stored?.apiDomain || ZOHO_API_DOMAIN;
-    const response = await fetch(`${apiDomain}/trainercentral/api/v4/${config.orgId}/courses.json?limit=1`, {
+    const url = `${TRAINERCENTRAL_BASE_URL}/api/v4/${config.orgId}/courses.json?limit=1`;
+    console.log(`[Zoho] Test connection: ${url}`);
+    const response = await fetch(url, {
       headers: {
         Authorization: `Zoho-oauthtoken ${accessToken}`,
       },
