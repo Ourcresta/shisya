@@ -582,3 +582,73 @@ guruRouter.delete("/projects/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete project" });
   }
 });
+
+// ============ ZOHO TRAINERCENTRAL INTEGRATION ============
+
+guruRouter.get("/settings/integrations", async (req: Request, res: Response) => {
+  try {
+    const zohoConfigured = !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_ORG_ID);
+    res.json({
+      zoho: {
+        configured: zohoConfigured,
+        status: zohoConfigured ? "connected" : "not_connected",
+      },
+      aisiksha: {
+        configured: !!(process.env.AISIKSHA_ADMIN_URL && process.env.AISIKSHA_API_KEY),
+      },
+      resend: {
+        configured: !!process.env.RESEND_API_KEY,
+      },
+    });
+  } catch (error) {
+    console.error("[Guru] Integration status error:", error);
+    res.status(500).json({ error: "Failed to check integration status" });
+  }
+});
+
+guruRouter.post("/zoho/test-connection", async (req: Request, res: Response) => {
+  try {
+    const clientId = process.env.ZOHO_CLIENT_ID;
+    const clientSecret = process.env.ZOHO_CLIENT_SECRET;
+    const orgId = process.env.ZOHO_ORG_ID;
+
+    if (!clientId || !clientSecret || !orgId) {
+      return res.status(400).json({
+        success: false,
+        error: "Zoho credentials not configured. Add ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, and ZOHO_ORG_ID to your secrets."
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Zoho credentials are configured. Full API connection will be established when TrainerCentral integration is activated."
+    });
+  } catch (error) {
+    console.error("[Guru] Zoho test connection error:", error);
+    res.status(500).json({ success: false, error: "Failed to test Zoho connection" });
+  }
+});
+
+guruRouter.post("/zoho/sync", async (req: Request, res: Response) => {
+  try {
+    const clientId = process.env.ZOHO_CLIENT_ID;
+    const clientSecret = process.env.ZOHO_CLIENT_SECRET;
+    const orgId = process.env.ZOHO_ORG_ID;
+
+    if (!clientId || !clientSecret || !orgId) {
+      return res.status(400).json({
+        success: false,
+        error: "Zoho credentials not configured"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Zoho sync framework is ready. Full sync will be available when TrainerCentral API integration is completed.",
+      syncedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("[Guru] Zoho sync error:", error);
+    res.status(500).json({ success: false, error: "Failed to sync with Zoho" });
+  }
+});

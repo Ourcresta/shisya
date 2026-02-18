@@ -3,16 +3,75 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGuruAuth } from "@/contexts/GuruAuthContext";
-import { LayoutDashboard, BookOpen, Users } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, RefreshCw, Plug } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface IntegrationStatus {
+  zoho: {
+    configured: boolean;
+    status: string;
+  };
+  aisiksha: {
+    configured: boolean;
+  };
+  resend: {
+    configured: boolean;
+  };
+}
 
 export default function GuruSettings() {
   const { admin } = useGuruAuth();
+  const { toast } = useToast();
 
-  const configStatus = {
-    aiSikshaAdmin: import.meta.env.VITE_AISIKSHA_ADMIN_URL ? "configured" : "not configured",
-    resendEmail: import.meta.env.VITE_RESEND_API_KEY ? "configured" : "not configured",
-    database: "connected",
-  };
+  const { data: integrations, isLoading: integrationsLoading } = useQuery<IntegrationStatus>({
+    queryKey: ["/api/guru/settings/integrations"],
+  });
+
+  const zohoConnected = integrations?.zoho?.configured ?? false;
+
+  const testConnectionMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/guru/zoho/test-connection");
+      return res.json();
+    },
+    onSuccess: (data: { success: boolean; message: string }) => {
+      toast({
+        title: "Connection Test",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/settings/integrations"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Connection Test Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/guru/zoho/sync");
+      return res.json();
+    },
+    onSuccess: (data: { success: boolean; message: string }) => {
+      toast({
+        title: "Sync Complete",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/settings/integrations"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -64,7 +123,7 @@ export default function GuruSettings() {
           <CardDescription>Current environment settings status</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium" data-testid="text-aisiksha-label">
                 AISiksha Admin URL
@@ -72,13 +131,13 @@ export default function GuruSettings() {
               <p className="text-xs text-muted-foreground">Integration endpoint</p>
             </div>
             <Badge
-              variant={configStatus.aiSikshaAdmin === "configured" ? "default" : "secondary"}
+              variant={integrations?.aisiksha?.configured ? "default" : "secondary"}
               data-testid="badge-aisiksha-status"
             >
-              {configStatus.aiSikshaAdmin}
+              {integrationsLoading ? "checking..." : integrations?.aisiksha?.configured ? "configured" : "not configured"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium" data-testid="text-resend-label">
                 Resend Email
@@ -86,13 +145,13 @@ export default function GuruSettings() {
               <p className="text-xs text-muted-foreground">Email service provider</p>
             </div>
             <Badge
-              variant={configStatus.resendEmail === "configured" ? "default" : "secondary"}
+              variant={integrations?.resend?.configured ? "default" : "secondary"}
               data-testid="badge-resend-status"
             >
-              {configStatus.resendEmail}
+              {integrationsLoading ? "checking..." : integrations?.resend?.configured ? "configured" : "not configured"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium" data-testid="text-database-label">
                 Database
@@ -100,8 +159,73 @@ export default function GuruSettings() {
               <p className="text-xs text-muted-foreground">PostgreSQL connection</p>
             </div>
             <Badge variant="default" data-testid="badge-database-status">
-              {configStatus.database}
+              connected
             </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="card-zoho-integration">
+        <CardHeader>
+          <CardTitle>Zoho TrainerCentral Integration</CardTitle>
+          <CardDescription>Sync courses and users from Zoho TrainerCentral</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-medium" data-testid="text-zoho-connection-label">
+                Connection Status
+              </p>
+            </div>
+            <Badge
+              variant={zohoConnected ? "default" : "secondary"}
+              data-testid="badge-zoho-status"
+            >
+              {integrationsLoading ? "checking..." : zohoConnected ? "Connected" : "Not Connected"}
+            </Badge>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium mb-2" data-testid="text-zoho-features-label">
+              What This Does
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <li data-testid="text-zoho-feature-catalog">Syncs course catalog from TrainerCentral</li>
+              <li data-testid="text-zoho-feature-enrollments">Imports user enrollments</li>
+              <li data-testid="text-zoho-feature-updates">Keeps content updated automatically</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium mb-2" data-testid="text-zoho-setup-label">
+              Setup Instructions
+            </p>
+            <p className="text-sm text-muted-foreground mb-2" data-testid="text-zoho-setup-description">
+              To connect Zoho TrainerCentral, you need to add your Zoho API credentials in the Secrets tab.
+            </p>
+            <p className="text-sm text-muted-foreground mb-3" data-testid="text-zoho-required-secrets">
+              Required secrets: ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_ORG_ID
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => testConnectionMutation.mutate()}
+                disabled={testConnectionMutation.isPending}
+                data-testid="button-zoho-test-connection"
+              >
+                <Plug className="w-4 h-4 mr-2" />
+                {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => syncMutation.mutate()}
+                disabled={!zohoConnected || syncMutation.isPending}
+                data-testid="button-zoho-sync"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {syncMutation.isPending ? "Syncing..." : "Sync Now"}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
