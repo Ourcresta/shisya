@@ -642,7 +642,7 @@ guruRouter.post("/zoho/sync", async (req: Request, res: Response) => {
     const result = await zohoService.syncCoursesFromTrainerCentral();
     res.json({
       success: true,
-      message: `Sync complete: ${result.created} courses created, ${result.updated} updated.`,
+      message: `Sync complete: ${result.created} created, ${result.updated} updated, ${result.deleted} deleted.`,
       ...result,
       syncedAt: new Date().toISOString(),
     });

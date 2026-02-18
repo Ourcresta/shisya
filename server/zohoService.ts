@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { zohoTokens, courses, modules, lessons } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { zohoTokens, courses, modules, lessons, tests, labs, projects } from "@shared/schema";
+import { eq, desc, isNotNull, notInArray } from "drizzle-orm";
 
 const ZOHO_ACCOUNTS_URL = "https://accounts.zoho.in";
 const ZOHO_API_DOMAIN = "https://www.zohoapis.in";
@@ -46,7 +46,7 @@ function getConfig(): ZohoConfig {
 
 export function getAuthorizationUrl(): string {
   const config = getConfig();
-  const scopes = "TrainerCentral.courseapi.READ,TrainerCentral.userapi.READ";
+  const scopes = "TrainerCentral.courseapi.ALL,TrainerCentral.userapi.ALL";
   const params = new URLSearchParams({
     response_type: "code",
     client_id: config.clientId,
@@ -221,17 +221,56 @@ export async function fetchTrainerCentralCourses(): Promise<any[]> {
   return allCourses;
 }
 
-export async function fetchCourseLessons(courseId: string): Promise<any[]> {
+export async function fetchCourseSections(courseId: string): Promise<any[]> {
   const config = getConfig();
   const orgId = config.orgId;
 
   try {
     const data = await zohoApiRequest(
-      `/api/v4/${orgId}/course/${courseId}/lessons.json`
+      `/api/v4/${orgId}/course/${courseId}/sections.json`
     );
-    return data.lessons || data.data || [];
-  } catch (error) {
-    console.error(`[Zoho] Failed to fetch lessons for course ${courseId}:`, error);
+    console.log(`[Zoho] Sections response keys:`, Object.keys(data));
+    console.log(`[Zoho] Sections response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
+    const sections = data.sections || data.data || [];
+    return Array.isArray(sections) ? sections : [];
+  } catch (error: any) {
+    console.error(`[Zoho] Failed to fetch sections for course ${courseId}:`, error.message);
+    return [];
+  }
+}
+
+export async function fetchCourseSessions(courseId: string): Promise<any[]> {
+  const config = getConfig();
+  const orgId = config.orgId;
+
+  try {
+    const data = await zohoApiRequest(
+      `/api/v4/${orgId}/course/${courseId}/sessions.json`
+    );
+    console.log(`[Zoho] Sessions response keys:`, Object.keys(data));
+    console.log(`[Zoho] Sessions response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
+    const sessions = data.sessions || data.data || [];
+    return Array.isArray(sessions) ? sessions : [];
+  } catch (error: any) {
+    console.error(`[Zoho] Failed to fetch sessions for course ${courseId}:`, error.message);
+    return [];
+  }
+}
+
+export async function fetchCourseSessionInfos(courseId: string): Promise<any[]> {
+  const config = getConfig();
+  const orgId = config.orgId;
+
+  try {
+    const data = await zohoApiRequest(
+      `/api/v4/${orgId}/course/${courseId}/sessionInfos.json`
+    );
+    console.log(`[Zoho] SessionInfos response keys:`, Object.keys(data));
+    console.log(`[Zoho] SessionInfos response (first 2000 chars):`, JSON.stringify(data).substring(0, 2000));
+    const sessionInfos = data.sessionInfos || data.sessions || data.data || [];
+    return Array.isArray(sessionInfos) ? sessionInfos : [];
+  } catch (error: any) {
+    console.error(`[Zoho] Failed to fetch sessionInfos for course ${courseId}:`, error.message);
     return [];
   }
 }
@@ -240,19 +279,23 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
   synced: number;
   created: number;
   updated: number;
+  deleted: number;
   errors: string[];
 }> {
   const tcCourses = await fetchTrainerCentralCourses();
-  const result = { synced: tcCourses.length, created: 0, updated: 0, errors: [] as string[] };
+  const result = { synced: tcCourses.length, created: 0, updated: 0, deleted: 0, errors: [] as string[] };
+
+  const syncedZohoIds: string[] = [];
 
   for (const tcCourse of tcCourses) {
     try {
       const zohoId = String(tcCourse.courseId || tcCourse.id);
+      syncedZohoIds.push(zohoId);
+
       const title = tcCourse.courseName || tcCourse.name || tcCourse.title || "Untitled Course";
       const rawDescription = tcCourse.description || tcCourse.summary || "";
       const description = rawDescription.replace(/<[^>]*>/g, '').trim() || tcCourse.subTitle || "";
       const thumbnailUrl = tcCourse.thumbnail || tcCourse.image || tcCourse.courseImageURL || null;
-      const courseUrl = tcCourse.courseURL || null;
       const isPublished = tcCourse.publishStatus === "1" || tcCourse.publishStatus === 1;
 
       const [existing] = await db.select()
@@ -262,6 +305,8 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
 
       console.log(`[Zoho] Syncing course: "${title}" (zohoId: ${zohoId}, published: ${isPublished})`);
 
+      let courseId: number;
+
       if (existing) {
         await db.update(courses).set({
           title,
@@ -270,9 +315,10 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
           status: isPublished ? "published" : existing.status,
           updatedAt: new Date(),
         }).where(eq(courses.id, existing.id));
+        courseId = existing.id;
         result.updated++;
       } else {
-        await db.insert(courses).values({
+        const [newCourse] = await db.insert(courses).values({
           title,
           description,
           thumbnailUrl,
@@ -283,16 +329,160 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
           isFree: false,
           creditCost: 100,
           isActive: true,
-        });
+        }).returning();
+        courseId = newCourse.id;
         result.created++;
       }
+
+      try {
+        await syncCourseCurriculum(zohoId, courseId);
+      } catch (currError: any) {
+        console.error(`[Zoho] Failed to sync curriculum for "${title}":`, currError.message);
+        result.errors.push(`Curriculum sync failed for "${title}": ${currError.message}`);
+      }
     } catch (error: any) {
-      result.errors.push(`Failed to sync course "${tcCourse.name || tcCourse.id}": ${error.message}`);
+      result.errors.push(`Failed to sync course "${tcCourse.courseName || tcCourse.id}": ${error.message}`);
     }
   }
 
-  console.log(`[Zoho] Sync complete: ${result.created} created, ${result.updated} updated, ${result.errors.length} errors`);
+  try {
+    const deletedCount = await deleteRemovedCourses(syncedZohoIds);
+    result.deleted = deletedCount;
+  } catch (delError: any) {
+    console.error(`[Zoho] Failed to delete removed courses:`, delError.message);
+    result.errors.push(`Delete sync failed: ${delError.message}`);
+  }
+
+  console.log(`[Zoho] Sync complete: ${result.created} created, ${result.updated} updated, ${result.deleted} deleted, ${result.errors.length} errors`);
   return result;
+}
+
+async function deleteRemovedCourses(activeZohoIds: string[]): Promise<number> {
+  const zohoSyncedCourses = await db.select({ id: courses.id, zohoId: courses.zohoId })
+    .from(courses)
+    .where(isNotNull(courses.zohoId));
+
+  let deletedCount = 0;
+
+  for (const course of zohoSyncedCourses) {
+    if (course.zohoId && !activeZohoIds.includes(course.zohoId)) {
+      console.log(`[Zoho] Deleting course ID ${course.id} (zohoId: ${course.zohoId}) - no longer in TrainerCentral`);
+
+      const courseModules = await db.select().from(modules).where(eq(modules.courseId, course.id));
+      for (const mod of courseModules) {
+        await db.delete(lessons).where(eq(lessons.moduleId, mod.id));
+      }
+      await db.delete(modules).where(eq(modules.courseId, course.id));
+      await db.delete(labs).where(eq(labs.courseId, course.id));
+      await db.delete(tests).where(eq(tests.courseId, course.id));
+      await db.delete(projects).where(eq(projects.courseId, course.id));
+      await db.delete(courses).where(eq(courses.id, course.id));
+      deletedCount++;
+    }
+  }
+
+  if (deletedCount > 0) {
+    console.log(`[Zoho] Deleted ${deletedCount} courses no longer in TrainerCentral`);
+  }
+  return deletedCount;
+}
+
+async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number): Promise<void> {
+  const tcSections = await fetchCourseSections(zohoCoureId);
+  const tcSessions = await fetchCourseSessions(zohoCoureId);
+  const tcSessionInfos = await fetchCourseSessionInfos(zohoCoureId);
+
+  const allLessons = [...tcSessions, ...tcSessionInfos];
+
+  console.log(`[Zoho] Curriculum data for course ${localCourseId}: ${tcSections.length} sections, ${tcSessions.length} sessions, ${tcSessionInfos.length} sessionInfos`);
+
+  if (tcSections.length === 0 && allLessons.length === 0) {
+    console.log(`[Zoho] No curriculum data found for course ${localCourseId}, skipping`);
+    return;
+  }
+
+  const existingModules = await db.select().from(modules).where(eq(modules.courseId, localCourseId));
+  for (const mod of existingModules) {
+    await db.delete(lessons).where(eq(lessons.moduleId, mod.id));
+  }
+  await db.delete(modules).where(eq(modules.courseId, localCourseId));
+
+  if (tcSections.length > 0) {
+    console.log(`[Zoho] Syncing ${tcSections.length} sections for course ${localCourseId}`);
+
+    for (let sIdx = 0; sIdx < tcSections.length; sIdx++) {
+      const section = tcSections[sIdx];
+      const sectionTitle = section.sectionName || section.name || section.title || `Section ${sIdx + 1}`;
+      const sectionDesc = section.description || "";
+
+      if (sIdx === 0) {
+        console.log(`[Zoho] First section keys:`, Object.keys(section));
+        console.log(`[Zoho] First section data:`, JSON.stringify(section).substring(0, 500));
+      }
+
+      const [newModule] = await db.insert(modules).values({
+        courseId: localCourseId,
+        title: sectionTitle,
+        description: sectionDesc.replace(/<[^>]*>/g, '').trim(),
+        orderIndex: sIdx + 1,
+      }).returning();
+
+      const sectionId = String(section.sectionId || section.id);
+
+      const sectionLessons = section.lessons || section.sessions || section.materials || [];
+
+      if (Array.isArray(sectionLessons) && sectionLessons.length > 0) {
+        console.log(`[Zoho] Section "${sectionTitle}" has ${sectionLessons.length} inline lessons`);
+        for (let lIdx = 0; lIdx < sectionLessons.length; lIdx++) {
+          const lesson = sectionLessons[lIdx];
+          await insertLesson(lesson, newModule.id, localCourseId, lIdx);
+        }
+      } else {
+        const matchedLessons = allLessons.filter((l: any) => {
+          const lessonSectionId = String(l.sectionId || l.section_id || l.sectionID || "");
+          return lessonSectionId === sectionId;
+        });
+
+        console.log(`[Zoho] Section "${sectionTitle}" matched ${matchedLessons.length} lessons from sessions (sectionId: ${sectionId})`);
+        for (let lIdx = 0; lIdx < matchedLessons.length; lIdx++) {
+          await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx);
+        }
+      }
+    }
+  } else if (allLessons.length > 0) {
+    console.log(`[Zoho] No sections found, creating default module with ${allLessons.length} lessons`);
+
+    const [defaultModule] = await db.insert(modules).values({
+      courseId: localCourseId,
+      title: "Course Content",
+      description: "Lessons from TrainerCentral",
+      orderIndex: 1,
+    }).returning();
+
+    for (let lIdx = 0; lIdx < allLessons.length; lIdx++) {
+      await insertLesson(allLessons[lIdx], defaultModule.id, localCourseId, lIdx);
+    }
+  }
+}
+
+async function insertLesson(lesson: any, moduleId: number, courseId: number, index: number): Promise<void> {
+  const lessonTitle = lesson.sessionName || lesson.lessonName || lesson.name || lesson.title || `Lesson ${index + 1}`;
+  const rawContent = lesson.description || lesson.content || lesson.summary || "";
+  const lessonContent = rawContent.replace(/<[^>]*>/g, '').trim();
+  const lessonType = lesson.type || lesson.sessionType || lesson.lessonType || "TEXT";
+
+  if (index === 0) {
+    console.log(`[Zoho] First lesson keys:`, Object.keys(lesson));
+  }
+
+  await db.insert(lessons).values({
+    moduleId,
+    courseId,
+    title: lessonTitle,
+    content: lessonContent || `${lessonType} lesson from TrainerCentral`,
+    orderIndex: index + 1,
+    isPreview: index === 0,
+  });
 }
 
 export async function testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
