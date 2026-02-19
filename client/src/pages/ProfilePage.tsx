@@ -10,10 +10,14 @@ import LearningStats from "@/components/profile/LearningStats";
 import SkillsSection from "@/components/profile/SkillsSection";
 import PortfolioProjects from "@/components/profile/PortfolioProjects";
 import CertificatesSection from "@/components/profile/CertificatesSection";
+import ExternalCertificationsSection from "@/components/profile/ExternalCertificationsSection";
+import PortfolioNotesSection from "@/components/profile/PortfolioNotesSection";
 import { getProfile, saveProfile, initializeDefaultProfile, canMakeProfilePublic, updateProfile } from "@/lib/profile";
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getPassedTestsCount } from "@/lib/testAttempts";
+import { getExternalCertifications, getPortfolioNotes } from "@/lib/portfolioExtras";
+import type { ExternalCertification, PortfolioNote } from "@/lib/portfolioExtras";
 import type { StudentProfile, Certificate, ProjectSubmission } from "@shared/schema";
 import { User, Settings, Pencil, AlertCircle, Eye } from "lucide-react";
 import { Link } from "wouter";
@@ -30,6 +34,8 @@ export default function ProfilePage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [projects, setProjects] = useState<ProjectWithDetails[]>([]);
   const [testsPassed, setTestsPassed] = useState(0);
+  const [extCerts, setExtCerts] = useState<ExternalCertification[]>([]);
+  const [portfolioNotes, setPortfolioNotes] = useState<PortfolioNote[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [saving, setSaving] = useState(false);
 
@@ -52,6 +58,8 @@ export default function ProfilePage() {
     })));
 
     setTestsPassed(getPassedTestsCount());
+    setExtCerts(getExternalCertifications());
+    setPortfolioNotes(getPortfolioNotes());
   }, []);
 
   const allSkills = useMemo(() => {
@@ -222,6 +230,16 @@ export default function ProfilePage() {
             <PortfolioProjects projects={projects} />
 
             <CertificatesSection certificates={certificates} />
+
+            <ExternalCertificationsSection
+              certifications={extCerts}
+              onChange={setExtCerts}
+            />
+
+            <PortfolioNotesSection
+              notes={portfolioNotes}
+              onChange={setPortfolioNotes}
+            />
 
             {!profile.bio && !profile.headline && (
               <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
