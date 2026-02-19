@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useState } from "react";
 import {
   GraduationCap,
   BookOpen,
@@ -328,25 +329,51 @@ function FeaturesSection() {
 }
 
 function CoursePreviewCard({ course }: { course: Course }) {
+  const [imgError, setImgError] = useState(false);
+  const hasThumbnail = course.thumbnailUrl && !imgError;
+  const rating = (course as any).rating ?? 0;
+
   return (
-    <Card className="flex flex-col h-full" data-testid={`card-preview-course-${course.id}`}>
-      <div className="relative aspect-video bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-t-lg overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-            <BookOpen className="w-7 h-7 text-primary" />
+    <Card className="flex flex-col h-full hover-elevate transition-all duration-200" data-testid={`card-preview-course-${course.id}`}>
+      <div className="relative aspect-video rounded-t-md overflow-hidden">
+        {hasThumbnail ? (
+          <img
+            src={course.thumbnailUrl!}
+            alt={course.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <BookOpen className="w-7 h-7 text-primary" />
+            </div>
           </div>
-        </div>
-        <div className="absolute top-3 left-3">
+        )}
+        {course.category && (
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-foreground border-0 text-xs">
+              {course.category}
+            </Badge>
+          </div>
+        )}
+        <div className="absolute top-3 right-3">
           <LevelBadge level={course.level} />
         </div>
       </div>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-1 gap-1">
         <h3
-          className="text-lg font-semibold leading-snug line-clamp-2"
+          className="text-base font-semibold leading-snug line-clamp-2"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {course.title}
         </h3>
+        {rating > 0 && (
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span className="text-xs font-medium text-muted-foreground">{rating.toFixed(1)}</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-1">
         {course.description && (

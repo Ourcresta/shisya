@@ -74,6 +74,8 @@ interface Course {
   createdAt: string;
   zohoId: string | null;
   category: string | null;
+  rating: number | null;
+  totalStudents: number | null;
 }
 
 interface CourseForm {
@@ -86,6 +88,8 @@ interface CourseForm {
   testRequired: boolean;
   projectRequired: boolean;
   skills: string;
+  rating: number;
+  totalStudents: number;
 }
 
 const defaultForm: CourseForm = {
@@ -98,6 +102,8 @@ const defaultForm: CourseForm = {
   testRequired: false,
   projectRequired: false,
   skills: "",
+  rating: 0,
+  totalStudents: 0,
 };
 
 export default function GuruCourses() {
@@ -202,6 +208,8 @@ export default function GuruCourses() {
       testRequired: course.testRequired,
       projectRequired: course.projectRequired,
       skills: course.skills || "",
+      rating: course.rating ?? 0,
+      totalStudents: course.totalStudents ?? 0,
     });
     setEditOpen(true);
   };
@@ -568,6 +576,34 @@ function CourseFormFields({
             ))}
           </div>
         )}
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="course-rating">Rating (0-5)</Label>
+          <Input
+            id="course-rating"
+            type="number"
+            min={0}
+            max={5}
+            step={0.1}
+            value={form.rating}
+            onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) || 0 })}
+            placeholder="e.g. 4.5"
+            data-testid="input-course-rating"
+          />
+        </div>
+        <div>
+          <Label htmlFor="course-total-students">Total Students</Label>
+          <Input
+            id="course-total-students"
+            type="number"
+            min={0}
+            value={form.totalStudents}
+            onChange={(e) => setForm({ ...form, totalStudents: parseInt(e.target.value) || 0 })}
+            placeholder="e.g. 1200"
+            data-testid="input-course-total-students"
+          />
+        </div>
       </div>
       <div className="space-y-3">
         <div className="flex items-center gap-2">

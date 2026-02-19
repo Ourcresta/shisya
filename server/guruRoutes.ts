@@ -88,11 +88,12 @@ guruRouter.get("/courses/:id", async (req: Request, res: Response) => {
 
 guruRouter.post("/courses", async (req: Request, res: Response) => {
   try {
-    const { title, description, shortDescription, level, duration, skills, isFree, creditCost, price, testRequired, projectRequired } = req.body;
+    const { title, description, shortDescription, level, duration, skills, isFree, creditCost, price, testRequired, projectRequired, rating, totalStudents } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required" });
     const [newCourse] = await db.insert(courses).values({
       title, description, shortDescription, level: level || "beginner", duration, skills, isFree: isFree || false,
       creditCost: creditCost || 0, price: price || 0, testRequired: testRequired || false, projectRequired: projectRequired || false,
+      rating: rating || null, totalStudents: totalStudents || 0,
       status: "draft", isActive: false
     }).returning();
     res.json(newCourse);

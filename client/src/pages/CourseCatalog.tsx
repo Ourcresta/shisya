@@ -7,7 +7,6 @@ import { CourseCard } from "@/components/course/CourseCard";
 import { CourseCardSkeleton } from "@/components/course/CourseCardSkeleton";
 import { EmptyState } from "@/components/course/EmptyState";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -271,7 +270,6 @@ export default function CourseCatalog() {
                   data-testid="input-search-courses"
                 />
               </div>
-
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
                 <SelectTrigger className="w-full sm:w-[180px]" data-testid="select-sort">
                   <ArrowUpDown className="w-4 h-4 mr-2" />
@@ -294,90 +292,56 @@ export default function CourseCatalog() {
                 <span>Filters:</span>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {(["all", "beginner", "intermediate", "advanced", "masters"] as LevelFilter[]).map(
-                  (level) => (
-                    <Badge
-                      key={level}
-                      variant="secondary"
-                      className={`cursor-pointer toggle-elevate ${selectedLevel === level ? "toggle-elevated" : ""}`}
-                      onClick={() => setSelectedLevel(level)}
-                      data-testid={`badge-filter-level-${level}`}
-                    >
-                      {level === "all" ? "All Levels" : level.charAt(0).toUpperCase() + level.slice(1)}
-                    </Badge>
-                  )
-                )}
-              </div>
+              <Select value={selectedLevel} onValueChange={(v) => setSelectedLevel(v as LevelFilter)}>
+                <SelectTrigger className="w-[150px]" data-testid="select-filter-level">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="masters">Masters</SelectItem>
+                </SelectContent>
+              </Select>
 
-              <div className="hidden sm:block w-px h-5 bg-border" />
-
-              <div className="flex flex-wrap gap-2">
-                {(["all", "free", "paid"] as PricingFilter[]).map((pricing) => (
-                  <Badge
-                    key={pricing}
-                    variant="secondary"
-                    className={`cursor-pointer toggle-elevate ${selectedPricing === pricing ? "toggle-elevated" : ""}`}
-                    onClick={() => setSelectedPricing(pricing)}
-                    data-testid={`badge-filter-pricing-${pricing}`}
-                  >
-                    {pricing === "all" ? "All Pricing" : pricing.charAt(0).toUpperCase() + pricing.slice(1)}
-                  </Badge>
-                ))}
-              </div>
+              <Select value={selectedPricing} onValueChange={(v) => setSelectedPricing(v as PricingFilter)}>
+                <SelectTrigger className="w-[140px]" data-testid="select-filter-pricing">
+                  <SelectValue placeholder="Pricing" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Pricing</SelectItem>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
 
               {categories.length > 0 && (
-                <>
-                  <div className="hidden sm:block w-px h-5 bg-border" />
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant="secondary"
-                      className={`cursor-pointer toggle-elevate ${selectedCategory === "all" ? "toggle-elevated" : ""}`}
-                      onClick={() => setSelectedCategory("all")}
-                      data-testid="badge-filter-category-all"
-                    >
-                      All Categories
-                    </Badge>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-[160px]" data-testid="select-filter-category">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((cat) => (
-                      <Badge
-                        key={cat}
-                        variant="secondary"
-                        className={`cursor-pointer toggle-elevate ${selectedCategory === cat ? "toggle-elevated" : ""}`}
-                        onClick={() => setSelectedCategory(cat)}
-                        data-testid={`badge-filter-category-${cat.toLowerCase().replace(/\s+/g, "-")}`}
-                      >
-                        {cat}
-                      </Badge>
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
-                  </div>
-                </>
+                  </SelectContent>
+                </Select>
               )}
 
               {languages.length > 1 && (
-                <>
-                  <div className="hidden sm:block w-px h-5 bg-border" />
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant="secondary"
-                      className={`cursor-pointer toggle-elevate ${selectedLanguage === "all" ? "toggle-elevated" : ""}`}
-                      onClick={() => setSelectedLanguage("all")}
-                      data-testid="badge-filter-language-all"
-                    >
-                      All Languages
-                    </Badge>
+                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                  <SelectTrigger className="w-[150px]" data-testid="select-filter-language">
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Languages</SelectItem>
                     {languages.map((lang) => (
-                      <Badge
-                        key={lang}
-                        variant="secondary"
-                        className={`cursor-pointer toggle-elevate ${selectedLanguage === lang ? "toggle-elevated" : ""}`}
-                        onClick={() => setSelectedLanguage(lang)}
-                        data-testid={`badge-filter-language-${lang.toLowerCase()}`}
-                      >
-                        {getLanguageLabel(lang)}
-                      </Badge>
+                      <SelectItem key={lang} value={lang}>{getLanguageLabel(lang)}</SelectItem>
                     ))}
-                  </div>
-                </>
+                  </SelectContent>
+                </Select>
               )}
             </div>
 
