@@ -508,9 +508,10 @@ export async function debugCourseCurriculum(courseZohoId: string): Promise<any> 
   const orgId = config.orgId;
   const accessToken = await getValidAccessToken();
 
-  const results: any = { courseZohoId, sections: null, sessions: null, sessionInfos: null };
+  const results: any = { courseZohoId, sections: null, sessions: null, sessionDetails: [], courseInfo: null };
 
   const endpoints = [
+    { key: 'courseInfo', url: `/api/v4/${orgId}/course/${courseZohoId}.json` },
     { key: 'sections', url: `/api/v4/${orgId}/course/${courseZohoId}/sections.json` },
     { key: 'sessions', url: `/api/v4/${orgId}/course/${courseZohoId}/sessions.json` },
   ];
@@ -529,6 +530,44 @@ export async function debugCourseCurriculum(courseZohoId: string): Promise<any> 
       }
     } catch (e: any) {
       results[ep.key] = { error: e.message };
+    }
+  }
+
+  const sessions = results.sessions?.sessions || results.sessions?.data || [];
+  if (Array.isArray(sessions) && sessions.length > 0) {
+    const maxDetails = Math.min(sessions.length, 3);
+    for (let i = 0; i < maxDetails; i++) {
+      const session = sessions[i];
+      const sessionId = session.sessionId || session.id;
+      if (!sessionId) continue;
+
+      const sessionDetail: any = { sessionId, sessionName: session.name, materials: null, site: null, presentationData: null, materialSettings: null };
+
+      const materialEndpoints = [
+        { key: 'materials', url: session.links?.sessionMaterials || `/api/v4/${orgId}/session/${sessionId}/sessionMaterials.json` },
+        { key: 'site', url: session.links?.site || `/api/v4/${orgId}/session/${sessionId}/site.json` },
+        { key: 'presentationData', url: session.links?.presentationData || `/api/v4/${orgId}/session/${sessionId}/presentationData.json` },
+        { key: 'materialSettings', url: session.links?.sessionMaterialSettings || `/api/v4/${orgId}/session/${sessionId}/sessionMaterialSettings.json` },
+      ];
+
+      for (const ep of materialEndpoints) {
+        try {
+          const url = `${TRAINERCENTRAL_BASE_URL}${ep.url}`;
+          console.log(`[Zoho Debug] Fetching ${ep.key}: ${url}`);
+          const res = await fetch(url, {
+            headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
+          });
+          if (res.ok) {
+            sessionDetail[ep.key] = await res.json();
+          } else {
+            sessionDetail[ep.key] = { error: res.status, body: (await res.text()).substring(0, 300) };
+          }
+        } catch (e: any) {
+          sessionDetail[ep.key] = { error: e.message };
+        }
+      }
+
+      results.sessionDetails.push(sessionDetail);
     }
   }
 
