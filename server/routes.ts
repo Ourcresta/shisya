@@ -14,7 +14,7 @@ import { guruRouter } from "./guruRoutes";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable } from "@shared/schema";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans } from "@shared/schema";
 import { eq, like, or, and, desc as descOrder } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
@@ -1127,6 +1127,23 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching marksheet by ID:", error);
       res.status(500).json({ error: "Failed to fetch marksheet" });
+    }
+  });
+
+  app.get("/api/pricing-plans", async (req, res) => {
+    try {
+      const plans = await db.select().from(pricingPlans)
+        .where(eq(pricingPlans.isActive, true))
+        .orderBy(pricingPlans.orderIndex);
+      const parsed = plans.map(p => ({
+        ...p,
+        features: JSON.parse(p.features),
+        notIncluded: JSON.parse(p.notIncluded),
+      }));
+      res.json(parsed);
+    } catch (error) {
+      console.error("Error fetching pricing plans:", error);
+      res.status(500).json({ error: "Failed to fetch pricing plans" });
     }
   });
 

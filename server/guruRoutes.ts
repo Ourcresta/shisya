@@ -5,6 +5,7 @@ import {
   shishyaUsers, shishyaCourseEnrollments, shishyaUserCredits,
   shishyaUserProfiles, shishyaUserProgress, shishyaUserTestAttempts,
   shishyaUserProjectSubmissions, shishyaUserCertificates, shishyaCreditTransactions,
+  pricingPlans,
 } from "@shared/schema";
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
@@ -715,5 +716,71 @@ guruRouter.get("/zoho/learner-info", async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error("[Guru] Get learner info error:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+guruRouter.get("/pricing-plans", async (req: Request, res: Response) => {
+  try {
+    const plans = await db.select().from(pricingPlans).orderBy(asc(pricingPlans.orderIndex));
+    const parsed = plans.map(p => ({
+      ...p,
+      features: JSON.parse(p.features),
+      notIncluded: JSON.parse(p.notIncluded),
+    }));
+    res.json(parsed);
+  } catch (error) {
+    console.error("[Guru] Get pricing plans error:", error);
+    res.status(500).json({ error: "Failed to fetch pricing plans" });
+  }
+});
+
+guruRouter.post("/pricing-plans", async (req: Request, res: Response) => {
+  try {
+    const existing = await db.select({ count: count() }).from(pricingPlans);
+    if (existing[0].count >= 5) {
+      return res.status(400).json({ error: "Maximum 5 pricing plans allowed" });
+    }
+    const data = req.body;
+    if (data.features && Array.isArray(data.features)) data.features = JSON.stringify(data.features);
+    if (data.notIncluded && Array.isArray(data.notIncluded)) data.notIncluded = JSON.stringify(data.notIncluded);
+    const [plan] = await db.insert(pricingPlans).values(data).returning();
+    res.json({ ...plan, features: JSON.parse(plan.features), notIncluded: JSON.parse(plan.notIncluded) });
+  } catch (error) {
+    console.error("[Guru] Create pricing plan error:", error);
+    res.status(500).json({ error: "Failed to create pricing plan" });
+  }
+});
+
+guruRouter.put("/pricing-plans/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const data = req.body;
+    delete data.id;
+    delete data.createdAt;
+    if (data.features && Array.isArray(data.features)) data.features = JSON.stringify(data.features);
+    if (data.notIncluded && Array.isArray(data.notIncluded)) data.notIncluded = JSON.stringify(data.notIncluded);
+    data.updatedAt = new Date();
+    const [updated] = await db.update(pricingPlans).set(data).where(eq(pricingPlans.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Plan not found" });
+    res.json({ ...updated, features: JSON.parse(updated.features), notIncluded: JSON.parse(updated.notIncluded) });
+  } catch (error) {
+    console.error("[Guru] Update pricing plan error:", error);
+    res.status(500).json({ error: "Failed to update pricing plan" });
+  }
+});
+
+guruRouter.delete("/pricing-plans/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const existing = await db.select({ count: count() }).from(pricingPlans);
+    if (existing[0].count <= 1) {
+      return res.status(400).json({ error: "Must have at least 1 pricing plan" });
+    }
+    const [deleted] = await db.delete(pricingPlans).where(eq(pricingPlans.id, id)).returning();
+    if (!deleted) return res.status(404).json({ error: "Plan not found" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Guru] Delete pricing plan error:", error);
+    res.status(500).json({ error: "Failed to delete pricing plan" });
   }
 });
