@@ -727,6 +727,65 @@ Make the project practical, relevant to industry needs, and something students w
   }
 });
 
+guruRouter.post("/ai/generate-lab", async (req: Request, res: Response) => {
+  try {
+    const { courseTitle, level, language = "javascript" } = req.body;
+    if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
+
+    const langName = language === "javascript" ? "JavaScript" : language === "python" ? "Python" : language === "html" ? "HTML" : language === "css" ? "CSS" : language;
+
+    const difficultyGuide = level === "beginner"
+      ? "The lab should be simple and teach one core concept. Use clear variable names and simple logic."
+      : level === "intermediate"
+      ? "The lab should combine multiple concepts and require moderate problem-solving skills."
+      : "The lab should be challenging, involving advanced patterns, edge cases, or optimization.";
+
+    const openai = getOpenAI();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert coding instructor working for OurShiksha, an online learning platform. You design hands-on guided coding labs for students on the OurShiksha platform. Each lab should have clear instructions, starter code with TODO comments, a working solution, and expected console output. Return ONLY valid JSON, no markdown.`
+        },
+        {
+          role: "user",
+          content: `Create a guided coding lab in ${langName} for a course titled "${courseTitle}" at the "${level || "beginner"}" difficulty level.
+
+${difficultyGuide}
+
+Return a JSON object with this exact structure:
+{
+  "title": "Lab title that describes the exercise",
+  "instructions": "Step-by-step instructions explaining what the student needs to do. Use numbered steps. Be clear and educational.",
+  "starterCode": "The starter code with TODO comments where students need to fill in their code. Include helpful comments.",
+  "expectedOutput": "The exact console output the student should see when their code runs correctly",
+  "solutionCode": "The complete working solution code",
+  "language": "${language}"
+}
+
+Make the lab practical, focused on a single concept, and ensure the starter code compiles/runs even before the student fills in their parts (use placeholder values or empty function bodies). The expected output must exactly match what the solution code produces when run.`
+        }
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 4096,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    if (!parsed.title || !parsed.instructions || !parsed.solutionCode) {
+      return res.status(500).json({ error: "AI generated invalid lab structure" });
+    }
+
+    res.json(parsed);
+  } catch (error: any) {
+    console.error("[Guru] AI generate lab error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate lab with AI" });
+  }
+});
+
 // ============ ZOHO TRAINERCENTRAL INTEGRATION ============
 
 guruRouter.get("/settings/integrations", async (req: Request, res: Response) => {
