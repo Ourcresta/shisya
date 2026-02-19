@@ -19,6 +19,7 @@ import {
   updateResendCooldown,
   getUserByEmail
 } from "./lib/otp-db";
+import * as zohoService from "./zohoService";
 
 const SALT_ROUNDS = 12;
 const SESSION_EXPIRY_DAYS = 7;
@@ -155,7 +156,21 @@ authRouter.post("/verify-otp", async (req: Request, res: Response) => {
       }
     } catch (creditsError) {
       console.error("Error granting welcome bonus:", creditsError);
-      // Don't fail signup if credits fail - they can be applied later
+    }
+
+    // Auto-register student on TrainerCentral (non-blocking)
+    try {
+      const isConnected = await zohoService.isConnected();
+      if (isConnected) {
+        const emailParts = normalizedEmail.split("@")[0];
+        const firstName = emailParts.charAt(0).toUpperCase() + emailParts.slice(1);
+        zohoService.inviteLearnerToAcademy(normalizedEmail, firstName, "Student").catch((tcErr) => {
+          console.error("[TC Sync] Failed to register student on TrainerCentral:", tcErr.message);
+        });
+        console.log(`[TC Sync] Initiated TrainerCentral registration for ${normalizedEmail}`);
+      }
+    } catch (tcError) {
+      console.error("[TC Sync] TrainerCentral registration check failed:", tcError);
     }
 
     const sessionId = randomUUID();

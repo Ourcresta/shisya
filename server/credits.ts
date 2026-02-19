@@ -7,10 +7,13 @@ import {
   vouchers,
   voucherRedemptions,
   giftBoxes,
+  users,
+  courses as coursesTable,
   WELCOME_BONUS_CREDITS 
 } from "@shared/schema";
 import { eq, and, desc, lt, gt, isNull, or } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
+import * as zohoService from "./zohoService";
 
 export const creditsRouter = Router();
 
@@ -244,6 +247,25 @@ creditsRouter.post("/enrollments", requireAuth, async (req: AuthenticatedRequest
         creditsPaid: creditCost,
       })
       .returning();
+
+    // Auto-enroll on TrainerCentral (non-blocking)
+    try {
+      const isConnected = await zohoService.isConnected();
+      if (isConnected) {
+        const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+        const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        if (course?.zohoId && user?.email) {
+          const emailParts = user.email.split("@")[0];
+          const firstName = emailParts.charAt(0).toUpperCase() + emailParts.slice(1);
+          zohoService.inviteLearnerToCourse(user.email, firstName, "Student", course.zohoId).catch((tcErr) => {
+            console.error("[TC Sync] Failed to enroll student in TC course:", tcErr.message);
+          });
+          console.log(`[TC Sync] Initiated TrainerCentral course enrollment for ${user.email} in course ${course.zohoId}`);
+        }
+      }
+    } catch (tcError) {
+      console.error("[TC Sync] TrainerCentral enrollment check failed:", tcError);
+    }
 
     // Get updated balance
     const updatedCredits = await db
