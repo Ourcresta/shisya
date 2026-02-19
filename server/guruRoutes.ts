@@ -693,3 +693,27 @@ guruRouter.get("/zoho/debug-curriculum/:courseZohoId", async (req: Request, res:
     res.status(500).json({ error: error.message });
   }
 });
+
+guruRouter.get("/zoho/learners", async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const si = parseInt(req.query.si as string) || 0;
+    const data = await zohoService.getAcademyLearners(limit, si);
+    res.json(data);
+  } catch (error: any) {
+    console.error("[Guru] Get learners error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+guruRouter.get("/zoho/learner-info", async (req: Request, res: Response) => {
+  try {
+    const email = req.query.email as string;
+    if (!email) return res.status(400).json({ error: "Email required" });
+    const data = await zohoService.getLearnerInfo(email);
+    res.json(data);
+  } catch (error: any) {
+    console.error("[Guru] Get learner info error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});

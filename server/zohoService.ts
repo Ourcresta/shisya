@@ -696,3 +696,83 @@ export async function testConnection(): Promise<{ success: boolean; message: str
     return { success: false, message: error.message };
   }
 }
+
+// === Learner Management APIs ===
+
+export async function getAcademyLearners(limit = 20, startIndex = 0): Promise<any> {
+  const config = getConfig();
+  return zohoApiRequest(`/api/v4/${config.orgId}/portalMembers.json?type=5&limit=${limit}&si=${startIndex}`);
+}
+
+export async function getLearnerInfo(email: string): Promise<any> {
+  const config = getConfig();
+  return zohoApiRequest(`/api/v4/${config.orgId}/fetchuserdetails.json?email=${encodeURIComponent(email)}&fetchSignupData=true`);
+}
+
+export async function inviteLearnerToAcademy(email: string, firstName: string, lastName: string, password?: string): Promise<any> {
+  const config = getConfig();
+  const accessToken = await getValidAccessToken();
+  const url = `${TRAINERCENTRAL_BASE_URL}/api/v4/${config.orgId}/addCourseAttendee.json`;
+
+  const body: any = {
+    courseAttendee: {
+      email,
+      firstName,
+      lastName,
+    },
+  };
+  if (password) {
+    body.courseAttendee.password = password;
+  }
+
+  console.log(`[Zoho] Inviting learner to academy: ${email}`);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Zoho-oauthtoken ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json();
+  console.log(`[Zoho] Invite academy response (${response.status}):`, JSON.stringify(data).substring(0, 500));
+  return { status: response.status, data };
+}
+
+export async function inviteLearnerToCourse(email: string, firstName: string, lastName: string, courseId: string, password?: string): Promise<any> {
+  const config = getConfig();
+  const accessToken = await getValidAccessToken();
+  const url = `${TRAINERCENTRAL_BASE_URL}/api/v4/${config.orgId}/addCourseAttendee.json`;
+
+  const body: any = {
+    courseAttendee: {
+      email,
+      firstName,
+      lastName,
+      courseId,
+    },
+  };
+  if (password) {
+    body.courseAttendee.password = password;
+  }
+
+  console.log(`[Zoho] Inviting learner to course ${courseId}: ${email}`);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Zoho-oauthtoken ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json();
+  console.log(`[Zoho] Invite course response (${response.status}):`, JSON.stringify(data).substring(0, 500));
+  return { status: response.status, data };
+}
+
+export async function getCourseLearners(courseId: string, limit = 20, startIndex = 0): Promise<any> {
+  const config = getConfig();
+  return zohoApiRequest(`/api/v4/${config.orgId}/course/${courseId}/courseMembers.json?filter=3&limit=${limit}&si=${startIndex}`);
+}
