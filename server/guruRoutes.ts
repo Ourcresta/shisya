@@ -612,6 +612,8 @@ guruRouter.post("/ai/generate-test", async (req: Request, res: Response) => {
       ? "Questions should be foundational and straightforward, testing basic understanding and recall."
       : level === "intermediate"
       ? "Questions should test applied knowledge, requiring analysis and understanding of concepts."
+      : level === "masters"
+      ? "Questions must be extremely challenging and realistic, simulating real-world industry scenarios, interviews, and production-level problem-solving. Include tricky edge cases, subtle distinctions between concepts, real-world debugging scenarios, and questions that require deep expertise. These should challenge even experienced professionals."
       : "Questions should be challenging, testing deep understanding, problem-solving, and edge cases.";
 
     const openai = getOpenAI();
@@ -677,9 +679,11 @@ guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
       ? "The project should be simple and achievable, focusing on applying basic concepts learned in the course. Estimated 2-5 hours."
       : level === "intermediate"
       ? "The project should involve moderate complexity, requiring integration of multiple concepts. Estimated 5-10 hours."
+      : level === "masters"
+      ? "The project must be extremely challenging and production-grade, simulating a real-world industry project that a senior developer or team lead would work on. Include complex architecture decisions, scalability considerations, security best practices, performance optimization, CI/CD pipeline setup, testing strategies, and documentation requirements. This should be a portfolio-defining capstone project. Estimated 25-40 hours."
       : "The project should be challenging and comprehensive, simulating real-world scenarios with advanced requirements. Estimated 10-20 hours.";
 
-    const projectDifficulty = level === "beginner" ? "easy" : level === "intermediate" ? "medium" : "hard";
+    const projectDifficulty = level === "beginner" ? "easy" : level === "intermediate" ? "medium" : level === "masters" ? "hard" : "hard";
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
@@ -738,6 +742,8 @@ guruRouter.post("/ai/generate-lab", async (req: Request, res: Response) => {
       ? "The lab should be simple and teach one core concept. Use clear variable names and simple logic."
       : level === "intermediate"
       ? "The lab should combine multiple concepts and require moderate problem-solving skills."
+      : level === "masters"
+      ? "The lab must be extremely challenging and realistic, simulating production-level coding tasks. Include complex algorithms, design patterns, performance optimization, error handling for edge cases, and industry-standard code quality. The exercise should resemble a real senior developer coding challenge or technical interview problem."
       : "The lab should be challenging, involving advanced patterns, edge cases, or optimization.";
 
     const openai = getOpenAI();
