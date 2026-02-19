@@ -706,10 +706,24 @@ export default function GuruCourseDetail() {
               <Input
                 id="edit-course-thumbnail"
                 value={courseForm.thumbnailUrl}
-                onChange={(e) => setCourseForm({ ...courseForm, thumbnailUrl: e.target.value })}
-                placeholder="https://example.com/image.jpg"
+                onChange={(e) => {
+                  let url = e.target.value;
+                  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+                  if (driveMatch) {
+                    url = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+                  }
+                  const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+                  if (driveOpenMatch) {
+                    url = `https://drive.google.com/uc?export=view&id=${driveOpenMatch[1]}`;
+                  }
+                  setCourseForm({ ...courseForm, thumbnailUrl: url });
+                }}
+                placeholder="Paste any image URL or Google Drive link"
                 data-testid="input-edit-course-thumbnail"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Google Drive links are auto-converted. Make sure the file is shared as "Anyone with the link".
+              </p>
               {courseForm.thumbnailUrl && (
                 <div className="mt-2 rounded-md overflow-hidden border aspect-video max-w-[200px]">
                   <img
