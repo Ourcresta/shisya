@@ -10,6 +10,7 @@ import {
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
 import * as zohoService from "./zohoService";
+import OpenAI from "openai";
 
 export const guruRouter = Router();
 
@@ -594,6 +595,135 @@ guruRouter.delete("/projects/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[Guru] Delete project error:", error);
     res.status(500).json({ error: "Failed to delete project" });
+  }
+});
+
+// ============ AI CONTENT GENERATION ============
+
+const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+guruRouter.post("/ai/generate-test", async (req: Request, res: Response) => {
+  try {
+    const { courseTitle, level, questionCount = 10 } = req.body;
+    if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
+
+    const clampedCount = Math.min(Math.max(questionCount, 5), 20);
+    const difficultyGuide = level === "beginner"
+      ? "Questions should be foundational and straightforward, testing basic understanding and recall."
+      : level === "intermediate"
+      ? "Questions should test applied knowledge, requiring analysis and understanding of concepts."
+      : "Questions should be challenging, testing deep understanding, problem-solving, and edge cases.";
+
+    const openai = getOpenAI();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert educator and test creator. Generate high-quality multiple-choice questions (MCQs) for assessments. Each question must have exactly 4 options with only one correct answer. Return ONLY valid JSON, no markdown.`
+        },
+        {
+          role: "user",
+          content: `Create a test for a course titled "${courseTitle}" at the "${level || "beginner"}" difficulty level.
+
+${difficultyGuide}
+
+Generate exactly ${clampedCount} multiple-choice questions.
+
+Return a JSON object with this exact structure:
+{
+  "title": "Test title related to the course",
+  "description": "Brief description of what this test covers",
+  "durationMinutes": suggested duration in minutes (number),
+  "passingPercentage": suggested passing percentage (number, 50-80),
+  "questions": [
+    {
+      "question": "The question text",
+      "type": "mcq",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 0
+    }
+  ]
+}
+
+The correctAnswer is a zero-based index (0-3) indicating the correct option. Make questions clear, unambiguous, and educational. Vary the position of correct answers.`
+        }
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 4096,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    if (!parsed.questions || !Array.isArray(parsed.questions)) {
+      return res.status(500).json({ error: "AI generated invalid test structure" });
+    }
+
+    res.json(parsed);
+  } catch (error: any) {
+    console.error("[Guru] AI generate test error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate test with AI" });
+  }
+});
+
+guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
+  try {
+    const { courseTitle, level } = req.body;
+    if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
+
+    const difficultyGuide = level === "beginner"
+      ? "The project should be simple and achievable, focusing on applying basic concepts learned in the course. Estimated 2-5 hours."
+      : level === "intermediate"
+      ? "The project should involve moderate complexity, requiring integration of multiple concepts. Estimated 5-10 hours."
+      : "The project should be challenging and comprehensive, simulating real-world scenarios with advanced requirements. Estimated 10-20 hours.";
+
+    const projectDifficulty = level === "beginner" ? "easy" : level === "intermediate" ? "medium" : "hard";
+
+    const openai = getOpenAI();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert educator who designs practical, hands-on projects for students. Create projects that are engaging, educational, and build portfolio-worthy skills. Return ONLY valid JSON, no markdown.`
+        },
+        {
+          role: "user",
+          content: `Create a hands-on project for a course titled "${courseTitle}" at the "${level || "beginner"}" difficulty level.
+
+${difficultyGuide}
+
+Return a JSON object with this exact structure:
+{
+  "title": "Project title",
+  "description": "Detailed project description (2-3 paragraphs explaining what the student will build and why)",
+  "difficulty": "${projectDifficulty}",
+  "requirements": "Bullet-pointed list of specific deliverables and requirements the student must complete (use newlines to separate each requirement, prefix each with •)",
+  "resources": "Helpful resources, references, and tools the student can use (use newlines to separate each, prefix each with •)",
+  "estimatedHours": estimated hours as a number
+}
+
+Make the project practical, relevant to industry needs, and something students would be proud to add to their portfolio.`
+        }
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 2048,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    if (!parsed.title || !parsed.description) {
+      return res.status(500).json({ error: "AI generated invalid project structure" });
+    }
+
+    res.json(parsed);
+  } catch (error: any) {
+    console.error("[Guru] AI generate project error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate project with AI" });
   }
 });
 
