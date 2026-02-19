@@ -46,7 +46,7 @@ function getConfig(): ZohoConfig {
 
 export function getAuthorizationUrl(): string {
   const config = getConfig();
-  const scopes = "TrainerCentral.courseapi.ALL,TrainerCentral.userapi.ALL,TrainerCentral.sectionapi.ALL,TrainerCentral.sessionapi.ALL";
+  const scopes = "TrainerCentral.courseapi.ALL,TrainerCentral.userapi.ALL,TrainerCentral.sectionapi.ALL,TrainerCentral.sessionapi.ALL,TrainerCentral.presenterapi.ALL";
   const params = new URLSearchParams({
     response_type: "code",
     client_id: config.clientId,
