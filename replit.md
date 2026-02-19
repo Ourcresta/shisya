@@ -104,9 +104,14 @@ The GURU admin panel is accessible at `/guru` with session-based authentication 
 - Integration status endpoint
 
 **Zoho TrainerCentral Integration:**
-- Framework ready in Settings page and backend API stubs
+- Full OAuth2 integration with TrainerCentral (academy URL: https://our-shiksha.trainercentral.in)
+- Required scopes: TrainerCentral.courseapi.ALL, TrainerCentral.userapi.ALL, TrainerCentral.sectionapi.ALL, TrainerCentral.sessionapi.ALL, TrainerCentral.presenterapi.ALL
 - Requires ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_ORG_ID secrets to activate
 - Test connection and sync buttons available when credentials are configured
+- Course sync: Imports courses, curriculum (sections/modules, lessons), video URLs, and lesson content from TrainerCentral
+- **Auto Student Registration**: When a SHISHYA student verifies their email (signup), they are automatically invited to the TrainerCentral academy (non-blocking, fire-and-forget in `server/auth.ts`)
+- **Auto Course Enrollment**: When a student enrolls in a course on SHISHYA, they are automatically enrolled in the corresponding TrainerCentral course if it has a zohoId (non-blocking in `server/credits.ts`)
+- Learner APIs: invite to academy, invite to course, list learners, get learner info
 
 ## Documentation Files
 - **document.md:** Comprehensive project documentation with full feature specs, routes, database schema, and deployment guide.
