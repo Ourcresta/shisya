@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -31,11 +31,14 @@ import {
   Flame,
   Brain,
   Clock,
-  Signal
+  Signal,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  ResponsiveContainer
 } from "recharts";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,30 +125,30 @@ function updateLearningStreak(): void {
 }
 
 function getAIInsight(performanceScore: { overall: number; courseScore: number; testScore: number; certScore: number; level: string }): string {
-  if (performanceScore.overall === 0) return "Start a course to see your personalized learning insights here.";
+  if (performanceScore.overall === 0) return "Start a course to activate your AI learning intelligence.";
   
   const strengths: string[] = [];
   const improvements: string[] = [];
   
-  if (performanceScore.courseScore >= 70) strengths.push("course completion");
-  else if (performanceScore.courseScore < 40) improvements.push("finishing more lessons");
+  if (performanceScore.courseScore >= 70) strengths.push("core subject mastery");
+  else if (performanceScore.courseScore < 40) improvements.push("completing more lessons");
   
-  if (performanceScore.testScore >= 70) strengths.push("test performance");
-  else if (performanceScore.testScore < 40) improvements.push("practicing for assessments");
+  if (performanceScore.testScore >= 70) strengths.push("analytical performance");
+  else if (performanceScore.testScore < 40) improvements.push("practicing assessments");
   
-  if (performanceScore.certScore >= 70) strengths.push("earning certificates");
-  else if (performanceScore.certScore < 40) improvements.push("completing certification requirements");
+  if (performanceScore.certScore >= 70) strengths.push("industry credentials");
+  else if (performanceScore.certScore < 40) improvements.push("earning certifications");
   
   if (strengths.length > 0 && improvements.length > 0) {
-    return `Strong in ${strengths.join(" & ")}. Focus on ${improvements.join(" & ")} to level up.`;
+    return `Strong in ${strengths.join(" & ")}. Focus on ${improvements.join(" & ")} to advance your intelligence index.`;
   }
   if (strengths.length > 0) {
-    return `Excellent ${strengths.join(" & ")}! You're well on your way to ${performanceScore.level} mastery.`;
+    return `Excellent ${strengths.join(" & ")}! You're progressing toward ${performanceScore.level} status.`;
   }
   if (improvements.length > 0) {
-    return `Focus on ${improvements.join(" & ")} to boost your score. Every step counts!`;
+    return `Focus on ${improvements.join(" & ")} to boost your index. Every step matters!`;
   }
-  return "Keep learning consistently — you're making steady progress.";
+  return "Consistent learning detected. Your intelligence index is growing steadily.";
 }
 
 export default function Dashboard() {
@@ -166,6 +169,8 @@ export default function Dashboard() {
   const streak = getLearningStreak();
 
   updateLearningStreak();
+
+  const [showScoreDetails, setShowScoreDetails] = useState(false);
 
   const coursesWithProgress: CourseWithProgress[] = courses.map((course) => {
     const progress = getCourseProgress(course.id);
@@ -230,83 +235,90 @@ export default function Dashboard() {
   }, []);
   const uniqueSkills = Array.from(new Set(allSkills)).slice(0, 8);
 
-  const courseSkills = useMemo(() => {
-    const skillMap = new Map<string, { count: number; totalProgress: number }>();
+  const competencyScores = useMemo(() => {
+    const totalCourses = coursesWithProgress.length;
+    if (totalCourses === 0) return null;
+
+    const avgCourseProgress = coursesWithProgress.reduce((s, c) => s + c.progress, 0) / totalCourses;
+    const coreMastery = Math.round(avgCourseProgress);
+
+    const totalLabEntries = Object.values(labStore).reduce((sum, courseLabs) => {
+      return sum + Object.keys(courseLabs).length;
+    }, 0);
+    const completedLabCount = completedLabs.length;
+    const submittedProjects = Object.keys(allSubmissions).length;
+    const totalProjectable = coursesWithProgress.filter(c => c.projectRequired).length;
+    const labScore = totalLabEntries > 0 ? (completedLabCount / totalLabEntries) * 100 : 0;
+    const projectScore = totalProjectable > 0 ? (submittedProjects / totalProjectable) * 100 : 0;
+    const practicalApplication = Math.round((labScore * 0.6 + projectScore * 0.4));
+
+    const testTotal = Object.keys(allTestAttempts).length;
+    const analyticalAbility = testTotal > 0 ? Math.round((passedTests / testTotal) * 100) : 0;
+
+    const enrolledCount = coursesWithProgress.filter(c => c.progress > 0).length;
+    const digitalSkills = Math.round(totalCourses > 0 ? (enrolledCount / totalCourses) * 100 : 0);
+
+    const industryReadiness = Math.round(totalCourses > 0 ? Math.min((totalCertificates / totalCourses) * 100, 100) : 0);
+
+    return { coreMastery, practicalApplication, analyticalAbility, digitalSkills, industryReadiness };
+  }, [coursesWithProgress, labStore, completedLabs, allSubmissions, allTestAttempts, passedTests, totalCertificates]);
+
+  const competencyRadarData = useMemo(() => {
+    if (!competencyScores) return [];
+    return [
+      { category: "Core Mastery", score: competencyScores.coreMastery, fullMark: 100 },
+      { category: "Practical", score: competencyScores.practicalApplication, fullMark: 100 },
+      { category: "Analytical", score: competencyScores.analyticalAbility, fullMark: 100 },
+      { category: "Digital Skills", score: competencyScores.digitalSkills, fullMark: 100 },
+      { category: "Industry Ready", score: competencyScores.industryReadiness, fullMark: 100 },
+    ];
+  }, [competencyScores]);
+
+  const aiSuggestions = useMemo(() => {
+    if (!competencyScores) return [];
+    const suggestions: { text: string; priority: "high" | "medium" | "low" }[] = [];
     
-    coursesWithProgress.forEach((course) => {
-      const skills: string[] = [];
-      if (course.skills) {
-        if (typeof course.skills === "string") {
-          try {
-            const parsed = JSON.parse(course.skills);
-            if (Array.isArray(parsed)) skills.push(...parsed);
-          } catch {
-            skills.push(...(course.skills as string).split(",").map(s => s.trim()).filter(Boolean));
-          }
-        } else if (Array.isArray(course.skills)) {
-          skills.push(...course.skills);
+    if (competencyScores.practicalApplication < 50) {
+      suggestions.push({ text: "Complete pending labs to strengthen practical skills", priority: "high" });
+    }
+    if (competencyScores.analyticalAbility < 40) {
+      suggestions.push({ text: "Practice assessments to improve analytical ability", priority: "high" });
+    }
+    if (competencyScores.industryReadiness < 30) {
+      suggestions.push({ text: "Earn certifications to boost industry readiness", priority: "high" });
+    }
+    if (competencyScores.coreMastery < 60) {
+      suggestions.push({ text: "Finish more course lessons to build core mastery", priority: "medium" });
+    }
+    if (competencyScores.digitalSkills < 50) {
+      suggestions.push({ text: "Explore and enroll in more courses", priority: "medium" });
+    }
+    if (pendingProjects.length > 0) {
+      suggestions.push({ text: `Submit ${pendingProjects.length} pending project${pendingProjects.length > 1 ? "s" : ""}`, priority: "medium" });
+    }
+    if (pendingTests.length > 0) {
+      suggestions.push({ text: `Take ${pendingTests.length} pending assessment${pendingTests.length > 1 ? "s" : ""}`, priority: "low" });
+    }
+    if (suggestions.length === 0) {
+      suggestions.push({ text: "Keep up the great work! Continue exploring new courses", priority: "low" });
+    }
+    return suggestions.slice(0, 4);
+  }, [competencyScores, pendingProjects, pendingTests]);
+
+  const weeklyGrowth = useMemo(() => {
+    try {
+      const data = localStorage.getItem("shishya_weekly_scores");
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length >= 2) {
+          const latest = parsed[parsed.length - 1]?.score || 0;
+          const previous = parsed[parsed.length - 2]?.score || 0;
+          return latest - previous;
         }
       }
-      
-      skills.forEach(skill => {
-        const existing = skillMap.get(skill) || { count: 0, totalProgress: 0 };
-        existing.count += 1;
-        existing.totalProgress += course.progress;
-        skillMap.set(skill, existing);
-      });
-    });
-    
-    return skillMap;
-  }, [coursesWithProgress]);
-
-  const radarData = useMemo(() => {
-    const categories = new Map<string, number[]>();
-    const categoryKeywords: Record<string, string[]> = {
-      "Frontend": ["react", "html", "css", "javascript", "typescript", "vue", "angular", "ui", "ux", "tailwind", "responsive", "dom"],
-      "Backend": ["node", "express", "api", "rest", "server", "python", "django", "flask", "java", "spring", "php"],
-      "Database": ["sql", "mongodb", "postgres", "database", "redis", "orm", "drizzle", "prisma", "data model"],
-      "DevOps": ["git", "docker", "ci", "cd", "deploy", "aws", "cloud", "linux", "kubernetes", "testing"],
-      "Fundamentals": ["algorithm", "data structure", "oop", "design pattern", "architecture", "security", "authentication"],
-    };
-
-    courseSkills.forEach((data, skill) => {
-      const skillLower = skill.toLowerCase();
-      let matched = false;
-      for (const [category, keywords] of Object.entries(categoryKeywords)) {
-        if (keywords.some(kw => skillLower.includes(kw))) {
-          const existing = categories.get(category) || [];
-          existing.push(data.totalProgress / data.count);
-          categories.set(category, existing);
-          matched = true;
-          break;
-        }
-      }
-      if (!matched) {
-        const existing = categories.get("Other") || [];
-        existing.push(data.totalProgress / data.count);
-        categories.set("Other", existing);
-      }
-    });
-
-    return Array.from(categories.entries())
-      .map(([name, scores]) => ({
-        category: name,
-        proficiency: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-        fullMark: 100,
-      }))
-      .slice(0, 6);
-  }, [courseSkills]);
-
-  const skillBarData = useMemo(() => {
-    return Array.from(courseSkills.entries())
-      .map(([skill, data]) => ({
-        skill: skill.length > 12 ? skill.slice(0, 12) + "..." : skill,
-        fullSkill: skill,
-        proficiency: Math.round(data.totalProgress / data.count),
-      }))
-      .sort((a, b) => b.proficiency - a.proficiency)
-      .slice(0, 8);
-  }, [courseSkills]);
+    } catch {}
+    return 0;
+  }, []);
 
   const performanceScore = useMemo(() => {
     const courseWeight = 0.4;
@@ -330,18 +342,32 @@ export default function Dashboard() {
 
     let level: string;
     let levelColor: string;
-    if (overall >= 80) { level = "Expert"; levelColor = "text-amber-500"; }
-    else if (overall >= 60) { level = "Proficient"; levelColor = "text-emerald-500"; }
-    else if (overall >= 40) { level = "Developing"; levelColor = "text-blue-500"; }
+    if (overall >= 80) { level = "Distinguished"; levelColor = "text-amber-500"; }
+    else if (overall >= 60) { level = "Advanced"; levelColor = "text-emerald-500"; }
+    else if (overall >= 40) { level = "Progressing"; levelColor = "text-blue-500"; }
     else if (overall >= 20) { level = "Emerging"; levelColor = "text-violet-500"; }
-    else { level = "Novice"; levelColor = "text-muted-foreground"; }
+    else { level = "Beginner"; levelColor = "text-muted-foreground"; }
 
     return { overall, courseScore: Math.round(courseScore), testScore: Math.round(testScore), certScore: Math.round(Math.min(certScore, 100)), level, levelColor };
   }, [coursesWithProgress, allTestAttempts, passedTests, totalCertificates]);
 
   const aiInsight = useMemo(() => getAIInsight(performanceScore), [performanceScore]);
 
-  const SKILL_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "#8b5cf6", "#f59e0b", "#06b6d4"];
+  useMemo(() => {
+    if (performanceScore.overall > 0) {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const data = localStorage.getItem("shishya_weekly_scores");
+        const scores: { date: string; score: number }[] = data ? JSON.parse(data) : [];
+        if (scores.length === 0 || scores[scores.length - 1].date !== today) {
+          scores.push({ date: today, score: performanceScore.overall });
+          if (scores.length > 7) scores.splice(0, scores.length - 7);
+          localStorage.setItem("shishya_weekly_scores", JSON.stringify(scores));
+        }
+      } catch {}
+    }
+    return null;
+  }, [performanceScore.overall]);
 
   const stats = [
     {
@@ -644,165 +670,174 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {(radarData.length > 0 || skillBarData.length > 0) && (
-          <motion.div
-            className="mb-8"
-            variants={slideUp}
-            initial="initial"
-            animate="animate"
-            transition={{ delay: 0.15 }}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card data-testid="card-performance-score">
+        <motion.div className="mb-8" variants={slideUp} initial="initial" animate="animate" transition={{ delay: 0.15 }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card data-testid="card-performance-score">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-primary" />
+                  AI Performance Index
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative w-28 h-28" style={{ filter: "drop-shadow(0 0 12px hsl(var(--primary) / 0.2))" }}>
+                    <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="hsl(var(--primary))" />
+                          <stop offset="100%" stopColor="hsl(var(--chart-2))" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+                      <circle
+                        cx="50" cy="50" r="42" fill="none"
+                        stroke="url(#scoreGradient)"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={`${performanceScore.overall * 2.64} 264`}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold" data-testid="text-performance-score">{performanceScore.overall}</span>
+                      <span className="text-[10px] text-muted-foreground">/100</span>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className={performanceScore.levelColor} data-testid="badge-performance-level">
+                    {performanceScore.level}
+                  </Badge>
+                </div>
+                <div className="space-y-2.5">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Course Progress</span>
+                      <span className="font-medium">{performanceScore.courseScore}%</span>
+                    </div>
+                    <Progress value={performanceScore.courseScore} className="h-1.5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Test Performance</span>
+                      <span className="font-medium">{performanceScore.testScore}%</span>
+                    </div>
+                    <Progress value={performanceScore.testScore} className="h-1.5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Certification Rate</span>
+                      <span className="font-medium">{performanceScore.certScore}%</span>
+                    </div>
+                    <Progress value={performanceScore.certScore} className="h-1.5" />
+                  </div>
+                </div>
+                <div className="bg-primary/5 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid="text-ai-insight">
+                      {aiInsight}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs pt-2 border-t">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Weekly Growth
+                  </span>
+                  <span className={`font-semibold ${weeklyGrowth > 0 ? "text-green-500" : weeklyGrowth < 0 ? "text-red-500" : "text-muted-foreground"}`}>
+                    {weeklyGrowth > 0 ? "+" : ""}{weeklyGrowth}%
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card data-testid="card-competency-radar">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    Performance Score
+                    <Brain className="w-4 h-4 text-primary" />
+                    AI Competency Overview
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="relative w-28 h-28" style={{ filter: "drop-shadow(0 0 12px hsl(var(--primary) / 0.2))" }}>
-                      <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-                        <defs>
-                          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" />
-                            <stop offset="100%" stopColor="hsl(var(--chart-2))" />
-                          </linearGradient>
-                        </defs>
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
-                        <circle
-                          cx="50" cy="50" r="42" fill="none"
-                          stroke="url(#scoreGradient)"
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeDasharray={`${performanceScore.overall * 2.64} 264`}
-                          className="transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl font-bold" data-testid="text-performance-score">{performanceScore.overall}</span>
-                        <span className="text-[10px] text-muted-foreground">/100</span>
+                <CardContent>
+                  {competencyRadarData.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <RadarChart data={competencyRadarData} cx="50%" cy="50%" outerRadius="70%">
+                          <defs>
+                            <linearGradient id="competencyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                              <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0.1} />
+                            </linearGradient>
+                          </defs>
+                          <PolarGrid stroke="hsl(var(--border))" />
+                          <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                          <Radar name="Competency" dataKey="score" stroke="hsl(var(--primary))" fill="url(#competencyGradient)" strokeWidth={2} />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-wrap gap-2 mt-3 justify-center">
+                        {competencyRadarData.map(item => (
+                          <Badge key={item.category} variant="outline" className="text-[10px] gap-1">
+                            {item.category}: {item.score}%
+                          </Badge>
+                        ))}
                       </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">Start learning to see your AI competency analysis.</p>
                     </div>
-                    <Badge variant="outline" className={performanceScore.levelColor} data-testid="badge-performance-level">
-                      {performanceScore.level}
-                    </Badge>
-                  </div>
-                  <div className="space-y-2.5">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Course Progress</span>
-                        <span className="font-medium">{performanceScore.courseScore}%</span>
-                      </div>
-                      <Progress value={performanceScore.courseScore} className="h-1.5" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Test Performance</span>
-                        <span className="font-medium">{performanceScore.testScore}%</span>
-                      </div>
-                      <Progress value={performanceScore.testScore} className="h-1.5" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Certification Rate</span>
-                        <span className="font-medium">{performanceScore.certScore}%</span>
-                      </div>
-                      <Progress value={performanceScore.certScore} className="h-1.5" />
-                    </div>
-                  </div>
-                  <div className="bg-primary/5 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid="text-ai-insight">
-                        {aiInsight}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
-              {radarData.length >= 3 && (
-                <Card data-testid="card-skill-radar">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Target className="w-4 h-4 text-primary" />
-                      Skill Proficiency
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={220}>
-                      <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
-                        <PolarGrid stroke="hsl(var(--border))" />
-                        <PolarAngleAxis 
-                          dataKey="category" 
-                          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                        />
-                        <PolarRadiusAxis 
-                          angle={30} 
-                          domain={[0, 100]} 
-                          tick={false}
-                          axisLine={false}
-                        />
-                        <Radar
-                          name="Proficiency"
-                          dataKey="proficiency"
-                          stroke="hsl(var(--primary))"
-                          fill="hsl(var(--primary))"
-                          fillOpacity={0.2}
-                          strokeWidth={2}
-                        />
-                      </RadarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              )}
-
-              {skillBarData.length > 0 && (
-                <Card className={radarData.length < 3 ? "lg:col-span-2" : ""} data-testid="card-skill-bars">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-primary" />
-                      Skills Breakdown
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={220}>
-                      <BarChart data={skillBarData} layout="vertical" margin={{ left: 0, right: 16, top: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                        <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                        <YAxis 
-                          dataKey="skill" 
-                          type="category" 
-                          width={90} 
-                          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                          }}
-                          formatter={(value: number, _name: string, props: any) => [
-                            `${value}%`,
-                            props.payload.fullSkill,
-                          ]}
-                        />
-                        <Bar dataKey="proficiency" radius={[0, 4, 4, 0]} maxBarSize={24}>
-                          {skillBarData.map((_entry, index) => (
-                            <Cell key={index} fill={SKILL_COLORS[index % SKILL_COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              )}
+              <Card data-testid="card-growth-plan">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-amber-500" />
+                    Growth & Improvement Plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {aiSuggestions.map((suggestion, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-2.5 rounded-lg bg-muted/50">
+                        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                          suggestion.priority === "high" ? "bg-red-500" : 
+                          suggestion.priority === "medium" ? "bg-amber-500" : "bg-green-500"
+                        }`} />
+                        <p className="text-sm text-muted-foreground">{suggestion.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {competencyScores && (
+                    <div className="mt-4">
+                      <button 
+                        onClick={() => setShowScoreDetails(!showScoreDetails)}
+                        className="flex items-center gap-1 text-xs text-primary font-medium"
+                        data-testid="button-why-score"
+                      >
+                        {showScoreDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        Why this score?
+                      </button>
+                      {showScoreDetails && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-2 space-y-1.5 text-xs text-muted-foreground">
+                          {competencyScores.coreMastery < 50 && <p>- Course completion rate is below average</p>}
+                          {competencyScores.practicalApplication < 50 && <p>- Lab and project completion needs improvement</p>}
+                          {competencyScores.analyticalAbility < 50 && <p>- Test pass rate could be higher</p>}
+                          {competencyScores.industryReadiness < 30 && <p>- No certifications earned recently</p>}
+                          {competencyScores.digitalSkills < 50 && <p>- Explore more courses to improve digital skills</p>}
+                          {Object.values(competencyScores).every(v => v >= 50) && <p>- Great overall performance across all competencies</p>}
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
 
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
