@@ -50,7 +50,7 @@ import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
 
-const TRAINERCENTRAL_SITE = "https://our-shiksha.trainercentralsite.in";
+const TRAINERCENTRAL_SITE = "https://shishya.trainercentralsite.in";
 
 const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
   { id: "light", label: "Light", icon: Sun },
@@ -324,6 +324,7 @@ export default function LearnView() {
             <LessonContent 
               lessonId={selectedLessonId}
               courseTitle={course?.title}
+              courseTcUrl={course?.trainerCentralCourseUrl}
               isCompleted={isLessonCompleted(selectedLessonId)}
               onToggleComplete={() => toggleLessonComplete(selectedLessonId)}
               prevLesson={prevLesson}
@@ -372,6 +373,7 @@ export default function LearnView() {
 interface LessonContentProps {
   lessonId: number;
   courseTitle?: string;
+  courseTcUrl?: string | null;
   isCompleted: boolean;
   onToggleComplete: () => void;
   prevLesson: { id: number; title: string } | null;
@@ -383,6 +385,7 @@ interface LessonContentProps {
 
 function LessonContent({ 
   lessonId, 
+  courseTcUrl,
   isCompleted, 
   onToggleComplete,
   prevLesson,
@@ -420,7 +423,7 @@ function LessonContent({
   }
 
   const getWatchUrl = () => {
-    if (lesson.trainerCentralUrl) return lesson.trainerCentralUrl;
+    if (courseTcUrl) return courseTcUrl;
     if (lesson.videoUrl) return lesson.videoUrl;
     return TRAINERCENTRAL_SITE;
   };
@@ -443,7 +446,7 @@ function LessonContent({
         )}
       </div>
 
-      {(lesson.videoUrl || lesson.trainerCentralUrl) && (
+      {(courseTcUrl || lesson.videoUrl || lesson.trainerCentralUrl) && (
         <Card className="border-primary/20">
           <CardContent className="p-0">
             <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">

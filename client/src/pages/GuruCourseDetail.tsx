@@ -58,6 +58,8 @@ import {
   Languages,
   Zap,
   Video,
+  Check,
+  X,
 } from "lucide-react";
 
 interface Course {
@@ -76,6 +78,7 @@ interface Course {
   zohoId: string | null;
   category: string | null;
   thumbnailUrl: string | null;
+  trainerCentralCourseUrl: string | null;
   language: string | null;
   groupTitle: string | null;
   skills: string | null;
@@ -144,6 +147,8 @@ export default function GuruCourseDetail() {
 
   const [courseEditOpen, setCourseEditOpen] = useState(false);
   const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "" });
+  const [editingTcUrl, setEditingTcUrl] = useState(false);
+  const [tcUrlValue, setTcUrlValue] = useState("");
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/guru/courses", courseId],
@@ -168,6 +173,21 @@ export default function GuruCourseDetail() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to update course", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateTcUrlMutation = useMutation({
+    mutationFn: async (url: string) => {
+      const res = await apiRequest("PUT", `/api/guru/courses/${courseId}`, { trainerCentralCourseUrl: url || null });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/courses", courseId] });
+      setEditingTcUrl(false);
+      toast({ title: "TrainerCentral URL updated" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update URL", description: error.message, variant: "destructive" });
     },
   });
 
@@ -454,32 +474,84 @@ export default function GuruCourseDetail() {
               </div>
             )}
           </div>
-          {course.zohoId && (
-            <div className="mt-4 p-3 rounded-md border border-dashed" data-testid="info-zoho-sync">
-              <div className="flex items-center gap-2 text-sm">
+          <div className="mt-4 p-3 rounded-md border border-dashed space-y-3" data-testid="info-trainercentral">
+            <div className="flex items-center gap-2 text-sm">
+              <Video className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground font-medium">TrainerCentral Course URL</span>
+            </div>
+            {editingTcUrl ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={tcUrlValue}
+                  onChange={(e) => setTcUrlValue(e.target.value)}
+                  placeholder="https://shishya.trainercentralsite.in/course/..."
+                  className="flex-1 text-sm"
+                  data-testid="input-tc-url"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => updateTcUrlMutation.mutate(tcUrlValue)}
+                  disabled={updateTcUrlMutation.isPending}
+                  data-testid="button-save-tc-url"
+                >
+                  <Check className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditingTcUrl(false)}
+                  data-testid="button-cancel-tc-url"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {course.trainerCentralCourseUrl ? (
+                  <a
+                    href={course.trainerCentralCourseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline truncate flex-1"
+                    data-testid="link-tc-url"
+                  >
+                    {course.trainerCentralCourseUrl}
+                  </a>
+                ) : (
+                  <span className="text-sm text-muted-foreground italic flex-1" data-testid="text-tc-url-empty">
+                    No URL set - students won't see "Watch on TrainerCentral" button
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setTcUrlValue(course.trainerCentralCourseUrl || "");
+                    setEditingTcUrl(true);
+                  }}
+                  data-testid="button-edit-tc-url"
+                >
+                  <Pencil className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+            {course.zohoId && (
+              <div className="flex items-center gap-2 text-sm pt-1 border-t border-dashed">
                 <Cloud className="w-4 h-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">TrainerCentral ID:</span>
                 <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{course.zohoId}</code>
-                <a
-                  href={`https://our-shiksha.trainercentral.in`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
-                  data-testid="link-trainer-central"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
               </div>
-              {course.skills && (
-                <div className="flex items-center gap-2 text-sm mt-2 flex-wrap">
-                  <span className="text-muted-foreground shrink-0">Skills:</span>
-                  {course.skills.split(",").map((skill, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">{skill.trim()}</Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            )}
+            {course.skills && (
+              <div className="flex items-center gap-2 text-sm flex-wrap">
+                <span className="text-muted-foreground shrink-0">Skills:</span>
+                {course.skills.split(",").map((skill, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs">{skill.trim()}</Badge>
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

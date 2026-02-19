@@ -20,16 +20,7 @@ import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course, Test, Project, Lab } from "@shared/schema";
 
-const TRAINERCENTRAL_SITE = "https://our-shiksha.trainercentralsite.in";
-
-function getCourseSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+const TRAINERCENTRAL_SITE = "https://shishya.trainercentralsite.in";
 
 export default function CourseOverview() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -166,9 +157,9 @@ export default function CourseOverview() {
                 {isEnrolled ? "Continue Learning" : "Start Learning"}
               </Button>
 
-              {course.zohoId && (
+              {course.trainerCentralCourseUrl && (
                 <a 
-                  href={`${TRAINERCENTRAL_SITE}/course/${getCourseSlug(course.title)}`}
+                  href={course.trainerCentralCourseUrl}
                   target="_blank" 
                   rel="noopener noreferrer"
                 >

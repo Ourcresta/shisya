@@ -52,7 +52,7 @@ export default function LessonViewer() {
   };
 
   const getWatchUrl = () => {
-    if (lesson?.trainerCentralUrl) return lesson.trainerCentralUrl;
+    if (course?.trainerCentralCourseUrl) return course.trainerCentralCourseUrl;
     if (lesson?.videoUrl) return lesson.videoUrl;
     return TRAINERCENTRAL_SITE;
   };
@@ -112,7 +112,7 @@ export default function LessonViewer() {
 
           <Separator />
 
-          {(lesson.videoUrl || lesson.trainerCentralUrl) && (
+          {(course?.trainerCentralCourseUrl || lesson.videoUrl || lesson.trainerCentralUrl) && (
             <Card className="border-primary/20">
               <CardContent className="p-0">
                 <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">
