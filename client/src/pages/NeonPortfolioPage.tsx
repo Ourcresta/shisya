@@ -16,7 +16,7 @@ import {
   Download, ExternalLink, Eye, Code, Palette, Layers, 
   Globe, Smartphone, Server, Database, Zap, Sparkles,
   GraduationCap, Award, Briefcase, Send, MapPin, Check,
-  Copy, Menu, X, ChevronRight, Star, Calendar, FileText, ScrollText
+  Copy, Menu, X, ChevronRight, Star, Calendar, FileText, ScrollText, ShieldCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -339,6 +339,18 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
           background: ${theme.primaryGlow};
           transform: translateY(-3px);
         }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes ping {
+          75%, 100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
       `}</style>
 
       {isPreview && (
@@ -475,42 +487,188 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
 
       <section 
         id="home" 
-        className={`min-h-screen flex items-center ${isPreview ? "pt-24" : "pt-16"} px-6 md:px-12`}
+        className={`min-h-screen flex items-center relative ${isPreview ? "pt-24" : "pt-16"} px-6 md:px-12`}
+        style={{ overflow: "hidden" }}
       >
-        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center">
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ overflow: "hidden" }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={`particle-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: `${4 + i * 2}px`,
+                height: `${4 + i * 2}px`,
+                background: theme.primary,
+                opacity: 0.15 + i * 0.03,
+                left: `${10 + i * 15}%`,
+                top: `${20 + (i % 3) * 25}%`,
+              }}
+              animate={{
+                y: [0, -30, 0],
+                x: [0, i % 2 === 0 ? 15 : -15, 0],
+                opacity: [0.1 + i * 0.03, 0.25 + i * 0.03, 0.1 + i * 0.03],
+              }}
+              transition={{
+                duration: 4 + i * 0.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.5,
+              }}
+            />
+          ))}
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "500px",
+              height: "500px",
+              background: `radial-gradient(circle, ${theme.primary}08 0%, transparent 70%)`,
+              right: "-100px",
+              top: "10%",
+            }}
+          />
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "400px",
+              height: "400px",
+              background: `radial-gradient(circle, ${theme.accent}06 0%, transparent 70%)`,
+              left: "-80px",
+              bottom: "5%",
+            }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-6"
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="space-y-5"
           >
-            <p className="text-lg" style={{ color: theme.textMuted }}>
-              Hello, It's Me
-            </p>
-            
-            <h1 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm"
+              style={{ background: `${theme.primary}15`, border: `1px solid ${theme.primary}30`, color: theme.primary }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span
+                  className="absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ background: theme.primary, animation: "ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite" }}
+                />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: theme.primary }} />
+              </span>
+              Available for opportunities
+            </motion.div>
+
+            <motion.h1 
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1]"
               style={{ fontFamily: "'Poppins', sans-serif" }}
               data-testid="text-hero-name"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
             >
-              {profile.fullName}
-            </h1>
+              {profile.fullName.split(" ").map((word, idx) => (
+                <span key={idx}>
+                  {idx === profile.fullName.split(" ").length - 1 ? (
+                    <span style={{ color: theme.primary }} className="neon-text">{word}</span>
+                  ) : (
+                    <>{word} </>
+                  )}
+                </span>
+              ))}
+            </motion.h1>
             
-            <p className="text-xl md:text-2xl">
-              And I'm a{" "}
-              <span 
-                className="font-semibold neon-text"
-                style={{ color: theme.primary }}
-              >
-                {profile.headline || "Developer"}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              className="text-xl md:text-2xl font-light"
+              style={{ color: theme.textMuted }}
+            >
+              <span className="inline-flex items-center gap-2">
+                <span
+                  className="w-8 h-[2px] inline-block"
+                  style={{ background: theme.primary }}
+                />
+                <span 
+                  className="font-semibold"
+                  style={{ color: theme.primary }}
+                >
+                  {profile.headline || "Developer"}
+                </span>
               </span>
-            </p>
+            </motion.div>
             
-            <p style={{ color: theme.textMuted }} className="max-w-md">
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.55 }}
+              style={{ color: theme.textMuted }} 
+              className="max-w-lg text-base leading-relaxed"
+            >
               {profile.bio || "Passionate about creating amazing digital experiences and bringing ideas to life through code."}
-            </p>
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="flex flex-wrap items-center gap-3 pt-1"
+            >
+              {[
+                { value: stats.coursesCompleted, label: "Courses" },
+                { value: stats.projectsSubmitted, label: "Projects" },
+                { value: stats.certificatesEarned, label: "Certs" },
+              ].map((s, i) => (
+                <div key={s.label} className="flex items-center gap-2">
+                  {i > 0 && <span style={{ color: theme.borderColor }} className="text-lg">|</span>}
+                  <span className="text-xl font-bold" style={{ color: theme.primary }}>{s.value}</span>
+                  <span className="text-xs" style={{ color: theme.textMuted }}>{s.label}</span>
+                </div>
+              ))}
+            </motion.div>
             
-            <div className="flex items-center gap-4 pt-4">
+            <motion.div 
+              className="flex items-center gap-4 pt-3"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+            >
+              <button 
+                className="glow-button px-8 py-3 rounded-full text-white font-medium flex items-center gap-2"
+                data-testid="button-download-cv"
+                onClick={() => scrollToSection("portfolio")}
+              >
+                <Briefcase className="w-4 h-4" />
+                View Portfolio
+              </button>
+              <button 
+                className="px-6 py-3 rounded-full font-medium flex items-center gap-2 transition-all"
+                style={{ 
+                  border: `1px solid ${theme.borderColor}`,
+                  color: theme.text,
+                  background: `${theme.primary}08`,
+                }}
+                onClick={() => scrollToSection("contact")}
+                data-testid="button-hero-contact"
+              >
+                <Mail className="w-4 h-4" />
+                Contact Me
+              </button>
+            </motion.div>
+
+            <motion.div 
+              className="flex items-center gap-3 pt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.85 }}
+            >
               {profile.githubUrl && (
                 <a 
                   href={profile.githubUrl}
@@ -546,38 +704,66 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
               >
                 <Twitter className="w-5 h-5" />
               </div>
-            </div>
-            
-            <div className="pt-4">
-              <button 
-                className="glow-button px-8 py-3 rounded-full text-white font-medium flex items-center gap-2"
-                data-testid="button-download-cv"
-              >
-                <Download className="w-4 h-4" />
-                Download CV
-              </button>
-            </div>
+            </motion.div>
           </motion.div>
           
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             className="flex justify-center"
           >
             <div className="relative">
-              <div 
-                className="absolute inset-0 rounded-full floating"
+              <svg 
+                className="absolute -inset-6 w-[calc(100%+48px)] h-[calc(100%+48px)]"
+                viewBox="0 0 320 320"
+                style={{ filter: `drop-shadow(0 0 12px ${theme.primary}30)` }}
+              >
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={theme.primary} stopOpacity="0.8" />
+                    <stop offset="50%" stopColor={theme.accent} stopOpacity="0.3" />
+                    <stop offset="100%" stopColor={theme.primary} stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="160" cy="160" r="150"
+                  fill="none"
+                  stroke="url(#ringGrad)"
+                  strokeWidth="2"
+                  strokeDasharray="12 8"
+                  style={{ animation: "spin 25s linear infinite" }}
+                />
+                <circle
+                  cx="160" cy="160" r="140"
+                  fill="none"
+                  stroke={theme.primary}
+                  strokeWidth="1"
+                  strokeOpacity="0.15"
+                />
+              </svg>
+
+              <motion.div
+                className="absolute -top-2 -right-2 z-20 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
                 style={{ 
-                  background: `linear-gradient(135deg, ${theme.primary}40, ${theme.accent}20)`,
-                  transform: "scale(1.15)",
+                  background: theme.primary, 
+                  color: theme.background,
+                  boxShadow: `0 4px 20px ${theme.primaryGlow}`,
                 }}
-              />
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1, type: "spring", stiffness: 200 }}
+              >
+                <ShieldCheck className="w-3 h-3" />
+                Verified
+              </motion.div>
+
               <div 
-                className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden neon-glow floating"
+                className="relative w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden"
                 style={{ 
                   background: theme.backgroundSecondary,
-                  boxShadow: `0 0 40px ${theme.primary}40, 0 0 80px ${theme.primary}20`,
+                  boxShadow: `0 0 50px ${theme.primary}25, 0 0 100px ${theme.primary}10, inset 0 0 30px ${theme.primary}08`,
+                  border: `2px solid ${theme.primary}30`,
                 }}
               >
                 <Avatar className="w-full h-full">
@@ -594,9 +780,56 @@ export default function NeonPortfolioPage({ isPreview = false }: NeonPortfolioPr
                   </AvatarFallback>
                 </Avatar>
               </div>
+
+              {[
+                { icon: Code, pos: "top-4 -left-8", delay: 1.1 },
+                { icon: Layers, pos: "bottom-8 -left-6", delay: 1.3 },
+                { icon: Zap, pos: "-bottom-2 right-4", delay: 1.5 },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  className={`absolute ${item.pos} z-20`}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: item.delay, type: "spring", stiffness: 150 }}
+                >
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ 
+                      background: theme.cardBg,
+                      border: `1px solid ${theme.borderColor}`,
+                      backdropFilter: "blur(8px)",
+                      boxShadow: `0 4px 15px ${theme.primary}15`,
+                    }}
+                  >
+                    <item.icon className="w-5 h-5" style={{ color: theme.primary }} />
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
+
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+        >
+          <button
+            onClick={() => scrollToSection("about")}
+            className="flex flex-col items-center gap-2 group"
+            data-testid="button-scroll-down"
+          >
+            <span className="text-xs" style={{ color: theme.textMuted }}>Scroll Down</span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronRight className="w-5 h-5 rotate-90" style={{ color: theme.primary }} />
+            </motion.div>
+          </button>
+        </motion.div>
       </section>
 
       <section id="about" className="py-20 px-6 md:px-12">
