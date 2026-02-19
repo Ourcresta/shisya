@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Gift, 
   Coins, 
@@ -20,14 +21,41 @@ import {
   ChevronDown,
   Zap,
   Crown,
-  Building2
+  Building2,
+  CreditCard,
+  DollarSign,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader as CardHeaderUI, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/layout/Header";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Gift, Zap, Crown, Building2, Star, Coins, CreditCard, DollarSign,
+};
+
+interface PricingPlan {
+  id: number;
+  name: string;
+  subtitle: string | null;
+  price: string;
+  period: string | null;
+  coins: string | null;
+  coinsLabel: string | null;
+  iconName: string;
+  features: string[];
+  notIncluded: string[];
+  cta: string;
+  href: string;
+  buttonVariant: string;
+  popular: boolean;
+  orderIndex: number;
+  isActive: boolean;
+}
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -51,97 +79,6 @@ const coinUsage = [
   { icon: Award, label: "Certificate Generation", cost: "100 coins", description: "Verified skill certificates" },
 ];
 
-const plans = [
-  {
-    name: "Free",
-    subtitle: "Starter",
-    price: "₹0",
-    period: "",
-    coins: "500",
-    coinsLabel: "one-time",
-    icon: Gift,
-    features: [
-      "500 coins (one-time bonus)",
-      "Limited AI Usha usage",
-      "Practice labs (basic)",
-      "1 course access",
-      "Community support"
-    ],
-    notIncluded: ["No certificate generation"],
-    cta: "Start Free",
-    href: "/signup",
-    variant: "outline" as const,
-    popular: false
-  },
-  {
-    name: "Basic",
-    subtitle: "Learner",
-    price: "₹199",
-    period: "/ month",
-    coins: "2,000",
-    coinsLabel: "per month",
-    icon: Zap,
-    features: [
-      "2,000 coins / month",
-      "Full AI Usha access",
-      "All practice labs & tests",
-      "5 course access",
-      "Course completion certificate",
-      "Email support"
-    ],
-    notIncluded: [],
-    cta: "Upgrade",
-    href: "/signup",
-    variant: "outline" as const,
-    popular: false
-  },
-  {
-    name: "Pro",
-    subtitle: "Most Popular",
-    price: "₹499",
-    period: "/ month",
-    coins: "6,000",
-    coinsLabel: "per month",
-    icon: Crown,
-    features: [
-      "6,000 coins / month",
-      "Unlimited AI Usha",
-      "All labs, tests & projects",
-      "Unlimited course access",
-      "Certificates + Marksheets",
-      "Priority support",
-      "Progress analytics"
-    ],
-    notIncluded: [],
-    cta: "Go Pro",
-    href: "/signup",
-    variant: "default" as const,
-    popular: true
-  },
-  {
-    name: "Elite",
-    subtitle: "Institution",
-    price: "₹999",
-    period: "/ month",
-    coins: "15,000",
-    coinsLabel: "per month",
-    icon: Building2,
-    features: [
-      "15,000 coins / month",
-      "Everything in Pro",
-      "Advanced projects",
-      "Career guidance sessions",
-      "Placement readiness",
-      "Dedicated account manager",
-      "Custom learning paths"
-    ],
-    notIncluded: [],
-    cta: "Contact Sales",
-    href: "/signup",
-    variant: "outline" as const,
-    popular: false
-  }
-];
 
 const features = [
   { icon: Brain, title: "AI Tutor (Usha)", description: "24/7 personalized learning assistant that never gives direct answers" },
@@ -181,6 +118,9 @@ const faqs = [
 
 export default function Pricing() {
   const { user } = useAuth();
+  const { data: plans, isLoading: plansLoading } = useQuery<PricingPlan[]>({
+    queryKey: ["/api/pricing-plans"],
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -309,81 +249,109 @@ export default function Pricing() {
             </p>
           </motion.div>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {plans.map((plan, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card 
-                  className={`h-full flex flex-col relative ${
-                    plan.popular 
-                      ? 'border-primary shadow-lg ring-2 ring-primary/20' 
-                      : 'hover:shadow-md'
-                  } transition-all`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="gap-1 bg-primary text-primary-foreground">
-                        <Star className="w-3 h-3" />
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  
+          {plansLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="h-full flex flex-col">
                   <CardHeaderUI className="text-center pb-4">
-                    <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
-                      plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    }`}>
-                      <plan.icon className="w-6 h-6" />
-                    </div>
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
-                    <CardDescription>{plan.subtitle}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">{plan.price}</span>
-                      <span className="text-muted-foreground">{plan.period}</span>
-                    </div>
-                    <Badge variant="outline" className="mt-2 gap-1">
-                      <Coins className="w-3 h-3 text-amber-500" />
-                      {plan.coins} coins {plan.coinsLabel}
-                    </Badge>
+                    <Skeleton className="w-12 h-12 rounded-full mx-auto mb-3" />
+                    <Skeleton className="h-6 w-24 mx-auto" />
+                    <Skeleton className="h-4 w-20 mx-auto mt-2" />
+                    <Skeleton className="h-10 w-28 mx-auto mt-4" />
                   </CardHeaderUI>
-                  
-                  <CardContent className="flex-1">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                      {plan.notIncluded.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <span className="w-4 h-4 mt-0.5 shrink-0 text-center">-</span>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <CardContent className="flex-1 space-y-3">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Skeleton key={j} className="h-4 w-full" />
+                    ))}
                   </CardContent>
-                  
                   <CardFooter>
-                    <Link href={user ? "/shishya/wallet" : plan.href} className="w-full">
-                      <Button 
-                        variant={plan.variant} 
-                        className={`w-full ${plan.popular ? '' : ''}`}
-                        data-testid={`button-plan-${plan.name.toLowerCase()}`}
-                      >
-                        {plan.cta}
-                      </Button>
-                    </Link>
+                    <Skeleton className="h-10 w-full" />
                   </CardFooter>
                 </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          ) : plans && plans.length > 0 ? (
+            <motion.div
+              className={`grid grid-cols-1 md:grid-cols-2 ${plans.length <= 3 ? `lg:grid-cols-${plans.length}` : "lg:grid-cols-4"} gap-6`}
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+            >
+              {plans.map((plan, index) => {
+                const IconComp = ICON_MAP[plan.iconName] || Gift;
+                return (
+                  <motion.div key={plan.id} variants={fadeInUp}>
+                    <Card 
+                      className={`h-full flex flex-col relative ${
+                        plan.popular 
+                          ? 'border-primary shadow-lg ring-2 ring-primary/20' 
+                          : 'hover:shadow-md'
+                      } transition-all`}
+                    >
+                      {plan.popular && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                          <Badge className="gap-1 bg-primary text-primary-foreground">
+                            <Star className="w-3 h-3" />
+                            Most Popular
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      <CardHeaderUI className="text-center pb-4">
+                        <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                          plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                        }`}>
+                          <IconComp className="w-6 h-6" />
+                        </div>
+                        <CardTitle className="text-xl">{plan.name}</CardTitle>
+                        <CardDescription>{plan.subtitle}</CardDescription>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold">{plan.price}</span>
+                          <span className="text-muted-foreground">{plan.period}</span>
+                        </div>
+                        {plan.coins && (
+                          <Badge variant="outline" className="mt-2 gap-1">
+                            <Coins className="w-3 h-3 text-amber-500" />
+                            {plan.coins} coins {plan.coinsLabel}
+                          </Badge>
+                        )}
+                      </CardHeaderUI>
+                      
+                      <CardContent className="flex-1">
+                        <ul className="space-y-3">
+                          {plan.features.map((feature: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                          {plan.notIncluded.map((feature: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                              <span className="w-4 h-4 mt-0.5 shrink-0 text-center">-</span>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                      
+                      <CardFooter>
+                        <Link href={user ? "/shishya/wallet" : plan.href} className="w-full">
+                          <Button 
+                            variant={plan.buttonVariant as "default" | "outline" | "secondary"} 
+                            className="w-full"
+                            data-testid={`button-plan-${plan.name.toLowerCase()}`}
+                          >
+                            {plan.cta}
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : null}
         </div>
       </section>
 
