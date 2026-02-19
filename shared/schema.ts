@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, serial, boolean, timestamp, varchar, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, varchar, integer, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
@@ -32,6 +32,8 @@ export const courses = pgTable("courses", {
   instructorId: varchar("instructor_id", { length: 36 }),
   zohoId: varchar("zoho_id", { length: 100 }),
   category: varchar("category", { length: 100 }),
+  rating: real("rating"),
+  totalStudents: integer("total_students").default(0),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -874,6 +876,9 @@ export const courseSchema = z.object({
   groupTitle: z.string().nullable().optional(),
   trainerCentralCourseUrl: z.string().nullable().optional(),
   zohoId: z.string().nullable().optional(),
+  rating: z.number().nullable().optional(),
+  totalStudents: z.number().nullable().optional(),
+  projectCount: z.number().nullable().optional(),
   createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
 });

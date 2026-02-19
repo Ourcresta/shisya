@@ -14,8 +14,8 @@ import { guruRouter } from "./guruRoutes";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans } from "@shared/schema";
-import { eq, like, or, and, desc as descOrder } from "drizzle-orm";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable } from "@shared/schema";
+import { eq, like, or, and, desc as descOrder, sql, count } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -282,8 +282,24 @@ export async function registerRoutes(
         }
       }
 
-      console.log(`[Courses] Serving ${mergedCourses.length} courses (${externalCourses.length} external + ${dbCourses.length} from DB)`);
-      res.json(mergedCourses);
+      let projectCounts: Record<number, number> = {};
+      try {
+        const counts = await db.select({
+          courseId: projectsTable.courseId,
+          count: count(),
+        }).from(projectsTable).groupBy(projectsTable.courseId);
+        counts.forEach((c) => { projectCounts[c.courseId] = c.count; });
+      } catch (e) {
+        console.error("[DB] Failed to fetch project counts:", e);
+      }
+
+      const enrichedCourses = mergedCourses.map((c: any) => ({
+        ...c,
+        projectCount: projectCounts[c.id] || 0,
+      }));
+
+      console.log(`[Courses] Serving ${enrichedCourses.length} courses (${externalCourses.length} external + ${dbCourses.length} from DB)`);
+      res.json(enrichedCourses);
     } catch (error) {
       console.error("Error fetching courses:", error);
       const publishedCourses = mockCourses.filter(c => c.status === "published");
