@@ -21,7 +21,8 @@ import {
   Target,
   Lightbulb,
   ExternalLink,
-  LinkIcon
+  LinkIcon,
+  Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,10 +48,9 @@ import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { UshaProvider, useUsha } from "@/contexts/UshaContext";
-import { UshaTeacher } from "@/components/usha/UshaTeacher";
-import { UshaVideoPlayer, type AudioTrack, type SubtitleTrack } from "@/components/video/UshaVideoPlayer";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
+
+const TRAINERCENTRAL_BASE = "https://our-shiksha.trainercentral.in";
 
 const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
   { id: "light", label: "Light", icon: Sun },
@@ -117,10 +117,8 @@ export default function LearnView() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      {/* Custom Compact Header */}
       <header className="sticky top-0 z-50 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="h-full px-4 flex items-center justify-between gap-4">
-          {/* Left: Back + Course Title */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link href={course ? `/courses/${course.id}` : "/shishya/dashboard"}>
               <Button 
@@ -151,7 +149,6 @@ export default function LearnView() {
             </div>
           </div>
 
-          {/* Center: Progress Bar (hidden on mobile) */}
           <div className="hidden md:flex items-center gap-3 flex-1 max-w-xs">
             <Progress value={progressPercent} className="h-2 flex-1" />
             <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -159,9 +156,7 @@ export default function LearnView() {
             </span>
           </div>
 
-          {/* Right: Credits + Theme + Sidebar Toggle */}
           <div className="flex items-center gap-2">
-            {/* Credits Badge */}
             <Link href="/shishya/wallet">
               <Button 
                 variant="ghost" 
@@ -174,7 +169,6 @@ export default function LearnView() {
               </Button>
             </Link>
 
-            {/* Theme Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" data-testid="button-theme">
@@ -231,7 +225,6 @@ export default function LearnView() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Sidebar Toggle */}
             <Button
               variant="ghost"
               size="icon"
@@ -245,9 +238,7 @@ export default function LearnView() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar Overlay for Mobile */}
         {sidebarOpen && (
           <div 
             className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
@@ -255,7 +246,6 @@ export default function LearnView() {
           />
         )}
 
-        {/* Sidebar */}
         <aside 
           className={`
             fixed lg:relative inset-y-0 left-0 z-50 lg:z-0
@@ -270,7 +260,6 @@ export default function LearnView() {
             <LearnViewSidebarSkeleton />
           ) : course && modules ? (
             <div className="h-full overflow-y-auto p-4 lg:p-6 space-y-6">
-              {/* Course Title & Progress */}
               <div className="space-y-4">
                 <h2 
                   className="text-lg font-semibold"
@@ -280,7 +269,6 @@ export default function LearnView() {
                   {course.title}
                 </h2>
 
-                {/* Progress Indicator */}
                 <div className="flex items-center gap-4">
                   <ProgressRing progress={progressPercent} size={56} />
                   <div>
@@ -296,7 +284,6 @@ export default function LearnView() {
                 <Progress value={progressPercent} className="h-2" />
               </div>
 
-              {/* Modules Accordion */}
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                   Course Content
@@ -328,7 +315,6 @@ export default function LearnView() {
           ) : null}
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="max-w-3xl mx-auto p-4 lg:p-8">
@@ -364,7 +350,6 @@ export default function LearnView() {
                     Track your progress as you complete each lesson.
                   </p>
                   
-                  {/* Mobile: Show button to open sidebar */}
                   <Button
                     variant="outline"
                     className="lg:hidden mt-4"
@@ -380,98 +365,8 @@ export default function LearnView() {
           )}
         </main>
       </div>
-
-      {/* Usha AI Teacher */}
-      {user && selectedLessonId && course && (
-        <UshaTeacherWrapper
-          courseId={courseIdNum}
-          lessonId={selectedLessonId}
-          lessonTitle={allLessons.find(l => l.id === selectedLessonId)?.title || ""}
-        />
-      )}
     </div>
   );
-}
-
-function getDefaultVideoUrl(lessonId: number): string {
-  return `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
-}
-
-function getMockAudioTracks(lessonId: number): AudioTrack[] {
-  return [
-    {
-      id: `${lessonId}-en`,
-      languageCode: "en",
-      languageName: "English",
-      audioUrl: `https://example.com/audio/${lessonId}/en.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-hi`,
-      languageCode: "hi",
-      languageName: "Hindi",
-      audioUrl: `https://example.com/audio/${lessonId}/hi.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-ta`,
-      languageCode: "ta",
-      languageName: "Tamil",
-      audioUrl: `https://example.com/audio/${lessonId}/ta.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-te`,
-      languageCode: "te",
-      languageName: "Telugu",
-      audioUrl: `https://example.com/audio/${lessonId}/te.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-kn`,
-      languageCode: "kn",
-      languageName: "Kannada",
-      audioUrl: `https://example.com/audio/${lessonId}/kn.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-ml`,
-      languageCode: "ml",
-      languageName: "Malayalam",
-      audioUrl: `https://example.com/audio/${lessonId}/ml.mp3`,
-      voiceName: "Usha",
-    },
-    {
-      id: `${lessonId}-mr`,
-      languageCode: "mr",
-      languageName: "Marathi",
-      audioUrl: `https://example.com/audio/${lessonId}/mr.mp3`,
-      voiceName: "Usha",
-    },
-  ];
-}
-
-function getMockSubtitleTracks(lessonId: number): SubtitleTrack[] {
-  return [
-    {
-      id: `${lessonId}-sub-en`,
-      languageCode: "en",
-      languageName: "English",
-      subtitleUrl: `https://example.com/subtitles/${lessonId}/en.vtt`,
-    },
-    {
-      id: `${lessonId}-sub-hi`,
-      languageCode: "hi",
-      languageName: "Hindi",
-      subtitleUrl: `https://example.com/subtitles/${lessonId}/hi.vtt`,
-    },
-    {
-      id: `${lessonId}-sub-ta`,
-      languageCode: "ta",
-      languageName: "Tamil",
-      subtitleUrl: `https://example.com/subtitles/${lessonId}/ta.vtt`,
-    },
-  ];
 }
 
 interface LessonContentProps {
@@ -524,9 +419,14 @@ function LessonContent({
     );
   }
 
+  const getWatchUrl = () => {
+    if (lesson.trainerCentralUrl) return lesson.trainerCentralUrl;
+    if (lesson.videoUrl) return lesson.videoUrl;
+    return TRAINERCENTRAL_BASE;
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-8">
-      {/* Lesson Header */}
       <div className="space-y-1.5">
         <h1 
           className="text-xl md:text-2xl font-bold leading-tight"
@@ -543,28 +443,38 @@ function LessonContent({
         )}
       </div>
 
-      {/* Usha Video Player - Multi-language audio support */}
-      <UshaVideoPlayer
-        videoUrl={lesson.videoUrl || getDefaultVideoUrl(lessonId)}
-        title={lesson.title}
-        poster={undefined}
-        audioTracks={getMockAudioTracks(lessonId)}
-        subtitleTracks={getMockSubtitleTracks(lessonId)}
-        onProgress={(progress) => {
-          if (progress >= 90 && !isCompleted) {
-            // Auto-mark as complete when 90% watched
-          }
-        }}
-        onComplete={() => {
-          if (!isCompleted) {
-            onToggleComplete();
-          }
-        }}
-      />
+      {(lesson.videoUrl || lesson.trainerCentralUrl) && (
+        <Card className="border-primary/20">
+          <CardContent className="p-0">
+            <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Play className="w-8 h-8 text-primary ml-0.5" />
+              </div>
+              <div className="text-center space-y-1.5">
+                <h3 className="text-base font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+                  Watch Video Lesson
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Watch this lesson on TrainerCentral in a new tab.
+                </p>
+              </div>
+              <a
+                href={getWatchUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="button-watch-trainercentral"
+              >
+                <Button className="gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Watch on TrainerCentral
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Content Cards Grid */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Objectives */}
         {lesson.objectives && lesson.objectives.length > 0 && (
           <Card className="md:col-span-1">
             <CardHeader className="pb-3">
@@ -588,7 +498,6 @@ function LessonContent({
           </Card>
         )}
 
-        {/* Key Concepts */}
         {lesson.keyConcepts && lesson.keyConcepts.length > 0 && (
           <Card className="md:col-span-1">
             <CardHeader className="pb-3">
@@ -615,7 +524,6 @@ function LessonContent({
         )}
       </div>
 
-      {/* AI Notes / Content */}
       {aiNotes && aiNotes.content && (
         <Card>
           <CardHeader className="pb-3">
@@ -636,7 +544,26 @@ function LessonContent({
         </Card>
       )}
 
-      {/* External Resources */}
+      {lesson.content && lesson.content.length > 50 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-primary" />
+              </div>
+              Study Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div 
+              className="prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: lesson.content }}
+              data-testid="content-lesson"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {lesson.externalResources && lesson.externalResources.length > 0 && (
         <Card className="border-blue-500/20 bg-blue-500/5">
           <CardHeader className="pb-3">
@@ -671,11 +598,9 @@ function LessonContent({
         </Card>
       )}
 
-      {/* Navigation Buttons */}
       <Card className="mt-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-center gap-3">
-            {/* Previous Lesson */}
             <Button 
               variant="outline" 
               className="gap-2 flex-1 max-w-[140px]" 
@@ -687,7 +612,6 @@ function LessonContent({
               <span>Previous</span>
             </Button>
 
-            {/* Mark Complete */}
             <Button
               onClick={onToggleComplete}
               variant={isCompleted ? "secondary" : "default"}
@@ -707,7 +631,6 @@ function LessonContent({
               )}
             </Button>
 
-            {/* Next Lesson */}
             {nextLesson ? (
               <Button 
                 variant="default" 
@@ -887,24 +810,4 @@ function LearnViewSidebarSkeleton() {
       </div>
     </div>
   );
-}
-
-function UshaTeacherWrapper({ 
-  courseId, 
-  lessonId, 
-  lessonTitle 
-}: { 
-  courseId: number; 
-  lessonId: number; 
-  lessonTitle: string;
-}) {
-  const { setCourseId, setLessonId, setLessonTitle } = useUsha();
-
-  useEffect(() => {
-    setCourseId(courseId);
-    setLessonId(lessonId);
-    setLessonTitle(lessonTitle);
-  }, [courseId, lessonId, lessonTitle, setCourseId, setLessonId, setLessonTitle]);
-
-  return <UshaTeacher />;
 }

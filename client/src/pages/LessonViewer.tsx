@@ -18,32 +18,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useCourseProgress } from "@/contexts/ProgressContext";
-import { UshaAvatar } from "@/components/usha";
-import { UshaVideoPlayer } from "@/components/video/UshaVideoPlayer";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
-function isEmbeddableVideo(url: string): boolean {
-  return /youtube\.com|youtu\.be|vimeo\.com|dailymotion\.com|trainercentral\.com.*\/embed/i.test(url);
-}
-
-function isDirectVideo(url: string): boolean {
-  return /\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url);
-}
-
-function getEmbedUrl(url: string): string {
-  if (/youtube\.com\/embed\/[a-zA-Z0-9_-]+/i.test(url)) {
-    return url.replace(/^http:/, 'https:');
-  }
-
-  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
-
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-
-  return url;
-}
+const TRAINERCENTRAL_BASE = "https://our-shiksha.trainercentral.in";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -51,7 +29,6 @@ export default function LessonViewer() {
   const lessonIdNum = parseInt(lessonId || "0", 10);
   const { user } = useAuth();
 
-  // Use centralized progress context for reactive state
   const { isLessonCompleted, toggleLessonComplete } = useCourseProgress(courseIdNum);
   const isCompleted = isLessonCompleted(lessonIdNum);
 
@@ -74,6 +51,12 @@ export default function LessonViewer() {
     toggleLessonComplete(lessonIdNum);
   };
 
+  const getWatchUrl = () => {
+    if (lesson?.trainerCentralUrl) return lesson.trainerCentralUrl;
+    if (lesson?.videoUrl) return lesson.videoUrl;
+    return TRAINERCENTRAL_BASE;
+  };
+
   if (lessonError) {
     return <Redirect to={`/shishya/learn/${courseId}`} />;
   }
@@ -84,7 +67,6 @@ export default function LessonViewer() {
         <LessonViewerSkeleton />
       ) : lesson ? (
         <div className="max-w-3xl mx-auto space-y-8">
-          {/* Navigation */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <Link href={`/shishya/learn/${courseId}`}>
               <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back">
@@ -113,7 +95,6 @@ export default function LessonViewer() {
             </Button>
           </div>
 
-          {/* Lesson Header */}
           <div className="space-y-2">
             <h1 
               className="text-2xl md:text-3xl font-bold"
@@ -131,7 +112,37 @@ export default function LessonViewer() {
 
           <Separator />
 
-          {/* Objectives */}
+          {(lesson.videoUrl || lesson.trainerCentralUrl) && (
+            <Card className="border-primary/20">
+              <CardContent className="p-0">
+                <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">
+                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Play className="w-10 h-10 text-primary ml-1" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+                      Watch Video Lesson
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      This lesson includes a video hosted on TrainerCentral. Click below to watch it in a new tab.
+                    </p>
+                  </div>
+                  <a
+                    href={getWatchUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="button-watch-trainercentral"
+                  >
+                    <Button size="lg" className="gap-2">
+                      <ExternalLink className="w-4 h-4" />
+                      Watch on TrainerCentral
+                    </Button>
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {lesson.objectives && lesson.objectives.length > 0 && (
             <Card>
               <CardHeader>
@@ -153,7 +164,6 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* Key Concepts */}
           {lesson.keyConcepts && lesson.keyConcepts.length > 0 && (
             <Card>
               <CardHeader>
@@ -174,7 +184,6 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* Lesson Content (from TrainerCentral or local) */}
           {lesson.content && lesson.content.length > 50 && (
             <Card>
               <CardHeader>
@@ -193,7 +202,6 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* AI Notes */}
           {aiNotes && aiNotes.content && (
             <Card>
               <CardHeader>
@@ -212,82 +220,6 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* Video */}
-          {lesson.videoUrl && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Video className="w-5 h-5 text-rose-500" />
-                  Video Lesson
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {isEmbeddableVideo(lesson.videoUrl) ? (
-                  <div className="aspect-video rounded-lg overflow-hidden border">
-                    <iframe
-                      src={getEmbedUrl(lesson.videoUrl)}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      title={lesson.title}
-                      data-testid="video-embed"
-                    />
-                  </div>
-                ) : isDirectVideo(lesson.videoUrl) ? (
-                  <UshaVideoPlayer
-                    videoUrl={lesson.videoUrl}
-                    title={lesson.title}
-                  />
-                ) : (
-                  <a 
-                    href={lesson.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary hover:underline"
-                    data-testid="link-video"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    Watch Video
-                  </a>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Watch on TrainerCentral - for uploaded videos */}
-          {lesson.trainerCentralUrl && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Video className="w-5 h-5 text-rose-500" />
-                  {lesson.videoUrl ? "Additional Video" : "Video Lesson"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center gap-4 py-6">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Play className="w-8 h-8 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground text-center text-sm max-w-md">
-                    This lesson includes a video hosted on TrainerCentral. Click below to watch it.
-                  </p>
-                  <a
-                    href={lesson.trainerCentralUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="button-watch-trainercentral"
-                  >
-                    <Button className="gap-2">
-                      <ExternalLink className="w-4 h-4" />
-                      Watch Video on TrainerCentral
-                    </Button>
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* External Resources */}
           {lesson.externalResources && lesson.externalResources.length > 0 && (
             <Card>
               <CardHeader>
@@ -316,7 +248,6 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* Bottom Actions */}
           <div className="flex items-center justify-between flex-wrap gap-4 pt-4 pb-8">
             <Link href={`/shishya/learn/${courseId}`}>
               <Button variant="outline" className="gap-2" data-testid="button-back-bottom">
@@ -346,19 +277,6 @@ export default function LessonViewer() {
           </div>
         </div>
       ) : null}
-
-      {/* Usha AI Tutor Avatar */}
-      {user && lesson && (
-        <UshaAvatar
-          context={{
-            courseId: courseIdNum,
-            lessonId: lessonIdNum,
-            pageType: "lesson",
-            courseTitle: course?.title,
-            lessonTitle: lesson.title,
-          }}
-        />
-      )}
     </Layout>
   );
 }
