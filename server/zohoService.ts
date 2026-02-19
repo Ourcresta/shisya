@@ -570,7 +570,7 @@ async function insertLesson(
   const validVideoUrl = typeof videoUrl === 'string' && videoUrl.startsWith('http') ? videoUrl : null;
 
   let trainerCentralUrl: string | null = null;
-  if (matData?.hasUploadedVideo && !validVideoUrl && zohoCourseId && sessionId) {
+  if (matData?.hasUploadedVideo && zohoCourseId && sessionId) {
     trainerCentralUrl = `https://our-shiksha.trainercentral.in/course/attend?previouspage=clientapp#/course/${zohoCourseId}/attend/section/${sessionId}`;
     console.log(`[Zoho] Lesson "${lessonTitle}": uploaded video, TC link=${trainerCentralUrl}`);
   }

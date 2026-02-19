@@ -9,7 +9,8 @@ import {
   Lightbulb, 
   Video,
   LinkIcon,
-  BookOpen
+  BookOpen,
+  Play
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -249,6 +250,39 @@ export default function LessonViewer() {
                     Watch Video
                   </a>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Watch on TrainerCentral - for uploaded videos */}
+          {lesson.trainerCentralUrl && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Video className="w-5 h-5 text-rose-500" />
+                  {lesson.videoUrl ? "Additional Video" : "Video Lesson"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center gap-4 py-6">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Play className="w-8 h-8 text-primary" />
+                  </div>
+                  <p className="text-muted-foreground text-center text-sm max-w-md">
+                    This lesson includes a video hosted on TrainerCentral. Click below to watch it.
+                  </p>
+                  <a
+                    href={lesson.trainerCentralUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="button-watch-trainercentral"
+                  >
+                    <Button className="gap-2">
+                      <ExternalLink className="w-4 h-4" />
+                      Watch Video on TrainerCentral
+                    </Button>
+                  </a>
+                </div>
               </CardContent>
             </Card>
           )}
