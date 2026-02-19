@@ -40,9 +40,16 @@ function getLanguageLabel(code: string): string {
 
 interface CourseCardProps {
   course: Course;
+  languageVariants?: Course[];
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course: initialCourse, languageVariants }: CourseCardProps) {
+  const [selectedLang, setSelectedLang] = useState<string | null>(null);
+
+  const course = selectedLang && languageVariants
+    ? languageVariants.find(v => v.language === selectedLang) || initialCourse
+    : initialCourse;
+
   const rawSkills = course.skills;
   const skillsList: string[] = Array.isArray(rawSkills)
     ? rawSkills
@@ -222,7 +229,30 @@ export function CourseCard({ course }: CourseCardProps) {
         <div className="absolute top-3 right-3">
           {getPriceBadge()}
         </div>
-        {course.language && (
+        {languageVariants && languageVariants.length > 1 ? (
+          <div className="absolute bottom-3 left-3 flex flex-wrap gap-1">
+            {languageVariants.map((v) => (
+              <Badge
+                key={v.id}
+                variant="secondary"
+                className={`cursor-pointer text-xs backdrop-blur-sm border-0 ${
+                  v.id === course.id
+                    ? "bg-primary/90 text-primary-foreground"
+                    : "bg-background/80 text-foreground"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedLang(v.language || "en");
+                }}
+                data-testid={`badge-lang-variant-${v.language}-${v.id}`}
+              >
+                <Globe className="w-3 h-3 mr-1" />
+                {getLanguageLabel(v.language || "en")}
+              </Badge>
+            ))}
+          </div>
+        ) : course.language ? (
           <div className="absolute bottom-3 left-3">
             <Badge
               variant="secondary"
@@ -233,7 +263,7 @@ export function CourseCard({ course }: CourseCardProps) {
               {getLanguageLabel(course.language)}
             </Badge>
           </div>
-        )}
+        ) : null}
       </div>
 
       <CardHeader className="pb-2">
@@ -242,7 +272,7 @@ export function CourseCard({ course }: CourseCardProps) {
           style={{ fontFamily: "var(--font-display)" }}
           data-testid={`text-course-title-${course.id}`}
         >
-          {course.title}
+          {course.groupTitle || course.title}
         </h3>
       </CardHeader>
 

@@ -21,7 +21,7 @@ import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course } from "@shared/schema";
 
-type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
+type LevelFilter = "all" | "beginner" | "intermediate" | "advanced" | "masters";
 type PricingFilter = "all" | "free" | "paid";
 type SortOption = "default" | "title-asc" | "title-desc" | "price-low" | "price-high" | "newest";
 
@@ -139,8 +139,37 @@ export default function CourseCatalog() {
     return filtered;
   }, [courses, searchTerm, selectedLevel, selectedPricing, selectedCategory, selectedLanguage, sortBy]);
 
-  const totalCourses = courses?.length ?? 0;
-  const filteredCount = filteredCourses.length;
+  const groupedCourses = useMemo(() => {
+    const groups = new Map<string, Course[]>();
+    const ungrouped: Course[] = [];
+
+    filteredCourses.forEach((course) => {
+      const gt = course.groupTitle?.trim();
+      if (gt) {
+        const existing = groups.get(gt) || [];
+        existing.push(course);
+        groups.set(gt, existing);
+      } else {
+        ungrouped.push(course);
+      }
+    });
+
+    const result: { primary: Course; variants: Course[] }[] = [];
+
+    groups.forEach((coursesInGroup) => {
+      const primary = coursesInGroup[0];
+      result.push({ primary, variants: coursesInGroup });
+    });
+
+    ungrouped.forEach((course) => {
+      result.push({ primary: course, variants: [course] });
+    });
+
+    return result;
+  }, [filteredCourses]);
+
+  const totalCourses = groupedCourses.length;
+  const filteredCount = groupedCourses.length;
 
   const hasActiveFilters =
     selectedLevel !== "all" ||
@@ -159,11 +188,12 @@ export default function CourseCatalog() {
   };
 
   const levelCounts = useMemo(() => {
-    if (!courses) return { beginner: 0, intermediate: 0, advanced: 0 };
+    if (!courses) return { beginner: 0, intermediate: 0, advanced: 0, masters: 0 };
     return {
       beginner: courses.filter((c) => c.level.toLowerCase() === "beginner").length,
       intermediate: courses.filter((c) => c.level.toLowerCase() === "intermediate").length,
       advanced: courses.filter((c) => c.level.toLowerCase() === "advanced").length,
+      masters: courses.filter((c) => c.level.toLowerCase() === "masters").length,
     };
   }, [courses]);
 
@@ -213,6 +243,11 @@ export default function CourseCatalog() {
                   {levelCounts.advanced} Advanced
                 </div>
               )}
+              {levelCounts.masters > 0 && (
+                <div data-testid="stat-masters-count">
+                  {levelCounts.masters} Masters
+                </div>
+              )}
             </div>
           )}
         </motion.div>
@@ -260,7 +295,7 @@ export default function CourseCatalog() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {(["all", "beginner", "intermediate", "advanced"] as LevelFilter[]).map(
+                {(["all", "beginner", "intermediate", "advanced", "masters"] as LevelFilter[]).map(
                   (level) => (
                     <Badge
                       key={level}
@@ -383,7 +418,7 @@ export default function CourseCatalog() {
           />
         ) : !courses || courses.length === 0 ? (
           <EmptyState />
-        ) : filteredCourses.length === 0 ? (
+        ) : groupedCourses.length === 0 ? (
           <div className="text-center py-12 space-y-4">
             <EmptyState
               title="No courses found"
@@ -401,9 +436,9 @@ export default function CourseCatalog() {
             initial="initial"
             animate="animate"
           >
-            {filteredCourses.map((course) => (
-              <motion.div key={course.id} variants={staggerItem}>
-                <CourseCard course={course} />
+            {groupedCourses.map(({ primary, variants }) => (
+              <motion.div key={primary.groupTitle || primary.id} variants={staggerItem}>
+                <CourseCard course={primary} languageVariants={variants.length > 1 ? variants : undefined} />
               </motion.div>
             ))}
           </motion.div>

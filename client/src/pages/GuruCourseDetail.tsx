@@ -77,6 +77,7 @@ interface Course {
   category: string | null;
   thumbnailUrl: string | null;
   language: string | null;
+  groupTitle: string | null;
   skills: string | null;
   price: number;
   currency: string;
@@ -142,7 +143,7 @@ export default function GuruCourseDetail() {
   const [lessonForm, setLessonForm] = useState<LessonForm>(defaultLessonForm);
 
   const [courseEditOpen, setCourseEditOpen] = useState(false);
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "" });
+  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "" });
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/guru/courses", courseId],
@@ -155,7 +156,7 @@ export default function GuruCourseDetail() {
   });
 
   const updateCourseMutation = useMutation({
-    mutationFn: async (data: { title: string; description: string; level: string; thumbnailUrl: string; language: string }) => {
+    mutationFn: async (data: { title: string; description: string; level: string; thumbnailUrl: string; language: string; groupTitle: string }) => {
       const res = await apiRequest("PUT", `/api/guru/courses/${courseId}`, data);
       return res.json();
     },
@@ -316,7 +317,7 @@ export default function GuruCourseDetail() {
 
   const openEditCourse = () => {
     if (course) {
-      setCourseForm({ title: course.title, description: course.description || "", level: course.level, thumbnailUrl: course.thumbnailUrl || "", language: course.language || "" });
+      setCourseForm({ title: course.title, description: course.description || "", level: course.level, thumbnailUrl: course.thumbnailUrl || "", language: course.language || "", groupTitle: course.groupTitle || "" });
       setCourseEditOpen(true);
     }
   };
@@ -653,6 +654,19 @@ export default function GuruCourseDetail() {
               />
             </div>
             <div>
+              <Label htmlFor="edit-course-group-title">Group Title</Label>
+              <Input
+                id="edit-course-group-title"
+                value={courseForm.groupTitle}
+                onChange={(e) => setCourseForm({ ...courseForm, groupTitle: e.target.value })}
+                placeholder="e.g. Masters in Python"
+                data-testid="input-edit-course-group-title"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Courses with the same group title are shown as one card with language options in the catalog.
+              </p>
+            </div>
+            <div>
               <Label htmlFor="edit-course-description">Description</Label>
               <Textarea
                 id="edit-course-description"
@@ -673,6 +687,7 @@ export default function GuruCourseDetail() {
                     <SelectItem value="beginner">Beginner</SelectItem>
                     <SelectItem value="intermediate">Intermediate</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="masters">Masters</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -710,11 +725,11 @@ export default function GuruCourseDetail() {
                   let url = e.target.value;
                   const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
                   if (driveMatch) {
-                    url = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+                    url = `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
                   }
                   const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
                   if (driveOpenMatch) {
-                    url = `https://drive.google.com/uc?export=view&id=${driveOpenMatch[1]}`;
+                    url = `https://lh3.googleusercontent.com/d/${driveOpenMatch[1]}`;
                   }
                   setCourseForm({ ...courseForm, thumbnailUrl: url });
                 }}

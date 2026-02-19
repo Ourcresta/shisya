@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface LevelBadgeProps {
-  level: "beginner" | "intermediate" | "advanced";
+  level: "beginner" | "intermediate" | "advanced" | "masters";
   className?: string;
 }
 
@@ -18,6 +18,10 @@ const levelConfig = {
   advanced: {
     label: "Advanced",
     className: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800",
+  },
+  masters: {
+    label: "Masters",
+    className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
   },
 };
 
