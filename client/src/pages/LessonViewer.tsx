@@ -31,6 +31,10 @@ function isDirectVideo(url: string): boolean {
 }
 
 function getEmbedUrl(url: string): string {
+  if (/youtube\.com\/embed\/[a-zA-Z0-9_-]+/i.test(url)) {
+    return url.replace(/^http:/, 'https:');
+  }
+
   const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
   if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
 
@@ -169,13 +173,32 @@ export default function LessonViewer() {
             </Card>
           )}
 
-          {/* AI Notes / Content */}
-          {aiNotes && aiNotes.content && (
+          {/* Lesson Content (from TrainerCentral or local) */}
+          {lesson.content && lesson.content.length > 50 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <BookOpen className="w-5 h-5 text-primary" />
                   Lesson Content
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: lesson.content }}
+                  data-testid="content-lesson"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AI Notes */}
+          {aiNotes && aiNotes.content && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Lightbulb className="w-5 h-5 text-amber-500" />
+                  AI Study Notes
                 </CardTitle>
               </CardHeader>
               <CardContent>

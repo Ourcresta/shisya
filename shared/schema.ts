@@ -880,6 +880,7 @@ export const lessonSchema = z.object({
   id: z.number(),
   moduleId: z.number(),
   title: z.string(),
+  content: z.string().nullable().optional(),
   objectives: z.array(z.string()).nullable(),
   keyConcepts: z.array(z.string()).nullable(),
   orderIndex: z.number(),
