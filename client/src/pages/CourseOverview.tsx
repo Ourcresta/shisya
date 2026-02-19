@@ -20,7 +20,6 @@ import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course, Test, Project, Lab } from "@shared/schema";
 
-const TRAINERCENTRAL_SITE = "https://shishya.trainercentralsite.in";
 
 export default function CourseOverview() {
   const { courseId } = useParams<{ courseId: string }>();

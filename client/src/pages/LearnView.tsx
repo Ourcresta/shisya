@@ -50,7 +50,6 @@ import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
 
-const TRAINERCENTRAL_SITE = "https://shishya.trainercentralsite.in";
 
 const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
   { id: "light", label: "Light", icon: Sun },
@@ -422,11 +421,6 @@ function LessonContent({
     );
   }
 
-  const getWatchUrl = () => {
-    if (courseTcUrl) return courseTcUrl;
-    if (lesson.videoUrl) return lesson.videoUrl;
-    return TRAINERCENTRAL_SITE;
-  };
 
   return (
     <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-8">
@@ -446,7 +440,7 @@ function LessonContent({
         )}
       </div>
 
-      {(courseTcUrl || lesson.videoUrl || lesson.trainerCentralUrl) && (
+      {courseTcUrl && (
         <Card className="border-primary/20">
           <CardContent className="p-0">
             <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">
@@ -462,7 +456,7 @@ function LessonContent({
                 </p>
               </div>
               <a
-                href={getWatchUrl()}
+                href={courseTcUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="button-watch-trainercentral"

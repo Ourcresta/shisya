@@ -21,7 +21,6 @@ import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
-const TRAINERCENTRAL_SITE = "https://our-shiksha.trainercentralsite.in";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -51,11 +50,6 @@ export default function LessonViewer() {
     toggleLessonComplete(lessonIdNum);
   };
 
-  const getWatchUrl = () => {
-    if (course?.trainerCentralCourseUrl) return course.trainerCentralCourseUrl;
-    if (lesson?.videoUrl) return lesson.videoUrl;
-    return TRAINERCENTRAL_SITE;
-  };
 
   if (lessonError) {
     return <Redirect to={`/shishya/learn/${courseId}`} />;
@@ -112,7 +106,7 @@ export default function LessonViewer() {
 
           <Separator />
 
-          {(course?.trainerCentralCourseUrl || lesson.videoUrl || lesson.trainerCentralUrl) && (
+          {course?.trainerCentralCourseUrl && (
             <Card className="border-primary/20">
               <CardContent className="p-0">
                 <div className="flex flex-col items-center gap-4 py-8 px-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-lg">
@@ -128,7 +122,7 @@ export default function LessonViewer() {
                     </p>
                   </div>
                   <a
-                    href={getWatchUrl()}
+                    href={course.trainerCentralCourseUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="button-watch-trainercentral"
