@@ -85,6 +85,7 @@ interface CourseForm {
   isFree: boolean;
   testRequired: boolean;
   projectRequired: boolean;
+  skills: string;
 }
 
 const defaultForm: CourseForm = {
@@ -96,6 +97,7 @@ const defaultForm: CourseForm = {
   isFree: false,
   testRequired: false,
   projectRequired: false,
+  skills: "",
 };
 
 export default function GuruCourses() {
@@ -199,6 +201,7 @@ export default function GuruCourses() {
       isFree: course.isFree,
       testRequired: course.testRequired,
       projectRequired: course.projectRequired,
+      skills: course.skills || "",
     });
     setEditOpen(true);
   };
@@ -546,6 +549,25 @@ function CourseFormFields({
           onChange={(e) => setForm({ ...form, creditCost: parseInt(e.target.value) || 0 })}
           data-testid="input-course-credit-cost"
         />
+      </div>
+      <div>
+        <Label htmlFor="course-skills">Skills (comma-separated)</Label>
+        <Input
+          id="course-skills"
+          value={form.skills}
+          onChange={(e) => setForm({ ...form, skills: e.target.value })}
+          placeholder="e.g. React, Node.js, REST APIs, TypeScript"
+          data-testid="input-course-skills"
+        />
+        {form.skills && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {form.skills.split(",").map((skill, i) => skill.trim() && (
+              <Badge key={i} variant="secondary" className="text-xs">
+                {skill.trim()}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
       <div className="space-y-3">
         <div className="flex items-center gap-2">
