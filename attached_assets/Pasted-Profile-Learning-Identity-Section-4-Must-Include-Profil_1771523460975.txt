@@ -1,0 +1,237 @@
+Profile & Learning Identity Section
+4
+Must Include:
+
+Profile photo
+
+Student ID
+
+Department / Course Track
+
+Skill Level (Beginner / Intermediate / Advanced)
+
+XP Points / Credits
+
+Badges earned
+
+Learning Streak (🔥 streak counter)
+
+Resume Strength % (AI calculated)
+
+Backend Logic:
+
+UserController
+
+ProgressController
+
+GamificationController
+
+2️⃣ My Courses Section
+4
+Must Include:
+
+Enrolled Courses
+
+Progress bar per course
+
+Continue Learning button
+
+Last accessed lesson
+
+Course completion %
+
+Upcoming live classes
+
+Advanced Feature:
+
+AI recommends next lesson automatically
+
+Backend:
+
+CourseController
+
+EnrollmentController
+
+LessonController
+
+3️⃣ AI Learning Assistant Panel 🤖
+4
+
+This is your BIG differentiator.
+
+Include:
+
+Ask Doubts (Code + Theory)
+
+Explain in simple language
+
+Generate notes
+
+Create quiz from lesson
+
+Code debugging assistant
+
+Career advice
+
+Backend:
+
+AIAssistantController
+
+LLM API Integration
+
+Vector DB for course content
+
+4️⃣ Practice Lab & Code Compiler
+4
+Must Include:
+
+Multi-language compiler
+
+Practice problems
+
+AI feedback on code
+
+Test case runner
+
+Score based on efficiency
+
+Auto-save
+
+Backend:
+
+CompilerController
+
+PracticeController
+
+Docker/Sandbox execution
+
+5️⃣ Assessments & Exams Section
+4
+Include:
+
+Upcoming exams
+
+Completed exams
+
+Score breakdown
+
+AI performance analysis
+
+Weak topic detection
+
+Reattempt option
+
+Backend:
+
+ExamController
+
+ResultController
+
+AnalyticsEngine
+
+6️⃣ Performance Analytics Dashboard 📊
+
+This makes Our Shiksha look PREMIUM.
+
+Show:
+
+Skill Radar Chart
+
+Time spent learning
+
+Topic mastery %
+
+Consistency score
+
+Career readiness index
+
+Rank among peers
+
+Backend:
+
+AnalyticsController
+
+Data aggregation microservice
+
+7️⃣ Certificates & Achievements 🏆
+Include:
+
+Course Completion Certificates
+
+Internship Certificates
+
+Provisional Certificates
+
+Download PDF
+
+Share on LinkedIn
+
+Backend:
+
+CertificateController
+
+PDF Generator Service
+
+Blockchain verification (optional future)
+
+8️⃣ Internship & Career Section
+
+Since your goal is Career-Focused Academy:
+
+Include:
+
+Internship openings
+
+Resume Builder
+
+Mock Interview AI
+
+Job Matching Score
+
+Portfolio Builder
+
+Backend:
+
+CareerController
+
+ResumeParser AI
+
+Interview AI Engine
+
+9️⃣ Wallet / Credits System 💰
+
+Since you're planning monetization:
+
+Wallet balance
+
+Earned credits
+
+Purchased courses
+
+Referral earnings
+
+Scholarship eligibility
+
+Backend:
+
+WalletController
+
+PaymentGatewayService
+
+🔟 Community & Social Learning
+
+Discussion Forum
+
+Peer chat
+
+Study groups
+
+Leaderboard
+
+Doubt upvote system
+
+Backend:
+
+CommunityController
+
+Realtime chat (WebSockets)
