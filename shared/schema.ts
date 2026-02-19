@@ -844,6 +844,7 @@ export const courseSchema = z.object({
   category: z.string().nullable().optional(),
   thumbnailUrl: z.string().nullable().optional(),
   groupTitle: z.string().nullable().optional(),
+  zohoId: z.string().nullable().optional(),
   createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
 });

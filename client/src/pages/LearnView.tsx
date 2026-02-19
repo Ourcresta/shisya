@@ -50,7 +50,7 @@ import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course, ModuleWithLessons, Lesson, AINotes } from "@shared/schema";
 
-const TRAINERCENTRAL_BASE = "https://our-shiksha.trainercentral.in";
+const TRAINERCENTRAL_SITE = "https://our-shiksha.trainercentralsite.in";
 
 const modeOptions: { id: ThemeMode; label: string; icon: typeof Sun }[] = [
   { id: "light", label: "Light", icon: Sun },
@@ -422,7 +422,7 @@ function LessonContent({
   const getWatchUrl = () => {
     if (lesson.trainerCentralUrl) return lesson.trainerCentralUrl;
     if (lesson.videoUrl) return lesson.videoUrl;
-    return TRAINERCENTRAL_BASE;
+    return TRAINERCENTRAL_SITE;
   };
 
   return (

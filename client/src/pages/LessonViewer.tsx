@@ -21,7 +21,7 @@ import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
-const TRAINERCENTRAL_BASE = "https://our-shiksha.trainercentral.in";
+const TRAINERCENTRAL_SITE = "https://our-shiksha.trainercentralsite.in";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -54,7 +54,7 @@ export default function LessonViewer() {
   const getWatchUrl = () => {
     if (lesson?.trainerCentralUrl) return lesson.trainerCentralUrl;
     if (lesson?.videoUrl) return lesson.videoUrl;
-    return TRAINERCENTRAL_BASE;
+    return TRAINERCENTRAL_SITE;
   };
 
   if (lessonError) {
