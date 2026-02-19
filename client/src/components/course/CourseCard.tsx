@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowRight, BookOpen, Coins, Lock, Play } from "lucide-react";
+import { ArrowRight, BookOpen, Coins, Globe, Lock, Play } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,33 @@ import { SkillTag } from "@/components/ui/skill-tag";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Course } from "@shared/schema";
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  hi: "Hindi",
+  ta: "Tamil",
+  te: "Telugu",
+  kn: "Kannada",
+  ml: "Malayalam",
+  mr: "Marathi",
+  bn: "Bengali",
+  gu: "Gujarati",
+  pa: "Punjabi",
+  ur: "Urdu",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  ja: "Japanese",
+  zh: "Chinese",
+  ko: "Korean",
+  ar: "Arabic",
+  pt: "Portuguese",
+  ru: "Russian",
+};
+
+function getLanguageLabel(code: string): string {
+  return LANGUAGE_LABELS[code.toLowerCase()] || code.toUpperCase();
+}
 
 interface CourseCardProps {
   course: Course;
@@ -25,11 +53,14 @@ export function CourseCard({ course }: CourseCardProps) {
   const hasMoreSkills = skillsList.length > 3;
   const { user } = useAuth();
   const { balance, enrollments } = useCredits();
+  const [imgError, setImgError] = useState(false);
 
   const creditCost = course.creditCost || 0;
   const isFree = course.isFree || creditCost === 0;
   const isEnrolled = enrollments.some(e => e.courseId === course.id);
   const canAfford = balance >= creditCost;
+
+  const hasThumbnail = course.thumbnailUrl && !imgError;
 
   const getPriceBadge = () => {
     if (isFree) {
@@ -169,18 +200,40 @@ export function CourseCard({ course }: CourseCardProps) {
       className="group flex flex-col h-full hover-elevate transition-all duration-200"
       data-testid={`card-course-${course.id}`}
     >
-      <div className="relative aspect-video bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-t-lg overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-primary" />
+      <div className="relative aspect-video rounded-t-lg overflow-hidden">
+        {hasThumbnail ? (
+          <img
+            src={course.thumbnailUrl!}
+            alt={course.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setImgError(true)}
+            data-testid={`img-course-thumbnail-${course.id}`}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <BookOpen className="w-8 h-8 text-primary" />
+            </div>
           </div>
-        </div>
-        <div className="absolute top-3 left-3">
+        )}
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
           <LevelBadge level={course.level} />
         </div>
         <div className="absolute top-3 right-3">
           {getPriceBadge()}
         </div>
+        {course.language && (
+          <div className="absolute bottom-3 left-3">
+            <Badge
+              variant="secondary"
+              className="bg-background/80 backdrop-blur-sm text-foreground border-0 text-xs"
+              data-testid={`badge-language-${course.id}`}
+            >
+              <Globe className="w-3 h-3 mr-1" />
+              {getLanguageLabel(course.language)}
+            </Badge>
+          </div>
+        )}
       </div>
 
       <CardHeader className="pb-2">
