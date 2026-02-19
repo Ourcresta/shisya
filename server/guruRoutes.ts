@@ -622,7 +622,7 @@ guruRouter.post("/ai/generate-test", async (req: Request, res: Response) => {
       messages: [
         {
           role: "system",
-          content: `You are an expert educator and test creator working for OurShiksha, an online learning platform. Generate high-quality multiple-choice questions (MCQs) for student assessments on the OurShiksha platform. Each question must have exactly 4 options with only one correct answer. Return ONLY valid JSON, no markdown.`
+          content: `You are an expert educator and test creator for an online learning platform. Generate high-quality multiple-choice questions (MCQs) for student assessments. Each question must have exactly 4 options with only one correct answer. Return ONLY valid JSON, no markdown.`
         },
         {
           role: "user",
@@ -691,7 +691,7 @@ guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
       messages: [
         {
           role: "system",
-          content: `You are an expert educator working for OurShiksha, an online learning platform. You design practical, hands-on projects for students on the OurShiksha platform. Create projects that are engaging, educational, and build portfolio-worthy skills. Return ONLY valid JSON, no markdown.`
+          content: `You are an expert educator for an online learning platform. You design practical, hands-on projects for students. Create projects that are engaging, educational, and build portfolio-worthy skills. Return ONLY valid JSON, no markdown.`
         },
         {
           role: "user",
@@ -752,7 +752,7 @@ guruRouter.post("/ai/generate-lab", async (req: Request, res: Response) => {
       messages: [
         {
           role: "system",
-          content: `You are an expert coding instructor working for OurShiksha, an online learning platform. You design hands-on guided coding labs for students on the OurShiksha platform. Each lab should have clear instructions, starter code with TODO comments, a working solution, and expected console output. Return ONLY valid JSON, no markdown.`
+          content: `You are an expert coding instructor for an online learning platform. You design hands-on guided coding labs for students. Each lab should have clear instructions, starter code with TODO comments, a working solution, and expected console output. Return ONLY valid JSON, no markdown.`
         },
         {
           role: "user",
