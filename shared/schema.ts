@@ -1223,7 +1223,7 @@ export type UshaResponseType = typeof USHA_RESPONSE_TYPES[number];
 export const USHA_HELP_LEVELS = ["minimal", "moderate", "detailed"] as const;
 export type UshaHelpLevel = typeof USHA_HELP_LEVELS[number];
 
-export const USHA_PAGE_TYPES = ["lesson", "lab", "project", "test"] as const;
+export const USHA_PAGE_TYPES = ["lesson", "lab", "project", "test", "general"] as const;
 export type UshaPageType = typeof USHA_PAGE_TYPES[number];
 
 // Supported languages for Usha AI Tutor
@@ -1232,7 +1232,7 @@ export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 
 // Usha request schema
 export const ushaRequestSchema = z.object({
-  courseId: z.number(),
+  courseId: z.number().optional(),
   pageType: z.enum(USHA_PAGE_TYPES),
   message: z.string().min(1).max(1000),
   context: z.object({

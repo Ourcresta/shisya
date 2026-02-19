@@ -369,7 +369,10 @@ function detectLearningState(context: UshaContext, message: string): LearningSta
     return "post-lesson";
   }
   
-  // If on a lab page with lab context, treat as active learning
+  if (context.pageType === "general") {
+    return isGreeting ? "pre-learning" : "learning-active";
+  }
+
   if (context.labId && context.labTitle) {
     return "learning-active";
   }
@@ -495,6 +498,20 @@ function buildContextPrompt(
         break;
       case "test":
         contextDesc += `Help understand concepts for test preparation. NEVER reveal actual test answers.`;
+        break;
+      case "general":
+        contextDesc += `You are in GLOBAL MENTOR mode. The student is browsing the platform generally.
+You can help with:
+- Choosing the right course based on their background and goals
+- Creating career roadmaps and learning paths
+- Tracking their learning progress and suggesting next steps
+- Answering general programming/tech doubts
+- Motivation and encouragement
+- Portfolio and resume guidance
+- Explaining platform features
+
+Be warm, proactive, and helpful. Suggest specific courses when relevant.
+Keep responses concise but meaningful. Use bullet points for recommendations.`;
         break;
       default:
         contextDesc += `Explain concepts freely and encourage exploration.`;
@@ -623,7 +640,7 @@ export function registerUshaRoutes(app: Express): void {
       const { courseId, pageType, message, context, language: reqLanguage } = parseResult.data;
 
       const ushaContext: UshaContext = {
-        courseId,
+        courseId: courseId || 0,
         pageType,
         studentId: userId,
         lessonId: context?.lessonId,
@@ -655,7 +672,7 @@ export function registerUshaRoutes(app: Express): void {
       const misuseCheck = detectMisuse(message, userId);
       if (misuseCheck.isMisuse) {
         const warningResponse = getMisuseResponse(misuseCheck.isRepeated, helpLevel);
-        await saveConversation(userId, courseId, pageType, message, warningResponse);
+        await saveConversation(userId, courseId || 0, pageType, message, warningResponse);
         return res.json(warningResponse);
       }
 
@@ -678,7 +695,7 @@ export function registerUshaRoutes(app: Express): void {
         helpLevel,
       };
 
-      await saveConversation(userId, courseId, pageType, message, response);
+      await saveConversation(userId, courseId || 0, pageType, message, response);
 
       const responseWithMeta = {
         ...response,
