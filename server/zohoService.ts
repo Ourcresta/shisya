@@ -276,10 +276,16 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
       const zohoId = String(tcCourse.courseId || tcCourse.id);
       syncedZohoIds.push(zohoId);
 
+      if (result.created === 0 && result.updated === 0) {
+        console.log(`[Zoho] TC Course keys:`, Object.keys(tcCourse).join(', '));
+        console.log(`[Zoho] TC Course raw (2000 chars):`, JSON.stringify(tcCourse).substring(0, 2000));
+      }
+
       const title = tcCourse.courseName || tcCourse.name || tcCourse.title || "Untitled Course";
       const rawDescription = tcCourse.description || tcCourse.summary || "";
       const description = rawDescription.replace(/<[^>]*>/g, '').trim() || tcCourse.subTitle || "";
-      const thumbnailUrl = tcCourse.thumbnail || tcCourse.image || tcCourse.courseImageURL || null;
+      const thumbnailUrl = tcCourse.thumbnail || tcCourse.image || tcCourse.courseImageURL 
+        || tcCourse.courseImage || tcCourse.imageUrl || tcCourse.imageURL || tcCourse.coverImage || null;
       const isPublished = tcCourse.publishStatus === "1" || tcCourse.publishStatus === 1;
 
       const [existing] = await db.select()
@@ -371,6 +377,71 @@ async function deleteRemovedCourses(activeZohoIds: string[]): Promise<number> {
   return deletedCount;
 }
 
+async function fetchSessionMaterials(sessionId: string): Promise<{ videoUrl: string | null; contentHtml: string | null; materialType: string }> {
+  const config = getConfig();
+  const orgId = config.orgId;
+
+  try {
+    const data = await zohoApiRequest(
+      `/api/v4/${orgId}/session/${sessionId}/sessionMaterials.json`
+    );
+
+    const sessionMaterials = data.sessionMaterials || [];
+    const materials = data.materials || [];
+
+    let videoUrl: string | null = null;
+    let contentHtml: string | null = null;
+    let materialType = "TEXT";
+
+    for (const mat of sessionMaterials) {
+      const resType = String(mat.resourceType || "");
+
+      if (resType === "7" && mat.linkAddress) {
+        videoUrl = mat.linkAddress;
+        materialType = "VIDEO";
+        console.log(`[Zoho] Found embedded video: ${videoUrl}`);
+      }
+
+      if (resType === "6") {
+        materialType = "VIDEO";
+        if (!videoUrl) {
+          const materialId = mat.materialId || mat.material;
+          if (materialId) {
+            videoUrl = `https://our-shiksha.trainercentral.in/portal/session/${sessionId}/material/${materialId}`;
+          }
+          console.log(`[Zoho] Found uploaded video (resourceType 6), materialType set to VIDEO`);
+        }
+      }
+    }
+
+    for (const mat of materials) {
+      if (mat.materialText) {
+        contentHtml = mat.materialText;
+        break;
+      }
+    }
+
+    if (!contentHtml) {
+      for (const mat of sessionMaterials) {
+        if (String(mat.resourceType || "") === "10") {
+          const matchedMat = materials.find((m: any) => 
+            String(m.materialId) === String(mat.materialId || mat.material)
+          );
+          if (matchedMat?.materialText) {
+            contentHtml = matchedMat.materialText;
+            break;
+          }
+        }
+      }
+    }
+
+    return { videoUrl, contentHtml, materialType };
+  } catch (error: any) {
+    console.error(`[Zoho] Failed to fetch materials for session ${sessionId}:`, error.message);
+    return { videoUrl: null, contentHtml: null, materialType: "TEXT" };
+  }
+}
+
 async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number): Promise<void> {
   const tcSections = await fetchCourseSections(zohoCoureId);
   const tcSessions = await fetchCourseSessions(zohoCoureId);
@@ -381,6 +452,15 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
     console.log(`[Zoho] No curriculum data found for course ${localCourseId}, skipping`);
     return;
   }
+
+  console.log(`[Zoho] Fetching session materials for video URLs and content...`);
+  const sessionMaterialsMap = new Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string }>();
+  for (const session of tcSessions) {
+    const sessionId = String(session.sessionId || session.id);
+    const matData = await fetchSessionMaterials(sessionId);
+    sessionMaterialsMap.set(sessionId, matData);
+  }
+  console.log(`[Zoho] Fetched materials for ${sessionMaterialsMap.size} sessions`);
 
   const existingModules = await db.select().from(modules).where(eq(modules.courseId, localCourseId));
   for (const mod of existingModules) {
@@ -396,11 +476,6 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
       const sectionTitle = section.sectionName || section.name || section.title || `Section ${sIdx + 1}`;
       const sectionDesc = section.description || "";
 
-      console.log(`[Zoho] Section ${sIdx}: keys=${Object.keys(section).join(',')}, title="${sectionTitle}"`);
-      if (sIdx === 0) {
-        console.log(`[Zoho] First section full data:`, JSON.stringify(section).substring(0, 1000));
-      }
-
       const [newModule] = await db.insert(modules).values({
         courseId: localCourseId,
         title: sectionTitle,
@@ -413,9 +488,8 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
       const sectionLessons = section.lessons || section.sessions || section.materials || section.sessionMaterials || [];
 
       if (Array.isArray(sectionLessons) && sectionLessons.length > 0) {
-        console.log(`[Zoho] Section "${sectionTitle}" has ${sectionLessons.length} inline lessons`);
         for (let lIdx = 0; lIdx < sectionLessons.length; lIdx++) {
-          await insertLesson(sectionLessons[lIdx], newModule.id, localCourseId, lIdx);
+          await insertLesson(sectionLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap);
         }
       } else {
         const matchedLessons = tcSessions.filter((l: any) => {
@@ -423,18 +497,10 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
           return lSectionId === sectionId;
         });
 
-        console.log(`[Zoho] Section "${sectionTitle}" matched ${matchedLessons.length} lessons from sessions (sectionId: ${sectionId})`);
-        
-        if (matchedLessons.length === 0 && tcSessions.length > 0 && sIdx === 0) {
-          console.log(`[Zoho] DEBUG: First session keys:`, Object.keys(tcSessions[0]).join(','));
-          console.log(`[Zoho] DEBUG: First session data:`, JSON.stringify(tcSessions[0]).substring(0, 500));
-          console.log(`[Zoho] DEBUG: Looking for sectionId "${sectionId}" in sessions`);
-          const sessionSectionIds = tcSessions.map((s: any) => String(s.sectionId || s.section_id || s.sectionID || s.section || "NONE"));
-          console.log(`[Zoho] DEBUG: Session sectionIds found:`, Array.from(new Set(sessionSectionIds)));
-        }
+        console.log(`[Zoho] Section "${sectionTitle}" matched ${matchedLessons.length} lessons`);
 
         for (let lIdx = 0; lIdx < matchedLessons.length; lIdx++) {
-          await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx);
+          await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap);
         }
       }
     }
@@ -446,7 +512,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
     });
 
     if (unassignedSessions.length > 0) {
-      console.log(`[Zoho] ${unassignedSessions.length} sessions don't match any section, creating "Other Lessons" module`);
+      console.log(`[Zoho] ${unassignedSessions.length} sessions unmatched, creating "Other Lessons" module`);
       const [extraModule] = await db.insert(modules).values({
         courseId: localCourseId,
         title: "Other Lessons",
@@ -454,7 +520,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
         orderIndex: tcSections.length + 1,
       }).returning();
       for (let lIdx = 0; lIdx < unassignedSessions.length; lIdx++) {
-        await insertLesson(unassignedSessions[lIdx], extraModule.id, localCourseId, lIdx);
+        await insertLesson(unassignedSessions[lIdx], extraModule.id, localCourseId, lIdx, sessionMaterialsMap);
       }
     }
   } else if (tcSessions.length > 0) {
@@ -468,35 +534,52 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
     }).returning();
 
     for (let lIdx = 0; lIdx < tcSessions.length; lIdx++) {
-      await insertLesson(tcSessions[lIdx], defaultModule.id, localCourseId, lIdx);
+      await insertLesson(tcSessions[lIdx], defaultModule.id, localCourseId, lIdx, sessionMaterialsMap);
     }
   }
 }
 
-async function insertLesson(lesson: any, moduleId: number, courseId: number, index: number): Promise<void> {
+async function insertLesson(
+  lesson: any,
+  moduleId: number,
+  courseId: number,
+  index: number,
+  sessionMaterialsMap?: Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string }>
+): Promise<void> {
   const lessonTitle = lesson.sessionName || lesson.lessonName || lesson.name || lesson.title || `Lesson ${index + 1}`;
-  const rawContent = lesson.description || lesson.content || lesson.summary || "";
-  const lessonContent = rawContent.replace(/<[^>]*>/g, '').trim();
-  const lessonType = lesson.type || lesson.sessionType || lesson.lessonType || "TEXT";
+  const sessionId = String(lesson.sessionId || lesson.id || "");
 
-  const videoUrl = lesson.videoUrl || lesson.video_url || lesson.videoURL
-    || lesson.mediaUrl || lesson.media_url || lesson.streamUrl || lesson.stream_url
-    || lesson.contentUrl || lesson.content_url || lesson.url || null;
+  const matData = sessionMaterialsMap?.get(sessionId);
+
+  let lessonContent = "";
+  if (matData?.contentHtml) {
+    lessonContent = matData.contentHtml;
+  } else {
+    const rawContent = lesson.description || lesson.content || lesson.summary || "";
+    lessonContent = rawContent.replace(/<[^>]*>/g, '').trim();
+  }
+
+  let videoUrl = matData?.videoUrl || null;
+
+  if (!videoUrl) {
+    videoUrl = lesson.videoUrl || lesson.video_url || lesson.videoURL
+      || lesson.mediaUrl || lesson.media_url || lesson.streamUrl || lesson.stream_url
+      || lesson.contentUrl || lesson.content_url || lesson.url || null;
+  }
 
   const durationMinutes = lesson.durationMinutes || lesson.duration_minutes
     || lesson.duration || lesson.sessionDuration || null;
 
-  if (index === 0) {
-    console.log(`[Zoho] First lesson keys:`, Object.keys(lesson));
-    console.log(`[Zoho] First lesson data (500 chars):`, JSON.stringify(lesson).substring(0, 500));
-  }
+  const validVideoUrl = typeof videoUrl === 'string' && videoUrl.startsWith('http') ? videoUrl : null;
+
+  console.log(`[Zoho] Lesson "${lessonTitle}": video=${validVideoUrl ? 'YES' : 'no'}, content=${lessonContent ? `${lessonContent.length} chars` : 'none'}`);
 
   await db.insert(lessons).values({
     moduleId,
     courseId,
     title: lessonTitle,
-    content: lessonContent || `${lessonType} lesson from TrainerCentral`,
-    videoUrl: typeof videoUrl === 'string' && videoUrl.startsWith('http') ? videoUrl : null,
+    content: lessonContent || `Lesson from TrainerCentral`,
+    videoUrl: validVideoUrl,
     durationMinutes: typeof durationMinutes === 'number' ? durationMinutes : null,
     orderIndex: index + 1,
     isPreview: index === 0,
