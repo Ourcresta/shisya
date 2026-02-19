@@ -265,6 +265,7 @@ export default function GuruCourses() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>ID</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Level</TableHead>
@@ -277,6 +278,9 @@ export default function GuruCourses() {
               <TableBody>
                 {filteredCourses.map((course) => (
                   <TableRow key={course.id} data-testid={`row-course-${course.id}`}>
+                    <TableCell className="text-muted-foreground tabular-nums" data-testid={`text-course-id-${course.id}`}>
+                      {course.id}
+                    </TableCell>
                     <TableCell>
                       <Link href={`/guru/courses/${course.id}`}>
                         <span className="font-medium hover:underline cursor-pointer" data-testid={`link-course-${course.id}`}>

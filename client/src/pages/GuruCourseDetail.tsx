@@ -142,7 +142,7 @@ export default function GuruCourseDetail() {
   const [lessonForm, setLessonForm] = useState<LessonForm>(defaultLessonForm);
 
   const [courseEditOpen, setCourseEditOpen] = useState(false);
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner" });
+  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "" });
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/guru/courses", courseId],
@@ -155,7 +155,7 @@ export default function GuruCourseDetail() {
   });
 
   const updateCourseMutation = useMutation({
-    mutationFn: async (data: { title: string; description: string; level: string }) => {
+    mutationFn: async (data: { title: string; description: string; level: string; thumbnailUrl: string; language: string }) => {
       const res = await apiRequest("PUT", `/api/guru/courses/${courseId}`, data);
       return res.json();
     },
@@ -316,7 +316,7 @@ export default function GuruCourseDetail() {
 
   const openEditCourse = () => {
     if (course) {
-      setCourseForm({ title: course.title, description: course.description || "", level: course.level });
+      setCourseForm({ title: course.title, description: course.description || "", level: course.level, thumbnailUrl: course.thumbnailUrl || "", language: course.language || "" });
       setCourseEditOpen(true);
     }
   };
@@ -662,18 +662,64 @@ export default function GuruCourseDetail() {
                 data-testid="input-edit-course-description"
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Level</Label>
+                <Select value={courseForm.level} onValueChange={(v) => setCourseForm({ ...courseForm, level: v })}>
+                  <SelectTrigger data-testid="select-edit-course-level">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Language</Label>
+                <Select value={courseForm.language} onValueChange={(v) => setCourseForm({ ...courseForm, language: v })}>
+                  <SelectTrigger data-testid="select-edit-course-language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">Hindi</SelectItem>
+                    <SelectItem value="ta">Tamil</SelectItem>
+                    <SelectItem value="te">Telugu</SelectItem>
+                    <SelectItem value="kn">Kannada</SelectItem>
+                    <SelectItem value="ml">Malayalam</SelectItem>
+                    <SelectItem value="mr">Marathi</SelectItem>
+                    <SelectItem value="bn">Bengali</SelectItem>
+                    <SelectItem value="gu">Gujarati</SelectItem>
+                    <SelectItem value="pa">Punjabi</SelectItem>
+                    <SelectItem value="ur">Urdu</SelectItem>
+                    <SelectItem value="es">Spanish</SelectItem>
+                    <SelectItem value="fr">French</SelectItem>
+                    <SelectItem value="de">German</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div>
-              <Label>Level</Label>
-              <Select value={courseForm.level} onValueChange={(v) => setCourseForm({ ...courseForm, level: v })}>
-                <SelectTrigger data-testid="select-edit-course-level">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="edit-course-thumbnail">Thumbnail URL</Label>
+              <Input
+                id="edit-course-thumbnail"
+                value={courseForm.thumbnailUrl}
+                onChange={(e) => setCourseForm({ ...courseForm, thumbnailUrl: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+                data-testid="input-edit-course-thumbnail"
+              />
+              {courseForm.thumbnailUrl && (
+                <div className="mt-2 rounded-md overflow-hidden border aspect-video max-w-[200px]">
+                  <img
+                    src={courseForm.thumbnailUrl}
+                    alt="Thumbnail preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
