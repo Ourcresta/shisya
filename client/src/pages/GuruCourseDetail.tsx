@@ -638,12 +638,12 @@ export default function GuruCourseDetail() {
       )}
 
       <Dialog open={courseEditOpen} onOpenChange={setCourseEditOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle data-testid="text-edit-course-dialog-title">Edit Course Info</DialogTitle>
             <DialogDescription>Update course title, description, and level</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-1">
             <div>
               <Label htmlFor="edit-course-title">Title</Label>
               <Input
@@ -740,13 +740,28 @@ export default function GuruCourseDetail() {
                 Google Drive links are auto-converted. Make sure the file is shared as "Anyone with the link".
               </p>
               {courseForm.thumbnailUrl && (
-                <div className="mt-2 rounded-md overflow-hidden border aspect-video max-w-[200px]">
+                <div className="mt-2 rounded-md overflow-hidden border aspect-video max-w-[200px] relative bg-muted">
                   <img
                     src={courseForm.thumbnailUrl}
                     alt="Thumbnail preview"
                     className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'none';
+                      const fallback = img.parentElement?.querySelector('.preview-fallback');
+                      if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                    }}
+                    onLoad={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = 'block';
+                      const fallback = img.parentElement?.querySelector('.preview-fallback');
+                      if (fallback) (fallback as HTMLElement).style.display = 'none';
+                    }}
                   />
+                  <div className="preview-fallback absolute inset-0 items-center justify-center text-xs text-muted-foreground" style={{ display: 'none' }}>
+                    Preview unavailable
+                  </div>
                 </div>
               )}
             </div>
