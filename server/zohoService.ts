@@ -295,6 +295,8 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
 
       console.log(`[Zoho] Syncing course: "${title}" (zohoId: ${zohoId}, published: ${isPublished})`);
 
+      const trainerCentralCourseUrl = `https://shishya.trainercentralsite.in/clientapp/app/course/${zohoId}/course-details`;
+
       let courseId: number;
 
       if (existing) {
@@ -302,6 +304,7 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
           title,
           description,
           thumbnailUrl: thumbnailUrl || existing.thumbnailUrl,
+          trainerCentralCourseUrl: existing.trainerCentralCourseUrl || trainerCentralCourseUrl,
           status: isPublished ? "published" : existing.status,
           updatedAt: new Date(),
         }).where(eq(courses.id, existing.id));
@@ -312,6 +315,7 @@ export async function syncCoursesFromTrainerCentral(): Promise<{
           title,
           description,
           thumbnailUrl,
+          trainerCentralCourseUrl,
           status: isPublished ? "published" : "draft",
           zohoId,
           category: tcCourse.category || "General",
