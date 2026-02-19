@@ -906,6 +906,96 @@ export async function registerRoutes(
   // Import auth middleware
   const { requireAuth } = await import("./auth");
 
+  // ============ TRAINERCENTRAL VERIFICATION ROUTES ============
+
+  app.get("/api/tc/verify/course-progress/:courseId", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const email = req.user?.email;
+      if (!userId || !email) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const courseId = parseInt(req.params.courseId);
+      const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      if (!course.zohoId) {
+        return res.json({
+          verified: true,
+          hasZohoId: false,
+          message: "This course is not linked to TrainerCentral. No verification needed.",
+          progress: { completed: true, progressPercent: 100 }
+        });
+      }
+
+      const { getLearnerCourseProgress } = await import("./zohoService");
+      const progress = await getLearnerCourseProgress(email, course.zohoId);
+
+      res.json({
+        verified: progress.completed,
+        hasZohoId: true,
+        message: progress.completed
+          ? "Course completed on TrainerCentral."
+          : `Course not yet completed on TrainerCentral (${progress.progressPercent}% done). Complete all lessons on TrainerCentral first.`,
+        progress,
+      });
+    } catch (error: any) {
+      console.error("[TC Verify] Course progress error:", error.message);
+      res.json({
+        verified: true,
+        hasZohoId: false,
+        message: "Unable to verify TrainerCentral status. Proceeding without verification.",
+        progress: { completed: true, progressPercent: 100 }
+      });
+    }
+  });
+
+  app.get("/api/tc/verify/certificate-eligibility/:courseId", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const email = req.user?.email;
+      if (!userId || !email) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const courseId = parseInt(req.params.courseId);
+      const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      if (!course.zohoId) {
+        return res.json({
+          eligible: true,
+          hasZohoId: false,
+          message: "This course is not linked to TrainerCentral. Certificate can be generated.",
+        });
+      }
+
+      const { checkLearnerCertificateEligibility } = await import("./zohoService");
+      const result = await checkLearnerCertificateEligibility(email, course.zohoId);
+
+      res.json({
+        eligible: result.eligible,
+        hasZohoId: true,
+        courseCompleted: result.courseCompleted,
+        message: result.message,
+      });
+    } catch (error: any) {
+      console.error("[TC Verify] Certificate eligibility error:", error.message);
+      res.json({
+        eligible: true,
+        hasZohoId: false,
+        message: "Unable to verify TrainerCentral status. Proceeding without verification.",
+      });
+    }
+  });
+
   // POST /api/marksheet/generate - Generate a marksheet for authenticated user
   app.post("/api/marksheet/generate", requireAuth, async (req: any, res) => {
     try {

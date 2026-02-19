@@ -780,3 +780,98 @@ export async function getCourseLearners(courseId: string, limit = 20, startIndex
   const config = getConfig();
   return zohoApiRequest(`/api/v4/${config.orgId}/course/${courseId}/courseMembers.json?filter=3&limit=${limit}&si=${startIndex}`);
 }
+
+export async function getLearnerCourseProgress(email: string, courseZohoId: string): Promise<{
+  completed: boolean;
+  progressPercent: number;
+  completedSessions: number;
+  totalSessions: number;
+  details?: any;
+}> {
+  try {
+    const config = getConfig();
+    const accessToken = await getValidAccessToken();
+
+    const userInfoUrl = `${TRAINERCENTRAL_BASE_URL}/api/v4/${config.orgId}/fetchuserdetails.json?email=${encodeURIComponent(email)}&fetchSignupData=true`;
+    const userResponse = await fetch(userInfoUrl, {
+      headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
+    });
+
+    if (!userResponse.ok) {
+      console.log(`[Zoho] Learner not found on TrainerCentral: ${email}`);
+      return { completed: false, progressPercent: 0, completedSessions: 0, totalSessions: 0 };
+    }
+
+    const userData = await userResponse.json();
+    const userId = userData?.userId || userData?.data?.userId;
+
+    if (!userId) {
+      return { completed: false, progressPercent: 0, completedSessions: 0, totalSessions: 0 };
+    }
+
+    const progressUrl = `${TRAINERCENTRAL_BASE_URL}/api/v4/${config.orgId}/course/${courseZohoId}/courseMembers.json?filter=3&limit=200`;
+    const progressResponse = await fetch(progressUrl, {
+      headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
+    });
+
+    if (!progressResponse.ok) {
+      return { completed: false, progressPercent: 0, completedSessions: 0, totalSessions: 0 };
+    }
+
+    const progressData = await progressResponse.json();
+    const members = progressData?.courseMembers || progressData?.data || [];
+    const learner = Array.isArray(members) ? members.find((m: any) =>
+      m.email?.toLowerCase() === email.toLowerCase() || m.userId === userId
+    ) : null;
+
+    if (!learner) {
+      return { completed: false, progressPercent: 0, completedSessions: 0, totalSessions: 0 };
+    }
+
+    const percent = learner.progressPercent || learner.progress || 0;
+    const completedSessions = learner.completedSessions || 0;
+    const totalSessions = learner.totalSessions || 0;
+
+    return {
+      completed: percent >= 100 || learner.status === "completed",
+      progressPercent: percent,
+      completedSessions,
+      totalSessions,
+      details: learner,
+    };
+  } catch (error: any) {
+    console.error("[Zoho] getLearnerCourseProgress error:", error.message);
+    return { completed: false, progressPercent: 0, completedSessions: 0, totalSessions: 0 };
+  }
+}
+
+export async function checkLearnerCertificateEligibility(email: string, courseZohoId: string): Promise<{
+  eligible: boolean;
+  courseCompleted: boolean;
+  message: string;
+}> {
+  try {
+    const progress = await getLearnerCourseProgress(email, courseZohoId);
+
+    if (progress.completed) {
+      return {
+        eligible: true,
+        courseCompleted: true,
+        message: "Course completed on TrainerCentral. Certificate can be issued.",
+      };
+    }
+
+    return {
+      eligible: false,
+      courseCompleted: false,
+      message: `Course not yet completed on TrainerCentral (${progress.progressPercent}% done). Complete all lessons on TrainerCentral first.`,
+    };
+  } catch (error: any) {
+    console.error("[Zoho] checkLearnerCertificateEligibility error:", error.message);
+    return {
+      eligible: false,
+      courseCompleted: false,
+      message: "Unable to verify TrainerCentral completion. Please try again later.",
+    };
+  }
+}

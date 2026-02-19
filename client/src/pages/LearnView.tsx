@@ -22,7 +22,8 @@ import {
   Lightbulb,
   ExternalLink,
   LinkIcon,
-  Play
+  Play,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
 import { useCredits } from "@/contexts/CreditContext";
@@ -322,6 +324,7 @@ export default function LearnView() {
           ) : selectedLessonId ? (
             <LessonContent 
               lessonId={selectedLessonId}
+              courseId={courseIdNum}
               courseTitle={course?.title}
               courseTcUrl={course?.trainerCentralCourseUrl}
               isCompleted={isLessonCompleted(selectedLessonId)}
@@ -371,6 +374,7 @@ export default function LearnView() {
 
 interface LessonContentProps {
   lessonId: number;
+  courseId?: number;
   courseTitle?: string;
   courseTcUrl?: string | null;
   isCompleted: boolean;
@@ -384,6 +388,7 @@ interface LessonContentProps {
 
 function LessonContent({ 
   lessonId, 
+  courseId,
   courseTcUrl,
   isCompleted, 
   onToggleComplete,
@@ -609,24 +614,12 @@ function LessonContent({
               <span>Previous</span>
             </Button>
 
-            <Button
-              onClick={onToggleComplete}
-              variant={isCompleted ? "secondary" : "default"}
-              className="gap-2 flex-1 max-w-[180px]"
-              data-testid="button-mark-complete"
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Completed</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  <span>Mark Complete</span>
-                </>
-              )}
-            </Button>
+            <MarkCompleteButton
+              courseId={courseId}
+              courseTcUrl={courseTcUrl}
+              isCompleted={isCompleted}
+              onToggleComplete={onToggleComplete}
+            />
 
             {nextLesson ? (
               <Button 
@@ -781,6 +774,99 @@ function LessonContentSkeleton() {
           ))}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function MarkCompleteButton({ 
+  courseId, 
+  courseTcUrl, 
+  isCompleted, 
+  onToggleComplete 
+}: { 
+  courseId?: number; 
+  courseTcUrl?: string | null; 
+  isCompleted: boolean; 
+  onToggleComplete: () => void;
+}) {
+  const [verifying, setVerifying] = useState(false);
+  const [tcMessage, setTcMessage] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleMarkComplete = async () => {
+    if (isCompleted) {
+      onToggleComplete();
+      return;
+    }
+
+    if (!courseTcUrl || !courseId) {
+      onToggleComplete();
+      return;
+    }
+
+    setVerifying(true);
+    setTcMessage(null);
+
+    try {
+      const response = await fetch(`/api/tc/verify/course-progress/${courseId}`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        onToggleComplete();
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!data.hasZohoId || data.verified) {
+        onToggleComplete();
+      } else {
+        setTcMessage(data.message);
+        toast({
+          title: "TrainerCentral Verification",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    } catch {
+      onToggleComplete();
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-1 flex-1 max-w-[180px]">
+      <Button
+        onClick={handleMarkComplete}
+        variant={isCompleted ? "secondary" : "default"}
+        className="gap-2 w-full"
+        disabled={verifying}
+        data-testid="button-mark-complete"
+      >
+        {verifying ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Verifying...</span>
+          </>
+        ) : isCompleted ? (
+          <>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <span>Completed</span>
+          </>
+        ) : (
+          <>
+            <Circle className="w-4 h-4" />
+            <span>Mark Complete</span>
+          </>
+        )}
+      </Button>
+      {tcMessage && (
+        <p className="text-xs text-destructive text-center max-w-[200px]">
+          {tcMessage}
+        </p>
+      )}
     </div>
   );
 }
