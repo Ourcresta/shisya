@@ -15,10 +15,11 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
-  const skillsList = Array.isArray(course.skills)
-    ? course.skills
-    : typeof course.skills === "string"
-      ? course.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+  const rawSkills = course.skills;
+  const skillsList: string[] = Array.isArray(rawSkills)
+    ? rawSkills
+    : typeof rawSkills === "string"
+      ? rawSkills.split(",").map((s) => s.trim()).filter(Boolean)
       : [];
   const skills = skillsList.slice(0, 3);
   const hasMoreSkills = skillsList.length > 3;
