@@ -53,6 +53,7 @@ export const lessons = pgTable("lessons", {
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content"),
   videoUrl: text("video_url"),
+  trainerCentralUrl: text("trainer_central_url"),
   durationMinutes: integer("duration_minutes"),
   orderIndex: integer("order_index").notNull().default(0),
   isPreview: boolean("is_preview").notNull().default(false),
@@ -886,6 +887,7 @@ export const lessonSchema = z.object({
   orderIndex: z.number(),
   estimatedTime: z.string().nullable(),
   videoUrl: z.string().nullable(),
+  trainerCentralUrl: z.string().nullable().optional(),
   externalResources: z.array(z.object({
     title: z.string(),
     url: z.string(),

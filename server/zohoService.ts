@@ -377,7 +377,7 @@ async function deleteRemovedCourses(activeZohoIds: string[]): Promise<number> {
   return deletedCount;
 }
 
-async function fetchSessionMaterials(sessionId: string): Promise<{ videoUrl: string | null; contentHtml: string | null; materialType: string }> {
+async function fetchSessionMaterials(sessionId: string, zohoCourseId?: string): Promise<{ videoUrl: string | null; contentHtml: string | null; materialType: string; hasUploadedVideo: boolean }> {
   const config = getConfig();
   const orgId = config.orgId;
 
@@ -392,6 +392,7 @@ async function fetchSessionMaterials(sessionId: string): Promise<{ videoUrl: str
     let videoUrl: string | null = null;
     let contentHtml: string | null = null;
     let materialType = "TEXT";
+    let hasUploadedVideo = false;
 
     for (const mat of sessionMaterials) {
       const resType = String(mat.resourceType || "");
@@ -404,13 +405,8 @@ async function fetchSessionMaterials(sessionId: string): Promise<{ videoUrl: str
 
       if (resType === "6") {
         materialType = "VIDEO";
-        if (!videoUrl) {
-          const materialId = mat.materialId || mat.material;
-          if (materialId) {
-            videoUrl = `https://our-shiksha.trainercentral.in/portal/session/${sessionId}/material/${materialId}`;
-          }
-          console.log(`[Zoho] Found uploaded video (resourceType 6), materialType set to VIDEO`);
-        }
+        hasUploadedVideo = true;
+        console.log(`[Zoho] Found uploaded video (resourceType 6) in session ${sessionId}`);
       }
     }
 
@@ -435,10 +431,10 @@ async function fetchSessionMaterials(sessionId: string): Promise<{ videoUrl: str
       }
     }
 
-    return { videoUrl, contentHtml, materialType };
+    return { videoUrl, contentHtml, materialType, hasUploadedVideo };
   } catch (error: any) {
     console.error(`[Zoho] Failed to fetch materials for session ${sessionId}:`, error.message);
-    return { videoUrl: null, contentHtml: null, materialType: "TEXT" };
+    return { videoUrl: null, contentHtml: null, materialType: "TEXT", hasUploadedVideo: false };
   }
 }
 
@@ -454,10 +450,10 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
   }
 
   console.log(`[Zoho] Fetching session materials for video URLs and content...`);
-  const sessionMaterialsMap = new Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string }>();
+  const sessionMaterialsMap = new Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string; hasUploadedVideo: boolean }>();
   for (const session of tcSessions) {
     const sessionId = String(session.sessionId || session.id);
-    const matData = await fetchSessionMaterials(sessionId);
+    const matData = await fetchSessionMaterials(sessionId, zohoCoureId);
     sessionMaterialsMap.set(sessionId, matData);
   }
   console.log(`[Zoho] Fetched materials for ${sessionMaterialsMap.size} sessions`);
@@ -489,7 +485,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
 
       if (Array.isArray(sectionLessons) && sectionLessons.length > 0) {
         for (let lIdx = 0; lIdx < sectionLessons.length; lIdx++) {
-          await insertLesson(sectionLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap);
+          await insertLesson(sectionLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap, zohoCoureId);
         }
       } else {
         const matchedLessons = tcSessions.filter((l: any) => {
@@ -500,7 +496,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
         console.log(`[Zoho] Section "${sectionTitle}" matched ${matchedLessons.length} lessons`);
 
         for (let lIdx = 0; lIdx < matchedLessons.length; lIdx++) {
-          await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap);
+          await insertLesson(matchedLessons[lIdx], newModule.id, localCourseId, lIdx, sessionMaterialsMap, zohoCoureId);
         }
       }
     }
@@ -520,7 +516,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
         orderIndex: tcSections.length + 1,
       }).returning();
       for (let lIdx = 0; lIdx < unassignedSessions.length; lIdx++) {
-        await insertLesson(unassignedSessions[lIdx], extraModule.id, localCourseId, lIdx, sessionMaterialsMap);
+        await insertLesson(unassignedSessions[lIdx], extraModule.id, localCourseId, lIdx, sessionMaterialsMap, zohoCoureId);
       }
     }
   } else if (tcSessions.length > 0) {
@@ -534,7 +530,7 @@ async function syncCourseCurriculum(zohoCoureId: string, localCourseId: number):
     }).returning();
 
     for (let lIdx = 0; lIdx < tcSessions.length; lIdx++) {
-      await insertLesson(tcSessions[lIdx], defaultModule.id, localCourseId, lIdx, sessionMaterialsMap);
+      await insertLesson(tcSessions[lIdx], defaultModule.id, localCourseId, lIdx, sessionMaterialsMap, zohoCoureId);
     }
   }
 }
@@ -544,7 +540,8 @@ async function insertLesson(
   moduleId: number,
   courseId: number,
   index: number,
-  sessionMaterialsMap?: Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string }>
+  sessionMaterialsMap?: Map<string, { videoUrl: string | null; contentHtml: string | null; materialType: string; hasUploadedVideo: boolean }>,
+  zohoCourseId?: string
 ): Promise<void> {
   const lessonTitle = lesson.sessionName || lesson.lessonName || lesson.name || lesson.title || `Lesson ${index + 1}`;
   const sessionId = String(lesson.sessionId || lesson.id || "");
@@ -572,7 +569,13 @@ async function insertLesson(
 
   const validVideoUrl = typeof videoUrl === 'string' && videoUrl.startsWith('http') ? videoUrl : null;
 
-  console.log(`[Zoho] Lesson "${lessonTitle}": video=${validVideoUrl ? 'YES' : 'no'}, content=${lessonContent ? `${lessonContent.length} chars` : 'none'}`);
+  let trainerCentralUrl: string | null = null;
+  if (matData?.hasUploadedVideo && !validVideoUrl && zohoCourseId && sessionId) {
+    trainerCentralUrl = `https://our-shiksha.trainercentral.in/course/attend?previouspage=clientapp#/course/${zohoCourseId}/attend/section/${sessionId}`;
+    console.log(`[Zoho] Lesson "${lessonTitle}": uploaded video, TC link=${trainerCentralUrl}`);
+  }
+
+  console.log(`[Zoho] Lesson "${lessonTitle}": video=${validVideoUrl ? 'YES' : 'no'}, uploadedVideo=${matData?.hasUploadedVideo ? 'YES' : 'no'}, content=${lessonContent ? `${lessonContent.length} chars` : 'none'}`);
 
   await db.insert(lessons).values({
     moduleId,
@@ -580,6 +583,7 @@ async function insertLesson(
     title: lessonTitle,
     content: lessonContent || `Lesson from TrainerCentral`,
     videoUrl: validVideoUrl,
+    trainerCentralUrl,
     durationMinutes: typeof durationMinutes === 'number' ? durationMinutes : null,
     orderIndex: index + 1,
     isPreview: index === 0,
