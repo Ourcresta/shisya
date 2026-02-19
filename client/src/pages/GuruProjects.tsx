@@ -21,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, FolderKanban } from "lucide-react";
+import { Plus, Pencil, Trash2, FolderKanban, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface ProjectItem {
@@ -62,6 +62,20 @@ const defaultForm: ProjectForm = {
   estimatedHours: "",
 };
 
+interface AIProjectForm {
+  courseId: number | null;
+  level: string;
+}
+
+interface AIGeneratedProject {
+  title: string;
+  description: string;
+  difficulty: string;
+  requirements: string;
+  resources: string;
+  estimatedHours: number;
+}
+
 export default function GuruProjects() {
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
@@ -69,6 +83,13 @@ export default function GuruProjects() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [form, setForm] = useState<ProjectForm>(defaultForm);
+
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiPreviewOpen, setAiPreviewOpen] = useState(false);
+  const [aiForm, setAiForm] = useState<AIProjectForm>({ courseId: null, level: "beginner" });
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiResult, setAiResult] = useState<AIGeneratedProject | null>(null);
+  const [aiSelectedCourseId, setAiSelectedCourseId] = useState<number | null>(null);
 
   const { data: projectList, isLoading } = useQuery<ProjectItem[]>({
     queryKey: ["/api/guru/projects"],
@@ -175,6 +196,44 @@ export default function GuruProjects() {
     setDeleteOpen(true);
   };
 
+  const handleAiGenerate = async () => {
+    if (!aiForm.courseId) return;
+    const course = (courseOptions || []).find((c) => c.id === aiForm.courseId);
+    if (!course) return;
+
+    setAiGenerating(true);
+    try {
+      const res = await apiRequest("POST", "/api/guru/ai/generate-project", {
+        courseTitle: course.title,
+        level: aiForm.level,
+      });
+      const data = await res.json();
+      setAiResult(data);
+      setAiSelectedCourseId(aiForm.courseId);
+      setAiDialogOpen(false);
+      setAiPreviewOpen(true);
+    } catch (error: any) {
+      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAiSave = () => {
+    if (!aiResult || !aiSelectedCourseId) return;
+    createMutation.mutate({
+      courseId: aiSelectedCourseId,
+      title: aiResult.title,
+      description: aiResult.description,
+      difficulty: aiResult.difficulty || "medium",
+      requirements: aiResult.requirements || null,
+      resources: aiResult.resources || null,
+      estimatedHours: aiResult.estimatedHours || null,
+    });
+    setAiPreviewOpen(false);
+    setAiResult(null);
+  };
+
   const difficultyColors: Record<string, string> = {
     easy: "bg-green-500/10 text-green-700 dark:text-green-400",
     medium: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
@@ -192,13 +251,23 @@ export default function GuruProjects() {
             Manage capstone assignments
           </p>
         </div>
-        <Button
-          onClick={() => { setForm(defaultForm); setCreateOpen(true); }}
-          data-testid="button-create-project"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Project
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => { setAiForm({ courseId: null, level: "beginner" }); setAiDialogOpen(true); }}
+            data-testid="button-ai-generate-project"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Generate
+          </Button>
+          <Button
+            onClick={() => { setForm(defaultForm); setCreateOpen(true); }}
+            data-testid="button-create-project"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Project
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -360,6 +429,148 @@ export default function GuruProjects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-project-dialog-title">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                AI Generate Project
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Select a course and difficulty level. AI will design a project automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Course *</Label>
+              <Select
+                value={aiForm.courseId ? String(aiForm.courseId) : ""}
+                onValueChange={(v) => setAiForm({ ...aiForm, courseId: parseInt(v) })}
+              >
+                <SelectTrigger data-testid="select-ai-project-course">
+                  <SelectValue placeholder="Select a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(courseOptions || []).map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Difficulty Level</Label>
+              <Select value={aiForm.level} onValueChange={(v) => setAiForm({ ...aiForm, level: v })}>
+                <SelectTrigger data-testid="select-ai-project-level">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiDialogOpen(false)} data-testid="button-cancel-ai-project">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAiGenerate}
+              disabled={!aiForm.courseId || aiGenerating}
+              data-testid="button-submit-ai-project"
+            >
+              {aiGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={aiPreviewOpen} onOpenChange={setAiPreviewOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-preview-project-title">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                AI Generated Project Preview
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Review the generated project. You can save it as-is or close and make manual changes.
+            </DialogDescription>
+          </DialogHeader>
+          {aiResult && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Title</Label>
+                  <p className="font-medium" data-testid="text-ai-preview-project-name">{aiResult.title}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Course</Label>
+                  <p className="font-medium" data-testid="text-ai-preview-project-course">
+                    {(courseOptions || []).find((c) => c.id === aiSelectedCourseId)?.title}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge
+                  variant="secondary"
+                  className={`capitalize no-default-hover-elevate no-default-active-elevate ${difficultyColors[aiResult.difficulty] || ""}`}
+                >
+                  {aiResult.difficulty}
+                </Badge>
+                {aiResult.estimatedHours && (
+                  <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">
+                    {aiResult.estimatedHours} hours
+                  </Badge>
+                )}
+              </div>
+              <div>
+                <Label className="text-muted-foreground text-xs">Description</Label>
+                <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-desc">{aiResult.description}</p>
+              </div>
+              {aiResult.requirements && (
+                <div>
+                  <Label className="text-muted-foreground text-xs">Requirements</Label>
+                  <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-reqs">{aiResult.requirements}</p>
+                </div>
+              )}
+              {aiResult.resources && (
+                <div>
+                  <Label className="text-muted-foreground text-xs">Resources</Label>
+                  <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-resources">{aiResult.resources}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAiPreviewOpen(false); setAiResult(null); }} data-testid="button-discard-ai-project">
+              Discard
+            </Button>
+            <Button
+              onClick={handleAiSave}
+              disabled={createMutation.isPending}
+              data-testid="button-save-ai-project"
+            >
+              {createMutation.isPending ? "Saving..." : "Save Project"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

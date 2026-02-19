@@ -22,7 +22,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ClipboardCheck, X } from "lucide-react";
+import { Plus, Pencil, Trash2, ClipboardCheck, X, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface TestItem {
@@ -91,6 +91,20 @@ function parseQuestions(q: string | undefined | null): QuestionItem[] {
   }
 }
 
+interface AIGenerateForm {
+  courseId: number | null;
+  level: string;
+  questionCount: number;
+}
+
+interface AIGeneratedTest {
+  title: string;
+  description: string;
+  durationMinutes: number;
+  passingPercentage: number;
+  questions: QuestionItem[];
+}
+
 export default function GuruTests() {
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
@@ -99,6 +113,13 @@ export default function GuruTests() {
   const [selectedTest, setSelectedTest] = useState<TestItem | null>(null);
   const [form, setForm] = useState<TestForm>(defaultForm);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
+
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiPreviewOpen, setAiPreviewOpen] = useState(false);
+  const [aiForm, setAiForm] = useState<AIGenerateForm>({ courseId: null, level: "beginner", questionCount: 10 });
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiResult, setAiResult] = useState<AIGeneratedTest | null>(null);
+  const [aiSelectedCourseId, setAiSelectedCourseId] = useState<number | null>(null);
 
   const { data: testList, isLoading } = useQuery<TestItem[]>({
     queryKey: ["/api/guru/tests"],
@@ -241,6 +262,47 @@ export default function GuruTests() {
     setQuestions(updated);
   };
 
+  const handleAiGenerate = async () => {
+    if (!aiForm.courseId) return;
+    const course = (courseOptions || []).find((c) => c.id === aiForm.courseId);
+    if (!course) return;
+
+    setAiGenerating(true);
+    try {
+      const res = await apiRequest("POST", "/api/guru/ai/generate-test", {
+        courseTitle: course.title,
+        level: aiForm.level,
+        questionCount: aiForm.questionCount,
+      });
+      const data = await res.json();
+      setAiResult(data);
+      setAiSelectedCourseId(aiForm.courseId);
+      setAiDialogOpen(false);
+      setAiPreviewOpen(true);
+    } catch (error: any) {
+      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAiSave = () => {
+    if (!aiResult || !aiSelectedCourseId) return;
+    createMutation.mutate({
+      courseId: aiSelectedCourseId,
+      title: aiResult.title,
+      description: aiResult.description || null,
+      durationMinutes: aiResult.durationMinutes || 30,
+      passingPercentage: aiResult.passingPercentage || 60,
+      maxAttempts: null,
+      shuffleQuestions: true,
+      showCorrectAnswers: false,
+      questions: JSON.stringify(aiResult.questions),
+    });
+    setAiPreviewOpen(false);
+    setAiResult(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -252,13 +314,23 @@ export default function GuruTests() {
             Build and manage assessments
           </p>
         </div>
-        <Button
-          onClick={() => { setForm(defaultForm); setQuestions([]); setCreateOpen(true); }}
-          data-testid="button-create-test"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Test
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => { setAiForm({ courseId: null, level: "beginner", questionCount: 10 }); setAiDialogOpen(true); }}
+            data-testid="button-ai-generate-test"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Generate
+          </Button>
+          <Button
+            onClick={() => { setForm(defaultForm); setQuestions([]); setCreateOpen(true); }}
+            data-testid="button-create-test"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Test
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -424,6 +496,175 @@ export default function GuruTests() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-test-dialog-title">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                AI Generate Test
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Select a course and difficulty level. AI will generate questions automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Course *</Label>
+              <Select
+                value={aiForm.courseId ? String(aiForm.courseId) : ""}
+                onValueChange={(v) => setAiForm({ ...aiForm, courseId: parseInt(v) })}
+              >
+                <SelectTrigger data-testid="select-ai-test-course">
+                  <SelectValue placeholder="Select a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(courseOptions || []).map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Difficulty Level</Label>
+              <Select value={aiForm.level} onValueChange={(v) => setAiForm({ ...aiForm, level: v })}>
+                <SelectTrigger data-testid="select-ai-test-level">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Number of Questions (5-20)</Label>
+              <Input
+                type="number"
+                min={5}
+                max={20}
+                value={aiForm.questionCount}
+                onChange={(e) => setAiForm({ ...aiForm, questionCount: Math.min(20, Math.max(5, parseInt(e.target.value) || 10)) })}
+                data-testid="input-ai-test-question-count"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiDialogOpen(false)} data-testid="button-cancel-ai-test">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAiGenerate}
+              disabled={!aiForm.courseId || aiGenerating}
+              data-testid="button-submit-ai-test"
+            >
+              {aiGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={aiPreviewOpen} onOpenChange={setAiPreviewOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-preview-test-title">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                AI Generated Test Preview
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Review the generated test. You can save it as-is or close and make manual changes.
+            </DialogDescription>
+          </DialogHeader>
+          {aiResult && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Title</Label>
+                  <p className="font-medium" data-testid="text-ai-preview-title">{aiResult.title}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Course</Label>
+                  <p className="font-medium" data-testid="text-ai-preview-course">
+                    {(courseOptions || []).find((c) => c.id === aiSelectedCourseId)?.title}
+                  </p>
+                </div>
+              </div>
+              {aiResult.description && (
+                <div>
+                  <Label className="text-muted-foreground text-xs">Description</Label>
+                  <p className="text-sm" data-testid="text-ai-preview-description">{aiResult.description}</p>
+                </div>
+              )}
+              <div className="flex items-center gap-4 flex-wrap">
+                <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">
+                  {aiResult.durationMinutes} min
+                </Badge>
+                <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">
+                  Passing: {aiResult.passingPercentage}%
+                </Badge>
+                <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">
+                  {aiResult.questions.length} questions
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Questions</Label>
+                {aiResult.questions.map((q, idx) => (
+                  <Card key={idx} data-testid={`card-ai-preview-question-${idx}`}>
+                    <CardContent className="p-4 space-y-2">
+                      <p className="font-medium text-sm">
+                        <span className="text-muted-foreground mr-2">Q{idx + 1}.</span>
+                        {q.question}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {q.options.map((opt, oIdx) => (
+                          <div
+                            key={oIdx}
+                            className={`text-sm rounded-md px-3 py-2 ${
+                              oIdx === q.correctAnswer
+                                ? "bg-green-500/10 text-green-700 dark:text-green-400 font-medium"
+                                : "bg-muted"
+                            }`}
+                            data-testid={`text-ai-preview-option-${idx}-${oIdx}`}
+                          >
+                            {String.fromCharCode(65 + oIdx)}. {opt}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAiPreviewOpen(false); setAiResult(null); }} data-testid="button-discard-ai-test">
+              Discard
+            </Button>
+            <Button
+              onClick={handleAiSave}
+              disabled={createMutation.isPending}
+              data-testid="button-save-ai-test"
+            >
+              {createMutation.isPending ? "Saving..." : "Save Test"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
