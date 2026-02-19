@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
-import { Bell, Package, Tag, CreditCard, Award, BookOpen, AlertCircle, Info, Check, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Bell, Package, Tag, CreditCard, Award, BookOpen, AlertCircle, Info, Check, X, ClipboardCheck, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,7 +11,10 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { Notification } from "@shared/schema";
+import { getCourseProgress } from "@/lib/progress";
+import { getTestAttempts } from "@/lib/testAttempts";
+import { getAllSubmissions } from "@/lib/submissions";
+import type { Notification, Course } from "@shared/schema";
 
 const POLL_INTERVAL = 30000; // 30 seconds
 
@@ -57,6 +61,39 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: courses = [] } = useQuery<Course[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const pendingActions = useMemo(() => {
+    const allTestAttempts = getTestAttempts() as Record<string, any>;
+    const allSubmissions = getAllSubmissions() as Record<string, any>;
+    const tests: { courseId: number; title: string }[] = [];
+    const projects: { courseId: number; title: string }[] = [];
+
+    courses.forEach((course) => {
+      const progress = getCourseProgress(course.id);
+      const completedLessons = progress.completedLessons.length;
+      const progressPercent = completedLessons > 0 ? Math.min(Math.round((completedLessons / 10) * 100), 100) : 0;
+
+      if (progressPercent === 100) {
+        const attempt = allTestAttempts[course.id.toString()];
+        if (!attempt || !attempt.passed) {
+          tests.push({ courseId: course.id, title: course.title });
+        }
+
+        if (course.projectRequired) {
+          const submission = allSubmissions[course.id.toString()];
+          if (!submission) {
+            projects.push({ courseId: course.id, title: course.title });
+          }
+        }
+      }
+    });
+
+    return { tests, projects, total: tests.length + projects.length };
+  }, [courses]);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -153,12 +190,12 @@ export function NotificationBell() {
           data-testid="button-notifications"
         >
           <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
+          {(unreadCount + pendingActions.total) > 0 && (
             <Badge
               variant="destructive"
               className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs"
             >
-              {unreadCount > 99 ? "99+" : unreadCount}
+              {(unreadCount + pendingActions.total) > 99 ? "99+" : unreadCount + pendingActions.total}
             </Badge>
           )}
         </Button>
@@ -185,7 +222,47 @@ export function NotificationBell() {
           )}
         </div>
 
-        <ScrollArea className="h-[300px]">
+        {pendingActions.total > 0 && (
+          <div className="border-b">
+            <div className="px-3 pt-2 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Pending Actions
+              </span>
+            </div>
+            <div className="px-2 pb-2 space-y-1">
+              {pendingActions.tests.map((item) => (
+                <div
+                  key={`test-${item.courseId}`}
+                  className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover-elevate"
+                  onClick={() => { setIsOpen(false); setLocation(`/shishya/tests/${item.courseId}`); }}
+                  data-testid={`pending-action-test-${item.courseId}`}
+                >
+                  <ClipboardCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium truncate">Take Test</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{item.title}</p>
+                  </div>
+                </div>
+              ))}
+              {pendingActions.projects.map((item) => (
+                <div
+                  key={`project-${item.courseId}`}
+                  className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover-elevate"
+                  onClick={() => { setIsOpen(false); setLocation(`/shishya/projects/${item.courseId}`); }}
+                  data-testid={`pending-action-project-${item.courseId}`}
+                >
+                  <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium truncate">Submit Project</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{item.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <ScrollArea className={pendingActions.total > 0 ? "h-[220px]" : "h-[300px]"}>
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Bell className="w-10 h-10 text-muted-foreground/50 mb-2" />
