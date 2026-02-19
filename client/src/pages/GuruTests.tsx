@@ -23,6 +23,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, ClipboardCheck, X, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
+import { AiGenerateDialog } from "@/components/guru/AiGenerateDialog";
 import { Label } from "@/components/ui/label";
 
 interface TestItem {
@@ -91,12 +92,6 @@ function parseQuestions(q: string | undefined | null): QuestionItem[] {
   }
 }
 
-interface AIGenerateForm {
-  courseId: number | null;
-  level: string;
-  questionCount: number;
-}
-
 interface AIGeneratedTest {
   title: string;
   description: string;
@@ -116,7 +111,7 @@ export default function GuruTests() {
 
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [aiPreviewOpen, setAiPreviewOpen] = useState(false);
-  const [aiForm, setAiForm] = useState<AIGenerateForm>({ courseId: null, level: "beginner", questionCount: 10 });
+  const [aiQuestionCount, setAiQuestionCount] = useState(10);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiResult, setAiResult] = useState<AIGeneratedTest | null>(null);
   const [aiSelectedCourseId, setAiSelectedCourseId] = useState<number | null>(null);
@@ -262,21 +257,20 @@ export default function GuruTests() {
     setQuestions(updated);
   };
 
-  const handleAiGenerate = async () => {
-    if (!aiForm.courseId) return;
-    const course = (courseOptions || []).find((c) => c.id === aiForm.courseId);
+  const handleAiGenerate = async ({ courseId, level }: { courseId: number; level: string }) => {
+    const course = (courseOptions || []).find((c) => c.id === courseId);
     if (!course) return;
 
     setAiGenerating(true);
     try {
       const res = await apiRequest("POST", "/api/guru/ai/generate-test", {
         courseTitle: course.title,
-        level: aiForm.level,
-        questionCount: aiForm.questionCount,
+        level,
+        questionCount: aiQuestionCount,
       });
       const data = await res.json();
       setAiResult(data);
-      setAiSelectedCourseId(aiForm.courseId);
+      setAiSelectedCourseId(courseId);
       setAiDialogOpen(false);
       setAiPreviewOpen(true);
     } catch (error: any) {
@@ -317,7 +311,7 @@ export default function GuruTests() {
         <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
-            onClick={() => { setAiForm({ courseId: null, level: "beginner", questionCount: 10 }); setAiDialogOpen(true); }}
+            onClick={() => { setAiQuestionCount(10); setAiDialogOpen(true); }}
             data-testid="button-ai-generate-test"
           >
             <Sparkles className="w-4 h-4 mr-2" />
@@ -497,86 +491,29 @@ export default function GuruTests() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle data-testid="text-ai-test-dialog-title">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                AI Generate Test
-              </div>
-            </DialogTitle>
-            <DialogDescription>
-              Select a course and difficulty level. AI will generate questions automatically.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Course *</Label>
-              <Select
-                value={aiForm.courseId ? String(aiForm.courseId) : ""}
-                onValueChange={(v) => setAiForm({ ...aiForm, courseId: parseInt(v) })}
-              >
-                <SelectTrigger data-testid="select-ai-test-course">
-                  <SelectValue placeholder="Select a course" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(courseOptions || []).map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Difficulty Level</Label>
-              <Select value={aiForm.level} onValueChange={(v) => setAiForm({ ...aiForm, level: v })}>
-                <SelectTrigger data-testid="select-ai-test-level">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                  <SelectItem value="masters">Masters</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Number of Questions (5-20)</Label>
-              <Input
-                type="number"
-                min={5}
-                max={20}
-                value={aiForm.questionCount}
-                onChange={(e) => setAiForm({ ...aiForm, questionCount: Math.min(20, Math.max(5, parseInt(e.target.value) || 10)) })}
-                data-testid="input-ai-test-question-count"
-              />
-            </div>
+      <AiGenerateDialog
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
+        title="AI Generate Test"
+        description="Select a course and difficulty level. AI will generate questions automatically."
+        courses={courseOptions || []}
+        onGenerate={handleAiGenerate}
+        isGenerating={aiGenerating}
+        testIdPrefix="ai-test"
+        extraFields={() => (
+          <div>
+            <Label>Number of Questions (5-20)</Label>
+            <Input
+              type="number"
+              min={5}
+              max={20}
+              value={aiQuestionCount}
+              onChange={(e) => setAiQuestionCount(Math.min(20, Math.max(5, parseInt(e.target.value) || 10)))}
+              data-testid="input-ai-test-question-count"
+            />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAiDialogOpen(false)} data-testid="button-cancel-ai-test">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAiGenerate}
-              disabled={!aiForm.courseId || aiGenerating}
-              data-testid="button-submit-ai-test"
-            >
-              {aiGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generate
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+      />
 
       <Dialog open={aiPreviewOpen} onOpenChange={setAiPreviewOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
