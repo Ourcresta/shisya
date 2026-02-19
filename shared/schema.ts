@@ -527,6 +527,33 @@ export const zohoTokens = pgTable("zoho_tokens", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ============ PRICING PLANS TABLE (Admin manages, public reads) ============
+
+export const pricingPlans = pgTable("pricing_plans", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  subtitle: varchar("subtitle", { length: 100 }),
+  price: varchar("price", { length: 50 }).notNull(),
+  period: varchar("period", { length: 50 }),
+  coins: varchar("coins", { length: 50 }),
+  coinsLabel: varchar("coins_label", { length: 50 }),
+  iconName: varchar("icon_name", { length: 50 }).notNull().default("Gift"),
+  features: text("features").notNull().default("[]"),
+  notIncluded: text("not_included").notNull().default("[]"),
+  cta: varchar("cta", { length: 100 }).notNull().default("Get Started"),
+  href: varchar("href", { length: 255 }).notNull().default("/signup"),
+  buttonVariant: varchar("button_variant", { length: 20 }).notNull().default("outline"),
+  popular: boolean("popular").notNull().default(false),
+  orderIndex: integer("order_index").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertPricingPlanSchema = createInsertSchema(pricingPlans).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertPricingPlan = z.infer<typeof insertPricingPlanSchema>;
+export type PricingPlan = typeof pricingPlans.$inferSelect;
+
 // ============ BACKWARD COMPATIBILITY ALIASES ============
 // These aliases allow existing code to work with new table names
 
