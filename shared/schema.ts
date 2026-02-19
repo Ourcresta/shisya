@@ -839,6 +839,7 @@ export const courseSchema = z.object({
   projectRequired: z.boolean().nullable(),
   creditCost: z.number().nullable().default(0),
   isFree: z.boolean().nullable().default(true),
+  language: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   thumbnailUrl: z.string().nullable().optional(),
   createdAt: z.string().nullable(),

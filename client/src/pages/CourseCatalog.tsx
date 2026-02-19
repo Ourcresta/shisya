@@ -25,6 +25,33 @@ type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
 type PricingFilter = "all" | "free" | "paid";
 type SortOption = "default" | "title-asc" | "title-desc" | "price-low" | "price-high" | "newest";
 
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: "English",
+  hi: "Hindi",
+  ta: "Tamil",
+  te: "Telugu",
+  kn: "Kannada",
+  ml: "Malayalam",
+  mr: "Marathi",
+  bn: "Bengali",
+  gu: "Gujarati",
+  pa: "Punjabi",
+  ur: "Urdu",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  ja: "Japanese",
+  zh: "Chinese",
+  ko: "Korean",
+  ar: "Arabic",
+  pt: "Portuguese",
+  ru: "Russian",
+};
+
+function getLanguageLabel(code: string): string {
+  return LANGUAGE_LABELS[code.toLowerCase()] || code.toUpperCase();
+}
+
 export default function CourseCatalog() {
   const { data: courses, isLoading, error } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -36,6 +63,7 @@ export default function CourseCatalog() {
   const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
   const [selectedPricing, setSelectedPricing] = useState<PricingFilter>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("default");
 
   const categories = useMemo(() => {
@@ -45,6 +73,15 @@ export default function CourseCatalog() {
       if (c.category) cats.add(c.category);
     });
     return Array.from(cats).sort();
+  }, [courses]);
+
+  const languages = useMemo(() => {
+    if (!courses) return [];
+    const langs = new Set<string>();
+    courses.forEach((c) => {
+      if (c.language) langs.add(c.language);
+    });
+    return Array.from(langs).sort();
   }, [courses]);
 
   const filteredCourses = useMemo(() => {
@@ -72,7 +109,11 @@ export default function CourseCatalog() {
         selectedCategory === "all" ||
         course.category === selectedCategory;
 
-      return matchesSearch && matchesLevel && matchesPricing && matchesCategory;
+      const matchesLanguage =
+        selectedLanguage === "all" ||
+        course.language === selectedLanguage;
+
+      return matchesSearch && matchesLevel && matchesPricing && matchesCategory && matchesLanguage;
     });
 
     switch (sortBy) {
@@ -96,7 +137,7 @@ export default function CourseCatalog() {
     }
 
     return filtered;
-  }, [courses, searchTerm, selectedLevel, selectedPricing, selectedCategory, sortBy]);
+  }, [courses, searchTerm, selectedLevel, selectedPricing, selectedCategory, selectedLanguage, sortBy]);
 
   const totalCourses = courses?.length ?? 0;
   const filteredCount = filteredCourses.length;
@@ -105,6 +146,7 @@ export default function CourseCatalog() {
     selectedLevel !== "all" ||
     selectedPricing !== "all" ||
     selectedCategory !== "all" ||
+    selectedLanguage !== "all" ||
     searchTerm !== "";
 
   const clearFilters = () => {
@@ -112,6 +154,7 @@ export default function CourseCatalog() {
     setSelectedLevel("all");
     setSelectedPricing("all");
     setSelectedCategory("all");
+    setSelectedLanguage("all");
     setSortBy("default");
   };
 
@@ -269,6 +312,33 @@ export default function CourseCatalog() {
                         data-testid={`badge-filter-category-${cat.toLowerCase().replace(/\s+/g, "-")}`}
                       >
                         {cat}
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {languages.length > 1 && (
+                <>
+                  <div className="hidden sm:block w-px h-5 bg-border" />
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant="secondary"
+                      className={`cursor-pointer toggle-elevate ${selectedLanguage === "all" ? "toggle-elevated" : ""}`}
+                      onClick={() => setSelectedLanguage("all")}
+                      data-testid="badge-filter-language-all"
+                    >
+                      All Languages
+                    </Badge>
+                    {languages.map((lang) => (
+                      <Badge
+                        key={lang}
+                        variant="secondary"
+                        className={`cursor-pointer toggle-elevate ${selectedLanguage === lang ? "toggle-elevated" : ""}`}
+                        onClick={() => setSelectedLanguage(lang)}
+                        data-testid={`badge-filter-language-${lang.toLowerCase()}`}
+                      >
+                        {getLanguageLabel(lang)}
                       </Badge>
                     ))}
                   </div>
