@@ -59,6 +59,7 @@ import Login from "@/auth/Login";
 import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
 import { NeonPortfolioPreview, PublicNeonPortfolio } from "@/pages/NeonPortfolioPage";
+import { UshaFloatingWidget } from "@/components/usha";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -251,6 +252,7 @@ function App() {
                   <UshaProvider>
                     <Toaster />
                     <Router />
+                    <UshaFloatingWidget />
                   </UshaProvider>
                 </TestAttemptProvider>
               </ProgressProvider>
