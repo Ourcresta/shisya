@@ -18,7 +18,7 @@ export default function CertificatesDashboard() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="flex items-center gap-3">
           <GraduationCap className="w-8 h-8 text-primary" />
           <div>
@@ -36,7 +36,7 @@ export default function CertificatesDashboard() {
         </div>
 
         {certificates.length > 0 ? (
-          <div className="grid gap-4" data-testid="certificates-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" data-testid="certificates-grid">
             {certificates.map((certificate) => (
               <CertificateCard key={certificate.certificateId} certificate={certificate} />
             ))}

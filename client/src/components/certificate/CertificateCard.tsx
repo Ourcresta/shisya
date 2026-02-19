@@ -1,10 +1,12 @@
 import { Link } from "wouter";
-import { Award, Download, ExternalLink } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Award, Download, ExternalLink, Share2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -18,65 +20,87 @@ function LevelBadge({ level }: { level: "beginner" | "intermediate" | "advanced"
   };
 
   return (
-    <Badge className={colors[level]}>
+    <Badge className={`${colors[level]} text-[10px]`}>
       {level.charAt(0).toUpperCase() + level.slice(1)}
     </Badge>
   );
 }
 
 export default function CertificateCard({ certificate }: CertificateCardProps) {
+  const { toast } = useToast();
+
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/verify/${certificate.certificateId}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast({
+        title: "Link copied",
+        description: "Certificate verification link copied to clipboard.",
+      });
+    }).catch(() => {
+      toast({
+        title: "Share",
+        description: shareUrl,
+      });
+    });
+  };
+
   return (
-    <Card className="hover-elevate" data-testid={`card-certificate-${certificate.certificateId}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-500" />
-            <CardTitle className="text-lg" data-testid={`text-cert-title-${certificate.certificateId}`}>
-              {certificate.courseTitle}
-            </CardTitle>
+    <Card className="hover-elevate flex flex-col h-full" data-testid={`card-certificate-${certificate.certificateId}`}>
+      <CardContent className="p-4 flex flex-col flex-1 gap-3">
+        <div className="flex items-center justify-between gap-1">
+          <div className="p-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 shrink-0">
+            <Award className="w-4 h-4 text-amber-500" />
           </div>
           <LevelBadge level={certificate.level} />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div>
-            <span className="font-medium">Issue Date:</span>{" "}
+
+        <div className="flex-1 min-w-0">
+          <h4
+            className="font-semibold text-sm leading-tight line-clamp-2"
+            data-testid={`text-cert-title-${certificate.certificateId}`}
+          >
+            {certificate.courseTitle}
+          </h4>
+          <p className="text-[11px] text-muted-foreground mt-1">
             {format(new Date(certificate.issuedAt), "MMM d, yyyy")}
-          </div>
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
-            Issued
-          </Badge>
+          </p>
         </div>
 
         {certificate.skills.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {certificate.skills.slice(0, 4).map((skill) => (
-              <Badge key={skill} variant="secondary" className="text-xs">
+            {certificate.skills.slice(0, 2).map((skill) => (
+              <Badge key={skill} variant="secondary" className="text-[10px] px-1.5 py-0">
                 {skill}
               </Badge>
             ))}
-            {certificate.skills.length > 4 && (
-              <Badge variant="secondary" className="text-xs">
-                +{certificate.skills.length - 4} more
+            {certificate.skills.length > 2 && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                +{certificate.skills.length - 2}
               </Badge>
             )}
           </div>
         )}
 
-        <div className="flex gap-2 pt-2 flex-wrap">
-          <Link href={`/shishya/certificates/${certificate.certificateId}`}>
-            <Button className="gap-2" data-testid={`button-view-cert-${certificate.certificateId}`}>
-              <ExternalLink className="w-4 h-4" />
-              View Certificate
+        <div className="flex items-center gap-1 pt-1 mt-auto">
+          <Link href={`/shishya/certificates/${certificate.certificateId}`} className="flex-1">
+            <Button size="sm" className="w-full text-xs gap-1" data-testid={`button-view-cert-${certificate.certificateId}`}>
+              <ExternalLink className="w-3 h-3" />
+              View
             </Button>
           </Link>
-          <Link href={`/shishya/certificates/${certificate.certificateId}`}>
-            <Button variant="outline" className="gap-2" data-testid={`button-download-${certificate.certificateId}`}>
-              <Download className="w-4 h-4" />
-              Download PDF
-            </Button>
-          </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={handleShare}
+                data-testid={`button-share-cert-${certificate.certificateId}`}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Share certificate link</TooltipContent>
+          </Tooltip>
         </div>
       </CardContent>
     </Card>
