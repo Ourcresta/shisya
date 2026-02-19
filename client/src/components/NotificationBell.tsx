@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, Package, Tag, CreditCard, Award, BookOpen, AlertCircle, Info, Check, X, ClipboardCheck, FileText } from "lucide-react";
+import { Bell, Package, Tag, CreditCard, Award, BookOpen, AlertCircle, Info, Check, X, ClipboardCheck, FileText, Code2, ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,9 +14,10 @@ import { Separator } from "@/components/ui/separator";
 import { getCourseProgress } from "@/lib/progress";
 import { getTestAttempts } from "@/lib/testAttempts";
 import { getAllSubmissions } from "@/lib/submissions";
+import { getLabProgressStore } from "@/lib/labProgress";
 import type { Notification, Course } from "@shared/schema";
 
-const POLL_INTERVAL = 30000; // 30 seconds
+const POLL_INTERVAL = 30000;
 
 function getNotificationIcon(type: string) {
   switch (type) {
@@ -55,6 +56,14 @@ interface NotificationsResponse {
   unreadCount: number;
 }
 
+interface PendingActionItem {
+  courseId: number;
+  title: string;
+  type: "test" | "project" | "lab";
+  labCount?: number;
+  totalLabs?: number;
+}
+
 export function NotificationBell() {
   const [, setLocation] = useLocation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -69,8 +78,8 @@ export function NotificationBell() {
   const pendingActions = useMemo(() => {
     const allTestAttempts = getTestAttempts() as Record<string, any>;
     const allSubmissions = getAllSubmissions() as Record<string, any>;
-    const tests: { courseId: number; title: string }[] = [];
-    const projects: { courseId: number; title: string }[] = [];
+    const labStore = getLabProgressStore();
+    const items: PendingActionItem[] = [];
 
     courses.forEach((course) => {
       const progress = getCourseProgress(course.id);
@@ -80,19 +89,42 @@ export function NotificationBell() {
       if (progressPercent === 100) {
         const attempt = allTestAttempts[course.id.toString()];
         if (!attempt || !attempt.passed) {
-          tests.push({ courseId: course.id, title: course.title });
+          items.push({ courseId: course.id, title: course.title, type: "test" });
         }
 
         if (course.projectRequired) {
           const submission = allSubmissions[course.id.toString()];
           if (!submission) {
-            projects.push({ courseId: course.id, title: course.title });
+            items.push({ courseId: course.id, title: course.title, type: "project" });
+          }
+        }
+      }
+
+      if (progressPercent > 0) {
+        const courseLabs = labStore[course.id];
+        if (courseLabs) {
+          const completedCount = Object.values(courseLabs).filter((p: any) => p.completed).length;
+          const totalLabs = Object.keys(courseLabs).length;
+          if (totalLabs > 0 && completedCount < totalLabs) {
+            items.push({ 
+              courseId: course.id, 
+              title: course.title, 
+              type: "lab",
+              labCount: totalLabs - completedCount,
+              totalLabs
+            });
           }
         }
       }
     });
 
-    return { tests, projects, total: tests.length + projects.length };
+    return { 
+      items, 
+      tests: items.filter(i => i.type === "test"),
+      projects: items.filter(i => i.type === "project"),
+      labs: items.filter(i => i.type === "lab"),
+      total: items.length 
+    };
   }, [courses]);
 
   const fetchNotifications = useCallback(async () => {
@@ -111,15 +143,12 @@ export function NotificationBell() {
     }
   }, []);
 
-  // Initial fetch and polling
   useEffect(() => {
     fetchNotifications();
-    
     const interval = setInterval(fetchNotifications, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Refresh when popover opens
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
@@ -134,7 +163,6 @@ export function NotificationBell() {
       });
 
       if (response.ok) {
-        // Optimistic update
         setNotifications(prev =>
           prev.map(n =>
             n.id === notificationId ? { ...n, isRead: true } : n
@@ -156,7 +184,6 @@ export function NotificationBell() {
       });
 
       if (response.ok) {
-        // Optimistic update
         setNotifications(prev =>
           prev.map(n => ({ ...n, isRead: true }))
         );
@@ -180,6 +207,44 @@ export function NotificationBell() {
     }
   };
 
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case "test": return <ClipboardCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />;
+      case "project": return <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case "lab": return <Code2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
+      default: return <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" />;
+    }
+  };
+
+  const getActionLabel = (item: PendingActionItem) => {
+    switch (item.type) {
+      case "test": return "Take Assessment";
+      case "project": return "Submit Project";
+      case "lab": return `${item.labCount} Lab${(item.labCount || 0) > 1 ? "s" : ""} Remaining`;
+      default: return "Action Required";
+    }
+  };
+
+  const getActionRoute = (item: PendingActionItem) => {
+    switch (item.type) {
+      case "test": return `/shishya/tests/${item.courseId}`;
+      case "project": return `/shishya/projects/${item.courseId}`;
+      case "lab": return `/shishya/labs/${item.courseId}`;
+      default: return `/shishya/learn/${item.courseId}`;
+    }
+  };
+
+  const getActionColor = (type: string) => {
+    switch (type) {
+      case "test": return "text-purple-600 dark:text-purple-400";
+      case "project": return "text-blue-600 dark:text-blue-400";
+      case "lab": return "text-emerald-600 dark:text-emerald-400";
+      default: return "text-muted-foreground";
+    }
+  };
+
+  const totalBadgeCount = unreadCount + pendingActions.total;
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -190,23 +255,30 @@ export function NotificationBell() {
           data-testid="button-notifications"
         >
           <Bell className="w-5 h-5" />
-          {(unreadCount + pendingActions.total) > 0 && (
+          {totalBadgeCount > 0 && (
             <Badge
               variant="destructive"
               className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs"
             >
-              {(unreadCount + pendingActions.total) > 99 ? "99+" : unreadCount + pendingActions.total}
+              {totalBadgeCount > 99 ? "99+" : totalBadgeCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 p-0"
+        className="w-[340px] p-0"
         align="end"
         data-testid="popup-notifications"
       >
         <div className="flex items-center justify-between gap-2 p-3 border-b">
-          <h4 className="font-semibold">Notifications</h4>
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold">Notifications</h4>
+            {totalBadgeCount > 0 && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                {totalBadgeCount}
+              </Badge>
+            )}
+          </div>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -223,46 +295,43 @@ export function NotificationBell() {
         </div>
 
         {pendingActions.total > 0 && (
-          <div className="border-b">
-            <div className="px-3 pt-2 pb-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Pending Actions
-              </span>
+          <div className="border-b bg-amber-50/50 dark:bg-amber-950/20">
+            <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1">
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-3 h-3 text-amber-500" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  Action Required
+                </span>
+              </div>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400">
+                {pendingActions.total}
+              </Badge>
             </div>
-            <div className="px-2 pb-2 space-y-1">
-              {pendingActions.tests.map((item) => (
+            <div className="px-2 pb-2 space-y-0.5">
+              {pendingActions.items.map((item, idx) => (
                 <div
-                  key={`test-${item.courseId}`}
-                  className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover-elevate"
-                  onClick={() => { setIsOpen(false); setLocation(`/shishya/tests/${item.courseId}`); }}
-                  data-testid={`pending-action-test-${item.courseId}`}
+                  key={`${item.type}-${item.courseId}-${idx}`}
+                  className="flex items-center gap-2.5 p-2 rounded-md cursor-pointer hover-elevate group"
+                  onClick={() => { setIsOpen(false); setLocation(getActionRoute(item)); }}
+                  data-testid={`pending-action-${item.type}-${item.courseId}`}
                 >
-                  <ClipboardCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <div className="shrink-0">
+                    {getActionIcon(item.type)}
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium truncate">Take Test</p>
+                    <p className={`text-xs font-medium truncate ${getActionColor(item.type)}`}>
+                      {getActionLabel(item)}
+                    </p>
                     <p className="text-[10px] text-muted-foreground truncate">{item.title}</p>
                   </div>
-                </div>
-              ))}
-              {pendingActions.projects.map((item) => (
-                <div
-                  key={`project-${item.courseId}`}
-                  className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover-elevate"
-                  onClick={() => { setIsOpen(false); setLocation(`/shishya/projects/${item.courseId}`); }}
-                  data-testid={`pending-action-project-${item.courseId}`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium truncate">Submit Project</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{item.title}</p>
-                  </div>
+                  <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <ScrollArea className={pendingActions.total > 0 ? "h-[220px]" : "h-[300px]"}>
+        <ScrollArea className={pendingActions.total > 0 ? "h-[200px]" : "h-[300px]"}>
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Bell className="w-10 h-10 text-muted-foreground/50 mb-2" />

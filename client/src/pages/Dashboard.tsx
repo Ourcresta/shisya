@@ -27,7 +27,11 @@ import {
   GraduationCap,
   Library,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Flame,
+  Brain,
+  Clock,
+  Signal
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -41,6 +45,8 @@ import { getCourseProgress } from "@/lib/progress";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getTestAttempts } from "@/lib/testAttempts";
 import { getAllCertificates } from "@/lib/certificates";
+import { getLabProgressStore, getAllCompletedLabs } from "@/lib/labProgress";
+import { getProfile } from "@/lib/profile";
 import type { Course } from "@shared/schema";
 
 interface CourseWithProgress extends Course {
@@ -56,11 +62,91 @@ function getLearningLevel(completedCourses: number, passedTests: number): { leve
   return { level: "Beginner", variant: "outline" };
 }
 
-function getMotivationalMessage(inProgress: number, completed: number): string {
+function getMotivationalMessage(inProgress: number, completed: number, pendingCount: number): string {
+  if (pendingCount > 0) return `You have ${pendingCount} pending action${pendingCount > 1 ? "s" : ""} — complete them to earn certificates.`;
   if (completed >= 3) return "You're on fire! Keep building those skills.";
   if (inProgress > 0) return "Keep going — you're building real skills.";
   if (completed > 0) return "Great start! Continue your learning journey.";
   return "Your learning journey begins here.";
+}
+
+function getFirstName(user: any): string {
+  const profile = getProfile();
+  if (profile?.fullName) {
+    return profile.fullName.split(" ")[0];
+  }
+  if (user?.email) {
+    return user.email.split("@")[0];
+  }
+  return "";
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function getLearningStreak(): number {
+  try {
+    const streakData = localStorage.getItem("shishya_streak");
+    if (!streakData) return 0;
+    const parsed = JSON.parse(streakData);
+    const today = new Date().toDateString();
+    if (parsed.lastDate === today) return parsed.count || 1;
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (parsed.lastDate === yesterday) return parsed.count || 0;
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+function updateLearningStreak(): void {
+  try {
+    const today = new Date().toDateString();
+    const streakData = localStorage.getItem("shishya_streak");
+    if (streakData) {
+      const parsed = JSON.parse(streakData);
+      if (parsed.lastDate === today) return;
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (parsed.lastDate === yesterday) {
+        localStorage.setItem("shishya_streak", JSON.stringify({ lastDate: today, count: (parsed.count || 0) + 1 }));
+      } else {
+        localStorage.setItem("shishya_streak", JSON.stringify({ lastDate: today, count: 1 }));
+      }
+    } else {
+      localStorage.setItem("shishya_streak", JSON.stringify({ lastDate: today, count: 1 }));
+    }
+  } catch {}
+}
+
+function getAIInsight(performanceScore: { overall: number; courseScore: number; testScore: number; certScore: number; level: string }): string {
+  if (performanceScore.overall === 0) return "Start a course to see your personalized learning insights here.";
+  
+  const strengths: string[] = [];
+  const improvements: string[] = [];
+  
+  if (performanceScore.courseScore >= 70) strengths.push("course completion");
+  else if (performanceScore.courseScore < 40) improvements.push("finishing more lessons");
+  
+  if (performanceScore.testScore >= 70) strengths.push("test performance");
+  else if (performanceScore.testScore < 40) improvements.push("practicing for assessments");
+  
+  if (performanceScore.certScore >= 70) strengths.push("earning certificates");
+  else if (performanceScore.certScore < 40) improvements.push("completing certification requirements");
+  
+  if (strengths.length > 0 && improvements.length > 0) {
+    return `Strong in ${strengths.join(" & ")}. Focus on ${improvements.join(" & ")} to level up.`;
+  }
+  if (strengths.length > 0) {
+    return `Excellent ${strengths.join(" & ")}! You're well on your way to ${performanceScore.level} mastery.`;
+  }
+  if (improvements.length > 0) {
+    return `Focus on ${improvements.join(" & ")} to boost your score. Every step counts!`;
+  }
+  return "Keep learning consistently — you're making steady progress.";
 }
 
 export default function Dashboard() {
@@ -74,6 +160,13 @@ export default function Dashboard() {
   const allSubmissions = getAllSubmissions();
   const allTestAttempts = getTestAttempts();
   const allCertificates = getAllCertificates();
+  const labStore = getLabProgressStore();
+  const completedLabs = getAllCompletedLabs();
+  const firstName = getFirstName(user);
+  const greeting = getGreeting();
+  const streak = getLearningStreak();
+
+  updateLearningStreak();
 
   const coursesWithProgress: CourseWithProgress[] = courses.map((course) => {
     const progress = getCourseProgress(course.id);
@@ -108,8 +201,27 @@ export default function Dashboard() {
     return c.progress === 100 && c.projectRequired && !submission;
   });
 
+  const pendingLabs = useMemo(() => {
+    const labs: { courseId: number; title: string; remaining: number; total: number }[] = [];
+    coursesWithProgress.forEach(c => {
+      if (c.progress > 0) {
+        const courseLabs = labStore[c.id];
+        if (courseLabs) {
+          const completedCount = Object.values(courseLabs).filter((p: any) => p.completed).length;
+          const totalLabs = Object.keys(courseLabs).length;
+          if (totalLabs > 0 && completedCount < totalLabs) {
+            labs.push({ courseId: c.id, title: c.title, remaining: totalLabs - completedCount, total: totalLabs });
+          }
+        }
+      }
+    });
+    return labs;
+  }, [coursesWithProgress, labStore]);
+
+  const totalPendingActions = pendingTests.length + pendingProjects.length + pendingLabs.length;
+
   const learningStatus = getLearningLevel(completedCourses.length, passedTests);
-  const motivationalMessage = getMotivationalMessage(inProgressCourses.length, completedCourses.length);
+  const motivationalMessage = getMotivationalMessage(inProgressCourses.length, completedCourses.length, totalPendingActions);
 
   const allSkills = allCertificates.reduce((acc: string[], cert: any) => {
     if (cert.skills) {
@@ -228,6 +340,8 @@ export default function Dashboard() {
     return { overall, courseScore: Math.round(courseScore), testScore: Math.round(testScore), certScore: Math.round(Math.min(certScore, 100)), level, levelColor };
   }, [coursesWithProgress, allTestAttempts, passedTests, totalCertificates]);
 
+  const aiInsight = useMemo(() => getAIInsight(performanceScore), [performanceScore]);
+
   const SKILL_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "#8b5cf6", "#f59e0b", "#06b6d4"];
 
   const stats = [
@@ -237,6 +351,7 @@ export default function Dashboard() {
       icon: Coins,
       color: "text-amber-500",
       href: "/shishya/wallet",
+      subtitle: "Learning Points",
     },
     {
       title: "In Progress",
@@ -244,6 +359,7 @@ export default function Dashboard() {
       icon: BookOpen,
       color: "text-blue-500",
       href: "/courses",
+      subtitle: inProgressCourses.length > 0 ? `${Math.round(inProgressCourses.reduce((s, c) => s + c.progress, 0) / inProgressCourses.length)}% avg.` : "Start learning",
     },
     {
       title: "Completed",
@@ -251,6 +367,7 @@ export default function Dashboard() {
       icon: CheckCircle,
       color: "text-green-500",
       href: "/courses",
+      subtitle: completedCourses.length > 0 ? `${courses.length} total courses` : "Keep going!",
     },
     {
       title: "Certificates",
@@ -258,6 +375,7 @@ export default function Dashboard() {
       icon: Award,
       color: "text-yellow-500",
       href: "/shishya/certificates",
+      subtitle: totalCertificates > 0 ? "Verified credentials" : "Earn your first",
     },
     {
       title: "Tests Passed",
@@ -265,6 +383,7 @@ export default function Dashboard() {
       icon: ClipboardCheck,
       color: "text-purple-500",
       href: "/shishya/certificates",
+      subtitle: passedTests > 0 ? `${Object.keys(allTestAttempts).length} attempted` : "Take a test",
     },
   ];
 
@@ -301,16 +420,14 @@ export default function Dashboard() {
   }
 
   const activeCourse = inProgressCourses[0];
-  const hasPendingActions = pendingTests.length > 0 || pendingProjects.length > 0;
+  const hasPendingActions = totalPendingActions > 0;
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         
-        {/* Motivation Quote Banner */}
         <MotivationBanner className="mb-6" />
         
-        {/* ZONE 1: Welcome & Status */}
         <motion.div 
           className="mb-8"
           variants={slideUp}
@@ -318,21 +435,26 @@ export default function Dashboard() {
           animate="animate"
         >
           <div className="flex flex-col gap-4">
-            {/* Welcome Header Row */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <div className="flex items-center gap-3 mb-1">
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <h1 
                     className="text-2xl sm:text-3xl font-bold tracking-tight"
                     style={{ fontFamily: "var(--font-display)" }}
                     data-testid="text-welcome"
                   >
-                    Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}
+                    {greeting}{firstName ? `, ${firstName}` : ''}
                   </h1>
                   <Badge variant={learningStatus.variant} data-testid="badge-learning-level">
                     <Sparkles className="w-3 h-3 mr-1" />
                     {learningStatus.level}
                   </Badge>
+                  {streak > 0 && (
+                    <Badge variant="outline" className="text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700" data-testid="badge-streak">
+                      <Flame className="w-3 h-3 mr-1" />
+                      {streak} day streak
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-muted-foreground" data-testid="text-motivational">
                   {motivationalMessage}
@@ -340,7 +462,6 @@ export default function Dashboard() {
               </div>
             </div>
             
-            {/* Quick Links - Horizontal Scrollable */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {quickLinks.map((link) => (
                 <Link key={link.title} href={link.href}>
@@ -359,7 +480,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* ZONE 2: Learning Snapshot (Metrics) */}
         <motion.div 
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8"
           variants={staggerContainer}
@@ -378,6 +498,7 @@ export default function Dashboard() {
                       <div className="min-w-0">
                         <p className="text-xs text-muted-foreground truncate">{stat.title}</p>
                         <p className="text-2xl sm:text-3xl font-bold mt-0.5">{stat.value}</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-0.5 truncate">{stat.subtitle}</p>
                       </div>
                       <div className="p-2 rounded-lg bg-muted/50 shrink-0">
                         <stat.icon className={`w-5 h-5 ${stat.color}`} />
@@ -390,7 +511,6 @@ export default function Dashboard() {
           ))}
         </motion.div>
 
-        {/* ZONE 3: Primary Action */}
         <motion.div 
           className="mb-8"
           variants={slideUp}
@@ -403,9 +523,15 @@ export default function Dashboard() {
               <CardContent className="py-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <Target className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium text-primary">Continue Learning</span>
+                      {activeCourse.level && (
+                        <Badge variant="outline" className="text-[10px]">
+                          <Signal className="w-3 h-3 mr-1" />
+                          {activeCourse.level}
+                        </Badge>
+                      )}
                     </div>
                     <h2 
                       className="text-xl font-bold mb-3 truncate"
@@ -419,17 +545,34 @@ export default function Dashboard() {
                         {activeCourse.progress}%
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons completed
-                    </p>
+                    <div className="flex items-center gap-4 mt-2 flex-wrap">
+                      <p className="text-xs text-muted-foreground">
+                        {activeCourse.completedLessons} of {activeCourse.totalLessons} lessons completed
+                      </p>
+                      {activeCourse.duration && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {activeCourse.duration}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <Link href={`/shishya/learn/${activeCourse.id}`}>
-                    <Button size="lg" data-testid="button-continue-learning">
-                      <Play className="w-4 h-4 mr-2" />
-                      Continue
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {activeCourse.thumbnailUrl && (
+                      <img 
+                        src={activeCourse.thumbnailUrl} 
+                        alt="" 
+                        className="w-16 h-16 rounded-lg object-cover hidden sm:block" 
+                      />
+                    )}
+                    <Link href={`/shishya/learn/${activeCourse.id}`}>
+                      <Button size="lg" data-testid="button-continue-learning">
+                        <Play className="w-4 h-4 mr-2" />
+                        Continue
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -443,13 +586,13 @@ export default function Dashboard() {
                       <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Complete Pending Actions</span>
                     </div>
                     <h2 className="text-xl font-bold mb-1">
-                      You have {pendingTests.length + pendingProjects.length} pending items
+                      You have {totalPendingActions} pending item{totalPendingActions > 1 ? "s" : ""}
                     </h2>
                     <p className="text-muted-foreground text-sm">
-                      Complete tests and submit projects to earn certificates.
+                      Complete tests, submit projects, and finish labs to earn certificates.
                     </p>
                   </div>
-                  <Link href={pendingTests.length > 0 ? `/shishya/tests/${pendingTests[0].id}` : `/shishya/projects/${pendingProjects[0].id}`}>
+                  <Link href={pendingTests.length > 0 ? `/shishya/tests/${pendingTests[0].id}` : pendingProjects.length > 0 ? `/shishya/projects/${pendingProjects[0].id}` : `/shishya/labs/${pendingLabs[0]?.courseId}`}>
                     <Button size="lg" variant="outline" data-testid="button-complete-pending">
                       Take Action
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -486,7 +629,6 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* ZONE 3.5: Skills Analytics */}
         {(radarData.length > 0 || skillBarData.length > 0) && (
           <motion.div
             className="mb-8"
@@ -496,7 +638,6 @@ export default function Dashboard() {
             transition={{ delay: 0.15 }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Performance Score Card */}
               <Card data-testid="card-performance-score">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
@@ -550,10 +691,17 @@ export default function Dashboard() {
                       <Progress value={performanceScore.certScore} className="h-1.5" />
                     </div>
                   </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex items-start gap-2">
+                      <Brain className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid="text-ai-insight">
+                        {aiInsight}
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Skill Radar Chart */}
               {radarData.length >= 3 && (
                 <Card data-testid="card-skill-radar">
                   <CardHeader className="pb-3">
@@ -590,7 +738,6 @@ export default function Dashboard() {
                 </Card>
               )}
 
-              {/* Sub-Skill Bar Chart */}
               {skillBarData.length > 0 && (
                 <Card className={radarData.length < 3 ? "lg:col-span-2" : ""} data-testid="card-skill-bars">
                   <CardHeader className="pb-3">
@@ -642,10 +789,8 @@ export default function Dashboard() {
           initial="initial"
           animate="animate"
         >
-          {/* ZONE 4: Pending Actions */}
           <motion.div variants={staggerItem}>
             <Card className="h-full overflow-hidden relative bg-gradient-to-br from-card via-card to-primary/5 dark:to-primary/10 border-border/50 dark:border-primary/20">
-              {/* Decorative gradient orb */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-2xl pointer-events-none" />
               
               <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3 relative">
@@ -657,22 +802,21 @@ export default function Dashboard() {
                     Pending Actions
                   </span>
                 </CardTitle>
-                {(pendingTests.length > 0 || pendingProjects.length > 0) && (
+                {hasPendingActions && (
                   <Badge 
                     className="text-xs font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-lg dark:shadow-primary/30 animate-pulse"
                   >
-                    {pendingTests.length + pendingProjects.length} pending
+                    {totalPendingActions} pending
                   </Badge>
                 )}
               </CardHeader>
               <CardContent className="space-y-3 relative">
-                {pendingTests.length === 0 && pendingProjects.length === 0 ? (
+                {!hasPendingActions ? (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center justify-center py-10 text-center relative"
                   >
-                    {/* Success gradient background */}
                     <div className="absolute inset-0 bg-gradient-to-b from-green-500/5 via-transparent to-emerald-500/5 rounded-xl" />
                     
                     <div className="relative mb-4">
@@ -682,7 +826,6 @@ export default function Dashboard() {
                       <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/40 animate-bounce">
                         <Sparkles className="w-4 h-4 text-white" />
                       </div>
-                      {/* Glow ring */}
                       <div className="absolute inset-0 rounded-full bg-green-500/20 blur-xl animate-pulse" />
                     </div>
                     <p className="text-lg font-bold bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
@@ -717,7 +860,6 @@ export default function Dashboard() {
                               className="group relative flex items-center justify-between gap-3 p-3 rounded-xl border border-purple-300/50 dark:border-purple-500/30 bg-gradient-to-r from-purple-100/80 via-purple-50/50 to-violet-50/30 dark:from-purple-900/30 dark:via-purple-800/20 dark:to-violet-900/10 hover:border-purple-400 dark:hover:border-purple-400/50 hover:shadow-lg dark:hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer overflow-hidden"
                               data-testid={`pending-test-${course.id}`}
                             >
-                              {/* Hover glow effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                               
                               <div className="flex items-center gap-3 min-w-0 relative">
@@ -774,7 +916,6 @@ export default function Dashboard() {
                               className="group relative flex items-center justify-between gap-3 p-3 rounded-xl border border-blue-300/50 dark:border-blue-500/30 bg-gradient-to-r from-blue-100/80 via-blue-50/50 to-cyan-50/30 dark:from-blue-900/30 dark:via-blue-800/20 dark:to-cyan-900/10 hover:border-blue-400 dark:hover:border-blue-400/50 hover:shadow-lg dark:hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer overflow-hidden"
                               data-testid={`pending-project-${course.id}`}
                             >
-                              {/* Hover glow effect */}
                               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                               
                               <div className="flex items-center gap-3 min-w-0 relative">
@@ -807,15 +948,71 @@ export default function Dashboard() {
                         ))}
                       </div>
                     )}
+
+                    {pendingLabs.length > 0 && (
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center gap-2 px-1">
+                          <div className="p-1 rounded bg-gradient-to-br from-emerald-500/20 to-teal-500/10">
+                            <Code2 className="w-3 h-3 text-emerald-500" />
+                          </div>
+                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                            Labs to Complete
+                          </span>
+                        </div>
+                        {pendingLabs.map((lab, index) => (
+                          <Link 
+                            key={`lab-${lab.courseId}`} 
+                            href={`/shishya/labs/${lab.courseId}`}
+                            className="block"
+                          >
+                            <motion.div 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: (pendingTests.length + pendingProjects.length + index) * 0.1 }}
+                              className="group relative flex items-center justify-between gap-3 p-3 rounded-xl border border-emerald-300/50 dark:border-emerald-500/30 bg-gradient-to-r from-emerald-100/80 via-emerald-50/50 to-teal-50/30 dark:from-emerald-900/30 dark:via-emerald-800/20 dark:to-teal-900/10 hover:border-emerald-400 dark:hover:border-emerald-400/50 hover:shadow-lg dark:hover:shadow-emerald-500/20 transition-all duration-300 cursor-pointer overflow-hidden"
+                              data-testid={`pending-lab-${lab.courseId}`}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              
+                              <div className="flex items-center gap-3 min-w-0 relative">
+                                <div className="relative">
+                                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-400/30 group-hover:from-emerald-500/30 group-hover:to-teal-500/20 transition-colors shadow-inner">
+                                    <Code2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 truncate">
+                                      {lab.remaining} Lab{lab.remaining > 1 ? "s" : ""} Remaining
+                                    </p>
+                                    <Badge className="text-[10px] px-2 py-0 h-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/50 text-emerald-700 dark:text-emerald-300 font-medium">
+                                      {lab.total - lab.remaining}/{lab.total} done
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 truncate mt-0.5">{lab.title}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 relative">
+                                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-x-1">
+                                  Practice
+                                </span>
+                                <div className="p-1.5 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                                  <ArrowRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
+                              </div>
+                            </motion.div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* ZONE 5: Achievements & Proof */}
           <motion.div variants={staggerItem} className="space-y-6">
-            {/* Recent Certificates */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
@@ -867,7 +1064,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Skills Gained */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
@@ -898,6 +1094,39 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {completedLabs.length > 0 && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Code2 className="w-4 h-4 text-emerald-500" />
+                    Labs Completed
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-xs">
+                    {completedLabs.length} total
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-muted-foreground">Practice progress</span>
+                        <span className="font-medium">{completedLabs.length} labs</span>
+                      </div>
+                      <Progress 
+                        value={Math.min((completedLabs.length / Math.max(completedLabs.length + pendingLabs.reduce((s, l) => s + l.remaining, 0), 1)) * 100, 100)} 
+                        className="h-2" 
+                      />
+                    </div>
+                  </div>
+                  {completedLabs.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-2">
+                      Last completed: {new Date(completedLabs[0].completedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         </motion.div>
       </div>
