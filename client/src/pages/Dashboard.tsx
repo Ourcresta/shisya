@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -24,8 +25,14 @@ import {
   Code2,
   Coins,
   GraduationCap,
-  Library
+  Library,
+  TrendingUp,
+  BarChart3
 } from "lucide-react";
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+} from "recharts";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
 import MotivationBanner from "@/components/MotivationBanner";
@@ -111,6 +118,117 @@ export default function Dashboard() {
     return acc;
   }, []);
   const uniqueSkills = Array.from(new Set(allSkills)).slice(0, 8);
+
+  const courseSkills = useMemo(() => {
+    const skillMap = new Map<string, { count: number; totalProgress: number }>();
+    
+    coursesWithProgress.forEach((course) => {
+      const skills: string[] = [];
+      if (course.skills) {
+        if (typeof course.skills === "string") {
+          try {
+            const parsed = JSON.parse(course.skills);
+            if (Array.isArray(parsed)) skills.push(...parsed);
+          } catch {
+            skills.push(...(course.skills as string).split(",").map(s => s.trim()).filter(Boolean));
+          }
+        } else if (Array.isArray(course.skills)) {
+          skills.push(...course.skills);
+        }
+      }
+      
+      skills.forEach(skill => {
+        const existing = skillMap.get(skill) || { count: 0, totalProgress: 0 };
+        existing.count += 1;
+        existing.totalProgress += course.progress;
+        skillMap.set(skill, existing);
+      });
+    });
+    
+    return skillMap;
+  }, [coursesWithProgress]);
+
+  const radarData = useMemo(() => {
+    const categories = new Map<string, number[]>();
+    const categoryKeywords: Record<string, string[]> = {
+      "Frontend": ["react", "html", "css", "javascript", "typescript", "vue", "angular", "ui", "ux", "tailwind", "responsive", "dom"],
+      "Backend": ["node", "express", "api", "rest", "server", "python", "django", "flask", "java", "spring", "php"],
+      "Database": ["sql", "mongodb", "postgres", "database", "redis", "orm", "drizzle", "prisma", "data model"],
+      "DevOps": ["git", "docker", "ci", "cd", "deploy", "aws", "cloud", "linux", "kubernetes", "testing"],
+      "Fundamentals": ["algorithm", "data structure", "oop", "design pattern", "architecture", "security", "authentication"],
+    };
+
+    courseSkills.forEach((data, skill) => {
+      const skillLower = skill.toLowerCase();
+      let matched = false;
+      for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some(kw => skillLower.includes(kw))) {
+          const existing = categories.get(category) || [];
+          existing.push(data.totalProgress / data.count);
+          categories.set(category, existing);
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        const existing = categories.get("Other") || [];
+        existing.push(data.totalProgress / data.count);
+        categories.set("Other", existing);
+      }
+    });
+
+    return Array.from(categories.entries())
+      .map(([name, scores]) => ({
+        category: name,
+        proficiency: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+        fullMark: 100,
+      }))
+      .slice(0, 6);
+  }, [courseSkills]);
+
+  const skillBarData = useMemo(() => {
+    return Array.from(courseSkills.entries())
+      .map(([skill, data]) => ({
+        skill: skill.length > 12 ? skill.slice(0, 12) + "..." : skill,
+        fullSkill: skill,
+        proficiency: Math.round(data.totalProgress / data.count),
+      }))
+      .sort((a, b) => b.proficiency - a.proficiency)
+      .slice(0, 8);
+  }, [courseSkills]);
+
+  const performanceScore = useMemo(() => {
+    const courseWeight = 0.4;
+    const testWeight = 0.3;
+    const certWeight = 0.3;
+    
+    const courseScore = coursesWithProgress.length > 0
+      ? coursesWithProgress.reduce((sum, c) => sum + c.progress, 0) / coursesWithProgress.length
+      : 0;
+    
+    const testTotal = Object.keys(allTestAttempts).length;
+    const testScore = testTotal > 0 ? (passedTests / testTotal) * 100 : 0;
+    
+    const certScore = coursesWithProgress.length > 0
+      ? (totalCertificates / coursesWithProgress.length) * 100
+      : 0;
+    
+    const overall = Math.round(
+      courseScore * courseWeight + testScore * testWeight + Math.min(certScore, 100) * certWeight
+    );
+
+    let level: string;
+    let levelColor: string;
+    if (overall >= 80) { level = "Expert"; levelColor = "text-amber-500"; }
+    else if (overall >= 60) { level = "Proficient"; levelColor = "text-emerald-500"; }
+    else if (overall >= 40) { level = "Developing"; levelColor = "text-blue-500"; }
+    else if (overall >= 20) { level = "Emerging"; levelColor = "text-violet-500"; }
+    else { level = "Novice"; levelColor = "text-muted-foreground"; }
+
+    return { overall, courseScore: Math.round(courseScore), testScore: Math.round(testScore), certScore: Math.round(Math.min(certScore, 100)), level, levelColor };
+  }, [coursesWithProgress, allTestAttempts, passedTests, totalCertificates]);
+
+  const SKILL_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "#8b5cf6", "#f59e0b", "#06b6d4"];
 
   const stats = [
     {
@@ -367,6 +485,156 @@ export default function Dashboard() {
             </Card>
           )}
         </motion.div>
+
+        {/* ZONE 3.5: Skills Analytics */}
+        {(radarData.length > 0 || skillBarData.length > 0) && (
+          <motion.div
+            className="mb-8"
+            variants={slideUp}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.15 }}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Performance Score Card */}
+              <Card data-testid="card-performance-score">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    Performance Score
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative w-28 h-28">
+                      <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+                        <circle
+                          cx="50" cy="50" r="42" fill="none"
+                          stroke="hsl(var(--primary))"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray={`${performanceScore.overall * 2.64} 264`}
+                          className="transition-all duration-1000"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-2xl font-bold" data-testid="text-performance-score">{performanceScore.overall}</span>
+                        <span className="text-[10px] text-muted-foreground">/100</span>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className={performanceScore.levelColor} data-testid="badge-performance-level">
+                      {performanceScore.level}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2.5">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Course Progress</span>
+                        <span className="font-medium">{performanceScore.courseScore}%</span>
+                      </div>
+                      <Progress value={performanceScore.courseScore} className="h-1.5" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Test Performance</span>
+                        <span className="font-medium">{performanceScore.testScore}%</span>
+                      </div>
+                      <Progress value={performanceScore.testScore} className="h-1.5" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Certification Rate</span>
+                        <span className="font-medium">{performanceScore.certScore}%</span>
+                      </div>
+                      <Progress value={performanceScore.certScore} className="h-1.5" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Skill Radar Chart */}
+              {radarData.length >= 3 && (
+                <Card data-testid="card-skill-radar">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      Skill Proficiency
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis 
+                          dataKey="category" 
+                          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                        />
+                        <PolarRadiusAxis 
+                          angle={30} 
+                          domain={[0, 100]} 
+                          tick={false}
+                          axisLine={false}
+                        />
+                        <Radar
+                          name="Proficiency"
+                          dataKey="proficiency"
+                          stroke="hsl(var(--primary))"
+                          fill="hsl(var(--primary))"
+                          fillOpacity={0.2}
+                          strokeWidth={2}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Sub-Skill Bar Chart */}
+              {skillBarData.length > 0 && (
+                <Card className={radarData.length < 3 ? "lg:col-span-2" : ""} data-testid="card-skill-bars">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-primary" />
+                      Skills Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={skillBarData} layout="vertical" margin={{ left: 0, right: 16, top: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                        <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis 
+                          dataKey="skill" 
+                          type="category" 
+                          width={90} 
+                          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                          }}
+                          formatter={(value: number, _name: string, props: any) => [
+                            `${value}%`,
+                            props.payload.fullSkill,
+                          ]}
+                        />
+                        <Bar dataKey="proficiency" radius={[0, 4, 4, 0]} maxBarSize={24}>
+                          {skillBarData.map((_entry, index) => (
+                            <Cell key={index} fill={SKILL_COLORS[index % SKILL_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
