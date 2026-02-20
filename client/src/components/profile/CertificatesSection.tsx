@@ -1,10 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Award, ExternalLink, ShieldCheck } from "lucide-react";
+import { Award, Download, Share2, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface CertificatesSectionProps {
   certificates: Certificate[];
@@ -17,6 +18,8 @@ export default function CertificatesSection({
   showEmpty = true,
   isPublicView = false
 }: CertificatesSectionProps) {
+  const { toast } = useToast();
+
   if (certificates.length === 0 && !showEmpty) {
     return null;
   }
@@ -34,6 +37,25 @@ export default function CertificatesSection({
     }
   };
 
+  const handleShare = async (cert: Certificate) => {
+    const url = `${window.location.origin}/certificates/${cert.certificateId}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${cert.courseTitle} Certificate`,
+          text: `Check out my ${cert.courseTitle} certificate from OurShiksha!`,
+          url,
+        });
+      } catch {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied", description: "Certificate link copied to clipboard." });
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied", description: "Certificate link copied to clipboard." });
+    }
+  };
+
   return (
     <div data-testid="certificates-section">
       <div className="flex items-center gap-2 mb-4">
@@ -45,48 +67,52 @@ export default function CertificatesSection({
       </div>
 
       {certificates.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {certificates.map((cert) => (
             <Card key={cert.certificateId} className="overflow-visible">
               <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 shrink-0">
-                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 shrink-0">
+                      <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 ml-auto">
+                      <ShieldCheck className="w-3 h-3" />
+                      Verified
+                    </span>
                   </div>
                   
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate" data-testid={`cert-title-${cert.certificateId}`}>
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-sm line-clamp-2 leading-tight" data-testid={`cert-title-${cert.certificateId}`}>
                       {cert.courseTitle}
                     </h4>
                     
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <Badge className={getLevelColor(cert.level)}>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <Badge className={`text-[10px] ${getLevelColor(cert.level)}`}>
                         {cert.level.charAt(0).toUpperCase() + cert.level.slice(1)}
                       </Badge>
-                      <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
-                        <ShieldCheck className="w-3 h-3" />
-                        Verified
-                      </span>
                     </div>
                     
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-[11px] text-muted-foreground mt-2">
                       Issued {format(new Date(cert.issuedAt), "MMM d, yyyy")}
                     </p>
+                  </div>
 
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/certificates/${cert.certificateId}`} data-testid={`link-view-cert-${cert.certificateId}`}>
-                          View
-                        </Link>
-                      </Button>
-                      
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/verify/${cert.certificateId}`} data-testid={`link-verify-cert-${cert.certificateId}`}>
-                          <ShieldCheck className="w-4 h-4 mr-1" />
-                          Verify
-                        </Link>
-                      </Button>
-                    </div>
+                  <div className="flex flex-wrap gap-1.5 mt-auto pt-1 border-t">
+                    <Button variant="outline" size="sm" asChild className="flex-1">
+                      <Link href={`/certificates/${cert.certificateId}`} data-testid={`link-view-cert-${cert.certificateId}`}>
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        Download
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleShare(cert)}
+                      data-testid={`button-share-cert-${cert.certificateId}`}
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>

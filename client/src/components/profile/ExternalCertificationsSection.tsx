@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Award, Plus, Trash2, ExternalLink, Eye, FileText, ShieldCheck, Calendar, X, Tag } from "lucide-react";
+import { Award, Plus, Trash2, ExternalLink, Download, Share2, FileText, ShieldCheck, Calendar, X, Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { ExternalCertification } from "@/lib/portfolioExtras";
 import {
@@ -33,6 +35,8 @@ import {
   isVerifiedProvider,
   isVerifiedLink,
   CERTIFICATE_PROVIDERS,
+  getExtCertsPortfolioVisible,
+  setExtCertsPortfolioVisible,
 } from "@/lib/portfolioExtras";
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,6 +61,7 @@ export default function ExternalCertificationsSection({
   const [description, setDescription] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [previewCert, setPreviewCert] = useState<ExternalCertification | null>(null);
+  const [showInPortfolio, setShowInPortfolio] = useState(getExtCertsPortfolioVisible);
 
   const resetForm = () => {
     setTitle("");
@@ -130,6 +135,45 @@ export default function ExternalCertificationsSection({
     toast({ title: "Certificate removed" });
   };
 
+  const handleTogglePortfolio = (checked: boolean) => {
+    setShowInPortfolio(checked);
+    setExtCertsPortfolioVisible(checked);
+    toast({
+      title: checked ? "Shown in portfolio" : "Hidden from portfolio",
+      description: checked
+        ? "External certificates will appear in your public portfolio."
+        : "External certificates won't appear in your public portfolio.",
+    });
+  };
+
+  const handleShare = async (cert: ExternalCertification) => {
+    const text = `Check out my ${cert.title} certificate from ${cert.certifiedBy}!`;
+    const url = cert.driveLink || "";
+    if (navigator.share && url) {
+      try {
+        await navigator.share({ title: cert.title, text, url });
+      } catch {
+        if (url) {
+          await navigator.clipboard.writeText(url);
+          toast({ title: "Link copied", description: "Certificate link copied to clipboard." });
+        }
+      }
+    } else if (url) {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied", description: "Certificate link copied to clipboard." });
+    } else {
+      toast({ title: "No link available", description: "This certificate has no link to share.", variant: "destructive" });
+    }
+  };
+
+  const handleDownload = (cert: ExternalCertification) => {
+    if (cert.driveLink) {
+      window.open(cert.driveLink, "_blank", "noopener,noreferrer");
+    } else {
+      toast({ title: "No link available", description: "This certificate has no download link.", variant: "destructive" });
+    }
+  };
+
   const getCertVerificationStatus = (cert: ExternalCertification) => {
     if (cert.driveLink && isVerifiedLink(cert.driveLink)) return "link-verified";
     if (isVerifiedProvider(cert.certifiedBy)) return "provider-verified";
@@ -142,7 +186,20 @@ export default function ExternalCertificationsSection({
         <FileText className="w-5 h-5 text-primary" />
         <h3 className="font-semibold text-lg">External Certificates</h3>
         {certifications.length > 0 && (
-          <Badge variant="secondary" className="ml-auto">{certifications.length} added</Badge>
+          <Badge variant="secondary">{certifications.length} added</Badge>
+        )}
+        {!isPublicView && certifications.length > 0 && (
+          <div className="flex items-center gap-2 ml-auto">
+            <Label htmlFor="show-ext-certs-toggle" className="text-xs text-muted-foreground cursor-pointer">
+              Show in portfolio
+            </Label>
+            <Switch
+              id="show-ext-certs-toggle"
+              checked={showInPortfolio}
+              onCheckedChange={handleTogglePortfolio}
+              data-testid="toggle-show-ext-certs"
+            />
+          </div>
         )}
         {!isPublicView && (
           <Dialog open={addOpen} onOpenChange={(open) => { setAddOpen(open); if (!open) resetForm(); }}>
@@ -302,7 +359,7 @@ export default function ExternalCertificationsSection({
       </div>
 
       {certifications.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {certifications.map((cert) => {
             const thumbnailUrl = cert.driveLink ? getGoogleDriveThumbnailUrl(cert.driveLink) : null;
             const previewUrl = cert.driveLink ? getGoogleDrivePreviewUrl(cert.driveLink) : null;
@@ -313,7 +370,7 @@ export default function ExternalCertificationsSection({
                   <div className="flex flex-col gap-3">
                     {thumbnailUrl && (
                       <div
-                        className="w-full h-32 rounded-md bg-muted overflow-hidden cursor-pointer"
+                        className="w-full h-28 rounded-md bg-muted overflow-hidden cursor-pointer"
                         onClick={() => setPreviewCert(cert)}
                         data-testid={`button-preview-ext-cert-${cert.id}`}
                       >
@@ -327,89 +384,75 @@ export default function ExternalCertificationsSection({
                         />
                       </div>
                     )}
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 shrink-0">
-                        <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-medium truncate" data-testid={`text-ext-cert-title-${cert.id}`}>
-                            {cert.title}
-                          </h4>
-                          {verificationStatus !== "unverified" && (
-                            <Badge variant="secondary" className="shrink-0 text-[10px]">
-                              <ShieldCheck className="w-3 h-3 mr-0.5 text-emerald-600" />
-                              Verified
+                      {verificationStatus !== "unverified" && (
+                        <Badge variant="secondary" className="shrink-0 text-[10px] ml-auto">
+                          <ShieldCheck className="w-3 h-3 mr-0.5 text-emerald-600" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium text-sm line-clamp-2 leading-tight" data-testid={`text-ext-cert-title-${cert.id}`}>
+                        {cert.title}
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {cert.certifiedBy}
+                      </p>
+                      {cert.completionDate && (
+                        <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(cert.completionDate), "MMM yyyy")}
+                        </p>
+                      )}
+                      {cert.skills && cert.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {cert.skills.slice(0, 3).map((skill) => (
+                            <Badge key={skill} variant="outline" className="text-[10px] py-0">
+                              {skill}
+                            </Badge>
+                          ))}
+                          {cert.skills.length > 3 && (
+                            <Badge variant="outline" className="text-[10px] py-0 text-muted-foreground">
+                              +{cert.skills.length - 3}
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {cert.certifiedBy}
-                          {cert.completionDate && (
-                            <span className="inline-flex items-center gap-1 ml-2">
-                              <Calendar className="w-3 h-3" />
-                              {format(new Date(cert.completionDate), "MMM yyyy")}
-                            </span>
-                          )}
-                        </p>
-                        {cert.description && (
-                          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                            {cert.description}
-                          </p>
-                        )}
-                        {cert.skills && cert.skills.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {cert.skills.slice(0, 4).map((skill) => (
-                              <Badge key={skill} variant="outline" className="text-[10px] py-0">
-                                {skill}
-                              </Badge>
-                            ))}
-                            {cert.skills.length > 4 && (
-                              <Badge variant="outline" className="text-[10px] py-0 text-muted-foreground">
-                                +{cert.skills.length - 4}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {previewUrl && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setPreviewCert(cert)}
-                              data-testid={`button-view-ext-cert-${cert.id}`}
-                            >
-                              <Eye className="w-3.5 h-3.5 mr-1" />
-                              Preview
-                            </Button>
-                          )}
-                          {cert.driveLink && (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a
-                                href={cert.driveLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                data-testid={`link-open-ext-cert-${cert.id}`}
-                              >
-                                <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                                Open
-                              </a>
-                            </Button>
-                          )}
-                          {!isPublicView && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemove(cert.id)}
-                              className="text-destructive"
-                              data-testid={`button-remove-ext-cert-${cert.id}`}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 mr-1" />
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mt-auto pt-1 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(cert)}
+                        className="flex-1"
+                        data-testid={`button-download-ext-cert-${cert.id}`}
+                      >
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        Download
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShare(cert)}
+                        data-testid={`button-share-ext-cert-${cert.id}`}
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </Button>
+                      {!isPublicView && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemove(cert.id)}
+                          className="text-destructive"
+                          data-testid={`button-remove-ext-cert-${cert.id}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

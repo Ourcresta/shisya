@@ -17,7 +17,7 @@ import { getProfile, saveProfile, initializeDefaultProfile, canMakeProfilePublic
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getAllPassedTests, getPassedTestsCount } from "@/lib/testAttempts";
-import { getExternalCertifications, type ExternalCertification } from "@/lib/portfolioExtras";
+import { getExternalCertifications, getExtCertsPortfolioVisible, type ExternalCertification } from "@/lib/portfolioExtras";
 import type { StudentProfile, Certificate, ProjectSubmission, TestAttempt } from "@shared/schema";
 import { 
   MapPin, Github, Linkedin, ShieldCheck, 
@@ -877,7 +877,7 @@ export default function PortfolioPreviewPage() {
 
                   <TabsContent value="certificates" className="mt-4 space-y-6">
                     <CertificatesSection certificates={certificates} isPublicView />
-                    {extCerts.length > 0 && (
+                    {extCerts.length > 0 && getExtCertsPortfolioVisible() && (
                       <ExternalCertificationsSection
                         certifications={extCerts}
                         onChange={setExtCerts}

@@ -1,5 +1,19 @@
 const CERTS_KEY = "shishya_external_certifications";
 const NOTES_KEY = "shishya_portfolio_notes";
+const EXT_CERTS_VISIBLE_KEY = "shishya_ext_certs_in_portfolio";
+
+export function getExtCertsPortfolioVisible(): boolean {
+  try {
+    const stored = localStorage.getItem(EXT_CERTS_VISIBLE_KEY);
+    return stored === null ? true : stored === "true";
+  } catch {
+    return true;
+  }
+}
+
+export function setExtCertsPortfolioVisible(visible: boolean): void {
+  localStorage.setItem(EXT_CERTS_VISIBLE_KEY, String(visible));
+}
 
 export interface ExternalCertification {
   id: string;
