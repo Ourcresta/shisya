@@ -12,10 +12,12 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import PortfolioProjects from "@/components/profile/PortfolioProjects";
 import CertificatesSection from "@/components/profile/CertificatesSection";
 import AssessmentsSection from "@/components/profile/AssessmentsSection";
+import ExternalCertificationsSection from "@/components/profile/ExternalCertificationsSection";
 import { getProfile, saveProfile, initializeDefaultProfile, canMakeProfilePublic, updateProfile } from "@/lib/profile";
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getAllPassedTests, getPassedTestsCount } from "@/lib/testAttempts";
+import { getExternalCertifications, type ExternalCertification } from "@/lib/portfolioExtras";
 import type { StudentProfile, Certificate, ProjectSubmission, TestAttempt } from "@shared/schema";
 import { 
   MapPin, Github, Linkedin, ShieldCheck, 
@@ -40,6 +42,7 @@ export default function PortfolioPreviewPage() {
   const [projects, setProjects] = useState<ProjectWithDetails[]>([]);
   const [testAttempts, setTestAttempts] = useState<TestAttempt[]>([]);
   const [testsPassed, setTestsPassed] = useState(0);
+  const [extCerts, setExtCerts] = useState<ExternalCertification[]>([]);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [mode, setMode] = useState<"overview" | "edit">("overview");
@@ -66,6 +69,7 @@ export default function PortfolioPreviewPage() {
 
     setTestAttempts(getAllPassedTests());
     setTestsPassed(getPassedTestsCount());
+    setExtCerts(getExternalCertifications());
   }, []);
 
   const allSkills = useMemo(() => {
@@ -82,15 +86,21 @@ export default function PortfolioPreviewPage() {
         skills.push(...proj.skills);
       }
     });
+
+    extCerts.forEach(cert => {
+      if (cert.skills) {
+        skills.push(...cert.skills);
+      }
+    });
     
     return skills;
-  }, [certificates, projects]);
+  }, [certificates, projects, extCerts]);
 
   const uniqueSkills = useMemo(() => Array.from(new Set(allSkills)).sort(), [allSkills]);
 
   const coursesCompleted = certificates.length;
   const projectsSubmitted = projects.length;
-  const certificatesEarned = certificates.length;
+  const certificatesEarned = certificates.length + extCerts.length;
 
   const canGoPublic = canMakeProfilePublic(coursesCompleted, projectsSubmitted);
 
@@ -359,12 +369,21 @@ export default function PortfolioPreviewPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
+            className="space-y-6"
           >
             <ProfileForm 
               profile={profile} 
               onSave={handleSaveProfile}
               isPending={saving}
             />
+            <Card>
+              <CardContent className="pt-6">
+                <ExternalCertificationsSection
+                  certifications={extCerts}
+                  onChange={setExtCerts}
+                />
+              </CardContent>
+            </Card>
           </motion.div>
         ) : (
           <>
@@ -729,9 +748,9 @@ export default function PortfolioPreviewPage() {
                         <Sparkles className="w-5 h-5 text-cyan-400" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm">Neon Portfolio Theme</h3>
+                        <h3 className="font-semibold text-white text-sm">Modern Portfolio</h3>
                         <p className="text-xs text-slate-400">
-                          Modern dark theme with 5 color options
+                          Dark theme with 5 color options
                         </p>
                       </div>
                     </div>
@@ -771,8 +790,8 @@ export default function PortfolioPreviewPage() {
                     <TabsTrigger value="certificates" className="gap-1.5" data-testid="tab-certificates">
                       <Award className="w-3.5 h-3.5" />
                       Certificates
-                      {certificates.length > 0 && (
-                        <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{certificates.length}</Badge>
+                      {(certificates.length + extCerts.length) > 0 && (
+                        <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{certificates.length + extCerts.length}</Badge>
                       )}
                     </TabsTrigger>
                   </TabsList>
@@ -856,8 +875,15 @@ export default function PortfolioPreviewPage() {
                     <AssessmentsSection testAttempts={testAttempts} />
                   </TabsContent>
 
-                  <TabsContent value="certificates" className="mt-4">
+                  <TabsContent value="certificates" className="mt-4 space-y-6">
                     <CertificatesSection certificates={certificates} isPublicView />
+                    {extCerts.length > 0 && (
+                      <ExternalCertificationsSection
+                        certifications={extCerts}
+                        onChange={setExtCerts}
+                        isPublicView
+                      />
+                    )}
                   </TabsContent>
                 </Tabs>
               </motion.div>

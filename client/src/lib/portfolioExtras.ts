@@ -4,7 +4,11 @@ const NOTES_KEY = "shishya_portfolio_notes";
 export interface ExternalCertification {
   id: string;
   title: string;
+  certifiedBy: string;
   driveLink: string;
+  completionDate?: string;
+  skills: string[];
+  description?: string;
   addedAt: string;
 }
 
@@ -19,22 +23,86 @@ function generateId(): string {
   return `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
+export const CERTIFICATE_PROVIDERS = [
+  "Udemy",
+  "LinkedIn Learning",
+  "Pluralsight",
+  "Coursera",
+  "Simplilearn",
+  "Google",
+  "Microsoft",
+  "AWS",
+  "edX",
+  "Skillshare",
+  "freeCodeCamp",
+  "HackerRank",
+  "Other",
+] as const;
+
+export const VERIFIED_DOMAINS = [
+  "udemy.com",
+  "linkedin.com",
+  "pluralsight.com",
+  "coursera.org",
+  "simplilearn.com",
+  "google.com",
+  "microsoft.com",
+  "aws.amazon.com",
+  "edx.org",
+  "hackerrank.com",
+  "freecodecamp.org",
+  "credly.com",
+];
+
+export function isVerifiedProvider(certifiedBy: string): boolean {
+  const lower = certifiedBy.toLowerCase();
+  return CERTIFICATE_PROVIDERS.slice(0, -1).some(
+    (p) => p.toLowerCase() === lower
+  );
+}
+
+export function isVerifiedLink(link: string): boolean {
+  try {
+    const url = new URL(link);
+    return VERIFIED_DOMAINS.some((d) => url.hostname.includes(d));
+  } catch {
+    return false;
+  }
+}
+
 export function getExternalCertifications(): ExternalCertification[] {
   try {
     const stored = localStorage.getItem(CERTS_KEY);
     if (!stored) return [];
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    return parsed.map((c: any) => ({
+      ...c,
+      certifiedBy: c.certifiedBy || "Other",
+      skills: c.skills || [],
+      description: c.description || "",
+    }));
   } catch {
     return [];
   }
 }
 
-export function addExternalCertification(title: string, driveLink: string): ExternalCertification {
+export function addExternalCertification(
+  title: string,
+  certifiedBy: string,
+  driveLink: string,
+  completionDate?: string,
+  skills?: string[],
+  description?: string
+): ExternalCertification {
   const certs = getExternalCertifications();
   const newCert: ExternalCertification = {
     id: generateId(),
     title,
+    certifiedBy,
     driveLink,
+    completionDate,
+    skills: skills || [],
+    description: description || "",
     addedAt: new Date().toISOString(),
   };
   certs.push(newCert);
