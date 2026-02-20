@@ -44,6 +44,7 @@ import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { getCourseProgress } from "@/lib/progress";
+import { getPersonalizedRecommendations } from "@/lib/recommendations";
 import { getAllSubmissions } from "@/lib/submissions";
 import { getTestAttempts } from "@/lib/testAttempts";
 import { getAllCertificates } from "@/lib/certificates";
@@ -352,6 +353,10 @@ export default function Dashboard() {
   }, [coursesWithProgress, allTestAttempts, passedTests, totalCertificates]);
 
   const aiInsight = useMemo(() => getAIInsight(performanceScore), [performanceScore]);
+
+  const recommendations = useMemo(() => {
+    return getPersonalizedRecommendations(courses, 6);
+  }, [courses]);
 
   useMemo(() => {
     if (performanceScore.overall > 0) {
@@ -838,6 +843,90 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
+
+        {recommendations.length > 0 && (
+          <motion.div 
+            className="mb-8"
+            variants={slideUp}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.2 }}
+          >
+            <Card data-testid="card-recommendations">
+              <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Recommended for You
+                </CardTitle>
+                <Link href="/courses">
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Browse All
+                  </Button>
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recommendations.map(({ course, reasons }, idx) => (
+                    <motion.div
+                      key={course.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                      <Link href={`/shishya/course/${course.id}`}>
+                        <Card className="hover-elevate cursor-pointer h-full" data-testid={`recommendation-${course.id}`}>
+                          <CardContent className="p-0">
+                            {course.thumbnailUrl ? (
+                              <div className="h-28 w-full overflow-hidden rounded-t-xl">
+                                <img
+                                  src={course.thumbnailUrl}
+                                  alt={course.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="h-28 w-full rounded-t-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                                <BookOpen className="w-8 h-8 text-primary/40" />
+                              </div>
+                            )}
+                            <div className="p-3 space-y-2">
+                              <h4 className="text-sm font-medium line-clamp-2 leading-tight" data-testid={`text-rec-title-${course.id}`}>
+                                {course.title}
+                              </h4>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <Badge variant="outline" className="text-[10px] py-0">
+                                  {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                                </Badge>
+                                {course.isFree && (
+                                  <Badge variant="secondary" className="text-[10px] py-0 text-emerald-600 dark:text-emerald-400">
+                                    Free
+                                  </Badge>
+                                )}
+                                {course.category && (
+                                  <Badge variant="secondary" className="text-[10px] py-0">
+                                    {course.category}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="space-y-0.5">
+                                {reasons.map((reason, rIdx) => (
+                                  <p key={rIdx} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    <Lightbulb className="w-3 h-3 text-amber-500 shrink-0" />
+                                    {reason}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
