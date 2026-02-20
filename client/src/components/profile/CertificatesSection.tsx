@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Award, Download, Share2, ShieldCheck } from "lucide-react";
+import { Award, Download, Eye, Share2, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
@@ -101,8 +101,13 @@ export default function CertificatesSection({
                   <div className="flex flex-wrap gap-1.5 mt-auto pt-1 border-t">
                     <Button variant="outline" size="sm" asChild className="flex-1">
                       <Link href={`/certificates/${cert.certificateId}`} data-testid={`link-view-cert-${cert.certificateId}`}>
-                        <Download className="w-3.5 h-3.5 mr-1" />
-                        Download
+                        <Eye className="w-3.5 h-3.5 mr-1" />
+                        View
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/certificates/${cert.certificateId}`} data-testid={`link-download-cert-${cert.certificateId}`}>
+                        <Download className="w-3.5 h-3.5" />
                       </Link>
                     </Button>
                     <Button
