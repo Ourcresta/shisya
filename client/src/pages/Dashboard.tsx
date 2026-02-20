@@ -420,7 +420,7 @@ export default function Dashboard() {
     { title: "Labs", icon: Code2, href: "/shishya/labs" },
     { title: "Marksheet", icon: GraduationCap, href: "/shishya/marksheet" },
     { title: "Certificates", icon: Award, href: "/shishya/certificates" },
-    { title: "Portfolio", icon: User, href: "/shishya/profile/portfolio-preview" },
+    { title: "Portfolio", icon: User, href: "/shishya/profile" },
   ];
 
   if (coursesLoading) {
