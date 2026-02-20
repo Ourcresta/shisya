@@ -38,7 +38,6 @@ import TestResult from "@/pages/TestResult";
 import CertificatesDashboard from "@/pages/CertificatesDashboard";
 import CertificateViewer from "@/pages/CertificateViewer";
 import CertificateVerify from "@/pages/CertificateVerify";
-import ProfilePage from "@/pages/ProfilePage";
 import PublicProfilePage from "@/pages/PublicProfilePage";
 import PortfolioPreviewPage from "@/pages/PortfolioPreviewPage";
 import CourseLabs from "@/pages/CourseLabs";
@@ -114,10 +113,6 @@ function ProtectedCertificateViewer() {
 }
 
 function ProtectedProfilePage() {
-  return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
-}
-
-function ProtectedPortfolioPreview() {
   return <ProtectedRoute><PortfolioPreviewPage /></ProtectedRoute>;
 }
 
@@ -232,7 +227,6 @@ function Router() {
       <Route path="/shishya/certificates" component={ProtectedCertificatesDashboard} />
       <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
-      <Route path="/shishya/profile/portfolio-preview" component={ProtectedPortfolioPreview} />
       <Route path="/shishya/profile/neon-portfolio" component={ProtectedNeonPortfolioPreview} />
       
       <Route component={NotFound} />
