@@ -222,21 +222,21 @@ export default function Login() {
 
       <div className="auth-social-buttons">
         <button className="auth-social-btn" data-testid="button-google">
-          <SiGoogle className="w-4 h-4" style={{ color: '#4285F4' }} />
-          <span>Continue with Google</span>
+          <SiGoogle style={{ color: '#4285F4' }} />
+          <span className="auth-social-tooltip">Google</span>
         </button>
         <button className="auth-social-btn" data-testid="button-github">
-          <SiGithub className="w-4 h-4" />
-          <span>Continue with GitHub</span>
+          <SiGithub />
+          <span className="auth-social-tooltip">GitHub</span>
         </button>
         <button className="auth-social-btn" data-testid="button-microsoft">
-          <svg className="w-4 h-4" viewBox="0 0 23 23" fill="none">
+          <svg viewBox="0 0 23 23" fill="none">
             <rect width="11" height="11" fill="#F25022"/>
             <rect x="12" width="11" height="11" fill="#7FBA00"/>
             <rect y="12" width="11" height="11" fill="#00A4EF"/>
             <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
           </svg>
-          <span>Continue with Microsoft</span>
+          <span className="auth-social-tooltip">Microsoft</span>
         </button>
       </div>
 

@@ -1368,13 +1368,13 @@
 
 .auth-glass-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0,220,224,0.15);
   border-radius: 20px;
-  padding: 2.5rem 2rem;
+  padding: 2rem 1.75rem;
   box-shadow:
     0 0 30px rgba(0,220,224,0.08),
     0 8px 32px rgba(0,0,0,0.3),
@@ -1413,18 +1413,18 @@
 
 .auth-glass-card .auth-card-title {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #e8f0f8;
   text-align: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .auth-glass-card .auth-card-description {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: rgba(180,200,220,0.6);
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .auth-glass-card .auth-form-label {
@@ -1728,35 +1728,59 @@
 
 .auth-social-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
 .auth-social-btn {
-  width: 100%;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  padding: 0.65rem 1rem;
-  background: rgba(10,14,26,0.6);
+  padding: 0;
+  background: rgba(10,14,26,0.5);
   border: 1px solid rgba(0,220,224,0.12);
-  border-radius: 12px;
+  border-radius: 14px;
   color: rgba(200,220,240,0.8);
-  font-size: 0.85rem;
-  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .auth-social-btn:hover {
-  border-color: rgba(0,220,224,0.3);
-  background: rgba(0,220,224,0.05);
-  transform: translateY(-1px);
+  border-color: rgba(0,220,224,0.35);
+  background: rgba(0,220,224,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,220,224,0.12);
 }
 
 .auth-social-btn svg {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+}
+
+.auth-social-btn .auth-social-label {
+  display: none;
+}
+
+.auth-social-btn .auth-social-tooltip {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: rgba(180,200,220,0.5);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.auth-social-btn:hover .auth-social-tooltip {
+  opacity: 1;
 }
 
 .auth-security-badge {
@@ -1875,7 +1899,7 @@
   }
 
   .auth-social-btn {
-    padding: 0.55rem 0.75rem;
-    font-size: 0.8rem;
+    width: 46px;
+    height: 46px;
   }
 }
