@@ -1087,7 +1087,8 @@
 
 .auth-page-wrapper {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
 }
 
@@ -1242,8 +1243,10 @@
   position: relative;
   z-index: 1;
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   padding-top: 56px;
+  overflow: hidden;
 }
 
 .auth-left-panel {
@@ -1253,19 +1256,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: 1rem 2rem;
   overflow: hidden;
 }
 
 .auth-right-panel {
   position: relative;
-  flex: 0 0 500px;
+  flex: 0 0 440px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  overflow-y: auto;
-  max-height: 100vh;
+  padding: 1rem 1.5rem;
 }
 
 .auth-branding {
@@ -1279,13 +1280,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .auth-seal-glow {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 230px;
+  height: 230px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(0,180,220,0.3) 0%, rgba(0,100,200,0.15) 30%, rgba(80,0,180,0.08) 55%, transparent 75%);
   animation: auth-seal-pulse 4s ease-in-out infinite;
@@ -1293,8 +1294,8 @@
 }
 
 .auth-seal-image {
-  width: 220px;
-  height: 220px;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
   position: relative;
   z-index: 1;
@@ -1314,26 +1315,26 @@
 
 .auth-brand-tagline {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #e0e8f0;
   letter-spacing: -0.01em;
-  line-height: 1.4;
+  line-height: 1.3;
   margin-bottom: 0;
 }
 
 .auth-brand-divider {
-  width: 60px;
+  width: 50px;
   height: 2px;
-  margin: 1.5rem auto;
+  margin: 0.6rem auto;
   background: linear-gradient(90deg, transparent, #00dce0, transparent);
   border-radius: 1px;
 }
 
 .auth-brand-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: rgba(180,200,220,0.6);
-  line-height: 1.7;
+  line-height: 1.5;
   max-width: 340px;
   margin: 0 auto;
 }
@@ -1447,13 +1448,13 @@
 
 .auth-glass-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 370px;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0,220,224,0.15);
   border-radius: 20px;
-  padding: 2rem 1.75rem;
+  padding: 1.4rem 1.5rem;
   box-shadow:
     0 0 30px rgba(0,220,224,0.08),
     0 8px 32px rgba(0,0,0,0.3),
@@ -1492,22 +1493,22 @@
 
 .auth-glass-card .auth-card-title {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #e8f0f8;
   text-align: center;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
 .auth-glass-card .auth-card-description {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: rgba(180,200,220,0.6);
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.85rem;
 }
 
 .auth-glass-card .auth-form-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: rgba(200,220,240,0.7);
   margin-bottom: 0.4rem;
@@ -1516,7 +1517,7 @@
 
 .auth-glass-card .auth-input-wrapper {
   position: relative;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .auth-glass-card .auth-input-wrapper .auth-input-icon {
@@ -1534,12 +1535,12 @@
 
 .auth-glass-card .auth-input-field {
   width: 100%;
-  padding: 0.7rem 0.9rem 0.7rem 2.6rem;
+  padding: 0.55rem 0.9rem 0.55rem 2.6rem;
   background: rgba(10,14,26,0.6);
   border: 1px solid rgba(0,220,224,0.12);
-  border-radius: 12px;
+  border-radius: 10px;
   color: #e0e8f0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
@@ -1561,14 +1562,14 @@
 
 .auth-glass-card .auth-submit-btn {
   width: 100%;
-  padding: 0.75rem;
-  margin-top: 0.5rem;
+  padding: 0.6rem;
+  margin-top: 0.25rem;
   background: linear-gradient(135deg, #00bcd4, #00dce0);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: #0a0e1a;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -1596,9 +1597,9 @@
 
 .auth-glass-card .auth-footer-text {
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: rgba(180,200,220,0.5);
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
 }
 
 .auth-glass-card .auth-footer-link {
@@ -1617,7 +1618,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.25rem 0;
+  margin: 0.6rem 0;
 }
 
 .auth-glass-card .auth-divider-line {
@@ -1698,8 +1699,8 @@
 .auth-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 1.5rem;
-  border-radius: 12px;
+  margin-bottom: 0.85rem;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(0,220,224,0.15);
   background: rgba(10,14,26,0.5);
@@ -1711,8 +1712,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.65rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: rgba(180,200,220,0.5);
   background: transparent;
@@ -1740,8 +1741,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  margin-top: -0.15rem;
 }
 
 .auth-checkbox-label {
@@ -1813,8 +1814,8 @@
 }
 
 .auth-social-btn {
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1867,11 +1868,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
   border-top: 1px solid rgba(0,220,224,0.08);
   color: rgba(180,200,220,0.35);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 .auth-security-badge svg {
@@ -1885,19 +1886,28 @@
     display: none;
   }
 
+  .auth-page-wrapper {
+    height: auto;
+    max-height: none;
+    overflow: auto;
+  }
+
   .auth-split-layout {
     flex-direction: column;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .auth-left-panel {
     flex: none;
-    padding: 2rem 1.5rem 1rem;
-    min-height: 280px;
+    padding: 1rem 1.5rem 0.5rem;
+    min-height: auto;
   }
 
   .auth-right-panel {
     flex: 1;
-    padding: 1rem 1.5rem 2rem;
+    padding: 0.75rem 1.5rem 1.5rem;
   }
 
   .auth-orb-container {
