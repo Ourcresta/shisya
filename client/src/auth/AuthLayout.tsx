@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ChevronDown } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import sealLogo from "@assets/image_1771692213700.png";
+import sealLogo from "@/assets/images/ourshiksha-seal-transparent.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
