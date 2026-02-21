@@ -42,14 +42,16 @@ import sealLogo from "@assets/image_1771692892158.png";
 
 const navLinks = [
   { label: "Courses", href: "/courses" },
-  { label: "Udyog", href: "#" },
-  { label: "Subscription", href: "#" },
+  { label: "Subscription", href: "/pricing" },
+];
+
+const udyogDropdownItems = [
+  { label: "Virtual Internship", href: "#" },
 ];
 
 const moreDropdownItems = [
   { label: "About Our Shiksha", href: "#" },
   { label: "AI Usha Mentor", href: "#" },
-  { label: "Virtual Internship", href: "#" },
   { label: "Certifications", href: "#" },
   { label: "Become a Guru", href: "#" },
   { label: "Help Center", href: "#" },
@@ -180,6 +182,24 @@ function LandingNavbar() {
               <ChevronDown className="auth-navbar-chevron" />
             </Link>
           ))}
+          <div className="auth-navbar-dropdown" data-testid="nav-udyog-dropdown">
+            <button className="auth-navbar-link" data-testid="link-nav-udyog">
+              Udyog
+              <ChevronDown className="auth-navbar-chevron" />
+            </button>
+            <div className="auth-navbar-dropdown-menu">
+              {udyogDropdownItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="auth-navbar-dropdown-item"
+                  data-testid={`link-udyog-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
           <div className="auth-navbar-dropdown" data-testid="nav-more-dropdown">
             <button className="auth-navbar-link" data-testid="link-nav-more">
               More
