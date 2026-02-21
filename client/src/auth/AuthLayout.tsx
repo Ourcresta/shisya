@@ -1,18 +1,19 @@
 import { motion } from "framer-motion";
-import { GraduationCap, Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe } from "lucide-react";
+import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe } from "lucide-react";
+import sealLogo from "@assets/image_1771690889497.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
 const floatingIcons = [
-  { Icon: Code2, delay: 0, x: "15%", y: "20%", size: 22 },
-  { Icon: BarChart3, delay: 1.5, x: "70%", y: "15%", size: 20 },
-  { Icon: Atom, delay: 0.8, x: "25%", y: "65%", size: 24 },
-  { Icon: Lightbulb, delay: 2, x: "65%", y: "70%", size: 18 },
-  { Icon: BookOpen, delay: 0.5, x: "80%", y: "40%", size: 20 },
-  { Icon: Cpu, delay: 1.2, x: "10%", y: "45%", size: 18 },
-  { Icon: Globe, delay: 1.8, x: "50%", y: "85%", size: 22 },
+  { Icon: Code2, delay: 0, x: "12%", y: "18%", size: 22 },
+  { Icon: BarChart3, delay: 1.5, x: "75%", y: "12%", size: 20 },
+  { Icon: Atom, delay: 0.8, x: "20%", y: "68%", size: 24 },
+  { Icon: Lightbulb, delay: 2, x: "68%", y: "72%", size: 18 },
+  { Icon: BookOpen, delay: 0.5, x: "82%", y: "38%", size: 20 },
+  { Icon: Cpu, delay: 1.2, x: "8%", y: "42%", size: 18 },
+  { Icon: Globe, delay: 1.8, x: "55%", y: "88%", size: 22 },
 ];
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
@@ -37,18 +38,27 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            <div className="auth-logo-container">
-              <div className="auth-logo-glow" />
-              <GraduationCap className="auth-logo-icon" />
-            </div>
-            <h1 className="auth-brand-title">
-              Our<span className="auth-brand-highlight">Shiksha</span>
-            </h1>
-            <p className="auth-brand-tagline">Welcome to the Future of Learning</p>
+            <motion.div
+              className="auth-seal-container"
+              initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            >
+              <div className="auth-seal-glow" />
+              <img
+                src={sealLogo}
+                alt="OurShiksha Seal"
+                className="auth-seal-image"
+              />
+            </motion.div>
+
+            <h1 className="auth-brand-tagline">Welcome to the Future of Learning</h1>
             <div className="auth-brand-divider" />
             <p className="auth-brand-subtitle">
-              Master coding, earn certificates, and build your career with guided learning paths
+              Learn. Build. Get Certified.<br />
+              Launch Your Career with AI Guidance.
             </p>
+            <p className="auth-brand-powered">Powered by Usha AI Mentor</p>
           </motion.div>
 
           <div className="auth-floating-icons">

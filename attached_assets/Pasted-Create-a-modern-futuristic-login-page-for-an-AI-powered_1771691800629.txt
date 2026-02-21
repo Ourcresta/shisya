@@ -1,0 +1,123 @@
+Create a modern, futuristic login page for an AI-powered learning platform called "Our Shiksha".
+
+Design Requirements:
+
+Theme:
+- Dark space / galaxy background
+- Blue + purple gradient
+- Subtle glowing particles
+- Modern SaaS look
+- Glassmorphism login card (semi-transparent with blur effect)
+
+---------------------------------------------------
+TOP NAVIGATION BAR (Sticky)
+---------------------------------------------------
+
+Left:
+- Logo icon (graduation cap icon)
+- Text: Our Shiksha
+
+Center Menu:
+- Home
+- Courses
+- Udyog
+- Subscription
+- More (dropdown ready)
+
+Right Side:
+- Profile dropdown
+   Inside dropdown:
+     - Login
+     - Sign up for Guru
+     - Sign up for Shishya
+
+Navbar style:
+- Transparent with blur
+- Slight glow on hover
+- Smooth hover underline animation
+- Sticky at top
+
+---------------------------------------------------
+MAIN SECTION (Split Layout)
+---------------------------------------------------
+
+Left Side:
+- Large circular emblem logo (University-style crest)
+- Heading: "Welcome to the Future of Learning"
+- Subtext:
+  "Learn. Build. Get Certified. Launch Your Career with AI Guidance."
+- Small text:
+  "Powered by Usha AI Mentor"
+
+Right Side:
+Glassmorphism Login Card
+
+---------------------------------------------------
+LOGIN CARD DETAILS
+---------------------------------------------------
+
+Top Toggle Tabs:
+- Shishya (default selected)
+- Guru
+
+Title:
+"Welcome Back"
+Subtitle:
+"Log in to continue your learning journey"
+
+Input Fields:
+- Email
+- Password
+
+Below Password:
+- Remember me (checkbox)
+- Forgot Password (right aligned)
+
+Primary Button:
+- Log In (Gradient blue button)
+- Hover glow effect
+
+Below:
+- Don't have an account? Sign up
+
+Divider:
+OR
+
+Social Login Buttons:
+- Continue with Google
+- Continue with GitHub
+- Continue with Microsoft
+
+Footer:
+- Small lock icon
+- Text: "Your data is encrypted and secure"
+
+---------------------------------------------------
+STYLE DETAILS
+---------------------------------------------------
+
+- Use modern clean font (Inter or Poppins)
+- Border radius: 18px
+- Soft shadows
+- Neon blue glow accents
+- Smooth hover animations
+- Subtle button scaling on hover
+- Responsive layout
+
+---------------------------------------------------
+TECH STACK
+---------------------------------------------------
+
+Use:
+- HTML
+- CSS
+- Tailwind CSS (if possible)
+- Vanilla JS for dropdown + toggle
+
+Make the design clean, premium, and futuristic like Stripe + OpenAI + Vercel style.
+Responsive for desktop and mobile.
+
+Do NOT mention the word Student anywhere.
+Use "Shishya" instead.
+
+Generate full working code in one file.
