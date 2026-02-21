@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe } from "lucide-react";
+import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Home } from "lucide-react";
+import { Link } from "wouter";
 import sealLogo from "@assets/image_1771692892158.png";
 
 interface AuthLayoutProps {
@@ -38,6 +39,19 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       <div className="auth-split-layout">
         <div className="auth-left-panel">
+          <Link href="/" style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 20 }}>
+            <motion.button
+              className="auth-back-home-btn"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              data-testid="button-back-home"
+            >
+              <ArrowLeft style={{ width: 16, height: 16 }} />
+              <Home style={{ width: 16, height: 16 }} />
+              <span>Home</span>
+            </motion.button>
+          </Link>
           <motion.div
             className="auth-branding"
             initial={{ opacity: 0, y: 30 }}
