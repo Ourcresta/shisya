@@ -1015,11 +1015,10 @@
 .auth-cosmic-bg {
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 80%, rgba(0,80,160,0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(60,0,120,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 60% at 50% 50%, rgba(0,40,80,0.1) 0%, transparent 70%),
-    linear-gradient(135deg, #050810 0%, #0a1628 20%, #0d0a22 40%, #091a30 60%, #0a0e1a 80%, #060812 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #050810;
   z-index: 0;
 }
 
@@ -1204,22 +1203,15 @@
 }
 
 .auth-seal-glow {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,180,220,0.3) 0%, rgba(0,100,200,0.15) 30%, rgba(80,0,180,0.08) 55%, transparent 75%);
-  animation: auth-seal-pulse 4s ease-in-out infinite;
-  box-shadow: 0 0 60px rgba(0,180,220,0.15), 0 0 120px rgba(0,100,200,0.08);
+  display: none;
 }
 
 .auth-seal-image {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
+  width: 280px;
+  height: 280px;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 0 20px rgba(0,180,220,0.3)) drop-shadow(0 0 40px rgba(0,150,200,0.15));
+  object-fit: contain;
   animation: auth-seal-float 6s ease-in-out infinite;
 }
 
