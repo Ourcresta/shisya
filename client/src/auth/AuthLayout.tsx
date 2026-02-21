@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
-import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ChevronDown } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe } from "lucide-react";
 import sealLogo from "@assets/image_1771692892158.png";
 
 interface AuthLayoutProps {
@@ -17,24 +16,7 @@ const floatingIcons = [
   { Icon: Globe, delay: 1.8, x: "55%", y: "88%", size: 22 },
 ];
 
-const moreDropdownItems = [
-  { label: "About Our Shiksha", href: "#" },
-  { label: "AI Usha Mentor", href: "#" },
-  { label: "Virtual Internship", href: "#" },
-  { label: "Certifications", href: "#" },
-  { label: "Become a Guru", href: "#" },
-  { label: "Help Center", href: "#" },
-  { label: "Contact Us", href: "#" },
-];
-
-const navLinks = [
-  { label: "Courses", href: "/courses" },
-  { label: "Udyog", href: "#" },
-  { label: "Subscription", href: "#" },
-];
-
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  const [location] = useLocation();
 
   return (
     <div className="auth-page-wrapper">
@@ -53,89 +35,6 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="auth-grid-overlay" />
       </div>
-
-      <nav className="auth-navbar" data-testid="auth-navbar">
-        <div className="auth-navbar-inner">
-          <Link href="/" className="auth-navbar-brand" data-testid="link-home">
-            <img src={sealLogo} alt="OurShiksha" className="auth-navbar-logo" />
-            <span className="auth-navbar-brand-text">
-              Our <span className="auth-navbar-brand-accent">Shiksha</span>
-            </span>
-          </Link>
-
-          <div className="auth-navbar-links">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="auth-navbar-link"
-                data-testid={`link-nav-${link.label.toLowerCase()}`}
-              >
-                {link.label}
-                <ChevronDown className="auth-navbar-chevron" />
-              </Link>
-            ))}
-            <div className="auth-navbar-dropdown" data-testid="nav-more-dropdown">
-              <button className="auth-navbar-link" data-testid="link-nav-more">
-                More
-                <ChevronDown className="auth-navbar-chevron" />
-              </button>
-              <div className="auth-navbar-dropdown-menu">
-                {moreDropdownItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="auth-navbar-dropdown-item"
-                    data-testid={`link-more-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="auth-navbar-right">
-            <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-profile-dropdown">
-              <button className="auth-navbar-action" data-testid="link-nav-profile">
-                Profile
-                <ChevronDown className="auth-navbar-chevron" />
-              </button>
-              <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right">
-                <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-profile-login">
-                  Login
-                </Link>
-                <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-shishya">
-                  Sign up as Shishya
-                </Link>
-                <Link href="/signup?role=guru" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-guru">
-                  Sign up as Guru
-                </Link>
-              </div>
-            </div>
-            <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-login-dropdown">
-              <button
-                className={`auth-navbar-action auth-navbar-login ${location === "/login" ? "auth-navbar-action-active" : ""}`}
-                data-testid="link-nav-login"
-              >
-                Login
-                <ChevronDown className="auth-navbar-chevron" />
-              </button>
-              <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right">
-                <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-login-login">
-                  Login
-                </Link>
-                <Link href="/signup?role=guru" className="auth-navbar-dropdown-item" data-testid="link-login-signup-guru">
-                  Sign up for Guru
-                </Link>
-                <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-login-signup-shishya">
-                  Sign up for Shishya
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       <div className="auth-split-layout">
         <div className="auth-left-panel">
