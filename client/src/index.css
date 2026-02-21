@@ -967,6 +967,70 @@
   width: 14px;
   height: 14px;
   opacity: 0.5;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.auth-navbar-dropdown {
+  position: relative;
+}
+
+.auth-navbar-dropdown > .auth-navbar-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.auth-navbar-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  background: rgba(10,16,30,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0,220,224,0.12);
+  border-radius: 12px;
+  padding: 0.4rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(0,220,224,0.06);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(6px);
+  transition: all 0.25s ease;
+  z-index: 200;
+}
+
+.auth-navbar-dropdown:hover .auth-navbar-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.auth-navbar-dropdown:hover > .auth-navbar-link {
+  color: #00dce0;
+  background: rgba(0,220,224,0.06);
+}
+
+.auth-navbar-dropdown:hover > .auth-navbar-link .auth-navbar-chevron {
+  transform: rotate(180deg);
+  opacity: 0.8;
+}
+
+.auth-navbar-dropdown-item {
+  display: block;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(200,220,240,0.7);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.auth-navbar-dropdown-item:hover {
+  color: #00dce0;
+  background: rgba(0,220,224,0.08);
 }
 
 .auth-navbar-right {

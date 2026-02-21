@@ -17,11 +17,20 @@ const floatingIcons = [
   { Icon: Globe, delay: 1.8, x: "55%", y: "88%", size: 22 },
 ];
 
+const moreDropdownItems = [
+  { label: "About Our Shiksha", href: "#" },
+  { label: "AI Usha Mentor", href: "#" },
+  { label: "Virtual Internship", href: "#" },
+  { label: "Certifications", href: "#" },
+  { label: "Become a Guru", href: "#" },
+  { label: "Help Center", href: "#" },
+  { label: "Contact Us", href: "#" },
+];
+
 const navLinks = [
   { label: "Courses", href: "/courses" },
   { label: "Udyog", href: "#" },
   { label: "Subscription", href: "#" },
-  { label: "More", href: "#" },
 ];
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
@@ -66,6 +75,24 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 <ChevronDown className="auth-navbar-chevron" />
               </Link>
             ))}
+            <div className="auth-navbar-dropdown" data-testid="nav-more-dropdown">
+              <button className="auth-navbar-link" data-testid="link-nav-more">
+                More
+                <ChevronDown className="auth-navbar-chevron" />
+              </button>
+              <div className="auth-navbar-dropdown-menu">
+                {moreDropdownItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="auth-navbar-dropdown-item"
+                    data-testid={`link-more-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="auth-navbar-right">
