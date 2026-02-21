@@ -238,26 +238,6 @@ function LandingNavbar() {
               </Link>
             </div>
           </div>
-          <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-login-dropdown">
-            <button
-              className={`auth-navbar-action auth-navbar-login ${location === "/login" ? "auth-navbar-action-active" : ""}`}
-              data-testid="link-nav-login"
-            >
-              Login
-              <ChevronDown className="auth-navbar-chevron" />
-            </button>
-            <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right">
-              <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-login-login">
-                Login
-              </Link>
-              <Link href="/signup?role=guru" className="auth-navbar-dropdown-item" data-testid="link-login-signup-guru">
-                Sign up for Guru
-              </Link>
-              <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-login-signup-shishya">
-                Sign up for Shishya
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </nav>
