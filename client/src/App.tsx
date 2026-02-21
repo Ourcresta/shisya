@@ -11,7 +11,6 @@ import { CreditProvider } from "@/contexts/CreditContext";
 import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
-import GuruLogin from "@/pages/GuruLogin";
 import GuruLayout from "@/components/guru/GuruLayout";
 import GuruDashboard from "@/pages/GuruDashboard";
 import GuruCourses from "@/pages/GuruCourses";
@@ -194,7 +193,7 @@ function Router() {
       <Route path="/neon-portfolio/:username" component={PublicNeonPortfolio} />
       
       {/* Guru Admin Portal */}
-      <Route path="/guru" component={GuruLogin} />
+      <Route path="/guru">{() => <Redirect to="/login" />}</Route>
       <Route path="/guru/dashboard" component={() => <GuruPage component={GuruDashboard} />} />
       <Route path="/guru/courses" component={() => <GuruPage component={GuruCourses} />} />
       <Route path="/guru/courses/:courseId" component={() => <GuruPage component={GuruCourseDetail} />} />

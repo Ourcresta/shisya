@@ -53,7 +53,7 @@ export function GuruAuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Guru logout error:", error);
     } finally {
       setAdmin(null);
-      setLocation("/guru");
+      setLocation("/login");
     }
   }, [setLocation]);
 

@@ -59,7 +59,7 @@ function GuruLayoutInner({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Redirect to="/guru" />;
+    return <Redirect to="/login" />;
   }
 
   const style = {
