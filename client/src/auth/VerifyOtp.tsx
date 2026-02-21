@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, KeyRound } from "lucide-react";
+import AuthLayout from "./AuthLayout";
 
 export default function VerifyOtp() {
   const [, setLocation] = useLocation();
@@ -127,66 +125,56 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-primary" />
-            </div>
+    <AuthLayout>
+      <div className="auth-card-icon">
+        <Mail />
+      </div>
+      <h2 className="auth-card-title">Verify Your Email</h2>
+      <p className="auth-card-description">
+        We sent a verification code to<br />
+        <span style={{ color: '#00dce0', fontWeight: 500 }}>{email}</span>
+      </p>
+
+      <form onSubmit={handleVerify}>
+        <div>
+          <label className="auth-form-label">Verification Code</label>
+          <div className="auth-input-wrapper">
+            <input
+              type="text"
+              placeholder="000000"
+              className="auth-input-field auth-otp-input"
+              maxLength={6}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              data-testid="input-otp"
+            />
+            <KeyRound className="auth-input-icon" />
           </div>
-          <CardTitle className="text-2xl font-bold">Verify your email</CardTitle>
-          <CardDescription>
-            We sent a verification code to<br />
-            <span className="font-medium text-foreground">{email}</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Verification Code</label>
-              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Enter 6-digit code"
-                  className="pl-10 text-center text-lg tracking-widest"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  data-testid="input-otp"
-                />
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || otp.length !== 6}
-              data-testid="button-verify"
-            >
-              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Verify Email
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Didn't receive the code?{" "}
-            <Button
-              variant="ghost"
-              className="p-0 h-auto text-primary"
-              disabled={isResending || resendCooldown > 0}
-              onClick={handleResend}
-              data-testid="button-resend"
-            >
-              {isResending ? (
-                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-              ) : null}
-              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
-            </Button>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+        </div>
+
+        <button
+          type="submit"
+          className="auth-submit-btn"
+          disabled={isLoading || otp.length !== 6}
+          data-testid="button-verify"
+        >
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          Verify Email
+        </button>
+      </form>
+
+      <p className="auth-footer-text">
+        Didn't receive the code?{" "}
+        <button
+          className="auth-resend-btn"
+          disabled={isResending || resendCooldown > 0}
+          onClick={handleResend}
+          data-testid="button-resend"
+        >
+          {isResending && <Loader2 className="w-3 h-3 inline animate-spin mr-1" />}
+          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+        </button>
+      </p>
+    </AuthLayout>
   );
 }

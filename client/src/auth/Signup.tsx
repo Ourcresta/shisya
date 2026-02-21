@@ -4,14 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupInput } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader as CardHeaderUI, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, GraduationCap } from "lucide-react";
+import { Loader2, Mail, Lock, UserPlus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Header } from "@/components/layout/Header";
+import { Card } from "@/components/ui/card";
+import AuthLayout from "./AuthLayout";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -72,7 +69,7 @@ export default function Signup() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md">
-          <CardContent className="pt-8 pb-8 space-y-4">
+          <div className="pt-8 pb-8 space-y-4 px-6">
             <div className="flex justify-center">
               <Skeleton className="h-12 w-12 rounded-full" />
             </div>
@@ -80,7 +77,7 @@ export default function Signup() {
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
-          </CardContent>
+          </div>
         </Card>
       </div>
     );
@@ -91,90 +88,65 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-md">
-          <CardHeaderUI className="space-y-2 text-center">
-          <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription>
-            Join SHISHYA and start learning today
-          </CardDescription>
-        </CardHeaderUI>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          type="email"
-                          placeholder="you@example.com"
-                          className="pl-10"
-                          data-testid="input-email"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          type="password"
-                          placeholder="At least 8 characters"
-                          className="pl-10"
-                          data-testid="input-password"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-                data-testid="button-signup"
-              >
-                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Sign Up
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline" data-testid="link-login">
-              Log in
-            </Link>
-          </p>
-        </CardFooter>
-        </Card>
+    <AuthLayout>
+      <div className="auth-card-icon">
+        <UserPlus />
       </div>
-    </div>
+      <h2 className="auth-card-title">Create Your Account</h2>
+      <p className="auth-card-description">Join SHISHYA and start learning today</p>
+
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div>
+          <label className="auth-form-label">Email</label>
+          <div className="auth-input-wrapper">
+            <input
+              type="email"
+              placeholder="you@example.com"
+              className="auth-input-field"
+              data-testid="input-email"
+              {...form.register("email")}
+            />
+            <Mail className="auth-input-icon" />
+          </div>
+          {form.formState.errors.email && (
+            <p className="auth-error-text">{form.formState.errors.email.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="auth-form-label">Password</label>
+          <div className="auth-input-wrapper">
+            <input
+              type="password"
+              placeholder="At least 8 characters"
+              className="auth-input-field"
+              data-testid="input-password"
+              {...form.register("password")}
+            />
+            <Lock className="auth-input-icon" />
+          </div>
+          {form.formState.errors.password && (
+            <p className="auth-error-text">{form.formState.errors.password.message}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="auth-submit-btn"
+          disabled={isLoading}
+          data-testid="button-signup"
+        >
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          Sign Up
+        </button>
+      </form>
+
+      <p className="auth-footer-text">
+        Already have an account?{" "}
+        <Link href="/login" className="auth-footer-link" data-testid="link-login">
+          Log in
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }
