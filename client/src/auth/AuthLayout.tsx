@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ChevronDown } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import sealLogo from "@assets/image_1771693309786.png";
-import cosmicBg from "@assets/image_1771693341547.png";
+import sealLogo from "@assets/image_1771692892158.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -30,13 +29,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className="auth-page-wrapper">
-      <div className="auth-cosmic-bg" style={{ backgroundImage: `url(${cosmicBg})` }}>
+      <div className="auth-cosmic-bg">
         <div className="auth-stars" />
         <div className="auth-stars auth-stars-2" />
+        <div className="auth-stars auth-stars-3" />
+
+        <div className="auth-nebula auth-nebula-1" />
+        <div className="auth-nebula auth-nebula-2" />
+        <div className="auth-nebula auth-nebula-3" />
 
         <div className="auth-shooting-star auth-shooting-star-1" />
         <div className="auth-shooting-star auth-shooting-star-2" />
         <div className="auth-shooting-star auth-shooting-star-3" />
+
+        <div className="auth-grid-overlay" />
       </div>
 
       <nav className="auth-navbar" data-testid="auth-navbar">
@@ -93,6 +99,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
+              <div className="auth-seal-glow" />
               <img
                 src={sealLogo}
                 alt="OurShiksha Seal"
@@ -106,6 +113,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               Learn. Build. Get Certified.<br />
               Launch Your Career with AI Guidance.
             </p>
+            <p className="auth-brand-powered">Powered by Usha AI Mentor</p>
           </motion.div>
 
           <div className="auth-floating-icons">
