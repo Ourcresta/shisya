@@ -24,6 +24,8 @@ import {
   Building2,
   CreditCard,
   DollarSign,
+  ArrowLeft,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -126,6 +128,16 @@ export default function Pricing() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground" data-testid="button-back-home">
+            <ArrowLeft className="w-4 h-4" />
+            <Home className="w-4 h-4" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
