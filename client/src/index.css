@@ -1033,6 +1033,21 @@
   background: rgba(0,220,224,0.08);
 }
 
+.auth-navbar-dropdown-right > .auth-navbar-action {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.auth-navbar-dropdown-menu-right {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(6px);
+}
+
+.auth-navbar-dropdown:hover .auth-navbar-dropdown-menu-right {
+  transform: translateX(0) translateY(0);
+}
+
 .auth-navbar-right {
   display: flex;
   align-items: center;

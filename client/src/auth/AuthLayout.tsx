@@ -96,17 +96,29 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           </div>
 
           <div className="auth-navbar-right">
-            <Link href="/courses" className="auth-navbar-action" data-testid="link-nav-profile">
-              Profile
-              <ChevronDown className="auth-navbar-chevron" />
-            </Link>
+            <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-profile-dropdown">
+              <button className="auth-navbar-action" data-testid="link-nav-profile">
+                Profile
+                <ChevronDown className="auth-navbar-chevron" />
+              </button>
+              <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right">
+                <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-profile-login">
+                  Login
+                </Link>
+                <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-shishya">
+                  Sign up as Shishya
+                </Link>
+                <Link href="/signup?role=guru" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-guru">
+                  Sign up as Guru
+                </Link>
+              </div>
+            </div>
             <Link
               href="/login"
               className={`auth-navbar-action auth-navbar-login ${location === "/login" ? "auth-navbar-action-active" : ""}`}
               data-testid="link-nav-login"
             >
               Login
-              <ChevronDown className="auth-navbar-chevron" />
             </Link>
           </div>
         </div>
