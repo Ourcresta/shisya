@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe } from "lucide-react";
-import sealLogo from "@assets/image_1771690889497.png";
+import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ChevronDown } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import sealLogo from "@assets/image_1771692213700.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -16,7 +17,16 @@ const floatingIcons = [
   { Icon: Globe, delay: 1.8, x: "55%", y: "88%", size: 22 },
 ];
 
+const navLinks = [
+  { label: "Courses", href: "/courses" },
+  { label: "Udyog", href: "#" },
+  { label: "Subscription", href: "#" },
+  { label: "More", href: "#" },
+];
+
 export default function AuthLayout({ children }: AuthLayoutProps) {
+  const [location] = useLocation();
+
   return (
     <div className="auth-page-wrapper">
       <div className="auth-cosmic-bg">
@@ -26,9 +36,54 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="auth-nebula auth-nebula-1" />
         <div className="auth-nebula auth-nebula-2" />
+        <div className="auth-nebula auth-nebula-3" />
+
+        <div className="auth-shooting-star auth-shooting-star-1" />
+        <div className="auth-shooting-star auth-shooting-star-2" />
+        <div className="auth-shooting-star auth-shooting-star-3" />
 
         <div className="auth-grid-overlay" />
       </div>
+
+      <nav className="auth-navbar" data-testid="auth-navbar">
+        <div className="auth-navbar-inner">
+          <Link href="/" className="auth-navbar-brand" data-testid="link-home">
+            <img src={sealLogo} alt="OurShiksha" className="auth-navbar-logo" />
+            <span className="auth-navbar-brand-text">
+              Our <span className="auth-navbar-brand-accent">Shiksha</span>
+            </span>
+          </Link>
+
+          <div className="auth-navbar-links">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="auth-navbar-link"
+                data-testid={`link-nav-${link.label.toLowerCase()}`}
+              >
+                {link.label}
+                <ChevronDown className="auth-navbar-chevron" />
+              </Link>
+            ))}
+          </div>
+
+          <div className="auth-navbar-right">
+            <Link href="/courses" className="auth-navbar-action" data-testid="link-nav-profile">
+              Profile
+              <ChevronDown className="auth-navbar-chevron" />
+            </Link>
+            <Link
+              href="/login"
+              className={`auth-navbar-action auth-navbar-login ${location === "/login" ? "auth-navbar-action-active" : ""}`}
+              data-testid="link-nav-login"
+            >
+              Login
+              <ChevronDown className="auth-navbar-chevron" />
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       <div className="auth-split-layout">
         <div className="auth-left-panel">

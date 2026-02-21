@@ -890,6 +890,122 @@
    AUTH PAGES - COSMIC DESIGN SYSTEM
    ============================================ */
 
+/* --- Auth Navbar --- */
+.auth-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(6,8,18,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,220,224,0.08);
+}
+
+.auth-navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 56px;
+}
+
+.auth-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.auth-navbar-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.auth-navbar-brand-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(220,235,255,0.9);
+  letter-spacing: 0.02em;
+}
+
+.auth-navbar-brand-accent {
+  color: #00dce0;
+}
+
+.auth-navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.auth-navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(200,220,240,0.7);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.auth-navbar-link:hover {
+  color: #00dce0;
+  background: rgba(0,220,224,0.06);
+}
+
+.auth-navbar-chevron {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+}
+
+.auth-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.auth-navbar-action {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(200,220,240,0.7);
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid rgba(0,220,224,0.12);
+  background: rgba(0,220,224,0.04);
+  transition: all 0.2s ease;
+}
+
+.auth-navbar-action:hover {
+  border-color: rgba(0,220,224,0.25);
+  background: rgba(0,220,224,0.08);
+  color: #00dce0;
+}
+
+.auth-navbar-action-active {
+  border-color: rgba(0,220,224,0.3);
+  color: #00dce0;
+  background: rgba(0,220,224,0.1);
+}
+
+.auth-navbar-login {
+  background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(0,220,224,0.1));
+}
+
 .auth-page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -899,7 +1015,11 @@
 .auth-cosmic-bg {
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, #0a0e1a 0%, #0d1b2a 25%, #1a0a2e 50%, #0d1b2a 75%, #0a0e1a 100%);
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 80%, rgba(0,80,160,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(60,0,120,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 50%, rgba(0,40,80,0.1) 0%, transparent 70%),
+    linear-gradient(135deg, #050810 0%, #0a1628 20%, #0d0a22 40%, #091a30 60%, #0a0e1a 80%, #060812 100%);
   z-index: 0;
 }
 
@@ -975,10 +1095,58 @@
   animation-direction: reverse;
 }
 
+.auth-nebula-3 {
+  width: 600px;
+  height: 300px;
+  top: 40%;
+  left: 20%;
+  background: radial-gradient(ellipse, rgba(0,100,200,0.2) 0%, rgba(80,0,160,0.1) 40%, transparent 100%);
+  animation-delay: -3s;
+  filter: blur(100px);
+  opacity: 0.12;
+}
+
 @keyframes auth-nebula-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(20px, -15px) scale(1.05); }
   66% { transform: translate(-15px, 10px) scale(0.95); }
+}
+
+.auth-shooting-star {
+  position: absolute;
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0,220,224,0.8), transparent);
+  border-radius: 50%;
+  opacity: 0;
+  transform: rotate(-35deg);
+}
+
+.auth-shooting-star-1 {
+  top: 15%;
+  left: 70%;
+  animation: auth-shoot 4s ease-in 2s infinite;
+}
+
+.auth-shooting-star-2 {
+  top: 35%;
+  left: 40%;
+  width: 80px;
+  animation: auth-shoot 5s ease-in 5s infinite;
+}
+
+.auth-shooting-star-3 {
+  top: 60%;
+  left: 80%;
+  width: 100px;
+  animation: auth-shoot 6s ease-in 8s infinite;
+}
+
+@keyframes auth-shoot {
+  0% { opacity: 0; transform: rotate(-35deg) translateX(0); }
+  5% { opacity: 1; }
+  15% { opacity: 0; transform: rotate(-35deg) translateX(-300px); }
+  100% { opacity: 0; }
 }
 
 .auth-grid-overlay {
@@ -996,6 +1164,7 @@
   z-index: 1;
   display: flex;
   min-height: 100vh;
+  padding-top: 56px;
 }
 
 .auth-left-panel {
@@ -1036,11 +1205,12 @@
 
 .auth-seal-glow {
   position: absolute;
-  width: 280px;
-  height: 280px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,200,200,0.25) 0%, rgba(100,50,200,0.1) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(0,180,220,0.3) 0%, rgba(0,100,200,0.15) 30%, rgba(80,0,180,0.08) 55%, transparent 75%);
   animation: auth-seal-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 60px rgba(0,180,220,0.15), 0 0 120px rgba(0,100,200,0.08);
 }
 
 .auth-seal-image {
@@ -1608,6 +1778,10 @@
 }
 
 @media (max-width: 900px) {
+  .auth-navbar-links {
+    display: none;
+  }
+
   .auth-split-layout {
     flex-direction: column;
   }
@@ -1659,6 +1833,19 @@
 }
 
 @media (max-width: 480px) {
+  .auth-navbar-right {
+    gap: 0.2rem;
+  }
+
+  .auth-navbar-action {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .auth-navbar-brand-text {
+    font-size: 1rem;
+  }
+
   .auth-left-panel {
     min-height: 180px;
     padding: 1.5rem 1rem 0.5rem;
