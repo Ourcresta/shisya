@@ -46,7 +46,7 @@ const navLinks = [
 ];
 
 const udyogDropdownItems = [
-  { label: "Virtual Internship", href: "#" },
+  { label: "Internship", href: "#" },
 ];
 
 const moreDropdownItems = [
