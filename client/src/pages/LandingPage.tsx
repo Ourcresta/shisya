@@ -46,7 +46,7 @@ const navLinks = [
 ];
 
 const udyogDropdownItems = [
-  { label: "Internship", href: "#" },
+  { label: "Internship", href: "/shishya/udyog" },
 ];
 
 const moreDropdownItems = [

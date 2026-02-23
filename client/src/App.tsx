@@ -58,7 +58,9 @@ import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
 import { NeonPortfolioPreview, PublicNeonPortfolio } from "@/pages/NeonPortfolioPage";
 import { UshaFloatingWidget } from "@/components/usha";
+import UdyogLanding from "@/pages/UdyogLanding";
 import UdyogAssessment from "@/pages/UdyogAssessment";
+import UdyogDashboard from "@/pages/UdyogDashboard";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -148,6 +150,10 @@ function ProtectedUdyogAssessment() {
   return <ProtectedRoute><UdyogAssessment /></ProtectedRoute>;
 }
 
+function ProtectedUdyogDashboard() {
+  return <ProtectedRoute><UdyogDashboard /></ProtectedRoute>;
+}
+
 function GuruPage({ component: Component }: { component: React.ComponentType }) {
   return <GuruLayout><Component /></GuruLayout>;
 }
@@ -196,6 +202,7 @@ function Router() {
       <Route path="/profile/:username" component={PublicProfilePage} />
       <Route path="/portfolio/:username" component={PublicProfilePage} />
       <Route path="/neon-portfolio/:username" component={PublicNeonPortfolio} />
+      <Route path="/shishya/udyog" component={UdyogLanding} />
       
       {/* Guru Admin Portal */}
       <Route path="/guru">{() => <Redirect to="/login" />}</Route>
@@ -233,6 +240,7 @@ function Router() {
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
       <Route path="/shishya/profile/neon-portfolio" component={ProtectedNeonPortfolioPreview} />
       <Route path="/shishya/udyog/assess" component={ProtectedUdyogAssessment} />
+      <Route path="/shishya/udyog/dashboard" component={ProtectedUdyogDashboard} />
       
       <Route component={NotFound} />
     </Switch>
