@@ -2126,3 +2126,11 @@ html.dark body {
     height: 46px;
   }
 }
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
