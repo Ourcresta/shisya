@@ -129,12 +129,14 @@ export function Header() {
           >
             {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
           </Button>
-          <Link href="/">
-            <Button variant="ghost" size="sm" data-testid="button-home">
-              <Home className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Home</span>
-            </Button>
-          </Link>
+          {location !== "/" && (
+            <Link href="/">
+              <Button variant="ghost" size="sm" data-testid="button-home">
+                <Home className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
+            </Link>
+          )}
           {!isLoading && (
             <>
               {user ? (

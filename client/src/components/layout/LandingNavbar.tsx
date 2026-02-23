@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import sealLogo from "@assets/image_1771692892158.png";
 
 const navLinks = [
-  { label: "Home", href: "/" },
+  { label: "Home", href: "/", hideOn: "/" },
   { label: "Courses", href: "/courses" },
   { label: "Subscription", href: "/pricing" },
 ];
@@ -36,7 +36,7 @@ export function LandingNavbar() {
         </Link>
 
         <div className="auth-navbar-links">
-          {navLinks.map((link) => (
+          {navLinks.filter((link) => !link.hideOn || link.hideOn !== location).map((link) => (
             <Link
               key={link.label}
               href={link.href}
