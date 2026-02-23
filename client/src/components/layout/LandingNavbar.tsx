@@ -47,7 +47,7 @@ export function LandingNavbar() {
           ))}
           <div className="auth-navbar-dropdown" data-testid="nav-udyog-dropdown">
             <button className="auth-navbar-link" data-testid="link-nav-udyog">
-              Udyog
+              Our Udyog
               <ChevronDown className="auth-navbar-chevron" />
             </button>
             <div className="auth-navbar-dropdown-menu">

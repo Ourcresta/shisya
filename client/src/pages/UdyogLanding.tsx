@@ -135,7 +135,7 @@ export default function UdyogLanding() {
             >
               Step Into Industry With{" "}
               <span
-                className="bg-clip-text text-transparent"
+                className="bg-clip-text text-transparent whitespace-nowrap"
                 style={{
                   backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6, #22D3EE)",
                   backgroundSize: "200% 200%",
@@ -217,7 +217,7 @@ export default function UdyogLanding() {
             >
               How{" "}
               <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
-                Udyog
+                Our Udyog
               </span>{" "}
               Works
             </h2>
