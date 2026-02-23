@@ -19,7 +19,7 @@ export function Layout({ children, fullWidth = false }: LayoutProps) {
       <main className={`flex-1 ${fullWidth ? "" : "max-w-7xl mx-auto px-4 md:px-8 py-8"}`}>
         {children}
       </main>
-      <footer className="border-t py-6 mt-auto">
+      <footer className="border-t dark:border-cyan-500/10 py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center text-sm text-muted-foreground">
           {user && isShishyaPortal ? (
             <p>OurShiksha | Shishya Student Portal</p>

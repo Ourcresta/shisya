@@ -278,22 +278,7 @@ export default function UdyogAssessment() {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute top-20 left-[10%] w-72 h-72 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 70%)" }}
-          animate={{ y: [0, -30, 0], x: [0, 15, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-[40%] right-[5%] w-96 h-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)" }}
-          animate={{ y: [0, 25, 0], x: [0, -20, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-
+    <div className="min-h-screen relative">
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-12 md:py-20">
         <AnimatePresence mode="wait">
           {screen === "domain" && (

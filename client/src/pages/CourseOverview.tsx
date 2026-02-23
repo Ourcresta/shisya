@@ -124,7 +124,7 @@ export default function CourseOverview() {
             </div>
             
             <h1 
-              className="text-3xl md:text-4xl font-bold"
+              className="text-3xl md:text-4xl font-bold dark:neon-gradient-text"
               style={{ fontFamily: "var(--font-display)" }}
               data-testid="text-course-title"
             >

@@ -206,12 +206,12 @@ export default function CourseCatalog() {
           animate="animate"
         >
           <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-cyan-500/15 dark:border dark:border-cyan-500/20 flex items-center justify-center">
               <GraduationCap className="w-6 h-6 text-primary" />
             </div>
           </div>
           <h1
-            className="text-3xl md:text-4xl font-bold"
+            className="text-3xl md:text-4xl font-bold dark:neon-gradient-text"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-page-title"
           >

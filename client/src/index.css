@@ -229,6 +229,95 @@ html.dark body {
   background: transparent !important;
 }
 
+/* Universal cosmic glass cards in dark mode */
+.dark .shadcn-card {
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(34, 211, 238, 0.12) !important;
+  transition: all 0.3s ease;
+}
+
+.dark .shadcn-card:hover {
+  border-color: rgba(34, 211, 238, 0.25) !important;
+  box-shadow: 0 4px 20px -5px rgba(34, 211, 238, 0.15);
+}
+
+/* Dark mode section backgrounds - transparent to show cosmic gradient */
+.dark section[class*="bg-gradient"],
+.dark section[class*="bg-background"],
+.dark section.bg-background {
+  background: transparent !important;
+}
+
+/* Dark mode header glass effect */
+.dark header.sticky {
+  background: rgba(10, 14, 26, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom-color: rgba(34, 211, 238, 0.12) !important;
+}
+
+/* Dark mode footer cosmic styling */
+.dark footer {
+  background: rgba(10, 14, 26, 0.6) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top-color: rgba(34, 211, 238, 0.12) !important;
+}
+
+/* Dark mode muted backgrounds become glass */
+.dark .bg-muted\/50,
+.dark [class*="bg-muted"] {
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+/* Dark mode input fields */
+.dark input,
+.dark textarea,
+.dark select {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: rgba(34, 211, 238, 0.15) !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgba(34, 211, 238, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.1) !important;
+}
+
+/* Dark mode popover/dropdown glass */
+.dark [data-radix-popper-content-wrapper] [role="listbox"],
+.dark [data-radix-popper-content-wrapper] [role="menu"],
+.dark [data-radix-menu-content],
+.dark [data-state] .bg-popover {
+  background: rgba(10, 14, 26, 0.95) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(34, 211, 238, 0.15) !important;
+}
+
+/* Dark mode Progress bar glow */
+.dark [role="progressbar"] > div {
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+
+/* Dark mode badge cosmic styling */
+.dark .shadcn-card .badge-outline {
+  border-color: rgba(34, 211, 238, 0.2);
+}
+
+/* Dark mode accordion items */
+.dark [data-state][class*="border"][class*="rounded-2xl"] {
+  background: rgba(15, 23, 42, 0.4) !important;
+  border-color: rgba(34, 211, 238, 0.12) !important;
+}
+
+.dark [data-state][class*="border"][class*="rounded-2xl"]:hover {
+  border-color: rgba(34, 211, 238, 0.25) !important;
+}
+
 /* ============================================
    CYBERPUNK THEME (Purple - Neon Violet)
    ============================================ */

@@ -145,17 +145,12 @@ function HeroSection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10 dark:from-background dark:via-background dark:to-background py-16 md:py-24">
-      {/* Neon glow orbs for dark mode */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] neon-orb neon-orb-primary opacity-0 dark:opacity-20" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] neon-orb neon-orb-secondary opacity-0 dark:opacity-15" />
-      <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] neon-orb neon-orb-accent opacity-0 dark:opacity-10" />
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10 dark:from-transparent dark:via-transparent dark:to-transparent py-16 md:py-24">
+      {/* Dark mode radial glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_60%)] opacity-0 dark:opacity-100" />
       
       {/* Light mode gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50 dark:opacity-0" />
-      
-      {/* Dark mode radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.15),transparent_60%)] opacity-0 dark:opacity-100" />
       
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -235,9 +230,9 @@ function HeroSection() {
 
 function JourneySection() {
   return (
-    <section className="relative py-16 md:py-20 bg-background overflow-hidden">
+    <section className="relative py-16 md:py-20 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent dark:via-primary/10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent dark:via-cyan-500/[0.06]" />
       
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
@@ -288,7 +283,7 @@ function FeaturesSection() {
   ];
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-background dark:via-card/30 dark:to-background overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* Decorative gradient orbs */}
       <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl" />
@@ -422,7 +417,7 @@ function CoursePreviewSection() {
   const previewCourses = courses?.slice(0, 3) || [];
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-background to-muted/20 dark:to-card/20 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-background to-muted/20 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* Gradient mesh background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.1),transparent)] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.15),transparent)]" />
       
@@ -467,7 +462,7 @@ function CoursePreviewSection() {
 
 function RewardsSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-slate-900/50 via-background to-cyan-950/30 dark:from-slate-950 dark:via-[#020617] dark:to-cyan-950/50 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-slate-900/50 via-background to-cyan-950/30 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* Neon gradient orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-transparent rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-cyan-400/10 via-teal-500/5 to-transparent rounded-full blur-3xl" />
@@ -515,7 +510,7 @@ function RewardsSection() {
 
 function AISection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-purple-500/5 to-background dark:via-purple-500/10 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-purple-500/5 to-background dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* AI-themed gradient orbs */}
       <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/10 via-primary/5 to-transparent rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl" />
@@ -575,7 +570,7 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-primary/5 dark:from-card/30 dark:via-background dark:to-primary/10 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-primary/5 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-10 left-10 w-20 h-20 border border-primary/20 rounded-full" />
       <div className="absolute bottom-20 right-20 w-32 h-32 border border-primary/10 rounded-full" />
@@ -627,7 +622,7 @@ function TestimonialsSection() {
 
 function FAQSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background to-muted/20 dark:to-card/20 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background to-muted/20 dark:from-transparent dark:to-transparent overflow-hidden">
       <div className="max-w-3xl mx-auto px-4 md:px-8 relative">
         <div className="text-center mb-12">
           <h2
@@ -667,7 +662,7 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5 dark:from-primary/20 dark:via-background dark:to-primary/10 overflow-hidden">
+    <section className="relative py-16 md:py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
       {/* Gradient orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-primary/15 to-transparent rounded-full blur-3xl" />
