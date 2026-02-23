@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react";
 import sealLogo from "@assets/image_1771692892158.png";
 
 const navLinks = [
+  { label: "Home", href: "/" },
   { label: "Courses", href: "/courses" },
   { label: "Subscription", href: "/pricing" },
 ];
