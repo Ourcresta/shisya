@@ -54,6 +54,9 @@ import {
   CheckCircle,
   XCircle,
   Eye,
+  Users,
+  UserCheck,
+  Layers,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -111,6 +114,55 @@ interface Submission {
   reviewedAt: string | null;
 }
 
+interface BatchData {
+  batch: {
+    id: number;
+    internshipId: number;
+    batchNumber: number;
+    status: string;
+    startDate: string | null;
+    endDate: string | null;
+    createdAt: string;
+  };
+  internship: {
+    id: number;
+    title: string;
+    domain: string | null;
+  } | null;
+}
+
+interface BatchMember {
+  member: {
+    id: number;
+    batchId: number;
+    userId: string;
+    role: string;
+    skillScore: number;
+    performanceScore: number;
+    taskCompletionRate: number;
+    deadlineCompliance: number;
+    qualityScore: number;
+    collaborationScore: number;
+  };
+  profile: {
+    fullName: string | null;
+  } | null;
+}
+
+interface HrUser {
+  id: number;
+  email: string;
+  name: string;
+  companyName: string;
+  companyWebsite: string | null;
+  designation: string | null;
+  phone: string | null;
+  isApproved: boolean;
+  isActive: boolean;
+  approvedAt: string | null;
+  createdAt: string;
+}
+
 const defaultInternshipForm: InternshipForm = {
   title: "",
   description: "",
@@ -144,6 +196,17 @@ export default function GuruInternships() {
   const [reviewingSubmission, setReviewingSubmission] = useState<Submission | null>(null);
   const [reviewFeedback, setReviewFeedback] = useState("");
 
+  const [membersDialogBatchId, setMembersDialogBatchId] = useState<number | null>(null);
+  const [editingMemberRole, setEditingMemberRole] = useState<{ memberId: number; role: string } | null>(null);
+  const [editingMemberScores, setEditingMemberScores] = useState<{
+    memberId: number;
+    performanceScore: number;
+    taskCompletionRate: number;
+    deadlineCompliance: number;
+    qualityScore: number;
+    collaborationScore: number;
+  } | null>(null);
+
   const { data: internships, isLoading } = useQuery<Internship[]>({
     queryKey: ["/api/udyog/admin/internships"],
   });
@@ -155,6 +218,24 @@ export default function GuruInternships() {
 
   const { data: submissions, isLoading: submissionsLoading } = useQuery<Submission[]>({
     queryKey: ["/api/udyog/admin/submissions"],
+  });
+
+  const { data: batches, isLoading: batchesLoading } = useQuery<BatchData[]>({
+    queryKey: ["/api/udyog/admin/batches"],
+  });
+
+  const { data: batchMembers, isLoading: membersLoading } = useQuery<BatchMember[]>({
+    queryKey: ["/api/udyog/admin/batch", membersDialogBatchId, "members"],
+    queryFn: async () => {
+      const res = await fetch(`/api/udyog/admin/batch/${membersDialogBatchId}/members`);
+      if (!res.ok) throw new Error("Failed to fetch members");
+      return res.json();
+    },
+    enabled: !!membersDialogBatchId,
+  });
+
+  const { data: hrUsers, isLoading: hrUsersLoading } = useQuery<HrUser[]>({
+    queryKey: ["/api/udyog/admin/hr-users"],
   });
 
   const createMutation = useMutation({
@@ -236,6 +317,50 @@ export default function GuruInternships() {
     },
   });
 
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ memberId, role }: { memberId: number; role: string }) => {
+      const res = await apiRequest("PATCH", `/api/udyog/admin/batch-member/${memberId}/role`, { role });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/admin/batch", membersDialogBatchId, "members"] });
+      setEditingMemberRole(null);
+      toast({ title: "Role updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update role", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateScoresMutation = useMutation({
+    mutationFn: async ({ memberId, scores }: { memberId: number; scores: { performanceScore: number; taskCompletionRate: number; deadlineCompliance: number; qualityScore: number; collaborationScore: number } }) => {
+      const res = await apiRequest("PATCH", `/api/udyog/admin/batch-member/${memberId}/scores`, scores);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/admin/batch", membersDialogBatchId, "members"] });
+      setEditingMemberScores(null);
+      toast({ title: "Scores updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update scores", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const approveHrMutation = useMutation({
+    mutationFn: async ({ id, approved }: { id: number; approved: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/udyog/admin/hr-users/${id}/approve`, { approved });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/admin/hr-users"] });
+      toast({ title: "HR user status updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update HR user", description: error.message, variant: "destructive" });
+    },
+  });
+
   const filteredInternships = internships?.filter((i) =>
     i.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -283,6 +408,14 @@ export default function GuruInternships() {
           <TabsTrigger value="submissions" data-testid="tab-submissions">
             <FileCheck className="w-4 h-4 mr-2" />
             Submissions
+          </TabsTrigger>
+          <TabsTrigger value="batches" data-testid="tab-batches">
+            <Layers className="w-4 h-4 mr-2" />
+            Batches
+          </TabsTrigger>
+          <TabsTrigger value="hr-users" data-testid="tab-hr-users">
+            <UserCheck className="w-4 h-4 mr-2" />
+            HR Users
           </TabsTrigger>
         </TabsList>
 
@@ -667,7 +800,421 @@ export default function GuruInternships() {
             </Card>
           )}
         </TabsContent>
+
+        <TabsContent value="batches" className="space-y-4">
+          {batchesLoading ? (
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-5 w-12" />
+                    <Skeleton className="h-5 w-1/3" />
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ) : batches && batches.length > 0 ? (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Batch #</TableHead>
+                      <TableHead>Internship</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Members</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>End Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {batches.map((b) => (
+                      <TableRow key={b.batch.id} data-testid={`row-batch-${b.batch.id}`}>
+                        <TableCell className="tabular-nums font-medium" data-testid={`text-batch-number-${b.batch.id}`}>
+                          {b.batch.batchNumber}
+                        </TableCell>
+                        <TableCell data-testid={`text-batch-internship-${b.batch.id}`}>
+                          {b.internship?.title || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              b.batch.status === "active" ? "default" :
+                              b.batch.status === "completed" ? "default" :
+                              "secondary"
+                            }
+                            className={
+                              b.batch.status === "active"
+                                ? "bg-green-500/10 text-green-700 dark:text-green-400 no-default-hover-elevate no-default-active-elevate"
+                                : b.batch.status === "completed"
+                                ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 no-default-hover-elevate no-default-active-elevate"
+                                : b.batch.status === "forming"
+                                ? "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 no-default-hover-elevate no-default-active-elevate"
+                                : ""
+                            }
+                            data-testid={`badge-batch-status-${b.batch.id}`}
+                          >
+                            {b.batch.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setMembersDialogBatchId(b.batch.id)}
+                            data-testid={`button-view-members-${b.batch.id}`}
+                          >
+                            <Users className="w-4 h-4 mr-2" />
+                            View Members
+                          </Button>
+                        </TableCell>
+                        <TableCell data-testid={`text-batch-start-${b.batch.id}`}>
+                          {b.batch.startDate ? new Date(b.batch.startDate).toLocaleDateString() : "-"}
+                        </TableCell>
+                        <TableCell data-testid={`text-batch-end-${b.batch.id}`}>
+                          {b.batch.endDate ? new Date(b.batch.endDate).toLocaleDateString() : "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card data-testid="empty-batches">
+              <CardContent className="p-8 text-center">
+                <Layers className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">
+                  No batches found.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="hr-users" className="space-y-4">
+          {hrUsersLoading ? (
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ) : hrUsers && hrUsers.length > 0 ? (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Company Name</TableHead>
+                      <TableHead>Contact Person</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {hrUsers.map((hr) => (
+                      <TableRow key={hr.id} data-testid={`row-hr-user-${hr.id}`}>
+                        <TableCell>
+                          <span className="font-medium" data-testid={`text-hr-company-${hr.id}`}>
+                            {hr.companyName}
+                          </span>
+                        </TableCell>
+                        <TableCell data-testid={`text-hr-contact-${hr.id}`}>
+                          {hr.name}
+                        </TableCell>
+                        <TableCell data-testid={`text-hr-email-${hr.id}`}>
+                          {hr.email}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={hr.isApproved ? "default" : "secondary"}
+                            className={
+                              hr.isApproved
+                                ? "bg-green-500/10 text-green-700 dark:text-green-400 no-default-hover-elevate no-default-active-elevate"
+                                : "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 no-default-hover-elevate no-default-active-elevate"
+                            }
+                            data-testid={`badge-hr-status-${hr.id}`}
+                          >
+                            {hr.isApproved ? "Approved" : "Pending"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {!hr.isApproved && (
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                size="sm"
+                                onClick={() => approveHrMutation.mutate({ id: hr.id, approved: true })}
+                                disabled={approveHrMutation.isPending}
+                                className="bg-green-600 text-white"
+                                data-testid={`button-approve-hr-${hr.id}`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => approveHrMutation.mutate({ id: hr.id, approved: false })}
+                                disabled={approveHrMutation.isPending}
+                                data-testid={`button-reject-hr-${hr.id}`}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card data-testid="empty-hr-users">
+              <CardContent className="p-8 text-center">
+                <UserCheck className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">
+                  No HR users registered yet.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={!!membersDialogBatchId} onOpenChange={(open) => { if (!open) { setMembersDialogBatchId(null); setEditingMemberRole(null); setEditingMemberScores(null); } }}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle data-testid="text-members-dialog-title">Batch Members</DialogTitle>
+            <DialogDescription>View and manage members of this batch</DialogDescription>
+          </DialogHeader>
+          {membersLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-5 w-1/4" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-5 w-12" />
+                </div>
+              ))}
+            </div>
+          ) : batchMembers && batchMembers.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Skill Score</TableHead>
+                  <TableHead>Performance</TableHead>
+                  <TableHead>Task Completion %</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {batchMembers.map((bm) => (
+                  <TableRow key={bm.member.id} data-testid={`row-member-${bm.member.id}`}>
+                    <TableCell>
+                      <span className="font-medium" data-testid={`text-member-name-${bm.member.id}`}>
+                        {bm.profile?.fullName || "Unknown"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {editingMemberRole?.memberId === bm.member.id ? (
+                        <div className="flex items-center gap-1">
+                          <Select
+                            value={editingMemberRole.role}
+                            onValueChange={(v) => setEditingMemberRole({ ...editingMemberRole, role: v })}
+                          >
+                            <SelectTrigger className="w-32" data-testid={`select-role-${bm.member.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Team Lead">Team Lead</SelectItem>
+                              <SelectItem value="Developer">Developer</SelectItem>
+                              <SelectItem value="QA/Tester">QA/Tester</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            onClick={() => updateRoleMutation.mutate({ memberId: bm.member.id, role: editingMemberRole.role })}
+                            disabled={updateRoleMutation.isPending}
+                            data-testid={`button-save-role-${bm.member.id}`}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingMemberRole(null)}
+                            data-testid={`button-cancel-role-${bm.member.id}`}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={
+                              bm.member.role === "Team Lead"
+                                ? "bg-purple-500/10 text-purple-700 dark:text-purple-400 no-default-hover-elevate no-default-active-elevate"
+                                : bm.member.role === "Developer"
+                                ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 no-default-hover-elevate no-default-active-elevate"
+                                : "bg-orange-500/10 text-orange-700 dark:text-orange-400 no-default-hover-elevate no-default-active-elevate"
+                            }
+                            data-testid={`badge-member-role-${bm.member.id}`}
+                          >
+                            {bm.member.role}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditingMemberRole({ memberId: bm.member.id, role: bm.member.role })}
+                            data-testid={`button-edit-role-${bm.member.id}`}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="tabular-nums" data-testid={`text-member-skill-${bm.member.id}`}>
+                      {bm.member.skillScore}
+                    </TableCell>
+                    <TableCell className="tabular-nums" data-testid={`text-member-performance-${bm.member.id}`}>
+                      {bm.member.performanceScore}
+                    </TableCell>
+                    <TableCell className="tabular-nums" data-testid={`text-member-completion-${bm.member.id}`}>
+                      {bm.member.taskCompletionRate}%
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingMemberScores?.memberId === bm.member.id ? (
+                        <div className="space-y-2 text-left">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Quality</Label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={editingMemberScores.qualityScore}
+                                onChange={(e) => setEditingMemberScores({ ...editingMemberScores, qualityScore: parseInt(e.target.value) || 0 })}
+                                data-testid={`input-quality-score-${bm.member.id}`}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Collaboration</Label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={editingMemberScores.collaborationScore}
+                                onChange={(e) => setEditingMemberScores({ ...editingMemberScores, collaborationScore: parseInt(e.target.value) || 0 })}
+                                data-testid={`input-collab-score-${bm.member.id}`}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Task Completion</Label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={editingMemberScores.taskCompletionRate}
+                                onChange={(e) => setEditingMemberScores({ ...editingMemberScores, taskCompletionRate: parseInt(e.target.value) || 0 })}
+                                data-testid={`input-task-completion-${bm.member.id}`}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Deadline</Label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={editingMemberScores.deadlineCompliance}
+                                onChange={(e) => setEditingMemberScores({ ...editingMemberScores, deadlineCompliance: parseInt(e.target.value) || 0 })}
+                                data-testid={`input-deadline-score-${bm.member.id}`}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => updateScoresMutation.mutate({
+                                memberId: bm.member.id,
+                                scores: {
+                                  performanceScore: editingMemberScores.performanceScore,
+                                  taskCompletionRate: editingMemberScores.taskCompletionRate,
+                                  deadlineCompliance: editingMemberScores.deadlineCompliance,
+                                  qualityScore: editingMemberScores.qualityScore,
+                                  collaborationScore: editingMemberScores.collaborationScore,
+                                },
+                              })}
+                              disabled={updateScoresMutation.isPending}
+                              data-testid={`button-save-scores-${bm.member.id}`}
+                            >
+                              {updateScoresMutation.isPending ? "Saving..." : "Save Scores"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingMemberScores(null)}
+                              data-testid={`button-cancel-scores-${bm.member.id}`}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingMemberScores({
+                            memberId: bm.member.id,
+                            performanceScore: bm.member.performanceScore,
+                            taskCompletionRate: bm.member.taskCompletionRate,
+                            deadlineCompliance: bm.member.deadlineCompliance,
+                            qualityScore: bm.member.qualityScore,
+                            collaborationScore: bm.member.collaborationScore,
+                          })}
+                          data-testid={`button-edit-scores-${bm.member.id}`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="p-8 text-center">
+              <Users className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground" data-testid="text-no-members">
+                No members in this batch.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setMembersDialogBatchId(null); setEditingMemberRole(null); setEditingMemberScores(null); }} data-testid="button-close-members-dialog">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-lg">
