@@ -1,516 +1,780 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { 
-  Gift, 
-  Coins, 
-  MessageSquare, 
-  FlaskConical, 
-  ClipboardCheck, 
-  FolderKanban, 
-  Award, 
-  Check, 
-  Star, 
+import {
+  Check,
+  X,
   Sparkles,
-  Brain,
-  Target,
-  BookOpen,
   Shield,
   Users,
-  TrendingUp,
+  CreditCard,
+  RefreshCw,
+  Lock,
+  BookOpen,
+  Brain,
+  Briefcase,
+  Award,
+  Headphones,
+  FileText,
   ChevronDown,
   Zap,
   Crown,
-  Building2,
-  CreditCard,
-  DollarSign,
-  ArrowLeft,
-  Home,
-  type LucideIcon,
+  GraduationCap,
+  ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader as CardHeaderUI, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useAuth } from "@/contexts/AuthContext";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Gift, Zap, Crown, Building2, Star, Coins, CreditCard, DollarSign,
+const C = {
+  bgDeep: "#050A18",
+  bgPrimary: "#0B1D3A",
+  bgSecondary: "#0F172A",
+  cardBg: "rgba(255,255,255,0.04)",
+  cardBorder: "rgba(255,255,255,0.08)",
+  teal: "#00F5FF",
+  tealDark: "#0EA5E9",
+  purple: "#7C3AED",
+  success: "#10B981",
+  warning: "#F59E0B",
+  danger: "#EF4444",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#94A3B8",
 };
 
-interface PricingPlan {
-  id: number;
-  name: string;
-  subtitle: string | null;
-  price: string;
-  period: string | null;
-  coins: string | null;
-  coinsLabel: string | null;
-  iconName: string;
-  features: string[];
-  notIncluded: string[];
-  cta: string;
-  href: string;
-  buttonVariant: string;
-  popular: boolean;
-  orderIndex: number;
-  isActive: boolean;
-}
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const coinUsage = [
-  { icon: MessageSquare, label: "AI Usha Chat", cost: "5 coins / query", description: "Get personalized help from your AI tutor" },
-  { icon: FlaskConical, label: "Practice Lab", cost: "20 coins", description: "Hands-on coding exercises" },
-  { icon: ClipboardCheck, label: "Test Attempt", cost: "30 coins", description: "Skill assessment tests" },
-  { icon: FolderKanban, label: "Project Evaluation", cost: "50 coins", description: "Real-world project reviews" },
-  { icon: Award, label: "Certificate Generation", cost: "100 coins", description: "Verified skill certificates" },
+const plans = [
+  {
+    id: "free",
+    name: "Free Explorer",
+    subtitle: "Start your learning journey",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    features: [
+      "Access to free courses",
+      "Basic AI Usha access (5/day)",
+      "Basic certificates",
+      "Community support",
+      "Progress tracking",
+    ],
+    notIncluded: [
+      "Premium courses",
+      "Internship access",
+      "Hiring priority",
+      "Priority support",
+    ],
+    cta: "Get Started Free",
+    href: "/signup",
+    popular: false,
+    tier: 0,
+  },
+  {
+    id: "pro",
+    name: "Pro Learner",
+    subtitle: "For serious learners",
+    monthlyPrice: 999,
+    yearlyPrice: 799,
+    features: [
+      "All courses access",
+      "Unlimited AI Usha access",
+      "Internship eligibility",
+      "Verified certificates",
+      "Skill assessments",
+      "Portfolio builder",
+      "Email support",
+    ],
+    notIncluded: [
+      "Hiring priority",
+      "Resume review",
+    ],
+    cta: "Start Pro Plan",
+    href: "/signup",
+    popular: true,
+    tier: 1,
+  },
+  {
+    id: "elite",
+    name: "Elite Career",
+    subtitle: "Launch your career",
+    monthlyPrice: 2499,
+    yearlyPrice: 1999,
+    features: [
+      "Everything in Pro",
+      "Premium internships",
+      "Direct hiring priority",
+      "Resume & portfolio review",
+      "Priority support",
+      "Exclusive workshops",
+      "Career mentorship",
+    ],
+    notIncluded: [],
+    cta: "Go Elite",
+    href: "/signup",
+    popular: false,
+    tier: 2,
+  },
 ];
 
+const comparisonFeatures = [
+  { label: "Course Access", free: "Free only", pro: "All courses", elite: "All + Premium" },
+  { label: "AI Mentor (Usha)", free: "5 queries/day", pro: "Unlimited", elite: "Unlimited + Priority" },
+  { label: "Internship Access", free: false, pro: true, elite: "Premium" },
+  { label: "Verified Certificates", free: "Basic", pro: true, elite: true },
+  { label: "Skill Assessments", free: false, pro: true, elite: true },
+  { label: "Hiring Support", free: false, pro: false, elite: true },
+  { label: "Resume Review", free: false, pro: false, elite: true },
+  { label: "Priority Support", free: false, pro: false, elite: true },
+];
 
-const features = [
-  { icon: Brain, title: "AI Tutor (Usha)", description: "24/7 personalized learning assistant that never gives direct answers" },
-  { icon: FlaskConical, title: "Practice-First Learning", description: "Learn by doing with hands-on labs and exercises" },
-  { icon: FolderKanban, title: "Real-World Projects", description: "Build portfolio-worthy projects with expert evaluation" },
-  { icon: Award, title: "Verified Certificates", description: "Industry-recognized credentials with QR verification" },
-  { icon: TrendingUp, title: "Skill Progression", description: "Track your growth with detailed analytics" },
-  { icon: Coins, title: "Transparent Coin System", description: "Know exactly what you're spending, no hidden fees" }
+const trustItems = [
+  { icon: Lock, title: "Secure Payments", description: "Stripe & Razorpay encrypted checkout" },
+  { icon: RefreshCw, title: "7-Day Refund", description: "No questions asked refund policy" },
+  { icon: Users, title: "10,000+ Learners", description: "Trusted by students across India" },
+  { icon: Shield, title: "Data Privacy", description: "Your data is encrypted & protected" },
 ];
 
 const faqs = [
   {
-    question: "What are coins?",
-    answer: "Coins are OurShiksha's internal currency. They're used to access premium features like AI chat, practice labs, tests, project evaluations, and certificate generation. This transparent system ensures you know exactly what you're spending."
+    question: "Can I cancel my subscription anytime?",
+    answer: "Yes, you can cancel anytime from your account settings. You'll continue to have access until the end of your current billing period. No cancellation fees.",
   },
   {
-    question: "Do coins expire?",
-    answer: "Free signup coins never expire. Monthly subscription coins reset at the start of each billing cycle - unused coins don't carry over, so make the most of your learning each month!"
+    question: "Do I get a refund if I'm not satisfied?",
+    answer: "Absolutely. We offer a 7-day no-questions-asked refund policy. If you're not satisfied within the first 7 days, contact us for a full refund.",
   },
   {
-    question: "Can I buy extra coins?",
-    answer: "Yes! You can purchase additional coin packs anytime from your Wallet. Extra coins never expire and can be used alongside your subscription coins."
+    question: "What payment methods are supported?",
+    answer: "We accept UPI, credit/debit cards, net banking, and popular wallets like Google Pay and Paytm through our secure Razorpay integration. International cards via Stripe are also supported.",
   },
   {
-    question: "Can I upgrade anytime?",
-    answer: "Absolutely! You can upgrade your plan at any time. When you upgrade, you'll immediately receive the difference in coins for the current billing period."
+    question: "Is internship placement guaranteed?",
+    answer: "While we can't guarantee placement, Pro and Elite members get priority access to our internship network. Elite members additionally receive direct hiring priority from our partner companies.",
   },
   {
-    question: "Are certificates valid?",
-    answer: "Yes! Our certificates are industry-recognized and feature QR codes that link to public verification pages. Employers can verify the authenticity of your credentials instantly."
+    question: "Can I switch plans later?",
+    answer: "Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll only pay the prorated difference. Downgrades take effect at the next billing cycle.",
   },
   {
-    question: "What payment methods are accepted?",
-    answer: "We accept UPI, credit/debit cards, net banking, and popular wallets like Google Pay and Paytm through our secure Razorpay integration."
-  }
+    question: "Do I keep my certificates if I cancel?",
+    answer: "Yes, all certificates you've earned are yours forever. They remain publicly verifiable even after cancellation.",
+  },
 ];
+
+function GlassCard({
+  children,
+  className = "",
+  hover = true,
+  style,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+  style?: React.CSSProperties;
+  [key: string]: any;
+}) {
+  return (
+    <div
+      className={`rounded-[20px] backdrop-blur-[20px] transition-all duration-300 ${
+        hover ? "hover:-translate-y-1.5 hover:shadow-[0_12px_40px_-8px_rgba(0,245,255,0.15)]" : ""
+      } ${className}`}
+      style={{
+        background: C.cardBg,
+        border: `1px solid ${C.cardBorder}`,
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (hover) (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.2)";
+      }}
+      onMouseLeave={(e) => {
+        if (hover) (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionGlow({ position = "center", color = C.teal }: { position?: string; color?: string }) {
+  const posStyles: Record<string, React.CSSProperties> = {
+    center: { top: "50%", left: "50%", transform: "translate(-50%,-50%)" },
+    "top-right": { top: "-10%", right: "-5%" },
+    "bottom-left": { bottom: "-10%", left: "-5%" },
+    "top-left": { top: "0", left: "10%" },
+  };
+  return (
+    <div
+      className="absolute w-[600px] h-[600px] rounded-full blur-[180px] opacity-[0.06] pointer-events-none"
+      style={{ background: `radial-gradient(circle, ${color}, transparent)`, ...posStyles[position] }}
+    />
+  );
+}
+
+function BillingToggle({
+  isYearly,
+  onToggle,
+}: {
+  isYearly: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-4 mb-16">
+      <span
+        className="text-sm font-medium transition-colors"
+        style={{ color: !isYearly ? C.textPrimary : C.textSecondary }}
+      >
+        Monthly
+      </span>
+      <button
+        onClick={onToggle}
+        className="relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none"
+        style={{
+          background: isYearly
+            ? `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`
+            : "rgba(255,255,255,0.12)",
+          border: `1px solid ${isYearly ? "rgba(0,245,255,0.4)" : "rgba(255,255,255,0.15)"}`,
+          boxShadow: isYearly ? "0 0 20px rgba(0,245,255,0.2)" : "none",
+        }}
+        data-testid="toggle-billing"
+      >
+        <div
+          className="absolute top-1 w-6 h-6 rounded-full transition-all duration-300"
+          style={{
+            left: isYearly ? "calc(100% - 28px)" : "4px",
+            background: isYearly ? C.bgDeep : "rgba(255,255,255,0.8)",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+          }}
+        />
+      </button>
+      <div className="flex items-center gap-2">
+        <span
+          className="text-sm font-medium transition-colors"
+          style={{ color: isYearly ? C.textPrimary : C.textSecondary }}
+        >
+          Yearly
+        </span>
+        <span
+          className="px-2.5 py-1 rounded-full text-xs font-bold"
+          style={{
+            background: "rgba(245,158,11,0.15)",
+            color: C.warning,
+            border: "1px solid rgba(245,158,11,0.25)",
+          }}
+        >
+          Save 20%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PricingCard({
+  plan,
+  isYearly,
+  isLoggedIn,
+}: {
+  plan: (typeof plans)[0];
+  isYearly: boolean;
+  isLoggedIn: boolean;
+}) {
+  const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
+  const isFree = price === 0;
+  const isPopular = plan.popular;
+
+  return (
+    <div
+      className={`relative rounded-[20px] backdrop-blur-[20px] transition-all duration-300 flex flex-col h-full ${
+        isPopular ? "lg:scale-105 z-10" : "hover:-translate-y-1.5"
+      }`}
+      style={{
+        background: isPopular
+          ? "rgba(0,245,255,0.04)"
+          : C.cardBg,
+        border: `1px solid ${
+          isPopular ? "rgba(0,245,255,0.25)" : C.cardBorder
+        }`,
+        boxShadow: isPopular
+          ? "0 8px 40px -8px rgba(0,245,255,0.15), 0 0 0 1px rgba(0,245,255,0.08)"
+          : "none",
+      }}
+      onMouseEnter={(e) => {
+        if (!isPopular) {
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.2)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px -8px rgba(0,245,255,0.12)";
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-6px)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isPopular) {
+          (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
+          (e.currentTarget as HTMLElement).style.boxShadow = "none";
+          (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        }
+      }}
+      data-testid={`card-plan-${plan.id}`}
+    >
+      {isPopular && (
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+          <span
+            className="px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5"
+            style={{
+              background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+              color: C.bgDeep,
+              boxShadow: "0 4px 15px rgba(0,245,255,0.3)",
+            }}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Most Popular
+          </span>
+        </div>
+      )}
+
+      <div className="p-8 text-center">
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          style={{
+            background: plan.tier === 0
+              ? "rgba(255,255,255,0.06)"
+              : plan.tier === 1
+              ? "rgba(0,245,255,0.1)"
+              : "rgba(124,58,237,0.12)",
+            border: `1px solid ${
+              plan.tier === 0
+                ? "rgba(255,255,255,0.1)"
+                : plan.tier === 1
+                ? "rgba(0,245,255,0.25)"
+                : "rgba(124,58,237,0.3)"
+            }`,
+          }}
+        >
+          {plan.tier === 0 && <GraduationCap className="w-7 h-7" style={{ color: C.textSecondary }} />}
+          {plan.tier === 1 && <Zap className="w-7 h-7" style={{ color: C.teal }} />}
+          {plan.tier === 2 && <Crown className="w-7 h-7" style={{ color: C.purple }} />}
+        </div>
+
+        <h3
+          className="text-xl font-bold mb-1"
+          style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
+        >
+          {plan.name}
+        </h3>
+        <p className="text-sm mb-6" style={{ color: C.textSecondary }}>
+          {plan.subtitle}
+        </p>
+
+        <div className="mb-6">
+          {isFree ? (
+            <div>
+              <span
+                className="text-5xl font-bold"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  color: C.textPrimary,
+                }}
+              >
+                Free
+              </span>
+              <p className="text-sm mt-1" style={{ color: C.textSecondary }}>
+                Forever
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-lg" style={{ color: C.textSecondary }}>
+                  ₹
+                </span>
+                <span
+                  className="text-5xl font-bold tabular-nums"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    color: C.textPrimary,
+                  }}
+                >
+                  {price}
+                </span>
+              </div>
+              <p className="text-sm mt-1" style={{ color: C.textSecondary }}>
+                /month {isYearly && "· billed yearly"}
+              </p>
+              {isYearly && (
+                <p className="text-xs mt-1" style={{ color: C.warning }}>
+                  Save ₹{(plan.monthlyPrice - plan.yearlyPrice) * 12}/year
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Link href={isLoggedIn ? "/shishya/wallet" : plan.href}>
+          <button
+            className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+            style={
+              isFree
+                ? {
+                    background: "transparent",
+                    color: C.teal,
+                    border: `1px solid rgba(0,245,255,0.3)`,
+                  }
+                : plan.tier === 2
+                ? {
+                    background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                    color: C.bgDeep,
+                    boxShadow: "0 4px 20px rgba(0,245,255,0.3)",
+                    border: "none",
+                  }
+                : {
+                    background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                    color: C.bgDeep,
+                    boxShadow: "0 4px 20px rgba(0,245,255,0.3)",
+                    border: "none",
+                  }
+            }
+            data-testid={`button-plan-${plan.id}`}
+          >
+            {plan.cta}
+          </button>
+        </Link>
+      </div>
+
+      <div className="px-8 pb-8 flex-1" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mt-6 mb-4" style={{ color: C.textSecondary }}>
+          What's included
+        </p>
+        <ul className="space-y-3">
+          {plan.features.map((feature, i) => (
+            <li key={i} className="flex items-start gap-3 text-sm">
+              <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: C.teal }} />
+              <span style={{ color: C.textPrimary }}>{feature}</span>
+            </li>
+          ))}
+          {plan.notIncluded.map((feature, i) => (
+            <li key={i} className="flex items-start gap-3 text-sm">
+              <X className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "rgba(255,255,255,0.15)" }} />
+              <span style={{ color: "rgba(255,255,255,0.25)" }}>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonTable() {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
+        <thead>
+          <tr>
+            <th className="text-left py-4 px-6 text-sm font-semibold" style={{ color: C.textSecondary }}>
+              Feature
+            </th>
+            {["Free Explorer", "Pro Learner", "Elite Career"].map((name, i) => (
+              <th
+                key={name}
+                className="text-center py-4 px-6 text-sm font-semibold"
+                style={{
+                  color: i === 1 ? C.teal : C.textPrimary,
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                {name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {comparisonFeatures.map((row, index) => (
+            <tr
+              key={row.label}
+              style={{
+                borderTop: `1px solid ${C.cardBorder}`,
+                background: index % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
+              }}
+            >
+              <td className="py-4 px-6 text-sm" style={{ color: C.textPrimary }}>
+                {row.label}
+              </td>
+              {[row.free, row.pro, row.elite].map((val, i) => (
+                <td key={i} className="text-center py-4 px-6 text-sm">
+                  {val === true ? (
+                    <Check className="w-5 h-5 mx-auto" style={{ color: C.teal }} />
+                  ) : val === false ? (
+                    <X className="w-5 h-5 mx-auto" style={{ color: "rgba(255,255,255,0.12)" }} />
+                  ) : (
+                    <span style={{ color: C.textSecondary }}>{val}</span>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function Pricing() {
   const { user } = useAuth();
-  const { data: plans, isLoading: plansLoading } = useQuery<PricingPlan[]>({
-    queryKey: ["/api/pricing-plans"],
-  });
+  const [isYearly, setIsYearly] = useState(true);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        background: `linear-gradient(180deg, ${C.bgDeep} 0%, ${C.bgPrimary} 30%, ${C.bgSecondary} 100%)`,
+        color: C.textPrimary,
+      }}
+    >
       <LandingNavbar />
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 md:py-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-          <motion.div
-            className="text-center max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+
+      <section className="relative overflow-hidden pt-16 pb-8 md:pt-24 md:pb-12">
+        <SectionGlow position="top-right" color={C.teal} />
+        <SectionGlow position="bottom-left" color={C.purple} />
+
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+            style={{
+              background: "rgba(0,245,255,0.06)",
+              border: "1px solid rgba(0,245,255,0.15)",
+            }}
           >
-            <Badge variant="secondary" className="mb-4 gap-1.5 px-4 py-1.5">
-              <Gift className="w-4 h-4" />
-              Get FREE 500 Coins on Signup
-            </Badge>
-            
-            <h1 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Learn Skills. Prove Knowledge.{" "}
-              <span className="text-primary">Get Certified.</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              AI-Powered Learning with Practice, Projects & Certificates. 
-              Choose the plan that fits your learning journey.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button size="lg" className="gap-2 w-full sm:w-auto" data-testid="button-hero-start-free">
-                  <Sparkles className="w-5 h-5" />
-                  Get Started Free
-                </Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="gap-2"
-                onClick={() => document.getElementById('pricing-plans')?.scrollIntoView({ behavior: 'smooth' })}
-                data-testid="button-hero-view-plans"
-              >
-                View Plans
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </div>
-          </motion.div>
+            <Sparkles className="w-4 h-4" style={{ color: C.teal }} />
+            <span className="text-sm font-medium" style={{ color: C.teal }}>
+              Flexible plans for every learner
+            </span>
+          </div>
+
+          <h1
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary} 30%, ${C.teal} 100%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.02em",
+              lineHeight: "1.15",
+            }}
+            data-testid="text-pricing-headline"
+          >
+            Choose Your Learning Power
+          </h1>
+
+          <p
+            className="text-lg md:text-xl max-w-2xl mx-auto mb-4"
+            style={{ color: C.textSecondary, lineHeight: "1.7" }}
+            data-testid="text-pricing-subtitle"
+          >
+            Flexible plans built for serious learners and future professionals.
+            Start free, upgrade when you're ready.
+          </p>
         </div>
       </section>
 
-      {/* What Are Coins Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="inline-flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-full bg-amber-500/10">
-                <Coins className="w-6 h-6 text-amber-500" />
-              </div>
-              <h2 
-                className="text-2xl md:text-3xl font-bold"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                What Are Coins?
-              </h2>
-            </div>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Coins are OurShiksha's transparent credit system. Know exactly what you're spending - no hidden charges, no surprises.
-            </p>
-          </motion.div>
+      <section className="relative z-10 pb-20 md:pb-28">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <BillingToggle
+            isYearly={isYearly}
+            onToggle={() => setIsYearly(!isYearly)}
+          />
 
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {coinUsage.map((item, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className="h-full text-center hover:shadow-md transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <item.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="font-semibold mb-1">{item.label}</h3>
-                    <Badge variant="secondary" className="mb-2">
-                      <Coins className="w-3 h-3 mr-1" />
-                      {item.cost}
-                    </Badge>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+            {plans.map((plan) => (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                isYearly={isYearly}
+                isLoggedIn={!!user}
+              />
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Pricing Plans Section */}
-      <section id="pricing-plans" className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 
-              className="text-2xl md:text-3xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Choose Your Learning Plan
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Start free, upgrade anytime. All plans include access to our course library and AI-powered learning tools.
-            </p>
-          </motion.div>
+      <section className="relative py-20 md:py-24 overflow-hidden">
+        <SectionGlow position="center" color={C.teal} />
 
-          {plansLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="h-full flex flex-col">
-                  <CardHeaderUI className="text-center pb-4">
-                    <Skeleton className="w-12 h-12 rounded-full mx-auto mb-3" />
-                    <Skeleton className="h-6 w-24 mx-auto" />
-                    <Skeleton className="h-4 w-20 mx-auto mt-2" />
-                    <Skeleton className="h-10 w-28 mx-auto mt-4" />
-                  </CardHeaderUI>
-                  <CardContent className="flex-1 space-y-3">
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Skeleton key={j} className="h-4 w-full" />
-                    ))}
-                  </CardContent>
-                  <CardFooter>
-                    <Skeleton className="h-10 w-full" />
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : plans && plans.length > 0 ? (
-            <motion.div
-              className={`grid grid-cols-1 md:grid-cols-2 ${plans.length <= 3 ? `lg:grid-cols-${plans.length}` : "lg:grid-cols-4"} gap-6`}
-              variants={staggerContainer}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
+        <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-4"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              data-testid="text-comparison-title"
             >
-              {plans.map((plan, index) => {
-                const IconComp = ICON_MAP[plan.iconName] || Gift;
-                return (
-                  <motion.div key={plan.id} variants={fadeInUp}>
-                    <Card 
-                      className={`h-full flex flex-col relative ${
-                        plan.popular 
-                          ? 'border-primary shadow-lg ring-2 ring-primary/20' 
-                          : 'hover:shadow-md'
-                      } transition-all`}
-                    >
-                      {plan.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                          <Badge className="gap-1 bg-primary text-primary-foreground">
-                            <Star className="w-3 h-3" />
-                            Most Popular
-                          </Badge>
-                        </div>
-                      )}
-                      
-                      <CardHeaderUI className="text-center pb-4">
-                        <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
-                          plan.popular ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}>
-                          <IconComp className="w-6 h-6" />
-                        </div>
-                        <CardTitle className="text-xl">{plan.name}</CardTitle>
-                        <CardDescription>{plan.subtitle}</CardDescription>
-                        <div className="mt-4">
-                          <span className="text-4xl font-bold">{plan.price}</span>
-                          <span className="text-muted-foreground">{plan.period}</span>
-                        </div>
-                        {plan.coins && (
-                          <Badge variant="outline" className="mt-2 gap-1">
-                            <Coins className="w-3 h-3 text-amber-500" />
-                            {plan.coins} coins {plan.coinsLabel}
-                          </Badge>
-                        )}
-                      </CardHeaderUI>
-                      
-                      <CardContent className="flex-1">
-                        <ul className="space-y-3">
-                          {plan.features.map((feature: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-sm">
-                              <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                          {plan.notIncluded.map((feature: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <span className="w-4 h-4 mt-0.5 shrink-0 text-center">-</span>
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                      
-                      <CardFooter>
-                        <Link href={user ? "/shishya/wallet" : plan.href} className="w-full">
-                          <Button 
-                            variant={plan.buttonVariant as "default" | "outline" | "secondary"} 
-                            className="w-full"
-                            data-testid={`button-plan-${plan.name.toLowerCase()}`}
-                          >
-                            {plan.cta}
-                          </Button>
-                        </Link>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          ) : null}
+              Compare Plans
+            </h2>
+            <p style={{ color: C.textSecondary }} className="max-w-xl mx-auto">
+              See exactly what's included in each plan
+            </p>
+          </div>
+
+          <GlassCard hover={false} className="overflow-hidden">
+            <ComparisonTable />
+          </GlassCard>
         </div>
       </section>
 
-      {/* Why OurShiksha Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 
+      <section className="relative py-16 md:py-20 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h2
               className="text-2xl md:text-3xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              data-testid="text-trust-title"
             >
-              Why OurShiksha?
+              Your Trust, Our Priority
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              We're building the future of skill-based education in India
-            </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {features.map((feature, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className="h-full hover:shadow-md transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                      <feature.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h3 className="font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trustItems.map((item) => (
+              <GlassCard key={item.title} className="p-6 text-center">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
+                  style={{
+                    background: "rgba(0,245,255,0.08)",
+                    border: "1px solid rgba(0,245,255,0.15)",
+                  }}
+                >
+                  <item.icon className="w-6 h-6" style={{ color: C.teal }} />
+                </div>
+                <h3
+                  className="font-semibold mb-1"
+                  style={{ color: C.textPrimary, fontFamily: "var(--font-display)" }}
+                >
+                  {item.title}
+                </h3>
+                <p className="text-sm" style={{ color: C.textSecondary }}>
+                  {item.description}
+                </p>
+              </GlassCard>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 
+      <section className="relative py-16 md:py-20 overflow-hidden">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h2
               className="text-2xl md:text-3xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Built for Everyone
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              Students, professionals, and institutions trust OurShiksha for skill development
-            </p>
-            
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              <Badge variant="outline" className="gap-2 px-4 py-2">
-                <Users className="w-4 h-4" />
-                10,000+ Learners
-              </Badge>
-              <Badge variant="outline" className="gap-2 px-4 py-2">
-                <BookOpen className="w-4 h-4" />
-                50+ Courses
-              </Badge>
-              <Badge variant="outline" className="gap-2 px-4 py-2">
-                <Award className="w-4 h-4" />
-                5,000+ Certificates Issued
-              </Badge>
-              <Badge variant="outline" className="gap-2 px-4 py-2">
-                <Shield className="w-4 h-4" />
-                Verified & Trusted
-              </Badge>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 
-              className="text-2xl md:text-3xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              data-testid="text-faq-title"
             >
               Frequently Asked Questions
             </h2>
-          </motion.div>
+            <p style={{ color: C.textSecondary }}>
+              Everything you need to know before subscribing
+            </p>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left" data-testid={`faq-question-${index}`}>
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </motion.div>
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="rounded-[16px] px-6 backdrop-blur-[20px] border-0"
+                style={{
+                  background: C.cardBg,
+                  border: `1px solid ${C.cardBorder}`,
+                }}
+                data-testid={`faq-question-${index}`}
+              >
+                <AccordionTrigger
+                  className="hover:no-underline text-left py-5"
+                  style={{ color: C.textPrimary }}
+                >
+                  <span className="font-medium text-[15px]">{faq.question}</span>
+                </AccordionTrigger>
+                <AccordionContent
+                  className="pb-5 text-[14px] leading-relaxed"
+                  style={{ color: C.textSecondary }}
+                >
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <motion.div
-            className="text-center bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-2xl p-8 md:p-12"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+      <section className="relative py-16 md:py-20 overflow-hidden">
+        <SectionGlow position="center" color={C.teal} />
+
+        <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10 text-center">
+          <GlassCard
+            hover={false}
+            className="p-10 md:p-14"
+            style={{
+              background: "linear-gradient(135deg, rgba(0,245,255,0.04), rgba(124,58,237,0.03))",
+              border: "1px solid rgba(0,245,255,0.12)",
+            }}
           >
-            <Badge variant="secondary" className="mb-4 gap-1.5">
-              <Gift className="w-4 h-4" />
-              Limited Time Offer
-            </Badge>
-            <h2 
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+              style={{
+                background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                boxShadow: "0 0 30px rgba(0,245,255,0.25)",
+              }}
+            >
+              <GraduationCap className="w-8 h-8" style={{ color: C.bgDeep }} />
+            </div>
+            <h2
               className="text-2xl md:text-3xl font-bold mb-4"
-              style={{ fontFamily: "var(--font-display)" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                color: C.textPrimary,
+              }}
+              data-testid="text-cta-title"
             >
               Start Your Learning Journey Today
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              Sign up now and get 500 free coins to explore our AI-powered learning platform
+            <p className="mb-8 max-w-lg mx-auto" style={{ color: C.textSecondary }}>
+              Join thousands of students mastering skills, earning certificates, and building careers with OurShiksha.
             </p>
             <Link href="/signup">
-              <Button size="lg" className="gap-2" data-testid="button-final-cta">
-                <Sparkles className="w-5 h-5" />
-                Get 500 Free Coins
-              </Button>
+              <button
+                className="px-10 py-4 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] inline-flex items-center gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                  color: C.bgDeep,
+                  boxShadow: "0 4px 20px rgba(0,245,255,0.3)",
+                }}
+                data-testid="button-final-cta"
+              >
+                Get Started Free
+                <ArrowRight className="w-5 h-5" />
+              </button>
             </Link>
-          </motion.div>
+          </GlassCard>
         </div>
       </section>
+
+      <footer className="relative z-10 py-6 mt-auto" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center text-sm" style={{ color: C.textSecondary }}>
+          <p>Invest in your future. Start learning today.</p>
+        </div>
+      </footer>
     </div>
   );
 }
