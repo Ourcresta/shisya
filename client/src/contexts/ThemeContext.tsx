@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useLocation } from "wouter";
 
 export type ThemeColor = "neon" | "cyberpunk" | "minimal" | "ocean" | "sunset";
 export type ThemeMode = "light" | "dark" | "system";
@@ -9,6 +10,7 @@ interface ThemeContextType {
   resolvedMode: "light" | "dark";
   setThemeColor: (color: ThemeColor) => void;
   setThemeMode: (mode: ThemeMode) => void;
+  isShishyaRoute: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -24,7 +26,21 @@ export const themeColors: { id: ThemeColor; name: string; primary: string; descr
   { id: "sunset", name: "Sunset", primary: "#fb923c", description: "Warm Orange" },
 ];
 
+const PUBLIC_UDYOG_ROUTES = ["/shishya/udyog/jobs"];
+const PUBLIC_UDYOG_EXACT = "/shishya/udyog";
+
+function checkIsShishyaRoute(path: string): boolean {
+  if (PUBLIC_UDYOG_ROUTES.some(r => path.startsWith(r))) return false;
+  if (path === PUBLIC_UDYOG_EXACT) return false;
+
+  if (path.startsWith("/shishya/")) return true;
+
+  return false;
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [location] = useLocation();
+
   const [themeColor, setThemeColorState] = useState<ThemeColor>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(THEME_COLOR_KEY);
@@ -45,7 +61,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return "dark";
   });
 
-  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">("dark");
+  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">("light");
 
   const getSystemTheme = useCallback((): "light" | "dark" => {
     if (typeof window !== "undefined") {
@@ -54,22 +70,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return "light";
   }, []);
 
-  useEffect(() => {
-    const resolved = themeMode === "system" ? getSystemTheme() : themeMode;
-    setResolvedMode(resolved);
+  const isShishya = checkIsShishyaRoute(location);
 
+  useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute("data-theme", themeColor);
 
-    if (resolved === "dark") {
-      root.classList.add("dark");
+    if (isShishya) {
+      const resolved = themeMode === "system" ? getSystemTheme() : themeMode;
+      setResolvedMode(resolved);
+      root.setAttribute("data-theme", themeColor);
+
+      if (resolved === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
     } else {
+      setResolvedMode("light");
       root.classList.remove("dark");
+      root.removeAttribute("data-theme");
     }
-  }, [themeColor, themeMode, getSystemTheme]);
+  }, [themeColor, themeMode, getSystemTheme, isShishya]);
 
   useEffect(() => {
-    if (themeMode !== "system") return;
+    if (themeMode !== "system" || !isShishya) return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
@@ -78,7 +102,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [themeMode, getSystemTheme]);
+  }, [themeMode, getSystemTheme, isShishya]);
 
   const setThemeColor = (color: ThemeColor) => {
     setThemeColorState(color);
@@ -91,7 +115,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ themeColor, themeMode, resolvedMode, setThemeColor, setThemeMode }}>
+    <ThemeContext.Provider value={{ themeColor, themeMode, resolvedMode, setThemeColor, setThemeMode, isShishyaRoute: isShishya }}>
       {children}
     </ThemeContext.Provider>
   );

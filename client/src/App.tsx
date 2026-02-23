@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { TestAttemptProvider } from "@/contexts/TestAttemptContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { CreditProvider } from "@/contexts/CreditContext";
 import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
@@ -192,9 +192,10 @@ function SignupPage() {
 
 function ConditionalCosmicBackground() {
   const [location] = useLocation();
+  const { isShishyaRoute } = useTheme();
   const excludedPaths = ["/login", "/signup", "/verify-otp", "/guru/login"];
   const isExcluded = excludedPaths.some(p => location.startsWith(p));
-  if (isExcluded) return null;
+  if (isExcluded || !isShishyaRoute) return null;
   return <CosmicBackground />;
 }
 
