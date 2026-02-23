@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import OpenAI from "openai";
 import { db } from "./db";
 import {
   udyogInternships, udyogAssignments, udyogTasks, udyogSubmissions,
@@ -1280,6 +1281,132 @@ udyogRouter.patch("/admin/hr-users/:id/approve", async (req: Request, res: Respo
   } catch (error) {
     console.error("[Udyog Admin] Error approving HR user:", error);
     res.status(500).json({ error: "Failed to approve HR user" });
+  }
+});
+
+// ============ AI BUILDERS ============
+
+const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// POST /admin/ai/generate-internship - AI Internship Builder
+udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Response) => {
+  try {
+    const { title, skillLevel } = req.body;
+    if (!title || !skillLevel) {
+      return res.status(400).json({ error: "Title and skill level are required" });
+    }
+
+    const levelGuide: Record<string, string> = {
+      beginner: "Entry-level, no prior experience needed. Duration: 4 weeks. Focus on fundamentals and guided tasks.",
+      intermediate: "Some experience expected. Duration: 6 weeks. Focus on practical application and independent work.",
+      advanced: "Strong prior knowledge required. Duration: 8 weeks. Focus on complex projects, leadership, and architecture.",
+    };
+
+    const openai = getOpenAI();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert internship program designer for an AI-powered virtual internship platform called "Our Udyog". Design realistic, industry-relevant virtual internships that simulate real workplace environments. Students work in batches of 5 with roles (Team Lead, Developer, QA/Tester). Return ONLY valid JSON, no markdown.`
+        },
+        {
+          role: "user",
+          content: `Create a virtual internship program with the following details:
+Title: "${title}"
+Skill Level: ${skillLevel} - ${levelGuide[skillLevel] || levelGuide.beginner}
+
+Return a JSON object with this exact structure:
+{
+  "title": "${title}",
+  "description": "Detailed 2-3 paragraph description of the internship program, what students will learn, technologies used, and what they'll build",
+  "shortDescription": "One-line summary (max 100 chars) for card display",
+  "skillLevel": "${skillLevel}",
+  "domain": "The primary domain (e.g., Web Development, Data Science, Mobile Development, DevOps, UI/UX Design, Machine Learning, Cybersecurity, Cloud Computing)",
+  "duration": "X weeks",
+  "requiredSkills": "Comma-separated list of 4-6 prerequisite skills",
+  "milestones": "Comma-separated list of 4-6 key milestones students should achieve",
+  "batchSize": 5,
+  "tasks": [
+    {
+      "title": "Task title",
+      "description": "Detailed task description with clear deliverables",
+      "orderIndex": 1
+    }
+  ]
+}
+
+Generate 6-10 tasks that progressively build skills. Tasks should be specific, actionable, and relevant to the internship domain. Include a mix of individual and collaborative tasks.`
+        }
+      ],
+      max_tokens: 3000,
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return res.status(500).json({ error: "Failed to parse AI response" });
+    }
+    const parsed = JSON.parse(jsonMatch[0]);
+    res.json(parsed);
+  } catch (error) {
+    console.error("[Udyog AI] Error generating internship:", error);
+    res.status(500).json({ error: "Failed to generate internship. Please try again." });
+  }
+});
+
+// POST /admin/ai/generate-job - AI Job Builder
+udyogRouter.post("/admin/ai/generate-job", async (req: Request, res: Response) => {
+  try {
+    const { title, jobType } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: "Job title is required" });
+    }
+
+    const openai = getOpenAI();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert HR recruiter and job description writer. Create compelling, detailed job postings for tech roles. The jobs are posted on "Our Udyog" platform which connects graduates of virtual internship programs with employers. Return ONLY valid JSON, no markdown.`
+        },
+        {
+          role: "user",
+          content: `Create a job posting with the following title:
+Title: "${title}"
+Job Type: ${jobType || "full-time"}
+
+Return a JSON object with this exact structure:
+{
+  "title": "${title}",
+  "description": "Detailed 2-3 paragraph job description covering role overview, responsibilities, what the candidate will work on, team culture, and growth opportunities",
+  "requiredSkills": "Comma-separated list of 5-8 required technical skills",
+  "internshipRequired": true or false (whether completing an Our Udyog internship is required),
+  "minSkillScore": a number 0-100 (minimum skill assessment score required, 0 for no requirement),
+  "location": "City, Country or Remote",
+  "salaryRange": "₹X - ₹Y LPA or ₹X - ₹Y per month",
+  "jobType": "${jobType || "full-time"}"
+}
+
+Make the description professional, engaging, and realistic. Include specific technologies and responsibilities.`
+        }
+      ],
+      max_tokens: 2000,
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0]?.message?.content || "";
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return res.status(500).json({ error: "Failed to parse AI response" });
+    }
+    const parsed = JSON.parse(jsonMatch[0]);
+    res.json(parsed);
+  } catch (error) {
+    console.error("[Udyog AI] Error generating job:", error);
+    res.status(500).json({ error: "Failed to generate job posting. Please try again." });
   }
 });
 
