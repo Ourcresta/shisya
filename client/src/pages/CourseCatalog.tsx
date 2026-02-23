@@ -95,8 +95,8 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
       }}
       whileHover={{
         y: -6,
-        boxShadow: "0 20px 40px -12px rgba(79, 70, 229, 0.3), 0 0 20px rgba(0, 245, 255, 0.1)",
-        borderColor: "rgba(79, 70, 229, 0.4)",
+        boxShadow: "0 20px 40px -12px rgba(0, 245, 255, 0.2), 0 0 20px rgba(0, 245, 255, 0.15)",
+        borderColor: "rgba(0, 245, 255, 0.3)",
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       data-testid={`card-course-${course.id}`}
@@ -113,13 +113,13 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.15), rgba(0,245,255,0.1))" }}
+            style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.1), rgba(124,58,237,0.08))" }}
           >
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(79,70,229,0.2)", border: "1px solid rgba(79,70,229,0.3)" }}
+              style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.25)" }}
             >
-              <BookOpen className="w-8 h-8 text-indigo-400" />
+              <BookOpen className="w-8 h-8" style={{ color: "#00F5FF" }} />
             </div>
           </div>
         )}
@@ -129,7 +129,7 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
           <div className="absolute top-3 left-3">
             <span
               className="px-2.5 py-1 rounded-full text-xs font-medium"
-              style={{ background: "rgba(79,70,229,0.8)", color: "#fff", backdropFilter: "blur(8px)" }}
+              style={{ background: "rgba(0,245,255,0.85)", color: "#0B1D3A", backdropFilter: "blur(8px)" }}
               data-testid={`badge-category-${course.id}`}
             >
               {course.category}
@@ -156,10 +156,10 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedLang(v.language || "en"); }}
                 className="px-2 py-0.5 rounded-full text-xs font-medium transition-all"
                 style={{
-                  background: v.id === course.id ? "rgba(79,70,229,0.9)" : "rgba(255,255,255,0.15)",
+                  background: v.id === course.id ? "rgba(0,245,255,0.85)" : "rgba(255,255,255,0.15)",
                   color: "#fff",
                   backdropFilter: "blur(8px)",
-                  border: v.id === course.id ? "1px solid rgba(79,70,229,0.6)" : "1px solid rgba(255,255,255,0.1)",
+                  border: v.id === course.id ? "1px solid rgba(0,245,255,0.6)" : "1px solid rgba(255,255,255,0.1)",
                 }}
                 data-testid={`badge-lang-variant-${v.language}-${v.id}`}
               >
@@ -207,7 +207,7 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
           <LevelBadge level={course.level as any} />
           {projectCount > 0 && (
             <span className="flex items-center gap-1" data-testid={`text-projects-${course.id}`}>
-              <FolderKanban className="w-3.5 h-3.5 text-indigo-400" />
+              <FolderKanban className="w-3.5 h-3.5" style={{ color: "#00F5FF" }} />
               {projectCount} Project{projectCount !== 1 ? "s" : ""}
             </span>
           )}
@@ -291,9 +291,9 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
                 style={{
-                  background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                  color: "#fff",
-                  boxShadow: "0 4px 14px -3px rgba(79,70,229,0.4)",
+                  background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
+                  color: "#0B1D3A",
+                  boxShadow: "0 4px 14px -3px rgba(0,245,255,0.4)",
                 }}
                 data-testid={`button-view-course-${course.id}`}
               >
@@ -493,9 +493,9 @@ export default function CourseCatalog() {
               onClick={() => setSelectedLevel(level.id)}
               className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all"
               style={{
-                background: selectedLevel === level.id ? "rgba(79,70,229,0.15)" : "transparent",
-                color: selectedLevel === level.id ? "#a5b4fc" : "#9ca3af",
-                border: selectedLevel === level.id ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
+                background: selectedLevel === level.id ? "rgba(0,245,255,0.12)" : "transparent",
+                color: selectedLevel === level.id ? "#00F5FF" : "#9ca3af",
+                border: selectedLevel === level.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
               }}
               data-testid={`filter-level-${level.id}`}
             >
@@ -521,9 +521,9 @@ export default function CourseCatalog() {
               onClick={() => setSelectedPricing(pricing.id)}
               className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
               style={{
-                background: selectedPricing === pricing.id ? "rgba(79,70,229,0.15)" : "transparent",
-                color: selectedPricing === pricing.id ? "#a5b4fc" : "#9ca3af",
-                border: selectedPricing === pricing.id ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
+                background: selectedPricing === pricing.id ? "rgba(0,245,255,0.12)" : "transparent",
+                color: selectedPricing === pricing.id ? "#00F5FF" : "#9ca3af",
+                border: selectedPricing === pricing.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
               }}
               data-testid={`filter-pricing-${pricing.id}`}
             >
@@ -541,9 +541,9 @@ export default function CourseCatalog() {
               onClick={() => setSelectedLanguage("all")}
               className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
               style={{
-                background: selectedLanguage === "all" ? "rgba(79,70,229,0.15)" : "transparent",
-                color: selectedLanguage === "all" ? "#a5b4fc" : "#9ca3af",
-                border: selectedLanguage === "all" ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
+                background: selectedLanguage === "all" ? "rgba(0,245,255,0.12)" : "transparent",
+                color: selectedLanguage === "all" ? "#00F5FF" : "#9ca3af",
+                border: selectedLanguage === "all" ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
               }}
               data-testid="filter-language-all"
             >
@@ -555,9 +555,9 @@ export default function CourseCatalog() {
                 onClick={() => setSelectedLanguage(lang)}
                 className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
                 style={{
-                  background: selectedLanguage === lang ? "rgba(79,70,229,0.15)" : "transparent",
-                  color: selectedLanguage === lang ? "#a5b4fc" : "#9ca3af",
-                  border: selectedLanguage === lang ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
+                  background: selectedLanguage === lang ? "rgba(0,245,255,0.12)" : "transparent",
+                  color: selectedLanguage === lang ? "#00F5FF" : "#9ca3af",
+                  border: selectedLanguage === lang ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
                 }}
                 data-testid={`filter-language-${lang}`}
               >
@@ -584,9 +584,9 @@ export default function CourseCatalog() {
               onClick={() => setSortBy(sort.id)}
               className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
               style={{
-                background: sortBy === sort.id ? "rgba(79,70,229,0.15)" : "transparent",
-                color: sortBy === sort.id ? "#a5b4fc" : "#9ca3af",
-                border: sortBy === sort.id ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
+                background: sortBy === sort.id ? "rgba(0,245,255,0.12)" : "transparent",
+                color: sortBy === sort.id ? "#00F5FF" : "#9ca3af",
+                border: sortBy === sort.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
               }}
               data-testid={`filter-sort-${sort.id}`}
             >
@@ -644,12 +644,12 @@ export default function CourseCatalog() {
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "linear-gradient(135deg, rgba(79,70,229,0.2), rgba(0,245,255,0.15))",
-                    border: "1px solid rgba(79,70,229,0.3)",
-                    boxShadow: "0 0 20px rgba(79,70,229,0.2)",
+                    background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(124,58,237,0.1))",
+                    border: "1px solid rgba(0,245,255,0.25)",
+                    boxShadow: "0 0 20px rgba(0,245,255,0.15)",
                   }}
                 >
-                  <GraduationCap className="w-7 h-7 text-indigo-400" />
+                  <GraduationCap className="w-7 h-7" style={{ color: "#00F5FF" }} />
                 </div>
               </div>
 
@@ -674,7 +674,7 @@ export default function CourseCatalog() {
               {!isLoading && !error && courses && courses.length > 0 && (
                 <div className="flex items-center justify-center gap-4 md:gap-6 text-sm text-gray-400 flex-wrap">
                   <div className="flex items-center gap-1.5" data-testid="stat-total-courses">
-                    <BookOpen className="w-4 h-4 text-indigo-400" />
+                    <BookOpen className="w-4 h-4" style={{ color: "#00F5FF" }} />
                     <span>{courses.length} Course{courses.length !== 1 ? "s" : ""}</span>
                   </div>
                   {levelCounts.beginner > 0 && <div data-testid="stat-beginner-count">{levelCounts.beginner} Beginner</div>}
@@ -687,11 +687,11 @@ export default function CourseCatalog() {
               <div className="relative max-w-2xl mx-auto">
                 <div
                   className="absolute -inset-1 rounded-2xl opacity-50 blur-sm"
-                  style={{ background: "linear-gradient(135deg, #4F46E5, #00F5FF, #4F46E5)" }}
+                  style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
                 />
                 <div
                   className="relative flex items-center rounded-xl overflow-hidden"
-                  style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(79,70,229,0.3)" }}
+                  style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
                 >
                   <Search className="w-5 h-5 text-gray-400 ml-4 shrink-0" />
                   <input
@@ -737,12 +737,12 @@ export default function CourseCatalog() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap"
                       style={{
-                        background: isActive ? "rgba(79,70,229,0.2)" : "rgba(255,255,255,0.05)",
-                        color: isActive ? "#a5b4fc" : "#9ca3af",
+                        background: isActive ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.05)",
+                        color: isActive ? "#00F5FF" : "#9ca3af",
                         border: isActive
-                          ? "1px solid rgba(79,70,229,0.5)"
+                          ? "1px solid rgba(0,245,255,0.4)"
                           : "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: isActive ? "0 0 12px rgba(79,70,229,0.3)" : "none",
+                        boxShadow: isActive ? "0 0 12px rgba(0,245,255,0.2)" : "none",
                       }}
                       data-testid={`pill-category-${cat.id}`}
                     >
@@ -769,12 +769,12 @@ export default function CourseCatalog() {
                     }}
                   >
                     <div className="flex items-center gap-2 mb-5">
-                      <SlidersHorizontal className="w-4 h-4 text-indigo-400" />
+                      <SlidersHorizontal className="w-4 h-4" style={{ color: "#00F5FF" }} />
                       <h3 className="text-sm font-semibold text-white">Filters</h3>
                       {activeFilterCount > 0 && (
                         <span
                           className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={{ background: "rgba(79,70,229,0.2)", color: "#a5b4fc" }}
+                          style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF" }}
                         >
                           {activeFilterCount}
                         </span>
@@ -807,7 +807,7 @@ export default function CourseCatalog() {
                       {activeFilterCount > 0 && (
                         <span
                           className="px-1.5 py-0.5 rounded-full text-xs font-medium"
-                          style={{ background: "rgba(79,70,229,0.3)", color: "#a5b4fc" }}
+                          style={{ background: "rgba(0,245,255,0.2)", color: "#00F5FF" }}
                         >
                           {activeFilterCount}
                         </span>
@@ -841,9 +841,9 @@ export default function CourseCatalog() {
                   <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                     <div
                       className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(79,70,229,0.2)" }}
+                      style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}
                     >
-                      <BookOpen className="w-10 h-10 text-indigo-400" />
+                      <BookOpen className="w-10 h-10" style={{ color: "#00F5FF" }} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-empty-title">
                       No courses available
@@ -856,9 +856,9 @@ export default function CourseCatalog() {
                   <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                     <div
                       className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(79,70,229,0.2)" }}
+                      style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}
                     >
-                      <Search className="w-10 h-10 text-indigo-400" />
+                      <Search className="w-10 h-10" style={{ color: "#00F5FF" }} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-empty-title">
                       No courses found
@@ -869,7 +869,7 @@ export default function CourseCatalog() {
                     <button
                       onClick={clearFilters}
                       className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
-                      style={{ background: "rgba(79,70,229,0.15)", color: "#a5b4fc", border: "1px solid rgba(79,70,229,0.3)" }}
+                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.2)" }}
                       data-testid="button-reset-filters"
                     >
                       Reset All Filters
@@ -901,15 +901,15 @@ export default function CourseCatalog() {
                     <div
                       className="rounded-2xl p-8 text-center space-y-4"
                       style={{
-                        background: "linear-gradient(135deg, rgba(79,70,229,0.1), rgba(0,245,255,0.05))",
-                        border: "1px solid rgba(79,70,229,0.2)",
+                        background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
+                        border: "1px solid rgba(0,245,255,0.15)",
                       }}
                     >
                       <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
-                        style={{ background: "rgba(79,70,229,0.15)", border: "1px solid rgba(79,70,229,0.3)" }}
+                        style={{ background: "rgba(0,245,255,0.12)", border: "1px solid rgba(0,245,255,0.25)" }}
                       >
-                        <Sparkles className="w-7 h-7 text-indigo-400" />
+                        <Sparkles className="w-7 h-7" style={{ color: "#00F5FF" }} />
                       </div>
                       <h3
                         className="text-xl font-semibold text-white"
@@ -926,9 +926,9 @@ export default function CourseCatalog() {
                           <button
                             className="px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
                             style={{
-                              background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                              color: "#fff",
-                              boxShadow: "0 4px 14px -3px rgba(79,70,229,0.4)",
+                              background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
+                              color: "#0B1D3A",
+                              boxShadow: "0 4px 14px -3px rgba(0,245,255,0.4)",
                             }}
                             data-testid="button-signup-cta"
                           >
@@ -941,8 +941,8 @@ export default function CourseCatalog() {
                             className="px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
                             style={{
                               background: "rgba(255,255,255,0.05)",
-                              color: "#a5b4fc",
-                              border: "1px solid rgba(79,70,229,0.3)",
+                              color: "#00F5FF",
+                              border: "1px solid rgba(0,245,255,0.25)",
                             }}
                             data-testid="button-login-cta"
                           >
@@ -985,7 +985,7 @@ export default function CourseCatalog() {
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-5">
                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                      <Filter className="w-5 h-5 text-indigo-400" />
+                      <Filter className="w-5 h-5" style={{ color: "#00F5FF" }} />
                       Filters
                     </h3>
                     <button
@@ -1005,8 +1005,8 @@ export default function CourseCatalog() {
                       onClick={() => setMobileFiltersOpen(false)}
                       className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
                       style={{
-                        background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                        color: "#fff",
+                        background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
+                        color: "#0B1D3A",
                       }}
                       data-testid="button-apply-filters"
                     >
