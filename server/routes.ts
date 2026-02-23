@@ -5,6 +5,7 @@ import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
 import { guruAuthRouter } from "./guruAuth";
 import { oauthRouter } from "./oauth";
+import { udyogRouter } from "./udyogRoutes";
 import { seedGuruAdmin } from "./seedGuru";
 import { registerUshaRoutes } from "./usha";
 import { creditsRouter } from "./credits";
@@ -63,6 +64,9 @@ export async function registerRoutes(
 
   // OAuth routes (Google, Microsoft, SSO)
   app.use("/api/oauth", oauthRouter);
+
+  // Udyog Virtual Internship routes
+  app.use("/api/udyog", udyogRouter);
 
   // Zoho OAuth callback (no auth required - Zoho redirects here)
   app.get("/api/guru/zoho/callback", async (req, res) => {

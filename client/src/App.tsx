@@ -58,6 +58,7 @@ import Signup from "@/auth/Signup";
 import VerifyOtp from "@/auth/VerifyOtp";
 import { NeonPortfolioPreview, PublicNeonPortfolio } from "@/pages/NeonPortfolioPage";
 import { UshaFloatingWidget } from "@/components/usha";
+import UdyogAssessment from "@/pages/UdyogAssessment";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -141,6 +142,10 @@ function ProtectedMyLearnings() {
 
 function ProtectedNeonPortfolioPreview() {
   return <ProtectedRoute><NeonPortfolioPreview /></ProtectedRoute>;
+}
+
+function ProtectedUdyogAssessment() {
+  return <ProtectedRoute><UdyogAssessment /></ProtectedRoute>;
 }
 
 function GuruPage({ component: Component }: { component: React.ComponentType }) {
@@ -227,6 +232,7 @@ function Router() {
       <Route path="/shishya/certificates/:certificateId" component={ProtectedCertificateViewer} />
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
       <Route path="/shishya/profile/neon-portfolio" component={ProtectedNeonPortfolioPreview} />
+      <Route path="/shishya/udyog/assess" component={ProtectedUdyogAssessment} />
       
       <Route component={NotFound} />
     </Switch>
