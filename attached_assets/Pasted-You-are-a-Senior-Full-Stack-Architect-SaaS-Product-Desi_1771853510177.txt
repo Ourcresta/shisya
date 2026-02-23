@@ -1,0 +1,355 @@
+You are a Senior Full Stack Architect, SaaS Product Designer, and System Engineer.
+
+Build a scalable production-ready module called:
+
+"UDYOG – AI Driven Internship & Hiring Ecosystem"
+for the Our Shiksha platform.
+
+This is NOT a simple internship page.
+This is a complete Industry Simulation + HR Hiring Pipeline System.
+
+Use:
+
+Frontend: React + TailwindCSS (Dark AI SaaS UI)
+Backend: Node.js + Express
+Database: PostgreSQL
+Authentication: JWT
+Architecture: Modular, scalable, role-based access control
+Theme: Dark AI Professional (glassmorphism, minimal glow)
+
+---------------------------------------------------
+SYSTEM VISION
+---------------------------------------------------
+
+Our Shiksha = Learn → Practice → Intern → Get Hired
+
+Udyog is the Industry Engine.
+
+It must simulate real company environments
+and connect students to real HR recruiters.
+
+---------------------------------------------------
+ROLES IN SYSTEM
+---------------------------------------------------
+
+1. Shishya (Student)
+2. Guru (Instructor)
+3. Admin (Platform Controller)
+4. HR (Company Recruiter)
+
+Implement role-based access control strictly.
+
+---------------------------------------------------
+PART 1: UDYOG INTERNSHIP SYSTEM
+---------------------------------------------------
+
+CORE CONCEPT:
+Internships are batch-based industry simulations.
+
+Each Internship Project runs in batches of 5 students.
+
+---------------------------------------------------
+INTERNSHIP FLOW
+---------------------------------------------------
+
+STEP 1 – Eligibility Check
+- Student must complete required course OR pass skill assessment.
+- Skill score stored in database.
+
+STEP 2 – Batch Formation
+- Once 5 eligible students enroll → create new batch.
+- Automatically assign roles based on skill score:
+
+Highest skill → Team Lead
+Next 3 → Developers
+Lowest → QA/Tester
+
+Batch status = "Active"
+
+STEP 3 – Project Allocation
+Admin creates Internship Template with:
+- Title
+- Description
+- Required Skills
+- Duration (2–4 weeks)
+- Milestones
+- Task Templates
+
+Each batch gets its own instance of tasks.
+
+STEP 4 – Internship Workspace (Mini Company Simulation)
+
+Each Batch Dashboard must include:
+
+- Project Overview
+- Team Members & Roles
+- Kanban Task Board (Todo / In Progress / Review / Completed)
+- Individual Assigned Tasks
+- Submission Upload
+- AI Mentor Placeholder
+- Deadline Countdown
+- Progress Percentage
+- Performance Score
+
+---------------------------------------------------
+TASK SYSTEM
+---------------------------------------------------
+
+Tasks must support:
+
+- CRUD
+- Assigned To
+- Status
+- Due Date
+- File Submission
+- Admin Feedback
+- Score per task
+
+---------------------------------------------------
+EVALUATION SYSTEM
+---------------------------------------------------
+
+Final Performance Score calculated based on:
+
+- Task Completion Rate
+- Deadline Compliance
+- Task Quality Score
+- Team Collaboration Score (admin input)
+
+Store performance_score in BatchMembers table.
+
+---------------------------------------------------
+CERTIFICATION SYSTEM
+---------------------------------------------------
+
+If:
+- All tasks completed
+- Admin approves final submission
+
+Then:
+- Generate Internship Completion Certificate record
+- Include:
+   - Student Name
+   - Internship Title
+   - Role
+   - Batch ID
+   - Performance Score
+   - Duration
+- Enable PDF download (placeholder allowed)
+
+---------------------------------------------------
+PART 2: HR HIRING SYSTEM
+---------------------------------------------------
+
+HR users represent verified companies.
+
+HR must be approved by Admin before accessing dashboard.
+
+---------------------------------------------------
+HR CAPABILITIES
+---------------------------------------------------
+
+1. Post Job
+Fields:
+- Job Title
+- Description
+- Required Skills
+- Internship Required? (Yes/No)
+- Minimum Skill Score
+- Location
+- Salary Range
+- Job Type
+- Deadline
+
+2. View Candidates
+
+HR can filter students by:
+- Skill Score
+- Internship Completed
+- Performance Score
+- Specific Skills
+- Role (Team Lead / Developer)
+
+3. AI Matching Logic
+
+When job is posted:
+Calculate matching_score:
+
+matching_score =
+( skill_match_weight +
+ internship_performance_weight +
+ certification_weight ) / 3
+
+Show HR:
+Top 10 Recommended Candidates automatically.
+
+4. Manage Applications
+- Applied
+- Shortlisted
+- Rejected
+- Hired
+
+---------------------------------------------------
+PART 3: ADMIN SYSTEM
+---------------------------------------------------
+
+Admin can:
+
+- Create Internship Templates
+- View All Batches
+- Approve Submissions
+- Approve HR Accounts
+- Monitor Platform Analytics
+- Override Role Assignments
+
+---------------------------------------------------
+DATABASE STRUCTURE
+---------------------------------------------------
+
+Users
+- id
+- name
+- email
+- password
+- role (student/guru/admin/hr)
+- skill_score
+- verified
+
+InternshipTemplates
+- id
+- title
+- description
+- duration
+- required_skills
+- created_by
+
+Batches
+- id
+- template_id
+- batch_number
+- start_date
+- end_date
+- status
+
+BatchMembers
+- id
+- batch_id
+- user_id
+- role
+- performance_score
+
+Tasks
+- id
+- batch_id
+- assigned_to
+- title
+- description
+- status
+- score
+- due_date
+
+Submissions
+- id
+- task_id
+- file_url
+- feedback
+- approved
+
+Certificates
+- id
+- user_id
+- batch_id
+- issue_date
+- final_score
+
+Jobs
+- id
+- hr_id
+- title
+- description
+- required_skills
+- min_skill_score
+- location
+- salary_range
+- deadline
+- status
+
+Applications
+- id
+- job_id
+- student_id
+- matching_score
+- status
+- applied_at
+
+---------------------------------------------------
+UI REQUIREMENTS
+---------------------------------------------------
+
+Theme:
+Dark AI Professional
+
+Use:
+- Glassmorphism cards
+- Subtle neon accent
+- Sidebar navigation
+- Role-based accent colors
+- Clean dashboard layout
+
+Student Sidebar:
+- Overview
+- Internship
+- Tasks
+- Certificates
+- Profile
+
+HR Sidebar:
+- Dashboard
+- Post Job
+- Manage Jobs
+- Candidates
+- Shortlisted
+- Analytics
+
+Admin Sidebar:
+- Internship Templates
+- Batches
+- HR Approvals
+- Reports
+- Users
+
+---------------------------------------------------
+SECURITY REQUIREMENTS
+---------------------------------------------------
+
+- Protect routes by role
+- JWT authentication
+- Secure file upload
+- Validate inputs
+- Prevent HR from viewing private student data beyond allowed scope
+
+---------------------------------------------------
+ARCHITECTURE REQUIREMENTS
+---------------------------------------------------
+
+- Modular folder structure
+- Separate controllers
+- Service layer for business logic
+- Clean REST API
+- Proper error handling
+- Use environment variables
+
+---------------------------------------------------
+FINAL GOAL
+---------------------------------------------------
+
+Build this as a scalable SaaS architecture.
+
+Udyog must feel like:
+
+A real industry simulation engine + job placement pipeline.
+
+Not a simple internship page.
+
+Start with backend APIs first.
+Then create frontend dashboards for each role.
