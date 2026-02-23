@@ -8,7 +8,7 @@ import {
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
   Sparkles, Filter, UserPlus, LogIn
 } from "lucide-react";
-import { Layout } from "@/components/layout/Layout";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LevelBadge } from "@/components/ui/level-badge";
@@ -611,14 +611,9 @@ export default function CourseCatalog() {
   );
 
   return (
-    <Layout fullWidth>
-      <div
-        className="min-h-screen -mt-8 -mx-0 px-0"
-        style={{
-          background: "linear-gradient(180deg, #0B1D3A 0%, #0F172A 40%, #0B1120 100%)",
-          color: "#e2e8f0",
-        }}
-      >
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #0B1D3A 0%, #0F172A 40%, #0B1120 100%)", color: "#e2e8f0" }}>
+      <LandingNavbar />
+      <div className="flex-1">
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden"
           style={{ position: "fixed", zIndex: 0 }}
@@ -1024,6 +1019,11 @@ export default function CourseCatalog() {
           )}
         </AnimatePresence>
       </div>
-    </Layout>
+      <footer className="relative z-10 py-6 mt-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center text-sm text-gray-500">
+          <p>Your learning journey starts here.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
