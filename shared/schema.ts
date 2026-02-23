@@ -115,6 +115,8 @@ export const shishyaUsers = pgTable("shishya_users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   emailVerified: boolean("email_verified").notNull().default(false),
+  authProvider: varchar("auth_provider", { length: 20 }).default("email"),
+  authProviderId: varchar("auth_provider_id", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
