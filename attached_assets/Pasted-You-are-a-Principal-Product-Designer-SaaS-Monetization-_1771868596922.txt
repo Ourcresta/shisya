@@ -1,0 +1,264 @@
+You are a Principal Product Designer, SaaS Monetization Strategist,
+Senior Frontend Architect, and Conversion Optimization Expert.
+
+Project: "Our Shiksha" – AI-powered learning ecosystem.
+
+Your task:
+Design and implement a ULTRA-PREMIUM Subscription / Pricing Page.
+
+Target Standard:
+Apple × Stripe × Tesla × AI Startup
+Minimal. Confident. Premium. High-conversion.
+
+------------------------------------------------------------
+CRITICAL RULES (DO NOT BREAK)
+------------------------------------------------------------
+- DO NOT modify Udyog module.
+- DO NOT modify Internship module.
+- DO NOT modify AI Usha Mentor logic.
+- DO NOT change routing structure.
+- DO NOT modify backend APIs.
+- Only create or update Subscription / Pricing page.
+- Keep code modular and production-ready.
+
+------------------------------------------------------------
+CORE OBJECTIVE
+------------------------------------------------------------
+Build a pricing page that:
+1. Feels premium and trustworthy.
+2. Increases subscription conversion.
+3. Clearly differentiates plan value.
+4. Uses consistent design system.
+5. Maintains ecosystem theme consistency.
+
+------------------------------------------------------------
+DESIGN SYSTEM (STRICTLY FOLLOW)
+------------------------------------------------------------
+
+Background Gradient:
+#050A18 → #0B1D3A → #0F172A
+
+Card Background:
+rgba(255,255,255,0.04)
+backdrop-blur: 20px
+border: 1px solid rgba(255,255,255,0.08)
+
+Primary Accent (Teal):
+#00F5FF → #0EA5E9 (gradient)
+
+Secondary Accent (Purple):
+#7C3AED
+
+Success:
+#10B981
+
+Warning (Savings):
+#F59E0B
+
+Text Primary:
+#FFFFFF
+
+Text Secondary:
+#94A3B8
+
+NO random colors allowed.
+
+------------------------------------------------------------
+PAGE STRUCTURE
+------------------------------------------------------------
+
+1. Hero Section
+2. Billing Toggle (Monthly / Yearly)
+3. Pricing Cards (3 plans)
+4. Feature Comparison Section
+5. Trust & Security Section
+6. FAQ Section
+
+------------------------------------------------------------
+HERO SECTION
+------------------------------------------------------------
+
+Large Heading:
+"Choose Your Learning Power"
+
+Subtext:
+Flexible plans built for serious learners and future professionals.
+
+Centered layout.
+Minimal.
+Strong typography.
+
+------------------------------------------------------------
+BILLING TOGGLE
+------------------------------------------------------------
+
+Modern glass toggle switch:
+- Monthly
+- Yearly (Default selected)
+
+Show badge:
+"Save 20%" (in yellow accent)
+
+Animate price changes smoothly.
+
+------------------------------------------------------------
+PRICING PLANS (3-TIER MODEL)
+------------------------------------------------------------
+
+1. FREE EXPLORER
+- Limited courses
+- Basic certificates
+- Limited AI Usha access
+- No internship access
+CTA: Outline button
+
+2. PRO LEARNER (Most Popular)
+- All courses access
+- Full AI Usha access
+- Internship eligibility
+- Verified certificates
+- Skill assessments
+CTA: Teal gradient button
+Badge: "Most Popular"
+
+3. ELITE CAREER
+- Everything in Pro
+- Premium internships
+- Direct hiring priority
+- Resume review
+- Priority support
+CTA: Strong teal gradient button
+
+------------------------------------------------------------
+PRICING CARD STYLE
+------------------------------------------------------------
+
+- Border radius: 20px
+- Glass effect
+- Floating appearance
+- Subtle shadow
+
+Hover Effect:
+- translateY(-6px)
+- soft glow border
+- smooth transition (0.25s ease)
+
+Center plan slightly larger (scale 1.05).
+
+------------------------------------------------------------
+PRICE TYPOGRAPHY
+------------------------------------------------------------
+
+Price must be visually dominant:
+
+₹999
+/month
+
+Large font (bold 700)
+Clear hierarchy.
+
+------------------------------------------------------------
+FEATURE LIST STYLE
+------------------------------------------------------------
+
+Use:
+✔ Teal check icons
+Clear spacing
+Secondary text color
+
+No clutter.
+No long paragraphs.
+
+------------------------------------------------------------
+MICRO INTERACTIONS
+------------------------------------------------------------
+
+- Fade-in pricing cards
+- Smooth hover glow
+- Animated price change on toggle
+- Subtle scale animation on CTA hover
+- No heavy animation libraries
+
+------------------------------------------------------------
+FEATURE COMPARISON TABLE
+------------------------------------------------------------
+
+Below pricing cards:
+Simple comparison grid.
+
+Rows:
+- Course Access
+- AI Mentor Access
+- Internship Access
+- Certificates
+- Hiring Support
+- Priority Support
+
+Use checkmarks for clarity.
+
+------------------------------------------------------------
+TRUST SECTION
+------------------------------------------------------------
+
+Include:
+
+- Secure Payment (Stripe/Razorpay ready)
+- 7-Day Refund Policy
+- Trusted by 10,000+ learners
+- Data privacy assurance
+
+Clean, minimal icons.
+
+------------------------------------------------------------
+FAQ SECTION
+------------------------------------------------------------
+
+Accordion style:
+- Can I cancel anytime?
+- Do I get refund?
+- What payment methods are supported?
+- Is internship guaranteed?
+
+Minimal styling.
+Glass accordion.
+
+------------------------------------------------------------
+SPACING SYSTEM
+------------------------------------------------------------
+
+Use consistent spacing scale:
+4px
+8px
+16px
+24px
+32px
+48px
+64px
+
+No inconsistent margins.
+
+------------------------------------------------------------
+PERFORMANCE REQUIREMENTS
+------------------------------------------------------------
+
+- No heavy UI libraries.
+- No unnecessary dependencies.
+- Keep CSS optimized.
+- Use Tailwind if already configured.
+- Keep components modular.
+
+------------------------------------------------------------
+DELIVERABLE
+------------------------------------------------------------
+
+1. Provide complete Subscription page component code.
+2. Provide updated styling (CSS or Tailwind config).
+3. Explain improvements made.
+4. Ensure ecosystem theme consistency.
+5. Maintain production-ready quality.
+
+Final Goal:
+Make this feel like a premium AI education membership platform.
+Not a basic pricing page.
+Not a template.
+But a serious SaaS product ready for investors and scale.
