@@ -42,10 +42,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         return stored as ThemeMode;
       }
     }
-    return "light";
+    return "dark";
   });
 
-  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">("light");
+  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">("dark");
 
   const getSystemTheme = useCallback((): "light" | "dark" => {
     if (typeof window !== "undefined") {

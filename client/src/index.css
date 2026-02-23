@@ -213,6 +213,22 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* Cosmic gradient background for dark mode */
+html.dark {
+  background: linear-gradient(180deg, #0a0e1a 0%, #111827 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+html.dark body {
+  background: transparent;
+}
+
+.dark .min-h-screen.bg-background,
+.dark .min-h-screen[class*="bg-background"] {
+  background: transparent !important;
+}
+
 /* ============================================
    CYBERPUNK THEME (Purple - Neon Violet)
    ============================================ */

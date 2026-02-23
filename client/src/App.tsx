@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { CreditProvider } from "@/contexts/CreditContext";
 import { UshaProvider } from "@/contexts/UshaContext";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
+import { CosmicBackground } from "@/components/CosmicBackground";
 import NotFound from "@/pages/not-found";
 import GuruLayout from "@/components/guru/GuruLayout";
 import GuruDashboard from "@/pages/GuruDashboard";
@@ -189,6 +190,14 @@ function SignupPage() {
   return <AuthRedirect><Signup /></AuthRedirect>;
 }
 
+function ConditionalCosmicBackground() {
+  const [location] = useLocation();
+  const excludedPaths = ["/login", "/signup", "/verify-otp", "/guru/login"];
+  const isExcluded = excludedPaths.some(p => location.startsWith(p));
+  if (isExcluded) return null;
+  return <CosmicBackground />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -270,6 +279,7 @@ function App() {
                 <TestAttemptProvider>
                   <UshaProvider>
                     <Toaster />
+                    <ConditionalCosmicBackground />
                     <Router />
                     <UshaFloatingWidget />
                   </UshaProvider>
