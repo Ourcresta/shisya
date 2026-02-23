@@ -214,32 +214,6 @@ export default function Login() {
         </Link>
       </p>
 
-      <div className="auth-divider">
-        <div className="auth-divider-line" />
-        <span className="auth-divider-text">OR</span>
-        <div className="auth-divider-line" />
-      </div>
-
-      <div className="auth-social-buttons">
-        <button className="auth-social-btn" data-testid="button-google">
-          <SiGoogle style={{ color: '#4285F4' }} />
-          <span className="auth-social-tooltip">Google</span>
-        </button>
-        <button className="auth-social-btn" data-testid="button-github">
-          <SiGithub />
-          <span className="auth-social-tooltip">GitHub</span>
-        </button>
-        <button className="auth-social-btn" data-testid="button-microsoft">
-          <svg viewBox="0 0 23 23" fill="none">
-            <rect width="11" height="11" fill="#F25022"/>
-            <rect x="12" width="11" height="11" fill="#7FBA00"/>
-            <rect y="12" width="11" height="11" fill="#00A4EF"/>
-            <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
-          </svg>
-          <span className="auth-social-tooltip">Microsoft</span>
-        </button>
-      </div>
-
       <div className="auth-security-badge">
         <ShieldCheck className="w-3.5 h-3.5" />
         <span>Your data is encrypted and secure</span>
