@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useSearch, Redirect } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,10 +6,10 @@ import { loginSchema, type LoginInput } from "@shared/schema";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, GraduationCap, Shield, ShieldCheck } from "lucide-react";
+import { Loader2, Mail, Lock, GraduationCap, Shield, ShieldCheck, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { SiGoogle, SiGithub } from "react-icons/si";
+import { SiGoogle } from "react-icons/si";
 import AuthLayout from "./AuthLayout";
 
 const guruLoginSchema = z.object({
@@ -28,7 +28,32 @@ export default function Login() {
   const [activeTab, setActiveTab] = useState<"shishya" | "guru">("shishya");
   const [rememberMe, setRememberMe] = useState(false);
 
-  const redirectTo = new URLSearchParams(search).get("redirect") || "/shishya/dashboard";
+  const searchParams = new URLSearchParams(search);
+  const redirectTo = searchParams.get("redirect") || "/shishya/dashboard";
+  const oauthError = searchParams.get("error");
+
+  useEffect(() => {
+    if (oauthError) {
+      const errorMessages: Record<string, string> = {
+        google_not_configured: "Google login is not configured yet. Please use email/password.",
+        microsoft_not_configured: "Microsoft login is not configured yet. Please use email/password.",
+        sso_not_configured: "SSO login is not configured yet. Please contact your administrator.",
+        google_failed: "Google login failed. Please try again.",
+        microsoft_failed: "Microsoft login failed. Please try again.",
+        microsoft_token_failed: "Microsoft authentication failed. Please try again.",
+        sso_failed: "SSO login failed. Please try again.",
+        sso_token_failed: "SSO authentication failed. Please try again.",
+        no_code: "Authentication was cancelled. Please try again.",
+        no_email: "Could not retrieve your email from the provider.",
+      };
+      toast({
+        title: "Login Issue",
+        description: errorMessages[oauthError] || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, "", "/login");
+    }
+  }, [oauthError, toast]);
 
   const shishyaForm = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -213,6 +238,32 @@ export default function Login() {
           Sign up
         </Link>
       </p>
+
+      <div className="auth-divider">
+        <div className="auth-divider-line" />
+        <span className="auth-divider-text">OR</span>
+        <div className="auth-divider-line" />
+      </div>
+
+      <div className="auth-social-buttons">
+        <a href="/api/oauth/google" className="auth-social-btn" data-testid="button-google">
+          <SiGoogle style={{ color: '#4285F4' }} />
+          <span className="auth-social-tooltip">Google</span>
+        </a>
+        <a href="/api/oauth/microsoft" className="auth-social-btn" data-testid="button-microsoft">
+          <svg viewBox="0 0 23 23" fill="none" className="w-5 h-5">
+            <rect width="11" height="11" fill="#F25022"/>
+            <rect x="12" width="11" height="11" fill="#7FBA00"/>
+            <rect y="12" width="11" height="11" fill="#00A4EF"/>
+            <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+          </svg>
+          <span className="auth-social-tooltip">Microsoft</span>
+        </a>
+        <a href="/api/oauth/sso" className="auth-social-btn" data-testid="button-sso">
+          <Building2 className="w-5 h-5" style={{ color: '#8B5CF6' }} />
+          <span className="auth-social-tooltip">SSO</span>
+        </a>
+      </div>
 
       <div className="auth-security-badge">
         <ShieldCheck className="w-3.5 h-3.5" />

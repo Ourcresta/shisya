@@ -4,6 +4,7 @@ import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mock
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
 import { authRouter } from "./auth";
 import { guruAuthRouter } from "./guruAuth";
+import { oauthRouter } from "./oauth";
 import { seedGuruAdmin } from "./seedGuru";
 import { registerUshaRoutes } from "./usha";
 import { creditsRouter } from "./credits";
@@ -59,6 +60,9 @@ export async function registerRoutes(
 
   // Guru Admin auth routes
   app.use("/api/guru/auth", guruAuthRouter);
+
+  // OAuth routes (Google, Microsoft, SSO)
+  app.use("/api/oauth", oauthRouter);
 
   // Zoho OAuth callback (no auth required - Zoho redirects here)
   app.get("/api/guru/zoho/callback", async (req, res) => {
