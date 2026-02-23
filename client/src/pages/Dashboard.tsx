@@ -34,7 +34,8 @@ import {
   Signal,
   Lightbulb,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Briefcase
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -426,6 +427,7 @@ export default function Dashboard() {
     { title: "Marksheet", icon: GraduationCap, href: "/shishya/marksheet" },
     { title: "Certificates", icon: Award, href: "/shishya/certificates" },
     { title: "Portfolio", icon: User, href: "/shishya/profile" },
+    { title: "Udyog", icon: Briefcase, href: "/shishya/udyog/hub" },
   ];
 
   if (coursesLoading) {
@@ -493,7 +495,7 @@ export default function Dashboard() {
                 </p>
 
                 <div className="mt-4 bg-muted/50 rounded-lg p-3">
-                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-9 gap-2">
                     {quickLinks.map((link) => (
                       <Link key={link.title} href={link.href}>
                         <div
