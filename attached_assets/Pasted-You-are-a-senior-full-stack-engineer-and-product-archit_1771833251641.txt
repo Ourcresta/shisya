@@ -1,0 +1,185 @@
+You are a senior full-stack engineer and product architect.
+
+Build a production-ready "Udyog – AI Powered Virtual Internship System" for Our Shiksha platform.
+
+Tech Stack:
+- Frontend: React + TailwindCSS (Modern AI SaaS UI)
+- Backend: Node.js + Express
+- Database: PostgreSQL
+- Auth: JWT-based authentication
+- Architecture: Modular, scalable, clean folder structure
+- UI Theme: Dark AI futuristic with subtle glow accents
+
+---------------------------------------
+CORE PRODUCT VISION
+---------------------------------------
+
+Udyog is not just an internship page.
+It is a simulated industry environment where students work on real-world projects under AI guidance.
+
+This should feel like a mini IT company dashboard.
+
+---------------------------------------
+FEATURE REQUIREMENTS
+---------------------------------------
+
+1️⃣ Udyog Main Page
+- Hero section: "Step Into Industry With Udyog"
+- 3 Feature Cards:
+   - Virtual Internship
+   - Live Industry Projects
+   - Industry Certification
+- CTA: "Start Internship Journey"
+
+2️⃣ Virtual Internship System
+
+Internship must work like this:
+
+STEP 1: Skill Evaluation
+- Student takes AI skill assessment
+- Store score in database
+
+STEP 2: AI Internship Assignment
+- Based on skill level:
+    Beginner → Junior Intern Project
+    Intermediate → Project Associate
+    Advanced → Lead Developer Simulation
+- Assign project automatically
+
+STEP 3: Internship Dashboard
+
+Intern Dashboard Includes:
+- Assigned Project
+- Project Description
+- Deliverables Checklist
+- Submission Section
+- AI Mentor Chat (placeholder UI)
+- Progress Bar
+- Team View (simulated teammates)
+- Deadline Countdown
+
+3️⃣ Project Management Simulation
+
+Each internship must have:
+- Tasks (CRUD functionality)
+- Status: Todo | In Progress | Review | Completed
+- Submission upload
+- AI feedback placeholder
+
+4️⃣ Certification Logic
+
+If:
+- All tasks completed
+- Submission approved
+
+Then:
+- Generate Internship Completion Certificate
+- Store certification in database
+- Show downloadable PDF button (placeholder logic allowed)
+
+5️⃣ Admin Panel (Basic)
+
+Admin must be able to:
+- Create Internship Projects
+- Define skill level required
+- View student submissions
+- Approve / Reject
+
+---------------------------------------
+DATABASE STRUCTURE
+---------------------------------------
+
+Users
+- id
+- name
+- email
+- role (student/admin)
+- skill_score
+
+Internships
+- id
+- title
+- description
+- skill_level
+- duration
+- created_by
+
+Assignments
+- id
+- user_id
+- internship_id
+- status
+- progress
+
+Tasks
+- id
+- internship_id
+- title
+- description
+- status
+
+Submissions
+- id
+- assignment_id
+- file_url
+- feedback
+- approved
+
+Certificates
+- id
+- user_id
+- internship_id
+- issue_date
+
+---------------------------------------
+UI/UX REQUIREMENTS
+---------------------------------------
+
+- Dark AI theme
+- Glassmorphism cards
+- Subtle hover animations
+- Neon accent borders
+- Modern SaaS dashboard layout
+- Sidebar navigation inside Internship Dashboard
+
+Sidebar Items:
+- Overview
+- Tasks
+- Submission
+- AI Mentor
+- Certification
+
+---------------------------------------
+ADVANCED FEATURE (IMPORTANT)
+---------------------------------------
+
+Add AI Assignment Logic Function:
+
+If skill_score < 40 → Beginner Project
+If 40-75 → Intermediate
+If >75 → Advanced
+
+Write this logic clearly in backend controller.
+
+---------------------------------------
+CODE QUALITY REQUIREMENTS
+---------------------------------------
+
+- Clean folder structure
+- Reusable components
+- Proper error handling
+- Secure routes
+- Environment variables for secrets
+- Comment major logic clearly
+
+---------------------------------------
+GOAL
+---------------------------------------
+
+This should look and behave like a real internship management SaaS platform,
+not a simple static page.
+
+Focus on scalability and modularity.
+
+Build frontend and backend code.
+Start with backend APIs, then frontend UI.
