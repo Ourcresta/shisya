@@ -36,6 +36,8 @@ The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind 
 - **Analytics:** Recharts-powered skill radar, sub-skill bar chart, and performance score card.
 - **AI Privacy:** Generic platform references for AI content generation without brand name.
 - **GURU Admin Portal:** Full CRUD for courses, modules, lessons, tests, labs, projects, student and credit management, and Zoho TrainerCentral integration.
+- **OAuth Login:** Google OAuth and SSO (enterprise single sign-on) buttons on login page. OAuth routes in `server/oauth.ts`. Users table has `authProvider` and `authProviderId` fields.
+- **Udyog Virtual Internship System:** AI-powered virtual internship platform at `/shishya/udyog`. Features AI skill assessment (6 domains, 10 MCQ per domain), automatic internship assignment based on score (Beginner < 40 → Junior Intern, 40-75 → Project Associate, >75 → Lead Developer), intern dashboard with sidebar (Overview/Tasks/Submissions/AI Mentor/Certification), kanban-style task management, submission system, certificate generation. Backend routes in `server/udyogRoutes.ts`. Database tables: `udyog_internships`, `udyog_assignments`, `udyog_tasks`, `udyog_submissions`, `udyog_certificates`, `udyog_skill_assessments`. Guru admin page at `/guru/internships` for CRUD management.
 
 **Key Principles:** Read-only content consumption for students, focus on published courses, graceful error handling, and clear separation of public/authenticated routes.
 
