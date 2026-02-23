@@ -96,7 +96,7 @@ export default function UdyogLanding() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
       <LandingNavbar />
 
       {/* Hero Section */}

@@ -278,7 +278,7 @@ export default function UdyogAssessment() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-12 md:py-20">
         <AnimatePresence mode="wait">
           {screen === "domain" && (

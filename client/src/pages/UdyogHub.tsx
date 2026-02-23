@@ -81,7 +81,7 @@ export default function UdyogHub() {
   const ctaHref = user ? "/shishya/udyog/assess" : "/login?redirect=/shishya/udyog/assess";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
       <LandingNavbar />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">

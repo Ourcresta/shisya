@@ -209,7 +209,7 @@ export default function UdyogDashboard() {
 
   if (assignmentLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0e1a" }}>
         <motion.div
           className="flex flex-col items-center gap-4"
           initial={{ opacity: 0 }}
@@ -224,7 +224,7 @@ export default function UdyogDashboard() {
 
   if (!assignment && !assignmentData) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0a0e1a" }}>
         <motion.div
           className="text-center max-w-md"
           initial={{ opacity: 0, y: 30 }}
@@ -876,9 +876,9 @@ export default function UdyogDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <div className="hidden md:flex flex-col w-60 shrink-0 fixed top-0 left-0 h-screen z-30 bg-card/80 backdrop-blur-xl border-r border-white/10">
-        <div className="p-5 border-b border-white/10">
+    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: "#0a0e1a" }}>
+      <div className="hidden md:flex flex-col w-60 shrink-0 fixed top-0 left-0 h-screen z-30" style={{ background: "#111827", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="p-5 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
           <div className="flex items-center gap-2">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
