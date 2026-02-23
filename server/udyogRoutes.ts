@@ -1,9 +1,16 @@
 import { Router, Request, Response } from "express";
 import { db } from "./db";
-import { udyogInternships, udyogAssignments, udyogTasks, udyogSubmissions, udyogCertificates, udyogSkillAssessments, insertUdyogInternshipSchema } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import {
+  udyogInternships, udyogAssignments, udyogTasks, udyogSubmissions,
+  udyogCertificates, udyogSkillAssessments, udyogBatches, udyogBatchMembers,
+  udyogHrUsers, udyogJobs, udyogApplications,
+  insertUdyogInternshipSchema, insertUdyogJobSchema,
+  shishyaUsers, shishyaUserProfiles,
+} from "@shared/schema";
+import { eq, and, desc, sql, gte, lte, or, inArray, count } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
+import * as bcrypt from "bcrypt";
 
 export const udyogRouter = Router();
 
@@ -70,7 +77,7 @@ udyogRouter.post("/assess", requireAuth as any, async (req: AuthenticatedRequest
   }
 });
 
-// POST /assign - Auto-assign internship based on skill assessment (auth required)
+// POST /assign - Auto-assign internship based on skill assessment with batch formation (auth required)
 udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { assessmentId } = req.body;
@@ -100,15 +107,83 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
       intermediate: "Project Associate",
       advanced: "Lead Developer",
     };
+    const batchSize = internship.batchSize || 5;
+    let [formingBatch] = await db.select().from(udyogBatches)
+      .where(and(
+        eq(udyogBatches.internshipId, internship.id),
+        eq(udyogBatches.status, "forming")
+      ))
+      .limit(1);
+    if (!formingBatch) {
+      const existingBatches = await db.select({ cnt: count() }).from(udyogBatches)
+        .where(eq(udyogBatches.internshipId, internship.id));
+      const batchNumber = (existingBatches[0]?.cnt || 0) + 1;
+      [formingBatch] = await db.insert(udyogBatches).values({
+        internshipId: internship.id,
+        batchNumber,
+        status: "forming",
+      }).returning();
+    }
+    await db.insert(udyogBatchMembers).values({
+      batchId: formingBatch.id,
+      userId: req.user!.id,
+      role: "developer",
+      skillScore: assessment.score,
+    });
     const [assignment] = await db.insert(udyogAssignments).values({
       userId: req.user!.id,
       internshipId: internship.id,
+      batchId: formingBatch.id,
       status: "active",
       progress: 0,
       skillScore: assessment.score,
       assignedRole: roleMap[assessment.level] || "Junior Intern",
     }).returning();
-    res.json({ assignment, internship });
+    const members = await db.select().from(udyogBatchMembers)
+      .where(eq(udyogBatchMembers.batchId, formingBatch.id));
+    if (members.length >= batchSize) {
+      const sorted = [...members].sort((a, b) => b.skillScore - a.skillScore);
+      const roleAssignments: Record<string, string> = {};
+      sorted.forEach((m, i) => {
+        if (i === 0) roleAssignments[m.userId] = "Team Lead";
+        else if (i < sorted.length - 1) roleAssignments[m.userId] = "Developer";
+        else roleAssignments[m.userId] = "QA/Tester";
+      });
+      for (const member of sorted) {
+        const newRole = roleAssignments[member.userId];
+        await db.update(udyogBatchMembers).set({ role: newRole }).where(eq(udyogBatchMembers.id, member.id));
+        await db.update(udyogAssignments).set({ assignedRole: newRole })
+          .where(and(
+            eq(udyogAssignments.userId, member.userId),
+            eq(udyogAssignments.batchId, formingBatch.id)
+          ));
+      }
+      const now = new Date();
+      const durationWeeks = parseInt(internship.duration) || 4;
+      const endDate = new Date(now.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
+      await db.update(udyogBatches).set({
+        status: "active",
+        startDate: now,
+        endDate,
+      }).where(eq(udyogBatches.id, formingBatch.id));
+      const templateTasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, internship.id),
+          sql`${udyogTasks.batchId} IS NULL`
+        ))
+        .orderBy(udyogTasks.orderIndex);
+      for (const tpl of templateTasks) {
+        await db.insert(udyogTasks).values({
+          internshipId: internship.id,
+          batchId: formingBatch.id,
+          title: tpl.title,
+          description: tpl.description,
+          status: "todo",
+          orderIndex: tpl.orderIndex,
+        });
+      }
+    }
+    res.json({ assignment, internship, batch: formingBatch });
   } catch (error) {
     console.error("[Udyog] Error assigning internship:", error);
     res.status(500).json({ error: "Failed to assign internship" });
@@ -433,11 +508,11 @@ udyogRouter.get("/admin/submissions", async (req: Request, res: Response) => {
   }
 });
 
-// PATCH /admin/submissions/:id - Review submission (approve/reject)
+// PATCH /admin/submissions/:id - Review submission (approve/reject with score)
 udyogRouter.patch("/admin/submissions/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { status, feedback } = req.body;
+    const { status, feedback, score, approved } = req.body;
     if (!status) {
       return res.status(400).json({ error: "status is required" });
     }
@@ -451,6 +526,8 @@ udyogRouter.patch("/admin/submissions/:id", async (req: Request, res: Response) 
       .set({
         status,
         feedback: feedback || null,
+        score: score !== undefined ? score : existing.score,
+        approved: approved !== undefined ? approved : existing.approved,
         reviewedAt: new Date(),
       })
       .where(eq(udyogSubmissions.id, id))
@@ -459,5 +536,672 @@ udyogRouter.patch("/admin/submissions/:id", async (req: Request, res: Response) 
   } catch (error) {
     console.error("[Udyog Admin] Error reviewing submission:", error);
     res.status(500).json({ error: "Failed to review submission" });
+  }
+});
+
+// ============ BATCH ENDPOINTS ============
+
+// GET /batches - List all batches for an internship
+udyogRouter.get("/batches/:internshipId", async (req: Request, res: Response) => {
+  try {
+    const internshipId = parseInt(req.params.internshipId, 10);
+    const batches = await db.select().from(udyogBatches)
+      .where(eq(udyogBatches.internshipId, internshipId))
+      .orderBy(desc(udyogBatches.createdAt));
+    res.json(batches);
+  } catch (error) {
+    console.error("[Udyog] Error fetching batches:", error);
+    res.status(500).json({ error: "Failed to fetch batches" });
+  }
+});
+
+// GET /batch/:batchId - Get batch details with members and tasks
+udyogRouter.get("/batch/:batchId", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const batchId = parseInt(req.params.batchId, 10);
+    const [batch] = await db.select().from(udyogBatches)
+      .where(eq(udyogBatches.id, batchId))
+      .limit(1);
+    if (!batch) {
+      return res.status(404).json({ error: "Batch not found" });
+    }
+    const [internship] = await db.select().from(udyogInternships)
+      .where(eq(udyogInternships.id, batch.internshipId))
+      .limit(1);
+    const members = await db.select({
+      member: udyogBatchMembers,
+      profile: shishyaUserProfiles,
+    }).from(udyogBatchMembers)
+      .leftJoin(shishyaUserProfiles, eq(udyogBatchMembers.userId, shishyaUserProfiles.userId))
+      .where(eq(udyogBatchMembers.batchId, batchId));
+    const tasks = await db.select().from(udyogTasks)
+      .where(eq(udyogTasks.batchId, batchId))
+      .orderBy(udyogTasks.orderIndex);
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === "completed").length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    res.json({ batch, internship, members, tasks, progress });
+  } catch (error) {
+    console.error("[Udyog] Error fetching batch:", error);
+    res.status(500).json({ error: "Failed to fetch batch" });
+  }
+});
+
+// GET /my-batch - Get current user's active batch (auth required)
+udyogRouter.get("/my-batch", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const [assignment] = await db.select().from(udyogAssignments)
+      .where(and(
+        eq(udyogAssignments.userId, req.user!.id),
+        eq(udyogAssignments.status, "active")
+      ))
+      .orderBy(desc(udyogAssignments.createdAt))
+      .limit(1);
+    if (!assignment || !assignment.batchId) {
+      return res.status(404).json({ error: "No active batch found" });
+    }
+    const [batch] = await db.select().from(udyogBatches)
+      .where(eq(udyogBatches.id, assignment.batchId))
+      .limit(1);
+    if (!batch) {
+      return res.status(404).json({ error: "Batch not found" });
+    }
+    const [internship] = await db.select().from(udyogInternships)
+      .where(eq(udyogInternships.id, batch.internshipId))
+      .limit(1);
+    const members = await db.select({
+      member: udyogBatchMembers,
+      profile: shishyaUserProfiles,
+    }).from(udyogBatchMembers)
+      .leftJoin(shishyaUserProfiles, eq(udyogBatchMembers.userId, shishyaUserProfiles.userId))
+      .where(eq(udyogBatchMembers.batchId, batch.id));
+    const tasks = await db.select().from(udyogTasks)
+      .where(eq(udyogTasks.batchId, batch.id))
+      .orderBy(udyogTasks.orderIndex);
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === "completed").length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    res.json({ batch, internship, assignment, members, tasks, progress });
+  } catch (error) {
+    console.error("[Udyog] Error fetching batch:", error);
+    res.status(500).json({ error: "Failed to fetch batch" });
+  }
+});
+
+// PATCH /batch-member/:memberId/scores - Update batch member scores (admin)
+udyogRouter.patch("/admin/batch-member/:memberId/scores", async (req: Request, res: Response) => {
+  try {
+    const memberId = parseInt(req.params.memberId, 10);
+    const { qualityScore, collaborationScore } = req.body;
+    const [existing] = await db.select().from(udyogBatchMembers)
+      .where(eq(udyogBatchMembers.id, memberId))
+      .limit(1);
+    if (!existing) {
+      return res.status(404).json({ error: "Batch member not found" });
+    }
+    const updates: any = {};
+    if (qualityScore !== undefined) updates.qualityScore = qualityScore;
+    if (collaborationScore !== undefined) updates.collaborationScore = collaborationScore;
+    const taskCompletionRate = existing.taskCompletionRate || 0;
+    const deadlineCompliance = existing.deadlineCompliance || 0;
+    const qScore = qualityScore !== undefined ? qualityScore : (existing.qualityScore || 0);
+    const cScore = collaborationScore !== undefined ? collaborationScore : (existing.collaborationScore || 0);
+    updates.performanceScore = Math.round((taskCompletionRate + deadlineCompliance + qScore + cScore) / 4);
+    const [updated] = await db.update(udyogBatchMembers)
+      .set(updates)
+      .where(eq(udyogBatchMembers.id, memberId))
+      .returning();
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating batch member scores:", error);
+    res.status(500).json({ error: "Failed to update scores" });
+  }
+});
+
+// GET /admin/batches - List all batches across all internships
+udyogRouter.get("/admin/batches", async (req: Request, res: Response) => {
+  try {
+    const batches = await db.select({
+      batch: udyogBatches,
+      internship: udyogInternships,
+    }).from(udyogBatches)
+      .leftJoin(udyogInternships, eq(udyogBatches.internshipId, udyogInternships.id))
+      .orderBy(desc(udyogBatches.createdAt));
+    res.json(batches);
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching batches:", error);
+    res.status(500).json({ error: "Failed to fetch batches" });
+  }
+});
+
+// GET /admin/batch/:batchId/members - Get batch members with details
+udyogRouter.get("/admin/batch/:batchId/members", async (req: Request, res: Response) => {
+  try {
+    const batchId = parseInt(req.params.batchId, 10);
+    const members = await db.select({
+      member: udyogBatchMembers,
+      profile: shishyaUserProfiles,
+    }).from(udyogBatchMembers)
+      .leftJoin(shishyaUserProfiles, eq(udyogBatchMembers.userId, shishyaUserProfiles.userId))
+      .where(eq(udyogBatchMembers.batchId, batchId));
+    res.json(members);
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching batch members:", error);
+    res.status(500).json({ error: "Failed to fetch batch members" });
+  }
+});
+
+// PATCH /admin/batch-member/:memberId/role - Override role assignment
+udyogRouter.patch("/admin/batch-member/:memberId/role", async (req: Request, res: Response) => {
+  try {
+    const memberId = parseInt(req.params.memberId, 10);
+    const { role } = req.body;
+    if (!role) {
+      return res.status(400).json({ error: "role is required" });
+    }
+    const [updated] = await db.update(udyogBatchMembers)
+      .set({ role })
+      .where(eq(udyogBatchMembers.id, memberId))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Batch member not found" });
+    }
+    await db.update(udyogAssignments).set({ assignedRole: role })
+      .where(and(
+        eq(udyogAssignments.userId, updated.userId),
+        eq(udyogAssignments.batchId, updated.batchId)
+      ));
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating role:", error);
+    res.status(500).json({ error: "Failed to update role" });
+  }
+});
+
+// PATCH /admin/tasks/:taskId - Update task (assign, set due date, score)
+udyogRouter.patch("/admin/tasks/:taskId", async (req: Request, res: Response) => {
+  try {
+    const taskId = parseInt(req.params.taskId, 10);
+    const { assignedTo, dueDate, score, status, title, description } = req.body;
+    const updates: any = {};
+    if (assignedTo !== undefined) updates.assignedTo = assignedTo;
+    if (dueDate !== undefined) updates.dueDate = dueDate ? new Date(dueDate) : null;
+    if (score !== undefined) updates.score = score;
+    if (status !== undefined) updates.status = status;
+    if (title !== undefined) updates.title = title;
+    if (description !== undefined) updates.description = description;
+    const [updated] = await db.update(udyogTasks)
+      .set(updates)
+      .where(eq(udyogTasks.id, taskId))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating task:", error);
+    res.status(500).json({ error: "Failed to update task" });
+  }
+});
+
+// POST /admin/batches/:batchId/tasks - Add task to a specific batch
+udyogRouter.post("/admin/batches/:batchId/tasks", async (req: Request, res: Response) => {
+  try {
+    const batchId = parseInt(req.params.batchId, 10);
+    const [batch] = await db.select().from(udyogBatches)
+      .where(eq(udyogBatches.id, batchId))
+      .limit(1);
+    if (!batch) {
+      return res.status(404).json({ error: "Batch not found" });
+    }
+    const { title, description, assignedTo, dueDate, orderIndex } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: "Task title is required" });
+    }
+    const [task] = await db.insert(udyogTasks).values({
+      internshipId: batch.internshipId,
+      batchId,
+      assignedTo: assignedTo || null,
+      title,
+      description: description || null,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      orderIndex: orderIndex || 0,
+      status: "todo",
+    }).returning();
+    res.json(task);
+  } catch (error) {
+    console.error("[Udyog Admin] Error adding batch task:", error);
+    res.status(500).json({ error: "Failed to add task" });
+  }
+});
+
+// POST /admin/certificate/generate - Generate certificate for a batch member (admin approval)
+udyogRouter.post("/admin/certificate/generate", async (req: Request, res: Response) => {
+  try {
+    const { userId, batchId } = req.body;
+    if (!userId || !batchId) {
+      return res.status(400).json({ error: "userId and batchId are required" });
+    }
+    const [member] = await db.select().from(udyogBatchMembers)
+      .where(and(
+        eq(udyogBatchMembers.batchId, batchId),
+        eq(udyogBatchMembers.userId, userId)
+      ))
+      .limit(1);
+    if (!member) {
+      return res.status(404).json({ error: "Batch member not found" });
+    }
+    const [batch] = await db.select().from(udyogBatches)
+      .where(eq(udyogBatches.id, batchId))
+      .limit(1);
+    if (!batch) {
+      return res.status(404).json({ error: "Batch not found" });
+    }
+    const [internship] = await db.select().from(udyogInternships)
+      .where(eq(udyogInternships.id, batch.internshipId))
+      .limit(1);
+    const existingCert = await db.select().from(udyogCertificates)
+      .where(and(
+        eq(udyogCertificates.userId, userId),
+        eq(udyogCertificates.batchId, batchId)
+      ))
+      .limit(1);
+    if (existingCert.length > 0) {
+      return res.json({ certificate: existingCert[0], message: "Certificate already generated" });
+    }
+    const certificateId = `UDYOG-${randomUUID().slice(0, 8).toUpperCase()}`;
+    const [certificate] = await db.insert(udyogCertificates).values({
+      userId,
+      internshipId: batch.internshipId,
+      batchId,
+      certificateId,
+      role: member.role,
+      performanceScore: member.performanceScore || 0,
+      duration: internship?.duration || "4 weeks",
+    }).returning();
+    await db.update(udyogAssignments).set({
+      status: "completed",
+      completedAt: new Date(),
+    }).where(and(
+      eq(udyogAssignments.userId, userId),
+      eq(udyogAssignments.batchId, batchId)
+    ));
+    res.json({ certificate });
+  } catch (error) {
+    console.error("[Udyog Admin] Error generating certificate:", error);
+    res.status(500).json({ error: "Failed to generate certificate" });
+  }
+});
+
+// ============ HR HIRING SYSTEM ENDPOINTS ============
+
+// POST /hr/register - HR user registration
+udyogRouter.post("/hr/register", async (req: Request, res: Response) => {
+  try {
+    const { email, password, name, companyName, companyWebsite, designation, phone } = req.body;
+    if (!email || !password || !name || !companyName) {
+      return res.status(400).json({ error: "email, password, name, and companyName are required" });
+    }
+    const existing = await db.select().from(udyogHrUsers)
+      .where(eq(udyogHrUsers.email, email))
+      .limit(1);
+    if (existing.length > 0) {
+      return res.status(409).json({ error: "Email already registered" });
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    const [hrUser] = await db.insert(udyogHrUsers).values({
+      email,
+      passwordHash,
+      name,
+      companyName,
+      companyWebsite: companyWebsite || null,
+      designation: designation || null,
+      phone: phone || null,
+    }).returning();
+    const { passwordHash: _, ...safeUser } = hrUser;
+    res.json({ user: safeUser, message: "Registration successful. Awaiting admin approval." });
+  } catch (error) {
+    console.error("[Udyog HR] Error registering:", error);
+    res.status(500).json({ error: "Failed to register" });
+  }
+});
+
+// POST /hr/login - HR user login
+udyogRouter.post("/hr/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "email and password are required" });
+    }
+    const [hrUser] = await db.select().from(udyogHrUsers)
+      .where(eq(udyogHrUsers.email, email))
+      .limit(1);
+    if (!hrUser) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    const validPassword = await bcrypt.compare(password, hrUser.passwordHash);
+    if (!validPassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    if (!hrUser.isApproved) {
+      return res.status(403).json({ error: "Account pending admin approval" });
+    }
+    if (!hrUser.isActive) {
+      return res.status(403).json({ error: "Account is deactivated" });
+    }
+    const { passwordHash: _, ...safeUser } = hrUser;
+    res.json({ user: safeUser });
+  } catch (error) {
+    console.error("[Udyog HR] Error logging in:", error);
+    res.status(500).json({ error: "Failed to login" });
+  }
+});
+
+// POST /hr/jobs - Post a new job
+udyogRouter.post("/hr/jobs", async (req: Request, res: Response) => {
+  try {
+    const validation = insertUdyogJobSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0].message });
+    }
+    const [job] = await db.insert(udyogJobs).values(validation.data).returning();
+    res.json(job);
+  } catch (error) {
+    console.error("[Udyog HR] Error posting job:", error);
+    res.status(500).json({ error: "Failed to post job" });
+  }
+});
+
+// GET /hr/jobs/:hrId - Get all jobs by HR user
+udyogRouter.get("/hr/jobs/:hrId", async (req: Request, res: Response) => {
+  try {
+    const hrId = parseInt(req.params.hrId, 10);
+    const jobs = await db.select().from(udyogJobs)
+      .where(eq(udyogJobs.hrId, hrId))
+      .orderBy(desc(udyogJobs.createdAt));
+    res.json(jobs);
+  } catch (error) {
+    console.error("[Udyog HR] Error fetching jobs:", error);
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
+// PUT /hr/jobs/:id - Update a job posting
+udyogRouter.put("/hr/jobs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const [updated] = await db.update(udyogJobs)
+      .set({ ...req.body, updatedAt: new Date() })
+      .where(eq(udyogJobs.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog HR] Error updating job:", error);
+    res.status(500).json({ error: "Failed to update job" });
+  }
+});
+
+// DELETE /hr/jobs/:id - Delete a job posting
+udyogRouter.delete("/hr/jobs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.delete(udyogJobs).where(eq(udyogJobs.id, id));
+    res.json({ message: "Job deleted successfully" });
+  } catch (error) {
+    console.error("[Udyog HR] Error deleting job:", error);
+    res.status(500).json({ error: "Failed to delete job" });
+  }
+});
+
+// GET /hr/candidates/:jobId - Get matching candidates for a job with AI matching score
+udyogRouter.get("/hr/candidates/:jobId", async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const [job] = await db.select().from(udyogJobs)
+      .where(eq(udyogJobs.id, jobId))
+      .limit(1);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    const jobSkills = job.requiredSkills ? job.requiredSkills.split(",").map(s => s.trim().toLowerCase()) : [];
+    const assessments = await db.select().from(udyogSkillAssessments);
+    const completedAssignments = await db.select().from(udyogAssignments)
+      .where(eq(udyogAssignments.status, "completed"));
+    const certificates = await db.select().from(udyogCertificates);
+    const batchMembers = await db.select().from(udyogBatchMembers);
+    const studentScores: Record<string, { skillMatch: number; internshipPerformance: number; certificationBonus: number; total: number; details: any }> = {};
+    for (const a of assessments) {
+      if (!studentScores[a.userId]) {
+        studentScores[a.userId] = { skillMatch: 0, internshipPerformance: 0, certificationBonus: 0, total: 0, details: {} };
+      }
+      if (jobSkills.includes(a.domain.toLowerCase())) {
+        studentScores[a.userId].skillMatch = Math.max(studentScores[a.userId].skillMatch, a.score);
+      }
+    }
+    for (const ca of completedAssignments) {
+      if (studentScores[ca.userId]) {
+        studentScores[ca.userId].internshipPerformance = Math.max(studentScores[ca.userId].internshipPerformance, ca.skillScore);
+      }
+    }
+    for (const bm of batchMembers) {
+      if (studentScores[bm.userId] && bm.performanceScore) {
+        studentScores[bm.userId].internshipPerformance = Math.max(studentScores[bm.userId].internshipPerformance, bm.performanceScore);
+      }
+    }
+    for (const cert of certificates) {
+      if (studentScores[cert.userId]) {
+        studentScores[cert.userId].certificationBonus = Math.min(100, (studentScores[cert.userId].certificationBonus || 0) + 25);
+      }
+    }
+    const candidates = Object.entries(studentScores)
+      .map(([userId, scores]) => {
+        scores.total = Math.round((scores.skillMatch + scores.internshipPerformance + scores.certificationBonus) / 3);
+        return { userId, matchingScore: scores.total, ...scores };
+      })
+      .filter(c => c.matchingScore >= (job.minSkillScore || 0))
+      .sort((a, b) => b.matchingScore - a.matchingScore)
+      .slice(0, 10);
+    const candidateProfiles = [];
+    for (const c of candidates) {
+      const [profile] = await db.select().from(shishyaUserProfiles)
+        .where(eq(shishyaUserProfiles.userId, c.userId))
+        .limit(1);
+      candidateProfiles.push({ ...c, profile: profile || null });
+    }
+    res.json(candidateProfiles);
+  } catch (error) {
+    console.error("[Udyog HR] Error fetching candidates:", error);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+// POST /hr/applications - Apply for a job (student)
+udyogRouter.post("/hr/applications", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { jobId } = req.body;
+    if (!jobId) {
+      return res.status(400).json({ error: "jobId is required" });
+    }
+    const existing = await db.select().from(udyogApplications)
+      .where(and(
+        eq(udyogApplications.jobId, jobId),
+        eq(udyogApplications.studentId, req.user!.id)
+      ))
+      .limit(1);
+    if (existing.length > 0) {
+      return res.status(409).json({ error: "Already applied for this job" });
+    }
+    const [application] = await db.insert(udyogApplications).values({
+      jobId,
+      studentId: req.user!.id,
+      status: "applied",
+    }).returning();
+    res.json(application);
+  } catch (error) {
+    console.error("[Udyog HR] Error applying:", error);
+    res.status(500).json({ error: "Failed to apply" });
+  }
+});
+
+// GET /hr/applications/:jobId - Get all applications for a job
+udyogRouter.get("/hr/applications/:jobId", async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const applications = await db.select({
+      application: udyogApplications,
+      profile: shishyaUserProfiles,
+    }).from(udyogApplications)
+      .leftJoin(shishyaUserProfiles, eq(udyogApplications.studentId, shishyaUserProfiles.userId))
+      .where(eq(udyogApplications.jobId, jobId))
+      .orderBy(desc(udyogApplications.appliedAt));
+    res.json(applications);
+  } catch (error) {
+    console.error("[Udyog HR] Error fetching applications:", error);
+    res.status(500).json({ error: "Failed to fetch applications" });
+  }
+});
+
+// PATCH /hr/applications/:id/status - Update application status
+udyogRouter.patch("/hr/applications/:id/status", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { status } = req.body;
+    const validStatuses = ["applied", "shortlisted", "rejected", "hired"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+    const [updated] = await db.update(udyogApplications)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(udyogApplications.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog HR] Error updating application:", error);
+    res.status(500).json({ error: "Failed to update application" });
+  }
+});
+
+// GET /jobs - List all active jobs (public, for students)
+udyogRouter.get("/jobs", async (req: Request, res: Response) => {
+  try {
+    const jobs = await db.select({
+      job: udyogJobs,
+      hr: {
+        name: udyogHrUsers.name,
+        companyName: udyogHrUsers.companyName,
+      },
+    }).from(udyogJobs)
+      .leftJoin(udyogHrUsers, eq(udyogJobs.hrId, udyogHrUsers.id))
+      .where(eq(udyogJobs.status, "active"))
+      .orderBy(desc(udyogJobs.createdAt));
+    res.json(jobs);
+  } catch (error) {
+    console.error("[Udyog] Error fetching jobs:", error);
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
+// GET /my-applications - Get current student's job applications
+udyogRouter.get("/my-applications", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const applications = await db.select({
+      application: udyogApplications,
+      job: udyogJobs,
+    }).from(udyogApplications)
+      .leftJoin(udyogJobs, eq(udyogApplications.jobId, udyogJobs.id))
+      .where(eq(udyogApplications.studentId, req.user!.id))
+      .orderBy(desc(udyogApplications.appliedAt));
+    res.json(applications);
+  } catch (error) {
+    console.error("[Udyog] Error fetching applications:", error);
+    res.status(500).json({ error: "Failed to fetch applications" });
+  }
+});
+
+// ============ ADMIN HR MANAGEMENT ============
+
+// GET /admin/hr-users - List all HR user registrations
+udyogRouter.get("/admin/hr-users", async (req: Request, res: Response) => {
+  try {
+    const hrUsers = await db.select({
+      id: udyogHrUsers.id,
+      email: udyogHrUsers.email,
+      name: udyogHrUsers.name,
+      companyName: udyogHrUsers.companyName,
+      companyWebsite: udyogHrUsers.companyWebsite,
+      designation: udyogHrUsers.designation,
+      phone: udyogHrUsers.phone,
+      isApproved: udyogHrUsers.isApproved,
+      isActive: udyogHrUsers.isActive,
+      approvedAt: udyogHrUsers.approvedAt,
+      createdAt: udyogHrUsers.createdAt,
+    }).from(udyogHrUsers)
+      .orderBy(desc(udyogHrUsers.createdAt));
+    res.json(hrUsers);
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching HR users:", error);
+    res.status(500).json({ error: "Failed to fetch HR users" });
+  }
+});
+
+// PATCH /admin/hr-users/:id/approve - Approve or reject HR user
+udyogRouter.patch("/admin/hr-users/:id/approve", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { approved } = req.body;
+    const [updated] = await db.update(udyogHrUsers)
+      .set({
+        isApproved: approved,
+        approvedAt: approved ? new Date() : null,
+      })
+      .where(eq(udyogHrUsers.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "HR user not found" });
+    }
+    const { passwordHash: _, ...safeUser } = updated;
+    res.json(safeUser);
+  } catch (error) {
+    console.error("[Udyog Admin] Error approving HR user:", error);
+    res.status(500).json({ error: "Failed to approve HR user" });
+  }
+});
+
+// GET /admin/analytics - Platform analytics overview
+udyogRouter.get("/admin/analytics", async (req: Request, res: Response) => {
+  try {
+    const [internshipCount] = await db.select({ cnt: count() }).from(udyogInternships);
+    const [batchCount] = await db.select({ cnt: count() }).from(udyogBatches);
+    const [activeBatchCount] = await db.select({ cnt: count() }).from(udyogBatches)
+      .where(eq(udyogBatches.status, "active"));
+    const [studentCount] = await db.select({ cnt: count() }).from(udyogAssignments);
+    const [completedCount] = await db.select({ cnt: count() }).from(udyogAssignments)
+      .where(eq(udyogAssignments.status, "completed"));
+    const [certCount] = await db.select({ cnt: count() }).from(udyogCertificates);
+    const [hrCount] = await db.select({ cnt: count() }).from(udyogHrUsers);
+    const [approvedHrCount] = await db.select({ cnt: count() }).from(udyogHrUsers)
+      .where(eq(udyogHrUsers.isApproved, true));
+    const [jobCount] = await db.select({ cnt: count() }).from(udyogJobs);
+    const [applicationCount] = await db.select({ cnt: count() }).from(udyogApplications);
+    const [hiredCount] = await db.select({ cnt: count() }).from(udyogApplications)
+      .where(eq(udyogApplications.status, "hired"));
+    res.json({
+      internships: internshipCount.cnt,
+      batches: { total: batchCount.cnt, active: activeBatchCount.cnt },
+      students: { enrolled: studentCount.cnt, completed: completedCount.cnt },
+      certificates: certCount.cnt,
+      hr: { total: hrCount.cnt, approved: approvedHrCount.cnt },
+      jobs: jobCount.cnt,
+      applications: { total: applicationCount.cnt, hired: hiredCount.cnt },
+    });
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching analytics:", error);
+    res.status(500).json({ error: "Failed to fetch analytics" });
   }
 });

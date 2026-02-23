@@ -511,16 +511,44 @@ export const udyogInternships = pgTable("udyog_internships", {
   domain: varchar("domain", { length: 100 }),
   duration: varchar("duration", { length: 50 }).notNull().default("4 weeks"),
   maxParticipants: integer("max_participants").default(0),
+  requiredSkills: text("required_skills"),
+  milestones: text("milestones"),
+  batchSize: integer("batch_size").notNull().default(5),
   isActive: boolean("is_active").notNull().default(true),
   createdBy: integer("created_by"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const udyogBatches = pgTable("udyog_batches", {
+  id: serial("id").primaryKey(),
+  internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  batchNumber: integer("batch_number").notNull().default(1),
+  status: varchar("status", { length: 20 }).notNull().default("forming"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const udyogBatchMembers = pgTable("udyog_batch_members", {
+  id: serial("id").primaryKey(),
+  batchId: integer("batch_id").notNull().references(() => udyogBatches.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  role: varchar("role", { length: 50 }).notNull().default("developer"),
+  skillScore: integer("skill_score").notNull().default(0),
+  performanceScore: integer("performance_score").default(0),
+  taskCompletionRate: integer("task_completion_rate").default(0),
+  deadlineCompliance: integer("deadline_compliance").default(0),
+  qualityScore: integer("quality_score").default(0),
+  collaborationScore: integer("collaboration_score").default(0),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+});
+
 export const udyogAssignments = pgTable("udyog_assignments", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  batchId: integer("batch_id").references(() => udyogBatches.id),
   status: varchar("status", { length: 20 }).notNull().default("active"),
   progress: integer("progress").notNull().default(0),
   skillScore: integer("skill_score").notNull().default(0),
@@ -533,9 +561,14 @@ export const udyogAssignments = pgTable("udyog_assignments", {
 export const udyogTasks = pgTable("udyog_tasks", {
   id: serial("id").primaryKey(),
   internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  batchId: integer("batch_id").references(() => udyogBatches.id),
+  assignedTo: varchar("assigned_to", { length: 36 }).references(() => shishyaUsers.id),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   status: varchar("status", { length: 20 }).notNull().default("todo"),
+  score: integer("score").default(0),
+  maxScore: integer("max_score").default(100),
+  dueDate: timestamp("due_date"),
   orderIndex: integer("order_index").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -544,11 +577,15 @@ export const udyogSubmissions = pgTable("udyog_submissions", {
   id: serial("id").primaryKey(),
   assignmentId: integer("assignment_id").notNull().references(() => udyogAssignments.id),
   taskId: integer("task_id").references(() => udyogTasks.id),
+  batchId: integer("batch_id").references(() => udyogBatches.id),
+  userId: varchar("user_id", { length: 36 }).references(() => shishyaUsers.id),
   content: text("content"),
   fileUrl: text("file_url"),
   feedback: text("feedback"),
   aiFeedback: text("ai_feedback"),
+  score: integer("score").default(0),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
+  approved: boolean("approved").default(false),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),
   reviewedAt: timestamp("reviewed_at"),
 });
@@ -557,7 +594,11 @@ export const udyogCertificates = pgTable("udyog_certificates", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  batchId: integer("batch_id").references(() => udyogBatches.id),
   certificateId: varchar("certificate_id", { length: 50 }).notNull().unique(),
+  role: varchar("role", { length: 50 }),
+  performanceScore: integer("performance_score").default(0),
+  duration: varchar("duration", { length: 50 }),
   issueDate: timestamp("issue_date").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -571,9 +612,62 @@ export const udyogSkillAssessments = pgTable("udyog_skill_assessments", {
   assessedAt: timestamp("assessed_at").defaultNow().notNull(),
 });
 
+// ============ UDYOG HR HIRING SYSTEM TABLES ============
+
+export const udyogHrUsers = pgTable("udyog_hr_users", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  companyName: varchar("company_name", { length: 255 }).notNull(),
+  companyWebsite: varchar("company_website", { length: 500 }),
+  designation: varchar("designation", { length: 100 }),
+  phone: varchar("phone", { length: 20 }),
+  isApproved: boolean("is_approved").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  approvedBy: integer("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const udyogJobs = pgTable("udyog_jobs", {
+  id: serial("id").primaryKey(),
+  hrId: integer("hr_id").notNull().references(() => udyogHrUsers.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  requiredSkills: text("required_skills"),
+  internshipRequired: boolean("internship_required").notNull().default(false),
+  minSkillScore: integer("min_skill_score").default(0),
+  location: varchar("location", { length: 255 }),
+  salaryRange: varchar("salary_range", { length: 100 }),
+  jobType: varchar("job_type", { length: 50 }).notNull().default("full-time"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  deadline: timestamp("deadline"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const udyogApplications = pgTable("udyog_applications", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").notNull().references(() => udyogJobs.id),
+  studentId: varchar("student_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  matchingScore: integer("matching_score").default(0),
+  status: varchar("status", { length: 20 }).notNull().default("applied"),
+  appliedAt: timestamp("applied_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertUdyogInternshipSchema = createInsertSchema(udyogInternships).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertUdyogInternship = z.infer<typeof insertUdyogInternshipSchema>;
 export type UdyogInternship = typeof udyogInternships.$inferSelect;
+
+export const insertUdyogBatchSchema = createInsertSchema(udyogBatches).omit({ id: true, createdAt: true });
+export type InsertUdyogBatch = z.infer<typeof insertUdyogBatchSchema>;
+export type UdyogBatch = typeof udyogBatches.$inferSelect;
+
+export const insertUdyogBatchMemberSchema = createInsertSchema(udyogBatchMembers).omit({ id: true, joinedAt: true });
+export type InsertUdyogBatchMember = z.infer<typeof insertUdyogBatchMemberSchema>;
+export type UdyogBatchMember = typeof udyogBatchMembers.$inferSelect;
 
 export const insertUdyogAssignmentSchema = createInsertSchema(udyogAssignments).omit({ id: true, createdAt: true });
 export type InsertUdyogAssignment = z.infer<typeof insertUdyogAssignmentSchema>;
@@ -589,6 +683,18 @@ export type UdyogSubmission = typeof udyogSubmissions.$inferSelect;
 
 export type UdyogCertificate = typeof udyogCertificates.$inferSelect;
 export type UdyogSkillAssessment = typeof udyogSkillAssessments.$inferSelect;
+
+export const insertUdyogHrUserSchema = createInsertSchema(udyogHrUsers).omit({ id: true, createdAt: true, approvedAt: true });
+export type InsertUdyogHrUser = z.infer<typeof insertUdyogHrUserSchema>;
+export type UdyogHrUser = typeof udyogHrUsers.$inferSelect;
+
+export const insertUdyogJobSchema = createInsertSchema(udyogJobs).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertUdyogJob = z.infer<typeof insertUdyogJobSchema>;
+export type UdyogJob = typeof udyogJobs.$inferSelect;
+
+export const insertUdyogApplicationSchema = createInsertSchema(udyogApplications).omit({ id: true, appliedAt: true, updatedAt: true });
+export type InsertUdyogApplication = z.infer<typeof insertUdyogApplicationSchema>;
+export type UdyogApplication = typeof udyogApplications.$inferSelect;
 
 // ============ GURU ADMIN TABLES ============
 
