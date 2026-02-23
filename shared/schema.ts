@@ -500,6 +500,96 @@ export const shishyaUshaMessages = pgTable("shishya_usha_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ============ UDYOG VIRTUAL INTERNSHIP TABLES ============
+
+export const udyogInternships = pgTable("udyog_internships", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  shortDescription: varchar("short_description", { length: 500 }),
+  skillLevel: varchar("skill_level", { length: 20 }).notNull().default("beginner"),
+  domain: varchar("domain", { length: 100 }),
+  duration: varchar("duration", { length: 50 }).notNull().default("4 weeks"),
+  maxParticipants: integer("max_participants").default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const udyogAssignments = pgTable("udyog_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  progress: integer("progress").notNull().default(0),
+  skillScore: integer("skill_score").notNull().default(0),
+  assignedRole: varchar("assigned_role", { length: 50 }),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const udyogTasks = pgTable("udyog_tasks", {
+  id: serial("id").primaryKey(),
+  internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  status: varchar("status", { length: 20 }).notNull().default("todo"),
+  orderIndex: integer("order_index").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const udyogSubmissions = pgTable("udyog_submissions", {
+  id: serial("id").primaryKey(),
+  assignmentId: integer("assignment_id").notNull().references(() => udyogAssignments.id),
+  taskId: integer("task_id").references(() => udyogTasks.id),
+  content: text("content"),
+  fileUrl: text("file_url"),
+  feedback: text("feedback"),
+  aiFeedback: text("ai_feedback"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
+export const udyogCertificates = pgTable("udyog_certificates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  internshipId: integer("internship_id").notNull().references(() => udyogInternships.id),
+  certificateId: varchar("certificate_id", { length: 50 }).notNull().unique(),
+  issueDate: timestamp("issue_date").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const udyogSkillAssessments = pgTable("udyog_skill_assessments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
+  domain: varchar("domain", { length: 100 }).notNull(),
+  score: integer("score").notNull(),
+  level: varchar("level", { length: 20 }).notNull(),
+  assessedAt: timestamp("assessed_at").defaultNow().notNull(),
+});
+
+export const insertUdyogInternshipSchema = createInsertSchema(udyogInternships).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertUdyogInternship = z.infer<typeof insertUdyogInternshipSchema>;
+export type UdyogInternship = typeof udyogInternships.$inferSelect;
+
+export const insertUdyogAssignmentSchema = createInsertSchema(udyogAssignments).omit({ id: true, createdAt: true });
+export type InsertUdyogAssignment = z.infer<typeof insertUdyogAssignmentSchema>;
+export type UdyogAssignment = typeof udyogAssignments.$inferSelect;
+
+export const insertUdyogTaskSchema = createInsertSchema(udyogTasks).omit({ id: true, createdAt: true });
+export type InsertUdyogTask = z.infer<typeof insertUdyogTaskSchema>;
+export type UdyogTask = typeof udyogTasks.$inferSelect;
+
+export const insertUdyogSubmissionSchema = createInsertSchema(udyogSubmissions).omit({ id: true, submittedAt: true });
+export type InsertUdyogSubmission = z.infer<typeof insertUdyogSubmissionSchema>;
+export type UdyogSubmission = typeof udyogSubmissions.$inferSelect;
+
+export type UdyogCertificate = typeof udyogCertificates.$inferSelect;
+export type UdyogSkillAssessment = typeof udyogSkillAssessments.$inferSelect;
+
 // ============ GURU ADMIN TABLES ============
 
 export const guruAdminUsers = pgTable("guru_admin_users", {
