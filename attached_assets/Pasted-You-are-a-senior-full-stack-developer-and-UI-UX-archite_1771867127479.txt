@@ -1,0 +1,127 @@
+You are a senior full-stack developer and UI/UX architect.
+
+Project Context:
+This is part of the “Our Shiksha” ecosystem.
+DO NOT modify or edit:
+- Udyog module
+- Internship module
+- AI Usha Mentor module
+- Any existing global layout or routing
+- Navbar structure
+- Footer structure
+
+Your task:
+Create ONLY the Course Catalog page with premium UI and intelligent layout.
+
+----------------------------------------
+PAGE NAME:
+CourseCatalog.jsx (or CourseCatalog.tsx)
+
+----------------------------------------
+THEME:
+Dark premium futuristic AI theme.
+
+Color Palette:
+Primary Background: #0B1D3A
+Card Background: rgba(255,255,255,0.05)
+Accent 1: #4F46E5
+Accent 2: #00F5FF
+Highlight: #F59E0B
+Success: #10B981
+
+Use glassmorphism styling and subtle glow effects.
+
+----------------------------------------
+PAGE STRUCTURE:
+
+1. Header Section
+- Large centered search bar
+- Placeholder: "Search skills, tools, careers..."
+- AI-style glow border
+- Voice icon button (UI only, no backend logic)
+
+2. Category Filter Pills (horizontal scrollable)
+- All
+- AI & Data
+- Web Development
+- Mechanical
+- Finance
+- Career Skills
+- Internship Prep
+
+Active pill should have glowing border.
+
+3. Main Layout:
+Two-column layout:
+
+LEFT SIDEBAR (fixed width)
+Filters:
+- Skill Level (Beginner / Intermediate / Advanced)
+- Duration (Short / Medium / Long)
+- Rating (4+ / 3+)
+- Price (Free / Premium)
+- Includes Internship (toggle)
+- Includes Certificate (toggle)
+
+RIGHT SIDE:
+Responsive course grid:
+- 3 columns desktop
+- 2 columns tablet
+- 1 column mobile
+
+----------------------------------------
+COURSE CARD DESIGN:
+
+Each card must include:
+
+- Thumbnail image
+- Category badge (top-left corner)
+- Course title
+- Short description (2 lines max)
+- Skill level badge
+- Duration text
+- Rating stars
+- AI Match Percentage (example: "92% Match for You")
+
+Card style:
+- Rounded corners (16px)
+- Subtle border glow on hover
+- Slight lift animation on hover
+- Smooth transition effects
+
+----------------------------------------
+MOCK DATA:
+Create 8-12 mock courses with realistic content.
+Do NOT connect to backend.
+Use static array.
+
+----------------------------------------
+RESPONSIVE REQUIREMENTS:
+- Fully responsive
+- Mobile filter panel should open as slide-up modal
+- Sticky search bar on mobile
+
+----------------------------------------
+ANIMATION:
+- Smooth fade-in for cards
+- Hover scaling effect
+- Animated counter for AI match percentage
+
+----------------------------------------
+IMPORTANT:
+- Do NOT change routing system
+- Do NOT touch Udyog code
+- Do NOT touch Internship code
+- Do NOT modify AI Usha component
+- Keep this page isolated and modular
+
+----------------------------------------
+CODE QUALITY:
+- Clean component structure
+- Reusable components (CourseCard, FilterSidebar, SearchBar)
+- Proper Tailwind CSS usage (if project uses Tailwind)
+- Clean CSS modules if not Tailwind
+- No unnecessary dependencies
+
+Deliver:
+Full complete production-ready page code.
