@@ -64,6 +64,7 @@ import UdyogLanding from "@/pages/UdyogLanding";
 import UdyogAssessment from "@/pages/UdyogAssessment";
 import UdyogDashboard from "@/pages/UdyogDashboard";
 import UdyogJobs from "@/pages/UdyogJobs";
+import UdyogHub from "@/pages/UdyogHub";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -157,6 +158,10 @@ function ProtectedUdyogDashboard() {
   return <ProtectedRoute><UdyogDashboard /></ProtectedRoute>;
 }
 
+function ProtectedUdyogHub() {
+  return <ProtectedRoute><UdyogHub /></ProtectedRoute>;
+}
+
 function GuruPage({ component: Component }: { component: React.ComponentType }) {
   return <GuruLayout><Component /></GuruLayout>;
 }
@@ -246,6 +251,7 @@ function Router() {
       <Route path="/shishya/profile" component={ProtectedProfilePage} />
       <Route path="/shishya/profile/neon-portfolio" component={ProtectedNeonPortfolioPreview} />
       <Route path="/shishya/udyog/assess" component={ProtectedUdyogAssessment} />
+      <Route path="/shishya/udyog/hub" component={ProtectedUdyogHub} />
       <Route path="/shishya/udyog/dashboard" component={ProtectedUdyogDashboard} />
       
       <Route component={NotFound} />
