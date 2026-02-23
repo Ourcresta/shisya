@@ -9,6 +9,7 @@ const navLinks = [
 
 const udyogDropdownItems = [
   { label: "Internship", href: "/shishya/udyog" },
+  { label: "Jobs", href: "/shishya/udyog/jobs" },
 ];
 
 const moreDropdownItems = [

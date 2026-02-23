@@ -40,6 +40,7 @@ const menuItems = [
   { title: "Labs", url: "/guru/labs", icon: FlaskConical },
   { title: "Projects", url: "/guru/projects", icon: FolderKanban },
   { title: "Internships", url: "/guru/internships", icon: Briefcase },
+  { title: "Jobs", url: "/guru/jobs", icon: Briefcase },
   { title: "Pricing", url: "/guru/pricing", icon: CreditCard },
   { title: "Settings", url: "/guru/settings", icon: Settings },
 ];

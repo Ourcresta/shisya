@@ -1124,6 +1124,116 @@ udyogRouter.get("/my-applications", requireAuth as any, async (req: Authenticate
   }
 });
 
+// ============ ADMIN JOB MANAGEMENT ============
+
+// GET /admin/jobs - List all job postings (admin view)
+udyogRouter.get("/admin/jobs", async (req: Request, res: Response) => {
+  try {
+    const jobs = await db.select({
+      job: udyogJobs,
+      hr: {
+        name: udyogHrUsers.name,
+        companyName: udyogHrUsers.companyName,
+      },
+    }).from(udyogJobs)
+      .leftJoin(udyogHrUsers, eq(udyogJobs.hrId, udyogHrUsers.id))
+      .orderBy(desc(udyogJobs.createdAt));
+    res.json(jobs);
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching jobs:", error);
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
+// POST /admin/jobs - Create a job posting (admin)
+udyogRouter.post("/admin/jobs", async (req: Request, res: Response) => {
+  try {
+    const { title, description, requiredSkills, internshipRequired, minSkillScore, location, salaryRange, jobType, status, deadline, hrId } = req.body;
+    const [job] = await db.insert(udyogJobs).values({
+      hrId: hrId || 1,
+      title,
+      description,
+      requiredSkills: requiredSkills || null,
+      internshipRequired: internshipRequired || false,
+      minSkillScore: minSkillScore || 0,
+      location: location || null,
+      salaryRange: salaryRange || null,
+      jobType: jobType || "full-time",
+      status: status || "active",
+      deadline: deadline ? new Date(deadline) : null,
+    }).returning();
+    res.json(job);
+  } catch (error) {
+    console.error("[Udyog Admin] Error creating job:", error);
+    res.status(500).json({ error: "Failed to create job" });
+  }
+});
+
+// PUT /admin/jobs/:id - Update a job posting (admin)
+udyogRouter.put("/admin/jobs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const [updated] = await db.update(udyogJobs)
+      .set({ ...req.body, updatedAt: new Date() })
+      .where(eq(udyogJobs.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating job:", error);
+    res.status(500).json({ error: "Failed to update job" });
+  }
+});
+
+// DELETE /admin/jobs/:id - Delete a job posting (admin)
+udyogRouter.delete("/admin/jobs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.delete(udyogJobs).where(eq(udyogJobs.id, id));
+    res.json({ message: "Job deleted successfully" });
+  } catch (error) {
+    console.error("[Udyog Admin] Error deleting job:", error);
+    res.status(500).json({ error: "Failed to delete job" });
+  }
+});
+
+// GET /admin/jobs/:jobId/applications - Get all applications for a job (admin)
+udyogRouter.get("/admin/jobs/:jobId/applications", async (req: Request, res: Response) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const applications = await db.select({
+      application: udyogApplications,
+    }).from(udyogApplications)
+      .where(eq(udyogApplications.jobId, jobId))
+      .orderBy(desc(udyogApplications.appliedAt));
+    res.json(applications.map(a => a.application));
+  } catch (error) {
+    console.error("[Udyog Admin] Error fetching applications:", error);
+    res.status(500).json({ error: "Failed to fetch applications" });
+  }
+});
+
+// PATCH /admin/applications/:id/status - Update application status (admin)
+udyogRouter.patch("/admin/applications/:id/status", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { status } = req.body;
+    const [updated] = await db.update(udyogApplications)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(udyogApplications.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating application:", error);
+    res.status(500).json({ error: "Failed to update application" });
+  }
+});
+
 // ============ ADMIN HR MANAGEMENT ============
 
 // GET /admin/hr-users - List all HR user registrations
