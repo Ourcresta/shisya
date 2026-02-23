@@ -53,6 +53,7 @@ import {
   FileCheck,
   CheckCircle,
   XCircle,
+  Eye,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -138,6 +139,8 @@ export default function GuruInternships() {
   const [selectedInternshipId, setSelectedInternshipId] = useState<string>("");
   const [taskForm, setTaskForm] = useState<TaskForm>(defaultTaskForm);
 
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewingInternship, setViewingInternship] = useState<Internship | null>(null);
   const [reviewingSubmission, setReviewingSubmission] = useState<Submission | null>(null);
   const [reviewFeedback, setReviewFeedback] = useState("");
 
@@ -370,6 +373,14 @@ export default function GuruInternships() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => { setViewingInternship(internship); setViewOpen(true); }}
+                              data-testid={`button-view-internship-${internship.id}`}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -722,6 +733,72 @@ export default function GuruInternships() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle data-testid="text-view-internship-dialog-title">Internship Details</DialogTitle>
+            <DialogDescription>Full details of the selected internship</DialogDescription>
+          </DialogHeader>
+          {viewingInternship && (
+            <div className="space-y-4" data-testid="view-internship-details">
+              <div>
+                <Label className="text-muted-foreground text-xs">Title</Label>
+                <p className="mt-1 font-medium" data-testid="view-internship-title">{viewingInternship.title}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground text-xs">Description</Label>
+                <p className="mt-1 text-sm whitespace-pre-wrap rounded-lg border p-3" data-testid="view-internship-description">{viewingInternship.description}</p>
+              </div>
+              {viewingInternship.shortDescription && (
+                <div>
+                  <Label className="text-muted-foreground text-xs">Short Description</Label>
+                  <p className="mt-1 text-sm" data-testid="view-internship-short-desc">{viewingInternship.shortDescription}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Skill Level</Label>
+                  <div className="mt-1">
+                    <Badge variant="outline" className="capitalize" data-testid="view-internship-skill-level">{viewingInternship.skillLevel}</Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Domain</Label>
+                  <p className="mt-1 text-sm" data-testid="view-internship-domain">{viewingInternship.domain || "-"}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Duration</Label>
+                  <p className="mt-1 text-sm" data-testid="view-internship-duration">{viewingInternship.duration}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Status</Label>
+                  <div className="mt-1">
+                    <Badge
+                      variant={viewingInternship.isActive ? "default" : "secondary"}
+                      className={viewingInternship.isActive ? "bg-green-500/10 text-green-700 dark:text-green-400 no-default-hover-elevate no-default-active-elevate" : ""}
+                      data-testid="view-internship-status"
+                    >
+                      {viewingInternship.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label className="text-muted-foreground text-xs">Created</Label>
+                <p className="mt-1 text-sm" data-testid="view-internship-created">{new Date(viewingInternship.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewOpen(false)} data-testid="button-close-view-internship">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!reviewingSubmission} onOpenChange={(open) => { if (!open) { setReviewingSubmission(null); setReviewFeedback(""); } }}>
         <DialogContent className="max-w-lg">

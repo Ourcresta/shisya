@@ -1,11 +1,19 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Code, Award, ArrowRight, Rocket, Users, Trophy, Sparkles, ChevronRight, Clock, Target, Zap } from "lucide-react";
+import { Briefcase, Code, Award, ArrowRight, Rocket, Users, Trophy, Sparkles, ChevronRight, Clock, Target, Zap, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const stats = [
   { label: "500+ Projects", icon: Briefcase },
@@ -76,6 +84,7 @@ const itemVariants = {
 export default function UdyogLanding() {
   const { user } = useAuth();
   const ctaHref = getCtaHref(user);
+  const [viewingInternship, setViewingInternship] = useState<any | null>(null);
 
   const { data: internships, isLoading } = useQuery<any[]>({
     queryKey: ["/api/udyog/internships"],
@@ -363,11 +372,37 @@ export default function UdyogLanding() {
                     )}
                   </div>
                   {internship.duration && (
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
                       <Clock className="w-4 h-4" />
                       <span>{internship.duration}</span>
                     </div>
                   )}
+                  {internship.shortDescription && (
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{internship.shortDescription}</p>
+                  )}
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                      onClick={() => setViewingInternship(internship)}
+                      data-testid={`button-view-details-${internship.id}`}
+                    >
+                      <Eye className="w-4 h-4 mr-1.5" />
+                      View Details
+                    </Button>
+                    <Link href={ctaHref}>
+                      <Button
+                        size="sm"
+                        className="ml-auto text-white border-0"
+                        style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                        data-testid={`button-apply-${internship.id}`}
+                      >
+                        Apply Now
+                        <ArrowRight className="w-4 h-4 ml-1.5" />
+                      </Button>
+                    </Link>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
@@ -423,6 +458,54 @@ export default function UdyogLanding() {
           </Link>
         </motion.div>
       </section>
+
+      <Dialog open={!!viewingInternship} onOpenChange={(open) => { if (!open) setViewingInternship(null); }}>
+        <DialogContent className="max-w-lg border-white/10 text-white" style={{ background: "linear-gradient(180deg, #0f1629 0%, #111827 100%)" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white" data-testid="text-view-detail-title">
+              {viewingInternship?.title}
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">Internship Program Details</DialogDescription>
+          </DialogHeader>
+          {viewingInternship && (
+            <div className="space-y-4">
+              <p className="text-gray-300 text-sm whitespace-pre-wrap" data-testid="text-view-detail-description">
+                {viewingInternship.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {viewingInternship.skillLevel && (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[viewingInternship.skillLevel?.toLowerCase()] || "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"}`}>
+                    {viewingInternship.skillLevel}
+                  </span>
+                )}
+                {viewingInternship.domain && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-300 border border-white/10">
+                    {viewingInternship.domain}
+                  </span>
+                )}
+              </div>
+              {viewingInternship.duration && (
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Clock className="w-4 h-4" />
+                  <span>{viewingInternship.duration}</span>
+                </div>
+              )}
+              <div className="pt-3 border-t border-white/10">
+                <Link href={ctaHref}>
+                  <Button
+                    className="w-full text-white border-0"
+                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    data-testid="button-apply-from-detail"
+                  >
+                    Apply Now
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <style>{`
         @keyframes gradientShift {
