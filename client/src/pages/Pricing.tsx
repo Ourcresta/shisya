@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/contexts/AuthContext";
-import { Header } from "@/components/layout/Header";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Gift, Zap, Crown, Building2, Star, Coins, CreditCard, DollarSign,
@@ -126,7 +126,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <LandingNavbar />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 md:py-24">
