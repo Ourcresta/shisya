@@ -1,0 +1,156 @@
+You are a Senior UI/UX Architect and Frontend Design System Expert.
+
+Project Context:
+This is the "Our Shiksha" learning platform.
+The platform already has:
+- Homepage
+- Course Catalog
+- Udyog (Internship)
+- AI Usha Mentor
+- Navbar and Footer
+
+IMPORTANT RULES:
+- DO NOT modify Udyog module.
+- DO NOT modify Internship module.
+- DO NOT modify AI Usha Mentor functionality.
+- DO NOT change routing.
+- DO NOT change backend logic.
+- DO NOT remove existing components.
+
+Your task is ONLY to improve theme consistency, visual depth, and design polish across:
+- Homepage
+- Course Catalog
+- Shared UI components (cards, buttons, filters, search)
+
+---------------------------------------------------------
+OBJECTIVE:
+Upgrade the theme from 8.5/10 to premium 9.5/10 level.
+
+---------------------------------------------------------
+PART 1 — STANDARDIZE COLOR SYSTEM
+
+Create a centralized design token system:
+
+Primary Background: #0B1D3A
+Secondary Background: #0F172A
+Card Background: rgba(255,255,255,0.05)
+Primary Accent (Teal): #00F5FF
+Secondary Accent (Purple): #7C3AED
+Success: #10B981
+Warning: #F59E0B
+Danger: #EF4444
+Text Primary: #FFFFFF
+Text Secondary: #94A3B8
+
+Ensure:
+- Teal is used for primary CTA and highlights.
+- Purple only for secondary CTA.
+- Green only for success indicators.
+- Yellow only for warnings.
+- Remove random accent color usage.
+
+---------------------------------------------------------
+PART 2 — IMPROVE BACKGROUND DEPTH
+
+Homepage and Course Catalog:
+
+Add subtle radial gradient behind content sections:
+
+Example:
+background: radial-gradient(circle at center, rgba(0,255,255,0.08), transparent 70%);
+
+Add:
+- Soft layered gradients
+- Subtle glow behind hero sections
+- Very light background particles (CSS only, no heavy animation libraries)
+
+The goal:
+Make the page feel immersive, not flat.
+
+---------------------------------------------------------
+PART 3 — CARD SYSTEM IMPROVEMENT
+
+Standardize all cards:
+
+- Border radius: 16px
+- Glass effect background
+- Subtle border:
+  border: 1px solid rgba(255,255,255,0.08);
+
+Hover effect:
+- Slight lift (translateY -4px)
+- Soft glow border using primary accent
+- Smooth transition 0.3s ease
+
+Ensure ALL cards behave consistently.
+
+---------------------------------------------------------
+PART 4 — BUTTON CONSISTENCY
+
+Primary Button:
+- Teal gradient
+- Glow on hover
+- Slight scale (1.02)
+
+Secondary Button:
+- Purple gradient
+- Subtle glow
+
+Outline Button:
+- Transparent background
+- Teal border
+- Glow on hover
+
+Remove inconsistent button styles.
+
+---------------------------------------------------------
+PART 5 — SEARCH BAR ENHANCEMENT
+
+For Course Catalog search bar:
+
+- Add neon glow shadow
+- Smooth focus animation
+- Increase border radius
+- Ensure consistent spacing
+
+Make it feel AI-powered.
+
+---------------------------------------------------------
+PART 6 — TYPOGRAPHY POLISH
+
+Headings:
+- Strong weight (600-700)
+- Slight letter spacing
+
+Body:
+- Softer secondary color
+- Increase line-height for readability
+
+Ensure visual hierarchy between:
+- Page Title
+- Section Title
+- Card Title
+- Body Text
+
+---------------------------------------------------------
+PART 7 — DO NOT MODIFY:
+
+- Udyog layout
+- Internship logic
+- AI Usha component logic
+- Navbar structure
+- Backend APIs
+
+Only improve visual consistency and polish.
+
+---------------------------------------------------------
+DELIVERABLE:
+
+1. Explain what changes were made.
+2. Show updated CSS / Tailwind adjustments.
+3. Keep components modular.
+4. Keep code clean and production-ready.
+5. No unnecessary dependencies.
+
+Goal:
+Make the platform feel like a premium AI-powered EdTech startup.

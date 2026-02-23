@@ -2,10 +2,8 @@ import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Header } from "@/components/layout/Header";
 import { LevelBadge } from "@/components/ui/level-badge";
 import {
   Accordion,
@@ -41,33 +39,26 @@ import ushaAvatarImage from "@assets/image_1767697725032.png";
 import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
+const C = {
+  bgPrimary: "#0B1D3A",
+  bgSecondary: "#0F172A",
+  cardBg: "rgba(255,255,255,0.05)",
+  cardBorder: "rgba(255,255,255,0.08)",
+  teal: "#00F5FF",
+  purple: "#7C3AED",
+  success: "#10B981",
+  warning: "#F59E0B",
+  danger: "#EF4444",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#94A3B8",
+};
 
 const journeySteps = [
-  {
-    icon: BookOpen,
-    title: "Learn",
-    description: "Structured lessons designed for clarity",
-  },
-  {
-    icon: FlaskConical,
-    title: "Practice",
-    description: "Guided labs to build real skills",
-  },
-  {
-    icon: FolderKanban,
-    title: "Build",
-    description: "Industry-aligned projects",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "Validate",
-    description: "Tests and assessments",
-  },
-  {
-    icon: Award,
-    title: "Prove",
-    description: "Certificates and portfolio",
-  },
+  { icon: BookOpen, title: "Learn", description: "Structured lessons designed for clarity" },
+  { icon: FlaskConical, title: "Practice", description: "Guided labs to build real skills" },
+  { icon: FolderKanban, title: "Build", description: "Industry-aligned projects" },
+  { icon: ClipboardCheck, title: "Validate", description: "Tests and assessments" },
+  { icon: Award, title: "Prove", description: "Certificates and portfolio" },
 ];
 
 const features = [
@@ -141,30 +132,91 @@ const faqItems = [
   },
 ];
 
+function GlassCard({
+  children,
+  className = "",
+  hover = true,
+  glow = false,
+  style,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  hover?: boolean;
+  glow?: boolean;
+  style?: React.CSSProperties;
+  [key: string]: any;
+}) {
+  return (
+    <div
+      className={`rounded-2xl backdrop-blur-sm transition-all duration-300 ${
+        hover ? "hover:-translate-y-1 hover:shadow-[0_8px_30px_-8px_rgba(0,245,255,0.2)]" : ""
+      } ${className}`}
+      style={{
+        background: C.cardBg,
+        border: `1px solid ${C.cardBorder}`,
+        ...(hover ? {} : {}),
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (hover) {
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (hover) {
+          (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
+        }
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionGlow({ position = "center", color = C.teal }: { position?: string; color?: string }) {
+  const posStyles: Record<string, React.CSSProperties> = {
+    center: { top: "50%", left: "50%", transform: "translate(-50%,-50%)" },
+    "top-right": { top: "0", right: "0" },
+    "bottom-left": { bottom: "0", left: "0" },
+    "top-left": { top: "0", left: "10%" },
+  };
+  return (
+    <div
+      className="absolute w-[500px] h-[500px] rounded-full blur-[150px] opacity-[0.07] pointer-events-none"
+      style={{ background: `radial-gradient(circle, ${color}, transparent)`, ...posStyles[position] }}
+    />
+  );
+}
+
 function HeroSection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10 dark:from-transparent dark:via-transparent dark:to-transparent py-16 md:py-24">
-      {/* Dark mode radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_60%)] opacity-0 dark:opacity-100" />
-      
-      {/* Light mode gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50 dark:opacity-0" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
+    <section className="relative overflow-hidden py-20 md:py-28">
+      <SectionGlow position="top-right" color={C.teal} />
+      <SectionGlow position="bottom-left" color={C.purple} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Text content */}
           <div className="text-center lg:text-left space-y-6">
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight dark:neon-gradient-text"
-              style={{ fontFamily: "var(--font-display)" }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 60%, ${C.purple} 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.02em",
+              }}
               data-testid="text-hero-headline"
             >
               Learn. Practice. Prove.
             </h1>
             <p
-              className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0"
+              className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0"
+              style={{ color: C.textSecondary, lineHeight: "1.8" }}
               data-testid="text-hero-subheading"
             >
               OurShiksha is a complete skill-learning platform where students learn concepts,
@@ -174,52 +226,102 @@ function HeroSection() {
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               {user ? (
                 <Link href="/shishya/dashboard">
-                  <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-go-to-shishya">
+                  <button
+                    className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                    style={{
+                      background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                      color: C.bgPrimary,
+                      boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                    }}
+                    data-testid="button-go-to-shishya"
+                  >
                     Go to Shishya
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </Link>
               ) : (
                 <>
                   <Link href="/login">
-                    <Button size="lg" className="min-w-[200px] dark:shadow-neon dark:hover:shadow-[0_6px_25px_-5px_rgba(34,211,238,0.5)]" data-testid="button-hero-login">
-                      <LogIn className="w-5 h-5 mr-2" />
+                    <button
+                      className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      style={{
+                        background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                        color: C.bgPrimary,
+                        boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                      }}
+                      data-testid="button-hero-login"
+                    >
+                      <LogIn className="w-5 h-5" />
                       Login to Shishya
-                    </Button>
+                    </button>
                   </Link>
                   <Link href="/courses">
-                    <Button size="lg" variant="outline" className="min-w-[200px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]" data-testid="button-hero-explore">
+                    <button
+                      className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      style={{
+                        background: "transparent",
+                        color: C.teal,
+                        border: `1px solid rgba(0,245,255,0.3)`,
+                        boxShadow: "none",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(0,245,255,0.2)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.6)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+                      }}
+                      data-testid="button-hero-explore"
+                    >
                       Explore Courses
-                      <ChevronRight className="w-5 h-5 ml-2" />
-                    </Button>
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
                   </Link>
                 </>
               )}
             </div>
           </div>
-          
-          {/* Right side - Usha Avatar */}
+
           <div className="flex flex-col items-center justify-center">
-            <div className="relative w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 p-1 shadow-2xl dark:shadow-[0_0_40px_-5px_rgba(34,211,238,0.5)] animate-float">
-              <img 
-                src={ushaAvatarImage} 
-                alt="Usha AI Tutor" 
-                className="w-full h-full rounded-full object-cover border-4 border-background"
+            <div
+              className="relative w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60 rounded-full p-1 animate-float"
+              style={{
+                background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.teal})`,
+                boxShadow: `0 0 50px -10px rgba(0,245,255,0.4)`,
+              }}
+            >
+              <img
+                src={ushaAvatarImage}
+                alt="Usha AI Tutor"
+                className="w-full h-full rounded-full object-cover"
+                style={{ border: `4px solid ${C.bgPrimary}` }}
                 data-testid="img-usha-avatar-hero"
               />
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center border-4 border-background shadow-lg">
+              <div
+                className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, ${C.success}, #059669)`,
+                  border: `4px solid ${C.bgPrimary}`,
+                }}
+              >
                 <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
             </div>
             <div className="mt-6 text-center">
-              <p 
-                className="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-primary to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                style={{ fontFamily: "var(--font-display)" }}
+              <p
+                className="text-xl md:text-2xl font-bold"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
                 data-testid="text-meet-usha"
               >
                 Meet Usha
               </p>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">Your AI Learning Companion</p>
+              <p className="text-sm md:text-base mt-1" style={{ color: C.textSecondary }}>Your AI Learning Companion</p>
             </div>
           </div>
         </div>
@@ -230,41 +332,59 @@ function HeroSection() {
 
 function JourneySection() {
   return (
-    <section className="relative py-16 md:py-20 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent dark:via-cyan-500/[0.06]" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="center" color={C.teal} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.01em",
+            }}
             data-testid="text-journey-title"
           >
             How OurShiksha Works
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
             Your complete learning journey in 5 simple steps
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {journeySteps.map((step, index) => (
-            <div
+            <GlassCard
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 dark:from-card/80 dark:to-card/40 border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon"
+              className="relative flex flex-col items-center text-center p-6"
               data-testid={`card-journey-step-${index + 1}`}
             >
-              <div className="absolute -top-3 left-4 w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-sm font-bold shadow-lg dark:shadow-neon">
+              <div
+                className="absolute -top-3 left-4 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                style={{
+                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                  color: C.bgPrimary,
+                  boxShadow: `0 0 12px rgba(0,245,255,0.4)`,
+                }}
+              >
                 {index + 1}
               </div>
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 flex items-center justify-center mb-4 border border-primary/20">
-                <step.icon className="w-7 h-7 text-primary" />
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                style={{
+                  background: "rgba(0,245,255,0.1)",
+                  border: "1px solid rgba(0,245,255,0.2)",
+                }}
+              >
+                <step.icon className="w-7 h-7" style={{ color: C.teal }} />
               </div>
-              <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-display)" }}>
+              <h3 className="text-lg font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
                 {step.title}
               </h3>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
-            </div>
+              <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
+            </GlassCard>
           ))}
         </div>
       </div>
@@ -273,54 +393,60 @@ function JourneySection() {
 }
 
 function FeaturesSection() {
-  const featureGradients = [
-    "from-cyan-500/20 to-blue-500/20 dark:from-cyan-500/30 dark:to-blue-500/10",
-    "from-purple-500/20 to-pink-500/20 dark:from-purple-500/30 dark:to-pink-500/10",
-    "from-green-500/20 to-emerald-500/20 dark:from-green-500/30 dark:to-emerald-500/10",
-    "from-orange-500/20 to-amber-500/20 dark:from-orange-500/30 dark:to-amber-500/10",
-    "from-blue-500/20 to-indigo-500/20 dark:from-blue-500/30 dark:to-indigo-500/10",
-    "from-rose-500/20 to-red-500/20 dark:from-rose-500/30 dark:to-red-500/10",
-  ];
+  const iconColors = [C.teal, C.purple, C.success, C.warning, C.teal, C.purple];
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-muted/20 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* Decorative gradient orbs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="top-right" color={C.purple} />
+      <SectionGlow position="bottom-left" color={C.teal} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
             data-testid="text-features-title"
           >
             What Students Get
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
             Everything you need to master new skills and advance your career
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={feature.title}
-              className={`relative p-6 rounded-2xl bg-gradient-to-br ${featureGradients[index % featureGradients.length]} border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon group`}
-              data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-6 h-6 text-primary" />
+          {features.map((feature, index) => {
+            const accent = iconColors[index % iconColors.length];
+            return (
+              <GlassCard
+                key={feature.title}
+                className="p-6"
+                data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+                    style={{
+                      background: `${accent}15`,
+                      border: `1px solid ${accent}30`,
+                    }}
+                  >
+                    <feature.icon className="w-6 h-6" style={{ color: accent }} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm" style={{ color: C.textSecondary }}>{feature.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              </GlassCard>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -333,36 +459,61 @@ function CoursePreviewCard({ course }: { course: Course }) {
   const rating = (course as any).rating ?? 0;
 
   return (
-    <Card className="flex flex-col h-full hover-elevate transition-all duration-200" data-testid={`card-preview-course-${course.id}`}>
-      <div className="relative aspect-video rounded-t-md overflow-hidden">
+    <div
+      className="flex flex-col h-full rounded-2xl overflow-hidden backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
+      style={{
+        background: C.cardBg,
+        border: `1px solid ${C.cardBorder}`,
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 30px -8px rgba(0,245,255,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+      }}
+      data-testid={`card-preview-course-${course.id}`}
+    >
+      <div className="relative aspect-video overflow-hidden">
         {hasThumbnail ? (
           <img
             src={course.thumbnailUrl!}
             alt={course.title}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <BookOpen className="w-7 h-7 text-primary" />
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: `linear-gradient(135deg, rgba(0,245,255,0.1), rgba(124,58,237,0.08))` }}
+          >
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.25)" }}
+            >
+              <BookOpen className="w-7 h-7" style={{ color: C.teal }} />
             </div>
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
         {course.category && (
           <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-foreground border-0 text-xs">
+            <span
+              className="px-2.5 py-1 rounded-full text-xs font-medium"
+              style={{ background: `${C.teal}CC`, color: C.bgPrimary, backdropFilter: "blur(8px)" }}
+            >
               {course.category}
-            </Badge>
+            </span>
           </div>
         )}
         <div className="absolute top-3 right-3">
           <LevelBadge level={course.level} />
         </div>
       </div>
-      <CardHeader className="pb-1 gap-1">
+      <div className="p-4 flex-1 flex flex-col gap-2">
         <h3
-          className="text-base font-semibold leading-snug line-clamp-2"
+          className="text-base font-semibold leading-snug line-clamp-2 text-white"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {course.title}
@@ -370,42 +521,51 @@ function CoursePreviewCard({ course }: { course: Course }) {
         {rating > 0 && (
           <div className="flex items-center gap-1">
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span className="text-xs font-medium text-muted-foreground">{rating.toFixed(1)}</span>
+            <span className="text-xs font-medium" style={{ color: C.textSecondary }}>{rating.toFixed(1)}</span>
           </div>
         )}
-      </CardHeader>
-      <CardContent className="flex-1">
         {course.description && (
-          <p className="text-sm text-muted-foreground line-clamp-3">{course.description}</p>
+          <p className="text-sm line-clamp-3" style={{ color: C.textSecondary }}>{course.description}</p>
         )}
-      </CardContent>
-      <CardFooter className="pt-2">
-        <Link href={`/courses/${course.id}`} className="w-full">
-          <Button variant="outline" className="w-full" data-testid={`button-view-course-${course.id}`}>
+      </div>
+      <div className="p-4 pt-0">
+        <Link href={`/courses/${course.id}`} className="block">
+          <button
+            className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+            style={{
+              background: "transparent",
+              color: C.teal,
+              border: `1px solid rgba(0,245,255,0.3)`,
+            }}
+            data-testid={`button-view-course-${course.id}`}
+          >
             View Course
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </Link>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 function CoursePreviewSkeleton() {
   return (
-    <Card className="flex flex-col h-full">
-      <Skeleton className="aspect-video rounded-t-lg rounded-b-none" />
-      <CardHeader className="pb-2">
-        <Skeleton className="h-6 w-3/4" />
-      </CardHeader>
-      <CardContent className="flex-1 space-y-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/3" />
-      </CardContent>
-      <CardFooter className="pt-2">
-        <Skeleton className="h-10 w-full rounded-lg" />
-      </CardFooter>
-    </Card>
+    <div
+      className="flex flex-col h-full rounded-2xl overflow-hidden animate-pulse"
+      style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
+    >
+      <div className="aspect-video" style={{ background: "rgba(255,255,255,0.06)" }} />
+      <div className="p-4 space-y-3 flex-1">
+        <div className="h-5 rounded" style={{ background: "rgba(255,255,255,0.08)", width: "75%" }} />
+        <div className="space-y-2">
+          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "100%" }} />
+          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "60%" }} />
+        </div>
+      </div>
+      <div className="p-4 pt-0">
+        <div className="h-10 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }} />
+      </div>
+    </div>
   );
 }
 
@@ -417,30 +577,34 @@ function CoursePreviewSection() {
   const previewCourses = courses?.slice(0, 3) || [];
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-background to-muted/20 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* Gradient mesh background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.1),transparent)] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(34,211,238,0.15),transparent)]" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="center" color={C.teal} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
             data-testid="text-preview-title"
           >
             Featured Courses
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
             Start your learning journey with our carefully crafted courses
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => <CoursePreviewSkeleton key={i} />)
           ) : previewCourses.length > 0 ? (
             previewCourses.map((course) => <CoursePreviewCard key={course.id} course={course} />)
           ) : (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
+            <div className="col-span-full text-center py-12" style={{ color: C.textSecondary }}>
               No courses available yet. Check back soon!
             </div>
           )}
@@ -448,10 +612,18 @@ function CoursePreviewSection() {
         {previewCourses.length > 0 && (
           <div className="text-center">
             <Link href="/courses">
-              <Button variant="outline" size="lg" className="dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-neon" data-testid="button-view-all-courses">
+              <button
+                className="px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 mx-auto hover:scale-[1.02]"
+                style={{
+                  background: "transparent",
+                  color: C.teal,
+                  border: `1px solid rgba(0,245,255,0.3)`,
+                }}
+                data-testid="button-view-all-courses"
+              >
                 View All Courses
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </Link>
           </div>
         )}
@@ -462,45 +634,55 @@ function CoursePreviewSection() {
 
 function RewardsSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-slate-900/50 via-background to-cyan-950/30 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* Neon gradient orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-cyan-400/10 via-teal-500/5 to-transparent rounded-full blur-3xl" />
-      <div className="absolute top-1/2 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-3xl" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="top-left" color={C.teal} />
+      <SectionGlow position="top-right" color={C.purple} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-teal-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.teal}, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
             data-testid="text-rewards-title"
           >
             Earn While You Learn
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto dark:text-slate-400">
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
             Complete courses, earn points, and unlock more learning opportunities
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {rewardsFlow.map((step, index) => (
-            <div
+            <GlassCard
               key={step.title}
-              className="relative flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-cyan-950/20 dark:from-slate-900/80 dark:via-slate-950/60 dark:to-cyan-950/30 border border-cyan-500/20 dark:border-cyan-400/30 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-cyan-400/50 hover:shadow-lg dark:hover:shadow-[0_4px_25px_-5px_rgba(34,211,238,0.4)]"
+              className="relative flex flex-col items-center text-center p-6"
               data-testid={`card-reward-step-${index + 1}`}
             >
               {index < rewardsFlow.length - 1 && (
                 <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <ChevronRight className="w-6 h-6 text-cyan-400/60 dark:text-cyan-400/80 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+                  <ChevronRight className="w-6 h-6" style={{ color: `${C.teal}99` }} />
                 </div>
               )}
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-teal-500/10 dark:from-cyan-400/40 dark:via-blue-500/30 dark:to-teal-500/20 flex items-center justify-center mb-4 border border-cyan-400/40 dark:border-cyan-400/50 shadow-lg dark:shadow-[0_0_20px_-5px_rgba(34,211,238,0.4)]">
-                <step.icon className="w-7 h-7 text-cyan-600 dark:text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                style={{
+                  background: "rgba(0,245,255,0.1)",
+                  border: "1px solid rgba(0,245,255,0.25)",
+                  boxShadow: "0 0 20px -5px rgba(0,245,255,0.2)",
+                }}
+              >
+                <step.icon className="w-7 h-7" style={{ color: C.teal }} />
               </div>
-              <h3 className="text-lg font-semibold mb-2 dark:text-white" style={{ fontFamily: "var(--font-display)" }}>
+              <h3 className="text-lg font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
                 {step.title}
               </h3>
-              <p className="text-sm text-muted-foreground dark:text-slate-400">{step.description}</p>
-            </div>
+              <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
+            </GlassCard>
           ))}
         </div>
       </div>
@@ -510,57 +692,86 @@ function RewardsSection() {
 
 function AISection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background via-purple-500/5 to-background dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* AI-themed gradient orbs */}
-      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="top-right" color={C.purple} />
+      <SectionGlow position="bottom-left" color={C.teal} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h2
-              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-primary to-cyan-400 bg-clip-text text-transparent"
-              style={{ fontFamily: "var(--font-display)" }}
+              className="text-2xl md:text-3xl font-bold"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
               data-testid="text-ai-title"
             >
               Meet Usha, Your AI Learning Companion
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Usha is integrated into every lesson, lab, and project to help you learn effectively. 
+            <p className="text-lg" style={{ color: C.textSecondary, lineHeight: "1.8" }}>
+              Usha is integrated into every lesson, lab, and project to help you learn effectively.
               Get instant guidance without direct answers, promoting genuine understanding.
             </p>
             <div className="grid grid-cols-2 gap-4">
               {aiFeatures.map((feature) => (
-                <div key={feature.title} className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/5 border border-primary/20 transition-all duration-300 hover:border-primary/40" data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/30 to-purple-500/20 flex items-center justify-center flex-shrink-0 border border-primary/20">
-                    <feature.icon className="w-5 h-5 text-primary" />
+                <GlassCard
+                  key={feature.title}
+                  className="p-3"
+                  data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, rgba(0,245,255,0.15), rgba(124,58,237,0.1))`,
+                        border: "1px solid rgba(0,245,255,0.2)",
+                      }}
+                    >
+                      <feature.icon className="w-5 h-5" style={{ color: C.teal }} />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-white">{feature.title}</h4>
+                      <p className="text-xs" style={{ color: C.textSecondary }}>{feature.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-sm">{feature.title}</h4>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
-                  </div>
-                </div>
+                </GlassCard>
               ))}
             </div>
           </div>
           <div className="relative">
-            <div className="aspect-square max-w-md mx-auto rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-cyan-500/10 p-8 flex items-center justify-center border border-primary/20 dark:border-primary/30 backdrop-blur-sm">
-              <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary via-purple-500 to-cyan-400 flex items-center justify-center shadow-2xl overflow-hidden border-4 border-primary/40 ring-4 ring-primary/30 ring-offset-4 ring-offset-background dark:shadow-neon-lg animate-float">
-                <img 
-                  src={ushaAvatarImage} 
-                  alt="Usha AI Tutor" 
+            <GlassCard className="aspect-square max-w-md mx-auto p-8 flex items-center justify-center" hover={false}>
+              <div
+                className="relative w-48 h-48 md:w-56 md:h-56 rounded-full flex items-center justify-center overflow-hidden animate-float"
+                style={{
+                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.teal})`,
+                  boxShadow: `0 0 50px -10px rgba(0,245,255,0.4)`,
+                  border: `4px solid rgba(0,245,255,0.3)`,
+                }}
+              >
+                <img
+                  src={ushaAvatarImage}
+                  alt="Usha AI Tutor"
                   className="w-full h-full object-cover object-center scale-110"
                   data-testid="img-usha-avatar-landing"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/30 to-transparent pointer-events-none" />
               </div>
-              <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-background/90 backdrop-blur-md rounded-xl shadow-lg p-3 md:p-4 border border-primary/30 dark:shadow-neon">
-                <p className="text-sm md:text-base font-medium">Need help with this concept?</p>
-              </div>
-              <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-background/90 backdrop-blur-md rounded-xl shadow-lg p-3 md:p-4 border border-primary/30 dark:shadow-neon">
-                <p className="text-sm md:text-base text-muted-foreground">Ask me anything!</p>
-              </div>
-            </div>
+              <GlassCard
+                className="absolute top-4 right-4 md:top-8 md:right-8 p-3 md:p-4"
+                hover={false}
+              >
+                <p className="text-sm md:text-base font-medium text-white">Need help with this concept?</p>
+              </GlassCard>
+              <GlassCard
+                className="absolute bottom-4 left-4 md:bottom-8 md:left-8 p-3 md:p-4"
+                hover={false}
+              >
+                <p className="text-sm md:text-base" style={{ color: C.textSecondary }}>Ask me anything!</p>
+              </GlassCard>
+            </GlassCard>
           </div>
         </div>
       </div>
@@ -570,34 +781,40 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-primary/5 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-10 left-10 w-20 h-20 border border-primary/20 rounded-full" />
-      <div className="absolute bottom-20 right-20 w-32 h-32 border border-primary/10 rounded-full" />
-      
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="center" color={C.purple} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
             data-testid="text-testimonials-title"
           >
             What Our Students Say
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
             Hear from learners who have transformed their careers with OurShiksha
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
-            <div 
-              key={testimonial.name} 
-              className="relative p-6 rounded-2xl bg-gradient-to-br from-card to-card/80 dark:from-card/80 dark:to-card/40 border border-border/50 dark:border-primary/20 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] dark:hover:border-primary/40 dark:hover:shadow-neon" 
+            <GlassCard
+              key={testimonial.name}
+              className="relative p-6"
               data-testid={`card-testimonial-${index + 1}`}
             >
               <div className="absolute -top-3 left-6">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border border-primary/30">
-                  <Quote className="w-4 h-4 text-primary" />
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.3)" }}
+                >
+                  <Quote className="w-4 h-4" style={{ color: C.teal }} />
                 </div>
               </div>
               <div className="flex gap-1 mb-4 pt-2">
@@ -605,14 +822,14 @@ function TestimonialsSection() {
                   <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+              <p className="mb-4 text-sm leading-relaxed" style={{ color: C.textSecondary }}>
                 "{testimonial.content}"
               </p>
-              <div className="pt-4 border-t border-border/50 dark:border-primary/20">
-                <p className="font-semibold text-sm">{testimonial.name}</p>
-                <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+              <div className="pt-4" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+                <p className="font-semibold text-sm text-white">{testimonial.name}</p>
+                <p className="text-xs" style={{ color: C.textSecondary }}>{testimonial.role}</p>
               </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
       </div>
@@ -622,17 +839,22 @@ function TestimonialsSection() {
 
 function FAQSection() {
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-b from-background to-muted/20 dark:from-transparent dark:to-transparent overflow-hidden">
-      <div className="max-w-3xl mx-auto px-4 md:px-8 relative">
-        <div className="text-center mb-12">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
             data-testid="text-faq-title"
           >
             Frequently Asked Questions
           </h2>
-          <p className="text-muted-foreground">
+          <p style={{ color: C.textSecondary }}>
             Everything you need to know about OurShiksha
           </p>
         </div>
@@ -641,13 +863,17 @@ function FAQSection() {
             <AccordionItem
               key={item.question}
               value={`item-${index}`}
-              className="border border-border/50 dark:border-primary/20 rounded-2xl px-4 bg-gradient-to-r from-card/50 to-card/30 dark:from-card/60 dark:to-card/30 backdrop-blur-sm transition-all duration-300 dark:hover:border-primary/40"
+              className="rounded-2xl px-5 backdrop-blur-sm transition-all duration-300 border-0"
+              style={{
+                background: C.cardBg,
+                border: `1px solid ${C.cardBorder}`,
+              }}
               data-testid={`faq-item-${index + 1}`}
             >
-              <AccordionTrigger className="hover:no-underline text-left">
+              <AccordionTrigger className="hover:no-underline text-left text-white">
                 <span className="font-medium">{item.question}</span>
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent style={{ color: C.textSecondary }}>
                 {item.answer}
               </AccordionContent>
             </AccordionItem>
@@ -662,48 +888,81 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-16 md:py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5 dark:from-transparent dark:via-transparent dark:to-transparent overflow-hidden">
-      {/* Gradient orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-tl from-primary/15 to-transparent rounded-full blur-3xl" />
-      
-      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative">
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="center" color={C.teal} />
+
+      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative z-10">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg dark:shadow-neon animate-float">
-            <GraduationCap className="w-8 h-8 text-primary-foreground" />
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center animate-float"
+            style={{
+              background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+              boxShadow: `0 0 30px -5px rgba(0,245,255,0.4)`,
+            }}
+          >
+            <GraduationCap className="w-8 h-8" style={{ color: C.bgPrimary }} />
           </div>
         </div>
         <h2
-          className="text-2xl md:text-3xl font-bold mb-4 dark:neon-gradient-text"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="text-2xl md:text-3xl font-bold mb-4"
+          style={{
+            fontFamily: "var(--font-display)",
+            background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
           data-testid="text-cta-title"
         >
           Start your learning journey with OurShiksha today.
         </h2>
-        <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+        <p className="mb-8 max-w-2xl mx-auto" style={{ color: C.textSecondary }}>
           Join thousands of students mastering new skills and building their careers.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {user ? (
             <Link href="/shishya/dashboard">
-              <Button size="lg" className="min-w-[180px] dark:shadow-neon dark:hover:shadow-neon-lg" data-testid="button-cta-shishya">
+              <button
+                className="min-w-[180px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                style={{
+                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                  color: C.bgPrimary,
+                  boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                }}
+                data-testid="button-cta-shishya"
+              >
                 Go to Shishya
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+                <ArrowRight className="w-5 h-5" />
+              </button>
             </Link>
           ) : (
             <>
               <Link href="/login">
-                <Button size="lg" className="min-w-[150px] dark:shadow-neon dark:hover:shadow-neon-lg" data-testid="button-cta-login">
-                  <LogIn className="w-5 h-5 mr-2" />
+                <button
+                  className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                  style={{
+                    background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                    color: C.bgPrimary,
+                    boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                  }}
+                  data-testid="button-cta-login"
+                >
+                  <LogIn className="w-5 h-5" />
                   Login
-                </Button>
+                </button>
               </Link>
               <Link href="/signup">
-                <Button size="lg" variant="outline" className="min-w-[150px] dark:border-primary/40 dark:hover:border-primary dark:hover:shadow-neon" data-testid="button-cta-signup">
-                  <UserPlus className="w-5 h-5 mr-2" />
+                <button
+                  className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                  style={{
+                    background: "transparent",
+                    color: C.teal,
+                    border: `1px solid rgba(0,245,255,0.3)`,
+                  }}
+                  data-testid="button-cta-signup"
+                >
+                  <UserPlus className="w-5 h-5" />
                   Sign Up
-                </Button>
+                </button>
               </Link>
             </>
           )}
@@ -717,35 +976,50 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border/50 dark:border-primary/20 py-8 bg-gradient-to-b from-background to-muted/20 dark:to-card/30">
+    <footer className="py-8" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm dark:shadow-neon">
-              <GraduationCap className="w-4 h-4" />
+            <div
+              className="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm"
+              style={{
+                background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+              }}
+            >
+              <GraduationCap className="w-4 h-4" style={{ color: C.bgPrimary }} />
             </div>
-            <span className="font-semibold dark:neon-gradient-text" style={{ fontFamily: "var(--font-display)" }}>
+            <span
+              className="font-semibold"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               OurShiksha
             </span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-home">
-              Home
-            </Link>
-            <Link href="/about" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-about">
-              About
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-privacy">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-terms">
-              Terms of Service
-            </Link>
-            <Link href="/contact" className="hover:text-foreground dark:hover:text-primary transition-colors" data-testid="link-contact">
-              Contact
-            </Link>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: C.textSecondary }}>
+            {[
+              { href: "/", label: "Home", testId: "link-home" },
+              { href: "/about", label: "About", testId: "link-about" },
+              { href: "/privacy", label: "Privacy Policy", testId: "link-privacy" },
+              { href: "/terms", label: "Terms of Service", testId: "link-terms" },
+              { href: "/contact", label: "Contact", testId: "link-contact" },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="transition-colors"
+                style={{ color: C.textSecondary }}
+                data-testid={link.testId}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
-          <p className="text-sm text-muted-foreground" data-testid="text-copyright">
+          <p className="text-sm" style={{ color: C.textSecondary }} data-testid="text-copyright">
             OurShiksha {currentYear}
           </p>
         </div>
@@ -756,7 +1030,13 @@ function Footer() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        background: `linear-gradient(180deg, ${C.bgPrimary} 0%, ${C.bgSecondary} 40%, #0B1120 100%)`,
+        color: C.textPrimary,
+      }}
+    >
       <LandingNavbar />
       <main className="flex-1">
         <HeroSection />
