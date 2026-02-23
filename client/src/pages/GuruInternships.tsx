@@ -57,6 +57,8 @@ import {
   Users,
   UserCheck,
   Layers,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -195,6 +197,12 @@ export default function GuruInternships() {
   const [viewingInternship, setViewingInternship] = useState<Internship | null>(null);
   const [reviewingSubmission, setReviewingSubmission] = useState<Submission | null>(null);
   const [reviewFeedback, setReviewFeedback] = useState("");
+
+  const [aiBuilderOpen, setAiBuilderOpen] = useState(false);
+  const [aiTitle, setAiTitle] = useState("");
+  const [aiSkillLevel, setAiSkillLevel] = useState("beginner");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiPreview, setAiPreview] = useState<any>(null);
 
   const [membersDialogBatchId, setMembersDialogBatchId] = useState<number | null>(null);
   const [editingMemberRole, setEditingMemberRole] = useState<{ memberId: number; role: string } | null>(null);
@@ -361,6 +369,65 @@ export default function GuruInternships() {
     },
   });
 
+  const handleAiGenerate = async () => {
+    if (!aiTitle.trim()) {
+      toast({ title: "Please enter a title", variant: "destructive" });
+      return;
+    }
+    setAiGenerating(true);
+    setAiPreview(null);
+    try {
+      const res = await apiRequest("POST", "/api/udyog/admin/ai/generate-internship", {
+        title: aiTitle,
+        skillLevel: aiSkillLevel,
+      });
+      const data = await res.json();
+      setAiPreview(data);
+    } catch (error: any) {
+      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAiCreateInternship = async () => {
+    if (!aiPreview) return;
+    const internshipData: InternshipForm = {
+      title: aiPreview.title,
+      description: aiPreview.description,
+      shortDescription: aiPreview.shortDescription || "",
+      skillLevel: aiPreview.skillLevel || aiSkillLevel,
+      domain: aiPreview.domain || "",
+      duration: aiPreview.duration || "4 weeks",
+      isActive: true,
+    };
+    createMutation.mutate(internshipData, {
+      onSuccess: async () => {
+        if (aiPreview.tasks && aiPreview.tasks.length > 0) {
+          const latestInternships = await fetch("/api/udyog/admin/internships").then(r => r.json());
+          const newest = latestInternships[0];
+          if (newest) {
+            for (const task of aiPreview.tasks) {
+              try {
+                await apiRequest("POST", `/api/udyog/admin/internships/${newest.id}/tasks`, {
+                  title: task.title,
+                  description: task.description,
+                  orderIndex: task.orderIndex,
+                });
+              } catch {}
+            }
+            queryClient.invalidateQueries({ queryKey: ["/api/udyog/internships"] });
+          }
+        }
+        setAiBuilderOpen(false);
+        setAiPreview(null);
+        setAiTitle("");
+        setAiSkillLevel("beginner");
+        toast({ title: "Internship created with AI-generated content!" });
+      },
+    });
+  };
+
   const filteredInternships = internships?.filter((i) =>
     i.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -431,6 +498,15 @@ export default function GuruInternships() {
                 data-testid="input-search-internships"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => { setAiPreview(null); setAiTitle(""); setAiSkillLevel("beginner"); setAiBuilderOpen(true); }}
+              data-testid="button-ai-internship-builder"
+              className="border-purple-500/30 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Builder
+            </Button>
             <Button
               onClick={() => { setForm(defaultInternshipForm); setCreateOpen(true); }}
               data-testid="button-create-internship"
@@ -1393,6 +1469,150 @@ export default function GuruInternships() {
             >
               Approve
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={aiBuilderOpen} onOpenChange={setAiBuilderOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-internship-builder-title" className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              AI Internship Builder
+            </DialogTitle>
+            <DialogDescription>Enter a title and skill level - AI will generate the full internship with tasks</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="ai-internship-title">Internship Title *</Label>
+              <Input
+                id="ai-internship-title"
+                value={aiTitle}
+                onChange={(e) => setAiTitle(e.target.value)}
+                placeholder="e.g., Full Stack Web Development, Data Science with Python"
+                data-testid="input-ai-internship-title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ai-skill-level">Skill Level *</Label>
+              <Select value={aiSkillLevel} onValueChange={setAiSkillLevel}>
+                <SelectTrigger data-testid="select-ai-skill-level">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner (Score &lt; 40)</SelectItem>
+                  <SelectItem value="intermediate">Intermediate (Score 40-75)</SelectItem>
+                  <SelectItem value="advanced">Advanced (Score &gt; 75)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={handleAiGenerate}
+              disabled={aiGenerating || !aiTitle.trim()}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              data-testid="button-ai-generate-internship"
+            >
+              {aiGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating with AI...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Internship
+                </>
+              )}
+            </Button>
+          </div>
+
+          {aiPreview && (
+            <div className="mt-4 space-y-4 border rounded-lg p-4 bg-muted/30">
+              <h4 className="font-semibold text-sm text-purple-700 dark:text-purple-400">AI Generated Preview</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Title</Label>
+                  <p className="font-medium" data-testid="ai-preview-title">{aiPreview.title}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Description</Label>
+                  <p className="text-sm whitespace-pre-wrap rounded border p-2 bg-background" data-testid="ai-preview-description">{aiPreview.description}</p>
+                </div>
+                {aiPreview.shortDescription && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Short Description</Label>
+                    <p className="text-sm" data-testid="ai-preview-short-desc">{aiPreview.shortDescription}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Domain</Label>
+                    <p className="text-sm font-medium">{aiPreview.domain}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Skill Level</Label>
+                    <Badge variant="outline" className="capitalize">{aiPreview.skillLevel}</Badge>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Duration</Label>
+                    <p className="text-sm font-medium">{aiPreview.duration}</p>
+                  </div>
+                </div>
+                {aiPreview.requiredSkills && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Required Skills</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {aiPreview.requiredSkills.split(",").map((skill: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">{skill.trim()}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiPreview.milestones && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Milestones</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {aiPreview.milestones.split(",").map((m: string, i: number) => (
+                        <Badge key={i} variant="outline" className="text-xs">{m.trim()}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiPreview.tasks && aiPreview.tasks.length > 0 && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Tasks ({aiPreview.tasks.length})</Label>
+                    <div className="space-y-2 mt-1">
+                      {aiPreview.tasks.map((task: any, i: number) => (
+                        <div key={i} className="flex gap-2 text-sm border rounded p-2 bg-background">
+                          <span className="text-muted-foreground font-mono shrink-0">{task.orderIndex || i + 1}.</span>
+                          <div>
+                            <p className="font-medium">{task.title}</p>
+                            <p className="text-muted-foreground text-xs mt-0.5">{task.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiBuilderOpen(false)} data-testid="button-cancel-ai-builder">
+              Cancel
+            </Button>
+            {aiPreview && (
+              <Button
+                onClick={handleAiCreateInternship}
+                disabled={createMutation.isPending}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                data-testid="button-create-ai-internship"
+              >
+                {createMutation.isPending ? "Creating..." : "Create This Internship"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
