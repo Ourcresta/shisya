@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, CheckCircle2, Clock, Send, MessageSquare, Award,
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
-  Medal, AlertCircle
+  Medal, AlertCircle, Users, Calendar, Star
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,12 +19,39 @@ const sidebarItems = [
   { key: "certification", label: "Certification", icon: Medal },
 ];
 
-const fakeTeam = [
-  { name: "Arjun Mehta", role: "Frontend Lead", color: "#22D3EE", online: true },
-  { name: "Priya Sharma", role: "Backend Developer", color: "#14B8A6", online: true },
-  { name: "Rahul Verma", role: "QA Engineer", color: "#8B5CF6", online: false },
-  { name: "Sneha Patel", role: "UI/UX Designer", color: "#F59E0B", online: true },
-];
+const roleColors: Record<string, string> = {
+  "Team Lead": "#22D3EE",
+  "Developer": "#14B8A6",
+  "QA/Tester": "#8B5CF6",
+  "developer": "#14B8A6",
+  "team_lead": "#22D3EE",
+  "qa_tester": "#8B5CF6",
+  "Junior Intern": "#F59E0B",
+  "Project Associate": "#3B82F6",
+  "Lead Developer": "#22D3EE",
+};
+
+function getRoleColor(role: string): string {
+  return roleColors[role] || "#14B8A6";
+}
+
+function getInitials(name: string): string {
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+}
+
+function getMemberDisplayName(m: any): string {
+  return m.profile?.fullName || m.member?.userId?.slice(0, 8) || "Member";
+}
+
+function getMemberRole(m: any): string {
+  const role = m.member?.role || "Developer";
+  const roleLabels: Record<string, string> = {
+    developer: "Developer",
+    team_lead: "Team Lead",
+    qa_tester: "QA/Tester",
+  };
+  return roleLabels[role] || role;
+}
 
 const statusColumns = ["todo", "in_progress", "review", "completed"];
 const statusLabels: Record<string, string> = {
@@ -79,13 +106,23 @@ export default function UdyogDashboard() {
   ]);
   const [chatInput, setChatInput] = useState("");
 
-  const { data: assignment, isLoading: assignmentLoading } = useQuery<any>({
+  const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
     queryKey: ["/api/udyog/my-assignment"],
   });
 
+  const { data: batchData } = useQuery<any>({
+    queryKey: ["/api/udyog/my-batch"],
+    retry: false,
+  });
+
+  const hasBatch = !!batchData?.batch;
+  const assignment = hasBatch ? batchData.assignment : assignmentData?.assignment || assignmentData;
+  const internship = hasBatch ? batchData.internship : assignmentData?.internship;
+  const tasks = hasBatch ? (batchData.tasks || []) : (assignmentData?.tasks || []);
+  const batchMembers: any[] = batchData?.members || [];
+  const batch = batchData?.batch;
+  const batchProgress = batchData?.progress;
   const assignmentId = assignment?.id;
-  const internship = assignment?.internship;
-  const tasks = assignment?.tasks || [];
 
   const { data: submissions = [] } = useQuery<any[]>({
     queryKey: ["/api/udyog/submissions", assignmentId],
@@ -98,6 +135,7 @@ export default function UdyogDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-assignment"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-batch"] });
       toast({ title: "Task Updated", description: "Task status changed successfully." });
     },
     onError: () => {
@@ -144,7 +182,7 @@ export default function UdyogDashboard() {
         ...prev,
         {
           role: "ai",
-          text: `Great question! Based on your current progress of ${assignment?.progress || 0}%, I'd recommend focusing on your pending tasks. Keep up the consistent effort — you're building real industry skills that will set you apart. Remember, every completed task brings you closer to your certification.`,
+          text: `Great question! Based on your current progress of ${overallProgress}%, I'd recommend focusing on your pending tasks. Keep up the consistent effort — you're building real industry skills that will set you apart. Remember, every completed task brings you closer to your certification.`,
         },
       ]);
     }, 800);
@@ -152,7 +190,22 @@ export default function UdyogDashboard() {
 
   const completedTasksCount = tasks.filter((t: any) => t.status === "completed").length;
   const allTasksCompleted = tasks.length > 0 && completedTasksCount === tasks.length;
-  const daysRemaining = assignment && internship ? getDaysRemaining(assignment.startedAt, internship.duration) : 0;
+  const overallProgress = hasBatch ? (batchProgress || 0) : (assignment?.progress || 0);
+
+  const daysRemaining = (() => {
+    if (batch?.endDate) {
+      const end = new Date(batch.endDate);
+      const now = new Date();
+      return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
+    }
+    if (assignment && internship) {
+      return getDaysRemaining(assignment.startedAt || assignment.createdAt, internship.duration);
+    }
+    return 0;
+  })();
+
+  const currentUserMember = batchMembers.find((m: any) => m.member?.userId === user?.id);
+  const performanceScore = currentUserMember?.member?.performanceScore;
 
   if (assignmentLoading) {
     return (
@@ -169,7 +222,7 @@ export default function UdyogDashboard() {
     );
   }
 
-  if (!assignment) {
+  if (!assignment && !assignmentData) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0a0e1a" }}>
         <motion.div
@@ -259,7 +312,7 @@ export default function UdyogDashboard() {
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm text-gray-400">Overall Progress</span>
           <span className="text-sm font-medium text-cyan-400" data-testid="text-progress-percent">
-            {assignment.progress || 0}%
+            {overallProgress}%
           </span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
@@ -267,13 +320,44 @@ export default function UdyogDashboard() {
             className="h-full rounded-full"
             style={{ background: "linear-gradient(90deg, #22D3EE, #14B8A6)" }}
             initial={{ width: 0 }}
-            animate={{ width: `${assignment.progress || 0}%` }}
+            animate={{ width: `${overallProgress}%` }}
             transition={{ duration: 0.8 }}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {hasBatch && batch && (
+        <div
+          className="rounded-xl p-4 border flex flex-wrap items-center gap-3"
+          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          <Users className="w-5 h-5 text-cyan-400" />
+          <span className="text-white font-medium text-sm" style={{ fontFamily: "var(--font-display)" }}>
+            Batch #{batch.batchNumber}
+          </span>
+          <span
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide"
+            style={{
+              background: batch.status === "active" ? "rgba(34,197,94,0.15)" : batch.status === "forming" ? "rgba(234,179,8,0.15)" : "rgba(107,114,128,0.15)",
+              color: batch.status === "active" ? "#4ade80" : batch.status === "forming" ? "#facc15" : "#9CA3AF",
+            }}
+            data-testid="badge-batch-status"
+          >
+            {batch.status}
+          </span>
+          {performanceScore !== undefined && performanceScore !== null && (
+            <div className="ml-auto flex items-center gap-1.5">
+              <Star className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm text-yellow-400 font-medium" data-testid="text-performance-score">
+                {performanceScore}
+              </span>
+              <span className="text-xs text-gray-500">Performance</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 ${performanceScore !== undefined && performanceScore !== null && !hasBatch ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-4`}>
         <div
           className="rounded-xl p-5 border text-center"
           style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
@@ -310,36 +394,52 @@ export default function UdyogDashboard() {
         <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "var(--font-display)" }}>
           Team Members
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {fakeTeam.map((member) => (
-            <div
-              key={member.name}
-              className="flex items-center gap-3 p-3 rounded-lg"
-              style={{ background: "rgba(255,255,255,0.03)" }}
-              data-testid={`team-member-${member.name.toLowerCase().replace(/\s+/g, "-")}`}
-            >
-              <div className="relative">
+        {batchMembers.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {batchMembers.map((m: any) => {
+              const displayName = getMemberDisplayName(m);
+              const role = getMemberRole(m);
+              const color = getRoleColor(role);
+              const initials = getInitials(displayName);
+              const isCurrentUser = m.member?.userId === user?.id;
+              return (
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                  style={{ background: member.color }}
+                  key={m.member?.id || m.member?.userId}
+                  className="flex items-center gap-3 p-3 rounded-lg"
+                  style={{ background: isCurrentUser ? "rgba(34,211,238,0.05)" : "rgba(255,255,255,0.03)" }}
+                  data-testid={`team-member-${displayName.toLowerCase().replace(/\s+/g, "-")}`}
                 >
-                  {member.name.split(" ").map((n) => n[0]).join("")}
+                  <div className="relative">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                      style={{ background: color }}
+                    >
+                      {initials}
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-white font-medium truncate">
+                      {displayName}{isCurrentUser ? " (You)" : ""}
+                    </p>
+                    <p className="text-xs" style={{ color }}>{role}</p>
+                  </div>
+                  {m.member?.performanceScore !== undefined && m.member?.performanceScore !== null && (
+                    <span className="text-xs text-gray-500 shrink-0" data-testid={`member-score-${m.member?.id}`}>
+                      {m.member.performanceScore}pts
+                    </span>
+                  )}
                 </div>
-                <div
-                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
-                  style={{
-                    background: member.online ? "#22C55E" : "#6B7280",
-                    borderColor: "#111827",
-                  }}
-                />
-              </div>
-              <div>
-                <p className="text-sm text-white font-medium">{member.name}</p>
-                <p className="text-xs text-gray-400">{member.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Users className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+            <p className="text-gray-400 text-sm" data-testid="text-no-team">
+              {batch?.status === "forming" ? "Batch is forming — team members will appear once the batch is full." : "No team members yet."}
+            </p>
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -366,17 +466,56 @@ export default function UdyogDashboard() {
                 <span className="text-xs text-gray-500 ml-auto">{colTasks.length}</span>
               </div>
               <div className="space-y-2 min-h-[100px]">
-                {colTasks.map((task: any) => (
-                  <div
+                {colTasks.map((task: any) => {
+                  const assignedMember = task.assignedTo ? batchMembers.find((m: any) => m.member?.userId === task.assignedTo) : null;
+                  const assignedName = assignedMember ? getMemberDisplayName(assignedMember) : null;
+                  return (<div
                     key={task.id}
                     className="rounded-lg p-4 border transition-all"
                     style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
                     data-testid={`task-card-${task.id}`}
                   >
-                    <h4 className="text-sm font-medium text-white mb-1">{task.title}</h4>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-medium text-white">{task.title}</h4>
+                      {task.score !== undefined && task.score !== null && task.status === "completed" && (
+                        <span
+                          className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+                          style={{ background: "rgba(34,197,94,0.15)", color: "#4ade80" }}
+                          data-testid={`task-score-${task.id}`}
+                        >
+                          {task.score}pts
+                        </span>
+                      )}
+                    </div>
                     {task.description && (
-                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-gray-400 mb-2 line-clamp-2">{task.description}</p>
                     )}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      {task.dueDate && (
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                          style={{ background: "rgba(234,179,8,0.1)", color: "#facc15" }}
+                          data-testid={`task-due-${task.id}`}
+                        >
+                          <Calendar className="w-2.5 h-2.5" />
+                          {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                        </span>
+                      )}
+                      {assignedName && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] text-gray-400"
+                          data-testid={`task-assigned-${task.id}`}
+                        >
+                          <span
+                            className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white"
+                            style={{ background: getRoleColor(getMemberRole(assignedMember!)) }}
+                          >
+                            {getInitials(assignedName).slice(0, 1)}
+                          </span>
+                          {assignedName.split(" ")[0]}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {statusColumns
                         .filter((s) => s !== col)
@@ -398,7 +537,8 @@ export default function UdyogDashboard() {
                         ))}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 {colTasks.length === 0 && (
                   <div className="rounded-lg p-4 border border-dashed text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                     <p className="text-xs text-gray-500">No tasks</p>
