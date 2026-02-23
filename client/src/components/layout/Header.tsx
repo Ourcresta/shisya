@@ -31,6 +31,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuLabel,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { useTheme, themeColors, type ThemeMode } from "@/contexts/ThemeContext";
 import { Palette, Check, Sun, Moon, Monitor } from "lucide-react";
@@ -203,6 +204,7 @@ export function Header() {
                               <Palette className="w-4 h-4 mr-2" />
                               Appearance
                             </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
                             <DropdownMenuSubContent className="w-56">
                               <DropdownMenuLabel className="flex items-center gap-2">
                                 {themeMode === "system" ? <Monitor className="h-4 w-4" /> : resolvedMode === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -251,6 +253,7 @@ export function Header() {
                                 ))}
                               </div>
                             </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
                           </DropdownMenuSub>
                         </>
                       )}
