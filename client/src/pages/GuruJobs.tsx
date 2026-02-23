@@ -52,6 +52,8 @@ import {
   Eye,
   MapPin,
   Calendar,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -172,6 +174,11 @@ export default function GuruJobs() {
   const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
   const [form, setForm] = useState<JobForm>(defaultJobForm);
   const [selectedJobIdForApps, setSelectedJobIdForApps] = useState<string>("");
+  const [aiBuilderOpen, setAiBuilderOpen] = useState(false);
+  const [aiJobTitle, setAiJobTitle] = useState("");
+  const [aiJobType, setAiJobType] = useState("full-time");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiJobPreview, setAiJobPreview] = useState<any>(null);
 
   const { data: jobsData, isLoading } = useQuery<JobData[]>({
     queryKey: ["/api/udyog/admin/jobs"],
@@ -264,6 +271,52 @@ export default function GuruJobs() {
       toast({ title: "Failed to update status", description: error.message, variant: "destructive" });
     },
   });
+
+  const handleAiGenerateJob = async () => {
+    if (!aiJobTitle.trim()) {
+      toast({ title: "Please enter a job title", variant: "destructive" });
+      return;
+    }
+    setAiGenerating(true);
+    setAiJobPreview(null);
+    try {
+      const res = await apiRequest("POST", "/api/udyog/admin/ai/generate-job", {
+        title: aiJobTitle,
+        jobType: aiJobType,
+      });
+      const data = await res.json();
+      setAiJobPreview(data);
+    } catch (error: any) {
+      toast({ title: "AI generation failed", description: error.message, variant: "destructive" });
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAiCreateJob = () => {
+    if (!aiJobPreview) return;
+    const jobData: JobForm = {
+      title: aiJobPreview.title,
+      description: aiJobPreview.description,
+      requiredSkills: aiJobPreview.requiredSkills || "",
+      internshipRequired: aiJobPreview.internshipRequired ?? false,
+      minSkillScore: aiJobPreview.minSkillScore || 0,
+      location: aiJobPreview.location || "",
+      salaryRange: aiJobPreview.salaryRange || "",
+      jobType: aiJobPreview.jobType || aiJobType,
+      status: "active",
+      deadline: "",
+    };
+    createMutation.mutate(jobData, {
+      onSuccess: () => {
+        setAiBuilderOpen(false);
+        setAiJobPreview(null);
+        setAiJobTitle("");
+        setAiJobType("full-time");
+        toast({ title: "Job created with AI-generated content!" });
+      },
+    });
+  };
 
   const filteredJobs = jobsData?.filter((j) =>
     j.job.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -447,6 +500,15 @@ export default function GuruJobs() {
                 data-testid="input-search-jobs"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => { setAiJobPreview(null); setAiJobTitle(""); setAiJobType("full-time"); setAiBuilderOpen(true); }}
+              data-testid="button-ai-job-builder"
+              className="border-purple-500/30 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Builder
+            </Button>
             <Button
               onClick={() => { setForm(defaultJobForm); setCreateOpen(true); }}
               data-testid="button-create-job"
@@ -745,6 +807,128 @@ export default function GuruJobs() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={aiBuilderOpen} onOpenChange={setAiBuilderOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle data-testid="text-ai-job-builder-title" className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              AI Job Builder
+            </DialogTitle>
+            <DialogDescription>Enter a job title and type - AI will generate the full job posting</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="ai-job-title">Job Title *</Label>
+              <Input
+                id="ai-job-title"
+                value={aiJobTitle}
+                onChange={(e) => setAiJobTitle(e.target.value)}
+                placeholder="e.g., Frontend Developer, Data Analyst, DevOps Engineer"
+                data-testid="input-ai-job-title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ai-job-type">Job Type</Label>
+              <Select value={aiJobType} onValueChange={setAiJobType}>
+                <SelectTrigger data-testid="select-ai-job-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full-time">Full-time</SelectItem>
+                  <SelectItem value="part-time">Part-time</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                  <SelectItem value="freelance">Freelance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={handleAiGenerateJob}
+              disabled={aiGenerating || !aiJobTitle.trim()}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              data-testid="button-ai-generate-job"
+            >
+              {aiGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating with AI...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Job Posting
+                </>
+              )}
+            </Button>
+          </div>
+
+          {aiJobPreview && (
+            <div className="mt-4 space-y-4 border rounded-lg p-4 bg-muted/30">
+              <h4 className="font-semibold text-sm text-purple-700 dark:text-purple-400">AI Generated Preview</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Title</Label>
+                  <p className="font-medium" data-testid="ai-job-preview-title">{aiJobPreview.title}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Description</Label>
+                  <p className="text-sm whitespace-pre-wrap rounded border p-2 bg-background" data-testid="ai-job-preview-description">{aiJobPreview.description}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Job Type</Label>
+                    <p className="text-sm font-medium capitalize">{aiJobPreview.jobType}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Location</Label>
+                    <p className="text-sm font-medium">{aiJobPreview.location || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Salary Range</Label>
+                    <p className="text-sm font-medium">{aiJobPreview.salaryRange || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Min Skill Score</Label>
+                    <p className="text-sm font-medium">{aiJobPreview.minSkillScore || 0}</p>
+                  </div>
+                </div>
+                {aiJobPreview.requiredSkills && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Required Skills</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {aiJobPreview.requiredSkills.split(",").map((skill: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">{skill.trim()}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <Label className="text-muted-foreground text-xs">Internship Required</Label>
+                  <p className="text-sm font-medium">{aiJobPreview.internshipRequired ? "Yes" : "No"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiBuilderOpen(false)} data-testid="button-cancel-ai-job-builder">
+              Cancel
+            </Button>
+            {aiJobPreview && (
+              <Button
+                onClick={handleAiCreateJob}
+                disabled={createMutation.isPending}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                data-testid="button-create-ai-job"
+              >
+                {createMutation.isPending ? "Creating..." : "Create This Job"}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
