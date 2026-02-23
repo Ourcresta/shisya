@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +97,7 @@ export default function UdyogLanding() {
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
+      <LandingNavbar />
       {/* Floating orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -140,7 +142,7 @@ export default function UdyogLanding() {
                   animation: "gradientShift 3s ease infinite",
                 }}
               >
-                Udyog
+                Our Udyog
               </span>
             </h1>
             <p
