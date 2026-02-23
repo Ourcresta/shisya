@@ -250,15 +250,6 @@ export default function Login() {
           <SiGoogle style={{ color: '#4285F4' }} />
           <span className="auth-social-tooltip">Google</span>
         </a>
-        <a href="/api/oauth/microsoft" className="auth-social-btn" data-testid="button-microsoft">
-          <svg viewBox="0 0 23 23" fill="none" className="w-5 h-5">
-            <rect width="11" height="11" fill="#F25022"/>
-            <rect x="12" width="11" height="11" fill="#7FBA00"/>
-            <rect y="12" width="11" height="11" fill="#00A4EF"/>
-            <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
-          </svg>
-          <span className="auth-social-tooltip">Microsoft</span>
-        </a>
         <a href="/api/oauth/sso" className="auth-social-btn" data-testid="button-sso">
           <Building2 className="w-5 h-5" style={{ color: '#8B5CF6' }} />
           <span className="auth-social-tooltip">SSO</span>
