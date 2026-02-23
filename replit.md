@@ -15,7 +15,7 @@ The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind 
 
 **UI/UX Decisions:**
 - **Branding & Design System:** GraduationCap icon, Inter font for body, Space Grotesk for headings, leveraging Shadcn UI.
-- **Theming:** Multi-theme system with 6 color palettes and light/dark/system modes, persisted locally.
+- **Theming:** Multi-theme system with 6 color palettes and light/dark/system modes, persisted locally. **Theme is scoped to SHISHYA routes only** — public pages (Landing, Courses, Pricing, Our Udyog, Jobs) always use default light appearance regardless of user theme settings. The Appearance menu only shows in the Header when on SHISHYA routes. Udyog pages (Landing, Jobs, Assessment, Dashboard, Hub) have self-contained dark backgrounds independent of the theme system.
 - **Animations:** Framer Motion for micro-animations and transitions.
 - **Modularity & Responsiveness:** Reusable UI components and full mobile responsiveness.
 - **Loading States:** Skeleton loading for enhanced user experience.
