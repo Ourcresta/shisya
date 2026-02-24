@@ -64,7 +64,9 @@ function CoinMesh() {
   }, []);
 
   const coinGeometry = useMemo(() => {
-    return new THREE.CylinderGeometry(1.5, 1.5, 0.12, 128);
+    const geo = new THREE.CylinderGeometry(1.5, 1.5, 0.12, 128);
+    geo.rotateX(Math.PI / 2);
+    return geo;
   }, []);
 
   const ribGeometries = useMemo(() => {
@@ -83,6 +85,8 @@ function CoinMesh() {
         new THREE.Matrix4().makeRotationY(-angle + Math.PI / 2)
       );
       ribGeo.applyMatrix4(matrix);
+      const rotMatrix = new THREE.Matrix4().makeRotationX(Math.PI / 2);
+      ribGeo.applyMatrix4(rotMatrix);
       ribs.push(ribGeo);
     }
     return ribs;
@@ -149,10 +153,9 @@ function CoinMesh() {
     }
 
     if (coinRef.current) {
-      coinRef.current.rotation.y = currentAngleRef.current;
+      coinRef.current.rotation.y = currentAngleRef.current + mouseOffset.current.x * 0.3;
       coinRef.current.position.y = Math.sin(t * 0.8) * 0.08;
-      coinRef.current.rotation.x = Math.PI * 0.08 + mouseOffset.current.y;
-      coinRef.current.rotation.z = mouseOffset.current.x * 0.3;
+      coinRef.current.rotation.x = mouseOffset.current.y;
     }
 
     if (shadowRef.current) {
@@ -165,7 +168,7 @@ function CoinMesh() {
 
   return (
     <>
-      <group ref={coinRef} rotation={[Math.PI * 0.08, 0, 0]}>
+      <group ref={coinRef}>
         <mesh geometry={coinGeometry} material={edgeMaterial} castShadow />
 
         {ribGeometries.map((ribGeo, i) => (
@@ -174,8 +177,7 @@ function CoinMesh() {
 
         <mesh
           geometry={faceGeometry}
-          position={[0, 0.061, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0, 0.061]}
         >
           <meshStandardMaterial
             map={textures[1]}
@@ -187,8 +189,8 @@ function CoinMesh() {
 
         <mesh
           geometry={faceGeometry}
-          position={[0, -0.061, 0]}
-          rotation={[Math.PI / 2, 0, Math.PI]}
+          position={[0, 0, -0.061]}
+          rotation={[0, Math.PI, 0]}
         >
           <meshStandardMaterial
             ref={backMatRef}

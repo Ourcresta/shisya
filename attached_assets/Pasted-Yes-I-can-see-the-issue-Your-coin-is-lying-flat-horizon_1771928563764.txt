@@ -1,0 +1,144 @@
+Yes 🔥 I can see the issue.
+
+Your coin is lying **flat (horizontal like a plate)** instead of **standing vertical like a real coin**.
+
+Right now it is rotated on the wrong axis.
+
+---
+
+# 🎯 WHY THIS HAPPENS
+
+Three.js `CylinderGeometry` is created like this:
+
+```
+Height → Y axis
+Circular faces → Top & Bottom
+```
+
+So by default:
+
+* Coin faces are facing UP and DOWN
+* That’s why it looks like a flying plate
+
+But a real coin should face the CAMERA (front-facing).
+
+---
+
+# ✅ FIX: ROTATE THE COIN 90° ON X AXIS
+
+You need this line:
+
+```js
+coin.rotation.x = Math.PI / 2;
+```
+
+NOT:
+
+```js
+coin.rotation.x = 0.3;   ❌
+```
+
+---
+
+# ✅ CORRECTED main.js (ONLY FIXED PART)
+
+Replace your initial rotation section with this:
+
+```js
+// Correct orientation (make coin stand vertical)
+coin.rotation.x = Math.PI / 2;
+coin.rotation.y = 0.3; // slight angle for premium look
+```
+
+---
+
+# 🎯 ALSO FIX AUTO ROTATION
+
+Since the coin is now vertical, rotate on Y axis only:
+
+Change this:
+
+```js
+coin.rotation.y += 0.01;
+```
+
+Keep this (correct):
+
+```js
+coin.rotation.y += 0.01;
+```
+
+Do NOT rotate X continuously anymore.
+
+---
+
+# 🏆 FINAL CORRECT ANIMATION LOOP
+
+```js
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Smooth rotation like real coin
+  coin.rotation.y += 0.01;
+
+  // Floating effect
+  coin.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+
+  renderer.render(scene, camera);
+}
+```
+
+---
+
+# 🎥 VISUAL RESULT AFTER FIX
+
+Before:
+🛸 Flying UFO
+
+After:
+🪙 Proper Standing Coin
+
+* Faces camera
+* Spins left-right
+* Looks real
+* Premium depth
+
+---
+
+# 🚀 OPTIONAL (If Still Slightly Wrong)
+
+If texture looks upside down:
+
+Add:
+
+```js
+coin.rotation.z = Math.PI;
+```
+
+---
+
+# 🧠 PRO TIP (Professional Setup)
+
+For perfect alignment:
+
+```js
+geometry.rotateX(Math.PI / 2);
+```
+
+Instead of rotating mesh.
+
+That makes geometry itself correct.
+
+---
+
+If you want next level:
+
+* Perfect 3-face flip cycle:
+  OUR SHIKSHA → USHA → OUR UDYOG → repeat
+* Automatic timed flip every 4 seconds
+* Apple-level smooth easing
+* Cinematic lighting
+
+Say:
+
+**"Build Final Ultra Premium Flip Version"** 🚀
