@@ -1,5 +1,6 @@
-import { useState } from "react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Check,
   X,
@@ -20,6 +21,12 @@ import {
   Crown,
   GraduationCap,
   ArrowRight,
+  Gift,
+  Star,
+  Coins,
+  DollarSign,
+  Building2,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Accordion,
@@ -29,6 +36,29 @@ import {
 } from "@/components/ui/accordion";
 import { useAuth } from "@/contexts/AuthContext";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Gift, Zap, Crown, Building2, Star, Coins, CreditCard, DollarSign, GraduationCap, BookOpen,
+};
+
+interface DBPlan {
+  id: number;
+  name: string;
+  subtitle: string | null;
+  price: string;
+  period: string | null;
+  coins: string | null;
+  coinsLabel: string | null;
+  iconName: string;
+  features: string[];
+  notIncluded: string[];
+  cta: string;
+  href: string;
+  buttonVariant: string;
+  popular: boolean;
+  orderIndex: number;
+  isActive: boolean;
+}
 
 const C = {
   bgDeep: "#050A18",
@@ -46,87 +76,61 @@ const C = {
   textSecondary: "#94A3B8",
 };
 
-const plans = [
+const fallbackPlans: DBPlan[] = [
   {
-    id: "free",
+    id: 1,
     name: "Free Explorer",
     subtitle: "Start your learning journey",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: [
-      "Access to free courses",
-      "Basic AI Usha access (5/day)",
-      "Basic certificates",
-      "Community support",
-      "Progress tracking",
-    ],
-    notIncluded: [
-      "Premium courses",
-      "Internship access",
-      "Hiring priority",
-      "Priority support",
-    ],
+    price: "₹0",
+    period: null,
+    coins: "500",
+    coinsLabel: "one-time",
+    iconName: "Gift",
+    features: ["Access to free courses", "Basic AI Usha access (5/day)", "Basic certificates", "Community support", "Progress tracking"],
+    notIncluded: ["Premium courses", "Internship access", "Hiring priority", "Priority support"],
     cta: "Get Started Free",
     href: "/signup",
+    buttonVariant: "outline",
     popular: false,
-    tier: 0,
+    orderIndex: 0,
+    isActive: true,
   },
   {
-    id: "pro",
+    id: 2,
     name: "Pro Learner",
     subtitle: "For serious learners",
-    monthlyPrice: 999,
-    yearlyPrice: 799,
-    features: [
-      "All courses access",
-      "Unlimited AI Usha access",
-      "Internship eligibility",
-      "Verified certificates",
-      "Skill assessments",
-      "Portfolio builder",
-      "Email support",
-    ],
-    notIncluded: [
-      "Hiring priority",
-      "Resume review",
-    ],
+    price: "₹499",
+    period: "/ month",
+    coins: "6,000",
+    coinsLabel: "per month",
+    iconName: "Crown",
+    features: ["All courses access", "Unlimited AI Usha access", "Internship eligibility", "Verified certificates", "Skill assessments", "Portfolio builder", "Email support"],
+    notIncluded: ["Hiring priority", "Resume review"],
     cta: "Start Pro Plan",
     href: "/signup",
+    buttonVariant: "default",
     popular: true,
-    tier: 1,
+    orderIndex: 1,
+    isActive: true,
   },
   {
-    id: "elite",
+    id: 3,
     name: "Elite Career",
     subtitle: "Launch your career",
-    monthlyPrice: 2499,
-    yearlyPrice: 1999,
-    features: [
-      "Everything in Pro",
-      "Premium internships",
-      "Direct hiring priority",
-      "Resume & portfolio review",
-      "Priority support",
-      "Exclusive workshops",
-      "Career mentorship",
-    ],
+    price: "₹999",
+    period: "/ month",
+    coins: "15,000",
+    coinsLabel: "per month",
+    iconName: "Building2",
+    features: ["Everything in Pro", "Premium internships", "Direct hiring priority", "Resume & portfolio review", "Priority support", "Exclusive workshops", "Career mentorship"],
     notIncluded: [],
     cta: "Go Elite",
     href: "/signup",
+    buttonVariant: "default",
     popular: false,
-    tier: 2,
+    orderIndex: 2,
+    isActive: true,
   },
-];
-
-const comparisonFeatures = [
-  { label: "Course Access", free: "Free only", pro: "All courses", elite: "All + Premium" },
-  { label: "AI Mentor (Usha)", free: "5 queries/day", pro: "Unlimited", elite: "Unlimited + Priority" },
-  { label: "Internship Access", free: false, pro: true, elite: "Premium" },
-  { label: "Verified Certificates", free: "Basic", pro: true, elite: true },
-  { label: "Skill Assessments", free: false, pro: true, elite: true },
-  { label: "Hiring Support", free: false, pro: false, elite: true },
-  { label: "Resume Review", free: false, pro: false, elite: true },
-  { label: "Priority Support", free: false, pro: false, elite: true },
 ];
 
 const trustItems = [
@@ -214,76 +218,30 @@ function SectionGlow({ position = "center", color = C.teal }: { position?: strin
   );
 }
 
-function BillingToggle({
-  isYearly,
-  onToggle,
-}: {
-  isYearly: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-center gap-4 mb-16">
-      <span
-        className="text-sm font-medium transition-colors"
-        style={{ color: !isYearly ? C.textPrimary : C.textSecondary }}
-      >
-        Monthly
-      </span>
-      <button
-        onClick={onToggle}
-        className="relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none"
-        style={{
-          background: isYearly
-            ? `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`
-            : "rgba(255,255,255,0.12)",
-          border: `1px solid ${isYearly ? "rgba(0,245,255,0.4)" : "rgba(255,255,255,0.15)"}`,
-          boxShadow: isYearly ? "0 0 20px rgba(0,245,255,0.2)" : "none",
-        }}
-        data-testid="toggle-billing"
-      >
-        <div
-          className="absolute top-1 w-6 h-6 rounded-full transition-all duration-300"
-          style={{
-            left: isYearly ? "calc(100% - 28px)" : "4px",
-            background: isYearly ? C.bgDeep : "rgba(255,255,255,0.8)",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-          }}
-        />
-      </button>
-      <div className="flex items-center gap-2">
-        <span
-          className="text-sm font-medium transition-colors"
-          style={{ color: isYearly ? C.textPrimary : C.textSecondary }}
-        >
-          Yearly
-        </span>
-        <span
-          className="px-2.5 py-1 rounded-full text-xs font-bold"
-          style={{
-            background: "rgba(245,158,11,0.15)",
-            color: C.warning,
-            border: "1px solid rgba(245,158,11,0.25)",
-          }}
-        >
-          Save 20%
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function PricingCard({
   plan,
-  isYearly,
   isLoggedIn,
+  tierIndex,
+  totalPlans,
 }: {
-  plan: (typeof plans)[0];
-  isYearly: boolean;
+  plan: DBPlan;
   isLoggedIn: boolean;
+  tierIndex: number;
+  totalPlans: number;
 }) {
-  const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
-  const isFree = price === 0;
+  const isFree = plan.price === "₹0" || plan.price === "0" || plan.price.toLowerCase() === "free";
   const isPopular = plan.popular;
+  const IconComp = ICON_MAP[plan.iconName] || Gift;
+
+  const priceNum = plan.price.replace(/[^\d]/g, "");
+
+  const tierColor = isPopular
+    ? C.teal
+    : tierIndex === 0
+    ? C.textSecondary
+    : tierIndex >= totalPlans - 1
+    ? C.purple
+    : C.teal;
 
   return (
     <div
@@ -337,23 +295,11 @@ function PricingCard({
         <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{
-            background: plan.tier === 0
-              ? "rgba(255,255,255,0.06)"
-              : plan.tier === 1
-              ? "rgba(0,245,255,0.1)"
-              : "rgba(124,58,237,0.12)",
-            border: `1px solid ${
-              plan.tier === 0
-                ? "rgba(255,255,255,0.1)"
-                : plan.tier === 1
-                ? "rgba(0,245,255,0.25)"
-                : "rgba(124,58,237,0.3)"
-            }`,
+            background: isPopular ? "rgba(0,245,255,0.1)" : isFree ? "rgba(255,255,255,0.06)" : "rgba(124,58,237,0.12)",
+            border: `1px solid ${isPopular ? "rgba(0,245,255,0.25)" : isFree ? "rgba(255,255,255,0.1)" : "rgba(124,58,237,0.3)"}`,
           }}
         >
-          {plan.tier === 0 && <GraduationCap className="w-7 h-7" style={{ color: C.textSecondary }} />}
-          {plan.tier === 1 && <Zap className="w-7 h-7" style={{ color: C.teal }} />}
-          {plan.tier === 2 && <Crown className="w-7 h-7" style={{ color: C.purple }} />}
+          <IconComp className="w-7 h-7" style={{ color: tierColor }} />
         </div>
 
         <h3
@@ -371,10 +317,7 @@ function PricingCard({
             <div>
               <span
                 className="text-5xl font-bold"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  color: C.textPrimary,
-                }}
+                style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
               >
                 Free
               </span>
@@ -385,47 +328,46 @@ function PricingCard({
           ) : (
             <div>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-lg" style={{ color: C.textSecondary }}>
-                  ₹
-                </span>
+                <span className="text-lg" style={{ color: C.textSecondary }}>₹</span>
                 <span
                   className="text-5xl font-bold tabular-nums"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    color: C.textPrimary,
-                  }}
+                  style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
                 >
-                  {price}
+                  {priceNum}
                 </span>
               </div>
-              <p className="text-sm mt-1" style={{ color: C.textSecondary }}>
-                /month {isYearly && "· billed yearly"}
-              </p>
-              {isYearly && (
-                <p className="text-xs mt-1" style={{ color: C.warning }}>
-                  Save ₹{(plan.monthlyPrice - plan.yearlyPrice) * 12}/year
+              {plan.period && (
+                <p className="text-sm mt-1" style={{ color: C.textSecondary }}>
+                  {plan.period}
                 </p>
               )}
             </div>
           )}
         </div>
 
+        {plan.coins && (
+          <div className="mb-6 flex items-center justify-center gap-2">
+            <Coins className="w-4 h-4" style={{ color: C.warning }} />
+            <span className="text-sm font-medium" style={{ color: C.textPrimary }}>
+              {plan.coins} coins
+            </span>
+            {plan.coinsLabel && (
+              <span className="text-xs" style={{ color: C.textSecondary }}>
+                {plan.coinsLabel}
+              </span>
+            )}
+          </div>
+        )}
+
         <Link href={isLoggedIn ? "/shishya/wallet" : plan.href}>
           <button
             className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
             style={
-              isFree
+              plan.buttonVariant === "outline" || isFree
                 ? {
                     background: "transparent",
                     color: C.teal,
                     border: `1px solid rgba(0,245,255,0.3)`,
-                  }
-                : plan.tier === 2
-                ? {
-                    background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
-                    color: C.bgDeep,
-                    boxShadow: "0 4px 20px rgba(0,245,255,0.3)",
-                    border: "none",
                   }
                 : {
                     background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
@@ -464,7 +406,14 @@ function PricingCard({
   );
 }
 
-function ComparisonTable() {
+function ComparisonTable({ plans }: { plans: DBPlan[] }) {
+  const featureSet = new Set<string>();
+  plans.forEach(p => {
+    p.features.forEach(f => featureSet.add(f));
+    p.notIncluded.forEach(f => featureSet.add(f));
+  });
+  const allFeatures = Array.from(featureSet);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
@@ -473,43 +422,44 @@ function ComparisonTable() {
             <th className="text-left py-4 px-6 text-sm font-semibold" style={{ color: C.textSecondary }}>
               Feature
             </th>
-            {["Free Explorer", "Pro Learner", "Elite Career"].map((name, i) => (
+            {plans.map((p) => (
               <th
-                key={name}
+                key={p.id}
                 className="text-center py-4 px-6 text-sm font-semibold"
                 style={{
-                  color: i === 1 ? C.teal : C.textPrimary,
+                  color: p.popular ? C.teal : C.textPrimary,
                   fontFamily: "var(--font-display)",
                 }}
               >
-                {name}
+                {p.name}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {comparisonFeatures.map((row, index) => (
+          {allFeatures.map((feature, index) => (
             <tr
-              key={row.label}
+              key={feature}
               style={{
                 borderTop: `1px solid ${C.cardBorder}`,
                 background: index % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
               }}
             >
               <td className="py-4 px-6 text-sm" style={{ color: C.textPrimary }}>
-                {row.label}
+                {feature}
               </td>
-              {[row.free, row.pro, row.elite].map((val, i) => (
-                <td key={i} className="text-center py-4 px-6 text-sm">
-                  {val === true ? (
-                    <Check className="w-5 h-5 mx-auto" style={{ color: C.teal }} />
-                  ) : val === false ? (
-                    <X className="w-5 h-5 mx-auto" style={{ color: "rgba(255,255,255,0.12)" }} />
-                  ) : (
-                    <span style={{ color: C.textSecondary }}>{val}</span>
-                  )}
-                </td>
-              ))}
+              {plans.map((p) => {
+                const included = p.features.includes(feature);
+                return (
+                  <td key={p.id} className="text-center py-4 px-6 text-sm">
+                    {included ? (
+                      <Check className="w-5 h-5 mx-auto" style={{ color: C.teal }} />
+                    ) : (
+                      <X className="w-5 h-5 mx-auto" style={{ color: "rgba(255,255,255,0.12)" }} />
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -520,7 +470,13 @@ function ComparisonTable() {
 
 export default function Pricing() {
   const { user } = useAuth();
-  const [isYearly, setIsYearly] = useState(true);
+
+  const { data: dbPlans, isLoading } = useQuery<DBPlan[]>({
+    queryKey: ["/api/pricing-plans"],
+  });
+
+  const plans = dbPlans && dbPlans.length > 0 ? dbPlans : fallbackPlans;
+  const gridCols = plans.length <= 2 ? "md:grid-cols-2" : plans.length === 3 ? "md:grid-cols-3" : plans.length === 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3 lg:grid-cols-5";
 
   return (
     <div
@@ -578,21 +534,44 @@ export default function Pricing() {
 
       <section className="relative z-10 pb-20 md:pb-28">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <BillingToggle
-            isYearly={isYearly}
-            onToggle={() => setIsYearly(!isYearly)}
-          />
+          <div className="mb-16" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-            {plans.map((plan) => (
-              <PricingCard
-                key={plan.id}
-                plan={plan}
-                isYearly={isYearly}
-                isLoggedIn={!!user}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-[20px] backdrop-blur-[20px] p-8 flex flex-col h-full"
+                  style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
+                >
+                  <div className="text-center space-y-4">
+                    <Skeleton className="w-14 h-14 rounded-2xl mx-auto" />
+                    <Skeleton className="h-6 w-32 mx-auto" />
+                    <Skeleton className="h-4 w-40 mx-auto" />
+                    <Skeleton className="h-12 w-24 mx-auto" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                  </div>
+                  <div className="mt-8 space-y-3">
+                    {[0, 1, 2, 3, 4].map((j) => (
+                      <Skeleton key={j} className="h-4 w-full" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={`grid grid-cols-1 ${gridCols} gap-6 lg:gap-8 items-stretch`}>
+              {plans.map((plan, index) => (
+                <PricingCard
+                  key={plan.id}
+                  plan={plan}
+                  isLoggedIn={!!user}
+                  tierIndex={index}
+                  totalPlans={plans.length}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -619,7 +598,7 @@ export default function Pricing() {
           </div>
 
           <GlassCard hover={false} className="overflow-hidden">
-            <ComparisonTable />
+            <ComparisonTable plans={plans} />
           </GlassCard>
         </div>
       </section>
