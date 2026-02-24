@@ -14,6 +14,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import udyogLogo from "@assets/image_1771943272315.png";
 
 const sidebarItems = [
   { key: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -1288,24 +1289,22 @@ export default function UdyogDashboard() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            opacity: 0.05,
+            opacity: 0.06,
             pointerEvents: "none" as const,
           }}
         >
-          <div style={{ width: "280px", height: "280px", borderRadius: "50%", border: "3px solid #1e3a5f", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "28px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "3px" }}>OUR</div>
-              <div style={{ fontSize: "28px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "3px" }}>UDYOG</div>
-            </div>
-          </div>
+          <img src={udyogLogo} alt="" style={{ width: "280px", height: "280px", objectFit: "contain" }} draggable={false} />
         </div>
 
         <div style={{ position: "relative", padding: "36px 44px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
 
           <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
-              OUR UDYOG
-            </h1>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginBottom: "2px" }}>
+              <img src={udyogLogo} alt="Our Udyog" style={{ width: "44px", height: "44px", objectFit: "contain" }} draggable={false} />
+              <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
+                OUR UDYOG
+              </h1>
+            </div>
             <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" as const, marginTop: "4px", color: "#4a5568" }}>
               Virtual Internship Programme
             </div>
@@ -1441,13 +1440,7 @@ export default function UdyogDashboard() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "50%", border: "2px solid #1e3a5f", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.7 }}>
-                    <div style={{ textAlign: "center", lineHeight: 1.1 }}>
-                      <div style={{ fontSize: "7px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "1px" }}>OUR</div>
-                      <div style={{ fontSize: "7px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "1px" }}>UDYOG</div>
-                      <div style={{ fontSize: "5px", color: "#4a5568" }}>VERIFIED</div>
-                    </div>
-                  </div>
+                  <img src={udyogLogo} alt="Our Udyog" style={{ width: "56px", height: "56px", objectFit: "contain" }} draggable={false} />
                   <div style={{ fontSize: "6px", marginTop: "3px", textAlign: "center", maxWidth: "70px", color: "#4a5568" }}>
                     This certificate is digitally verifiable
                   </div>
