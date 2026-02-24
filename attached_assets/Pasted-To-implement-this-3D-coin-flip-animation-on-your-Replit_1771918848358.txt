@@ -1,0 +1,108 @@
+To implement this 3D coin-flip animation on your Replit site, you can use a combination of **HTML** for the structure and **CSS** for the 3D rotation logic.
+
+Since the sequence involves three distinct faces (**Usha**, **Our Shiksha**, and **Our Udyog**), we use a "container" that cycles through classes to handle the multi-stage rotation.
+
+### 1. The Code Implementation
+
+You can add this to your project files. It uses a simple script to cycle the "active" logo every 5 seconds.
+
+**HTML:**
+
+```html
+<div class="coin-container">
+  <div id="coin" class="coin">
+    <div class="side front">
+      <img src="usha-avatar.png" alt="Usha AI">
+    </div>
+    <div class="side back">
+      <img id="back-logo" src="our-shiksha.png" alt="Logo">
+    </div>
+  </div>
+</div>
+
+```
+
+**CSS (The 3D Magic):**
+
+```css
+.coin-container {
+  width: 150px;
+  height: 150px;
+  perspective: 1000px;
+}
+
+.coin {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.side {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+.coin.is-flipped {
+  transform: rotateY(180deg);
+}
+
+img { width: 100%; height: 100%; object-fit: cover; }
+
+```
+
+**JavaScript (The 5-second Logic):**
+
+```javascript
+const coin = document.getElementById('coin');
+const backLogo = document.getElementById('back-logo');
+const logos = ['our-shiksha.png', 'our-udyog.png'];
+let logoIndex = 0;
+
+setInterval(() => {
+  // Flip to show the back logo
+  coin.classList.add('is-flipped');
+
+  // While flipped, wait for the animation to finish then prep the next logo
+  setTimeout(() => {
+    coin.classList.remove('is-flipped');
+    logoIndex = (logoIndex + 1) % logos.length;
+    // Update the logo for the next time it flips back
+    setTimeout(() => {
+      backLogo.src = logos[logoIndex];
+    }, 800); 
+  }, 5000); 
+}, 10000); // Cycles every 10 seconds total (5s front, 5s back)
+
+```
+
+---
+
+### 2. Replit AI Prompt
+
+If you want **Replit AI** to do the heavy lifting and integrate it directly into your existing layout, copy and paste this prompt:
+
+> "I want to replace my static Usha Avatar image with a 3D rotating coin animation.
+> **The logic:**
+> 1. Face A (Front) must always be the Usha Avatar.
+> 2. Face B (Back) should cycle between the 'Our Shiksha' logo and the 'Our Udyog' logo.
+> 3. Use CSS 3D transforms (`rotateY`) and `perspective` for a smooth flip effect.
+> 4. Create a 5-second interval: Show Usha for 5s, flip to Our Shiksha for 5s, flip back to Usha, then flip to Our Udyog.
+> 
+> 
+> Please update my current `index.html` and `style.css` to include this interactive element where the avatar currently sits."
+
+### Why this is better for your brand:
+
+This setup ensures **Usha** remains the "anchor" of your brand identity, appearing every other flip, while rotating the sub-brands (Shiksha and Udyog) on the reverse side.
+
+Would you like me to help you refine the CSS colors to match the dark theme of your website?
