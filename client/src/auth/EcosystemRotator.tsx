@@ -50,8 +50,6 @@ export default function EcosystemRotator() {
 
   return (
     <div className="coin3d" data-testid="ecosystem-rotator">
-      <div className="coin3d__glow" />
-      <div className="coin3d__aura" />
       <div className="coin3d__scene">
         <div
           className="coin3d__body"
