@@ -1,0 +1,267 @@
+Perfect 🔥
+Now I will explain clearly:
+
+You want:
+
+* 3D Metallic Coin
+* Rotating like your sample video
+* Smooth premium animation
+* Works inside Replit (Web)
+* Ready to copy-paste
+* Production level structure
+
+We will use:
+
+✅ Three.js
+✅ Real metallic material
+✅ Auto rotation
+✅ Mouse drag rotation
+✅ Soft lighting
+✅ Floating animation
+
+---
+
+# ✅ HOW THE COIN SHOULD WORK (Concept)
+
+### 1️⃣ Default State
+
+* Coin loads centered
+* Slight 3D angle (not flat)
+* Slowly rotating on Y-axis
+* Floating up and down
+
+### 2️⃣ On Mouse Move
+
+* Slight tilt based on cursor
+* Premium interactive feel
+
+### 3️⃣ On Click
+
+* Spin animation (fast rotation 1 round)
+* Then return to slow rotation
+
+### 4️⃣ Visual Feel
+
+* Metallic silver rim
+* Blue enamel center
+* Depth extrusion
+* Proper shadows
+* Reflection highlights
+
+---
+
+# ✅ FOLDER STRUCTURE (Replit)
+
+```
+/public
+   index.html
+   style.css
+   main.js
+   coin.png   (your logo image)
+```
+
+---
+
+# ✅ 1️⃣ index.html (COPY & PASTE)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Our Udyog 3D Coin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="coinCanvas"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+```
+
+---
+
+# ✅ 2️⃣ style.css (COPY & PASTE)
+
+```css
+body {
+  margin: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+}
+
+canvas {
+  display: block;
+}
+```
+
+---
+
+# ✅ 3️⃣ main.js (FULL PREMIUM VERSION)
+
+🔥 This is the real magic
+
+```javascript
+const canvas = document.getElementById("coinCanvas");
+
+// Scene
+const scene = new THREE.Scene();
+
+// Camera
+const camera = new THREE.PerspectiveCamera(
+  50,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 5;
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
+// Geometry (Coin Shape)
+const geometry = new THREE.CylinderGeometry(2, 2, 0.3, 100);
+
+// Load Texture
+const textureLoader = new THREE.TextureLoader();
+const coinTexture = textureLoader.load("coin.png");
+
+// Materials
+const sideMaterial = new THREE.MeshStandardMaterial({
+  color: 0xc0c0c0,
+  metalness: 1,
+  roughness: 0.3,
+});
+
+const frontMaterial = new THREE.MeshStandardMaterial({
+  map: coinTexture,
+  metalness: 0.8,
+  roughness: 0.4,
+});
+
+const backMaterial = new THREE.MeshStandardMaterial({
+  map: coinTexture,
+  metalness: 0.8,
+  roughness: 0.4,
+});
+
+const materials = [sideMaterial, frontMaterial, backMaterial];
+
+// Mesh
+const coin = new THREE.Mesh(geometry, materials);
+scene.add(coin);
+
+// Initial tilt
+coin.rotation.x = 0.3;
+
+// Floating animation
+let floatDirection = 1;
+
+// Mouse interaction
+window.addEventListener("mousemove", (event) => {
+  const mouseX = (event.clientX / window.innerWidth) - 0.5;
+  const mouseY = (event.clientY / window.innerHeight) - 0.5;
+
+  coin.rotation.y += mouseX * 0.05;
+  coin.rotation.x += mouseY * 0.05;
+});
+
+// Click spin
+window.addEventListener("click", () => {
+  gsap.to(coin.rotation, {
+    y: coin.rotation.y + Math.PI * 2,
+    duration: 1,
+    ease: "power2.out"
+  });
+});
+
+// Animation Loop
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Slow rotation
+  coin.rotation.y += 0.01;
+
+  // Floating
+  coin.position.y += 0.005 * floatDirection;
+
+  if (coin.position.y > 0.3) floatDirection = -1;
+  if (coin.position.y < -0.3) floatDirection = 1;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Resize Fix
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+```
+
+---
+
+# ⚡ OPTIONAL (Add Smooth Spin with GSAP)
+
+Add this inside index.html before main.js:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+```
+
+---
+
+# 🎯 HOW IT WORKS
+
+| Feature     | How It Works              |
+| ----------- | ------------------------- |
+| Rotation    | `coin.rotation.y += 0.01` |
+| Floating    | position oscillation      |
+| Metal Look  | MeshStandardMaterial      |
+| Lighting    | Ambient + Directional     |
+| Interaction | Mouse event listeners     |
+| Spin        | GSAP animation            |
+
+---
+
+# 🚀 ADVANCED (ULTRA PREMIUM VERSION)
+
+If you want:
+
+* Real HDR reflections
+* Realistic environment map
+* Roughness map
+* Normal map
+* Edge engraving
+* 4K cinematic lighting
+
+Tell me.
+
+I will generate:
+
+> 🔥 Apple × Tesla Level Coin Animation
+
+---
+
+If you want next:
+
+* Flip animation (Our Shiksha → Usha → Our Udyog)
+* Double sided coin with different faces
+* Full landing page hero animation
+
+Say:
+**“Build Ultra Premium Version”**
