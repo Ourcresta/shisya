@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import shikshaCoin from "@assets/image_1771927817215.png";
-import udyogCoin from "@assets/image_1771927824621.png";
-import ushaCoin from "@assets/image_1771927836393.png";
+import shikshaCoin from "@assets/image_1771941689932.png";
+import udyogCoin from "@assets/image_1771941747918.png";
+import ushaCoin from "@assets/image_1771941793408.png";
 
 const HOLD = 5000;
 const FLIP = 900;
