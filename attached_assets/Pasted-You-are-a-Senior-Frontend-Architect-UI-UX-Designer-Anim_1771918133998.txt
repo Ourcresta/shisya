@@ -1,0 +1,115 @@
+You are a Senior Frontend Architect + UI/UX Designer + Animation Engineer.
+
+Project: Our Shiksha (AI Learning Platform)
+Goal: Implement a premium 3D ecosystem animation for the homepage hero section.
+
+Context:
+We have three circular brand assets:
+1. Usha Avatar (AI Mentor)
+2. Our Shiksha Logo (Learning Platform)
+3. Our Udyog Logo (Industry Platform)
+
+We want to visually represent that:
+Usha connects Learning (Shiksha) and Industry (Udyog).
+
+---
+
+🎯 REQUIREMENT:
+
+Create a smooth 3D rotating "coin-style" animation that cycles between:
+
+• Face 1 → Usha Avatar  
+• Face 2 → Our Shiksha Logo  
+• Face 3 → Our Udyog Logo  
+
+The rotation must:
+- Be true 3D (not flat fade)
+- Rotate on Y-axis
+- Use CSS transform-style: preserve-3d
+- Use perspective for depth
+- Use backface-visibility: hidden
+- Be fully responsive
+- Be performance optimized (GPU accelerated)
+- No external libraries
+- No heavy JS
+- Clean, modular structure
+
+Timing:
+- Each face visible for 5 seconds
+- Full cycle duration: 15 seconds
+- Infinite loop
+- Smooth cubic-bezier transition
+
+---
+
+🎨 DESIGN SPECIFICATIONS:
+
+Theme:
+Dark gradient background (already exists)
+Modern AI startup aesthetic
+Premium glow feel
+
+Visual Enhancements:
+- Subtle outer glow around rotating object
+- Slight depth shadow
+- Soft hover interaction (pause animation on hover)
+- Slight scale-up on hover (1.05)
+- Maintain perfect circular shape
+
+Accessibility:
+- Add alt tags
+- Maintain semantic structure
+- No layout shift
+
+---
+
+🏗️ STRUCTURE REQUIREMENTS:
+
+Create:
+
+1. Clean HTML structure
+2. Production-level CSS
+3. Modular class naming (BEM-style preferred)
+4. Clean keyframe animation
+5. Commented code blocks
+
+Do NOT:
+- Use inline styles
+- Use unnecessary JS
+- Break responsiveness
+- Affect other page elements
+
+---
+
+✨ OPTIONAL ENHANCEMENT (If possible):
+
+Add:
+- Soft animated gradient ring behind the rotating element
+- Glow pulse every 10 seconds
+- Reduce motion preference detection (prefers-reduced-motion)
+
+---
+
+🧠 PERFORMANCE:
+
+Ensure:
+- Hardware acceleration
+- Will-change optimization
+- No janky transitions
+- Lightweight CSS
+
+---
+
+📦 OUTPUT FORMAT:
+
+Return:
+
+1. Final HTML
+2. Final CSS
+3. Optional minimal JS (only if absolutely required)
+4. Clear instructions on where to place files
+5. Responsive behavior notes
+
+This must look like a premium AI EdTech platform animation suitable for a VC-funded startup landing page.
+
+Make it elegant, modern, minimal, and powerful.
