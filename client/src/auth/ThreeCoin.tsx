@@ -88,7 +88,8 @@ function CoinMesh() {
       const t = clock.getElapsedTime();
       const scale = 1 - Math.sin(t * 0.8) * 0.08 * 0.5;
       shadowRef.current.scale.set(scale, scale, 1);
-      shadowRef.current.material.opacity = 0.25 + Math.sin(t * 0.8) * 0.03;
+      const mat = shadowRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.25 + Math.sin(t * 0.8) * 0.03;
     }
   });
 

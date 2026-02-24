@@ -1,9 +1,9 @@
+import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Home } from "lucide-react";
 import { Link } from "wouter";
-import sealLogo from "@assets/image_1771692892158.png";
-import ushaAvatar from "@assets/image_1767697725032.png";
-import udyogSeal from "@assets/image_1771923592033.png";
+
+const ThreeCoin = lazy(() => import("./ThreeCoin"));
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -60,25 +60,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <motion.div
-              className="auth-seal-container"
-              initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <div className="auth-seal-glow" />
-              <div className="auth-coin-edge" />
-              <div className="auth-seal-flipper">
-                <div className="auth-seal-face auth-seal-face--usha">
-                  <img src={ushaAvatar} alt="Usha AI Mentor" className="auth-seal-image" />
-                </div>
-                <div className="auth-seal-face auth-seal-face--shiksha">
-                  <img src={sealLogo} alt="OurShiksha Seal" className="auth-seal-image" />
-                </div>
-                <div className="auth-seal-face auth-seal-face--udyog">
-                  <img src={udyogSeal} alt="Our Udyog Seal" className="auth-seal-image" />
-                </div>
-              </div>
-              <div className="auth-seal-shadow" />
+              <Suspense fallback={<div style={{ width: 200, height: 200 }} />}>
+                <ThreeCoin />
+              </Suspense>
             </motion.div>
 
             <h1 className="auth-brand-tagline">Welcome to the Future of Learning</h1>
