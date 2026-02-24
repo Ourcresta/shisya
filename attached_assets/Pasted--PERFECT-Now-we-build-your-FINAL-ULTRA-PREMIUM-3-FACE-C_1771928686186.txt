@@ -1,0 +1,269 @@
+🔥 PERFECT.
+Now we build your **FINAL ULTRA PREMIUM 3-FACE COIN FLIP SYSTEM**
+
+This will:
+
+* ✅ Stand vertical (correct orientation)
+* ✅ Auto rotate slowly
+* ✅ Every 4 seconds → cinematic flip
+* ✅ Faces cycle:
+  **OUR SHIKSHA → USHA → OUR UDYOG → repeat**
+* ✅ Smooth Apple-level easing
+* ✅ Metallic lighting
+* ✅ Floating animation
+* ✅ Production-ready structure
+
+Ready to paste into Replit.
+
+---
+
+# 📁 FILE STRUCTURE
+
+```
+/public
+   index.html
+   style.css
+   main.js
+   shiksha.png
+   usha.png
+   udyog.png
+```
+
+(Use your exported coin face images)
+
+---
+
+# 1️⃣ index.html (COPY & PASTE)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ultra Premium Coin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<canvas id="coinCanvas"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
+```
+
+---
+
+# 2️⃣ style.css (COPY & PASTE)
+
+```css
+body {
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #0f172a, #020617);
+}
+
+canvas {
+  display: block;
+}
+```
+
+---
+
+# 3️⃣ main.js (ULTRA PREMIUM VERSION)
+
+🔥 This is the master version.
+
+```javascript
+const canvas = document.getElementById("coinCanvas");
+
+// SCENE
+const scene = new THREE.Scene();
+
+// CAMERA
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 6;
+
+// RENDERER
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+// LIGHTING (CINEMATIC)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(5, 5, 5);
+scene.add(keyLight);
+
+const rimLight = new THREE.DirectionalLight(0x00ffff, 0.6);
+rimLight.position.set(-5, 3, -5);
+scene.add(rimLight);
+
+// GEOMETRY
+const geometry = new THREE.CylinderGeometry(2, 2, 0.4, 120);
+geometry.rotateX(Math.PI / 2); // Make coin stand vertical
+
+// TEXTURES
+const loader = new THREE.TextureLoader();
+const textures = [
+  loader.load("shiksha.png"),
+  loader.load("usha.png"),
+  loader.load("udyog.png")
+];
+
+// MATERIALS
+const sideMaterial = new THREE.MeshStandardMaterial({
+  color: 0xc0c0c0,
+  metalness: 1,
+  roughness: 0.3
+});
+
+let currentFace = 0;
+
+const frontMaterial = new THREE.MeshStandardMaterial({
+  map: textures[currentFace],
+  metalness: 0.8,
+  roughness: 0.4
+});
+
+const backMaterial = new THREE.MeshStandardMaterial({
+  map: textures[currentFace],
+  metalness: 0.8,
+  roughness: 0.4
+});
+
+const materials = [sideMaterial, frontMaterial, backMaterial];
+
+const coin = new THREE.Mesh(geometry, materials);
+scene.add(coin);
+
+// Initial Premium Tilt
+coin.rotation.y = 0.3;
+
+// FLOATING ANIMATION
+let clock = new THREE.Clock();
+
+// AUTO ROTATION
+let baseRotationSpeed = 0.005;
+
+// FLIP FUNCTION
+function flipCoin() {
+  gsap.to(coin.rotation, {
+    y: coin.rotation.y + Math.PI,
+    duration: 1.2,
+    ease: "power3.inOut",
+    onComplete: () => {
+      currentFace = (currentFace + 1) % textures.length;
+      frontMaterial.map = textures[currentFace];
+      backMaterial.map = textures[currentFace];
+      frontMaterial.needsUpdate = true;
+      backMaterial.needsUpdate = true;
+    }
+  });
+}
+
+// AUTO FLIP EVERY 4 SECONDS
+setInterval(flipCoin, 4000);
+
+// CLICK SPIN BOOST
+window.addEventListener("click", () => {
+  gsap.to(coin.rotation, {
+    y: coin.rotation.y + Math.PI * 2,
+    duration: 1,
+    ease: "power2.out"
+  });
+});
+
+// MOUSE PARALLAX
+window.addEventListener("mousemove", (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 0.3;
+  const y = (e.clientY / window.innerHeight - 0.5) * 0.3;
+
+  gsap.to(coin.rotation, {
+    x: y,
+    duration: 0.5
+  });
+});
+
+// ANIMATION LOOP
+function animate() {
+  requestAnimationFrame(animate);
+
+  const elapsed = clock.getElapsedTime();
+
+  // Slow luxury rotation
+  coin.rotation.y += baseRotationSpeed;
+
+  // Floating effect
+  coin.position.y = Math.sin(elapsed) * 0.25;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// RESIZE FIX
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+```
+
+---
+
+# 🎬 HOW IT WORKS
+
+| Feature                 | Result                  |
+| ----------------------- | ----------------------- |
+| `rotateX(Math.PI/2)`    | Coin stands vertical    |
+| `setInterval(flipCoin)` | Timed 3-face cycle      |
+| GSAP easing             | Apple-level smooth flip |
+| Metal material          | Real silver edge        |
+| Floating                | Premium feel            |
+| Mouse parallax          | Interactive depth       |
+| Click spin              | Boost animation         |
+
+---
+
+# 🔥 WHAT HAPPENS VISUALLY
+
+1️⃣ Loads on OUR SHIKSHA
+2️⃣ After 4s → flips to USHA
+3️⃣ After 4s → flips to OUR UDYOG
+4️⃣ Loop continues
+5️⃣ Click → power spin
+6️⃣ Mouse → subtle tilt
+
+This matches your concept:
+
+> Brand → Usha → Brand → Usha → Brand
+
+---
+
+# 🚀 NEXT LEVEL (If You Want)
+
+I can upgrade this to:
+
+* HDR reflections (real metal environment)
+* Edge engraving text
+* Real rim ridges
+* Cinematic glow ring behind coin
+* Landing page hero integration
+* Scroll-triggered flip
+* Mobile optimized version
+
+Just say:
+
+**“Build Cinematic Hero Version”** 🔥
