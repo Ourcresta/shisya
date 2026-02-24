@@ -1,7 +1,7 @@
 import QRCodeBlock from "./QRCodeBlock";
 import type { Certificate } from "@shared/schema";
 import { format } from "date-fns";
-import ourShikshaStamp from "@assets/image_1766511184194.png";
+import ourShikshaStamp from "@assets/Gemini_Generated_Image_vdest9vdest9vdes_1771950307284.png";
 
 import ourshiksha_stamp_rot from "@assets/ourshiksha stamp_rot.png";
 
