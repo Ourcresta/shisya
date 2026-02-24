@@ -7,7 +7,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles, Loader2, MessageSquarePlus } from "lucide-react";
 
 interface CourseOption {
   id: number;
@@ -20,7 +21,7 @@ interface AiGenerateDialogProps {
   title: string;
   description: string;
   courses: CourseOption[];
-  onGenerate: (params: { courseId: number; level: string }) => void;
+  onGenerate: (params: { courseId: number; level: string; extraInstructions: string }) => void;
   isGenerating: boolean;
   extraFields?: (params: { courseId: number | null; level: string }) => ReactNode;
   testIdPrefix?: string;
@@ -39,18 +40,20 @@ export function AiGenerateDialog({
 }: AiGenerateDialogProps) {
   const [courseId, setCourseId] = useState<number | null>(null);
   const [level, setLevel] = useState("beginner");
+  const [extraInstructions, setExtraInstructions] = useState("");
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setCourseId(null);
       setLevel("beginner");
+      setExtraInstructions("");
     }
     onOpenChange(nextOpen);
   };
 
   const handleGenerate = () => {
     if (!courseId) return;
-    onGenerate({ courseId, level });
+    onGenerate({ courseId, level, extraInstructions: extraInstructions.trim() });
   };
 
   return (
@@ -97,6 +100,21 @@ export function AiGenerateDialog({
             </Select>
           </div>
           {extraFields?.({ courseId, level })}
+          <div>
+            <Label className="flex items-center gap-1.5">
+              <MessageSquarePlus className="w-3.5 h-3.5" />
+              Extra Instructions
+            </Label>
+            <Textarea
+              value={extraInstructions}
+              onChange={(e) => setExtraInstructions(e.target.value)}
+              placeholder="Add any specific requirements, topics to focus on, or guidelines for the AI..."
+              rows={3}
+              className="mt-1 text-sm"
+              data-testid={`textarea-${testIdPrefix}-extra-instructions`}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Optional: Guide the AI with additional context or preferences</p>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)} data-testid={`button-cancel-${testIdPrefix}`}>

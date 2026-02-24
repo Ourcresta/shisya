@@ -54,6 +54,7 @@ import {
   Calendar,
   Sparkles,
   Loader2,
+  MessageSquarePlus,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -179,6 +180,7 @@ export default function GuruJobs() {
   const [aiJobType, setAiJobType] = useState("full-time");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiJobPreview, setAiJobPreview] = useState<any>(null);
+  const [aiExtraInstructions, setAiExtraInstructions] = useState("");
 
   const { data: jobsData, isLoading } = useQuery<JobData[]>({
     queryKey: ["/api/udyog/admin/jobs"],
@@ -283,6 +285,7 @@ export default function GuruJobs() {
       const res = await apiRequest("POST", "/api/udyog/admin/ai/generate-job", {
         title: aiJobTitle,
         jobType: aiJobType,
+        extraInstructions: aiExtraInstructions,
       });
       const data = await res.json();
       setAiJobPreview(data);
@@ -313,6 +316,7 @@ export default function GuruJobs() {
         setAiJobPreview(null);
         setAiJobTitle("");
         setAiJobType("full-time");
+        setAiExtraInstructions("");
         toast({ title: "Job created with AI-generated content!" });
       },
     });
@@ -502,7 +506,7 @@ export default function GuruJobs() {
             </div>
             <Button
               variant="outline"
-              onClick={() => { setAiJobPreview(null); setAiJobTitle(""); setAiJobType("full-time"); setAiBuilderOpen(true); }}
+              onClick={() => { setAiJobPreview(null); setAiJobTitle(""); setAiJobType("full-time"); setAiExtraInstructions(""); setAiBuilderOpen(true); }}
               data-testid="button-ai-job-builder"
               className="border-purple-500/30 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10"
             >
@@ -843,6 +847,21 @@ export default function GuruJobs() {
                   <SelectItem value="freelance">Freelance</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <MessageSquarePlus className="w-3.5 h-3.5" />
+                Extra Instructions
+              </Label>
+              <Textarea
+                value={aiExtraInstructions}
+                onChange={(e) => setAiExtraInstructions(e.target.value)}
+                placeholder="Add any specific requirements, topics to focus on, or guidelines for the AI..."
+                rows={3}
+                className="mt-1 text-sm"
+                data-testid="textarea-ai-job-extra-instructions"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Optional: Guide the AI with additional context or preferences</p>
             </div>
             <Button
               onClick={handleAiGenerateJob}

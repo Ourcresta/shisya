@@ -59,6 +59,7 @@ import {
   Layers,
   Sparkles,
   Loader2,
+  MessageSquarePlus,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -203,6 +204,7 @@ export default function GuruInternships() {
   const [aiSkillLevel, setAiSkillLevel] = useState("beginner");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiPreview, setAiPreview] = useState<any>(null);
+  const [aiExtraInstructions, setAiExtraInstructions] = useState("");
 
   const [membersDialogBatchId, setMembersDialogBatchId] = useState<number | null>(null);
   const [editingMemberRole, setEditingMemberRole] = useState<{ memberId: number; role: string } | null>(null);
@@ -380,6 +382,7 @@ export default function GuruInternships() {
       const res = await apiRequest("POST", "/api/udyog/admin/ai/generate-internship", {
         title: aiTitle,
         skillLevel: aiSkillLevel,
+        extraInstructions: aiExtraInstructions,
       });
       const data = await res.json();
       setAiPreview(data);
@@ -423,6 +426,7 @@ export default function GuruInternships() {
         setAiPreview(null);
         setAiTitle("");
         setAiSkillLevel("beginner");
+        setAiExtraInstructions("");
         toast({ title: "Internship created with AI-generated content!" });
       },
     });
@@ -500,7 +504,7 @@ export default function GuruInternships() {
             </div>
             <Button
               variant="outline"
-              onClick={() => { setAiPreview(null); setAiTitle(""); setAiSkillLevel("beginner"); setAiBuilderOpen(true); }}
+              onClick={() => { setAiPreview(null); setAiTitle(""); setAiSkillLevel("beginner"); setAiExtraInstructions(""); setAiBuilderOpen(true); }}
               data-testid="button-ai-internship-builder"
               className="border-purple-500/30 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10"
             >
@@ -1506,6 +1510,21 @@ export default function GuruInternships() {
                   <SelectItem value="advanced">Advanced (Score &gt; 75)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <MessageSquarePlus className="w-3.5 h-3.5" />
+                Extra Instructions
+              </Label>
+              <Textarea
+                value={aiExtraInstructions}
+                onChange={(e) => setAiExtraInstructions(e.target.value)}
+                placeholder="Add any specific requirements, topics to focus on, or guidelines for the AI..."
+                rows={3}
+                className="mt-1 text-sm"
+                data-testid="textarea-ai-internship-extra-instructions"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Optional: Guide the AI with additional context or preferences</p>
             </div>
             <Button
               onClick={handleAiGenerate}

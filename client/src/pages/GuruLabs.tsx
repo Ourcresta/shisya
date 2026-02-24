@@ -198,7 +198,7 @@ export default function GuruLabs() {
     setDeleteOpen(true);
   };
 
-  const handleAiGenerate = async ({ courseId, level }: { courseId: number; level: string }) => {
+  const handleAiGenerate = async ({ courseId, level, extraInstructions }: { courseId: number; level: string; extraInstructions: string }) => {
     const course = (courseOptions || []).find((c) => c.id === courseId);
     if (!course) return;
 
@@ -208,6 +208,7 @@ export default function GuruLabs() {
         courseTitle: course.title,
         level,
         language: aiLanguage,
+        extraInstructions,
       });
       const data = await res.json();
       setAiResult(data);

@@ -1,0 +1,180 @@
+You are a Senior Frontend Architect, Senior UI/UX Designer, and Senior Animation Engineer.
+
+Project Name:
+Our Shiksha – AI Learning Ecosystem
+
+Goal:
+Create a premium 3D rotating ecosystem component for the homepage hero section.
+
+The rotation sequence must visually represent the ecosystem flow:
+
+Our Shiksha → rotate → Usha → rotate → Our Udyog → rotate → repeat infinitely
+
+This animation represents:
+Learning → AI Guidance → Industry Placement
+
+--------------------------------------------
+🎯 CORE FUNCTIONAL REQUIREMENTS
+--------------------------------------------
+
+1. Create a true 3D rotating object using CSS 3D transforms.
+2. Use perspective and transform-style: preserve-3d.
+3. Place 3 faces at 120° intervals on Y-axis.
+4. Each face must be perfectly circular.
+5. Rotation must be smooth and continuous.
+6. Each face visible for 4 seconds.
+7. Total animation cycle: 12 seconds.
+8. Infinite loop.
+9. Use cubic-bezier easing (smooth professional motion).
+10. No external libraries.
+11. No jQuery.
+12. Minimal JS (only if necessary).
+13. Fully responsive.
+14. GPU accelerated (use will-change: transform).
+
+--------------------------------------------
+🖼 IMAGES
+--------------------------------------------
+
+Use these paths:
+
+/images/ourshiksha-logo.png
+/images/usha-avatar.png
+/images/ourudyog-logo.png
+
+All images must:
+- Maintain aspect ratio
+- Use object-fit: contain
+- Be centered
+- Have proper alt attributes
+
+--------------------------------------------
+🎨 DESIGN & VISUAL SPECIFICATIONS
+--------------------------------------------
+
+Theme:
+Dark AI startup aesthetic (already existing site theme)
+
+Visual Enhancements:
+- Subtle radial glow behind rotating object
+- Soft blue outer aura
+- Very soft drop shadow below object
+- Slight floating motion (translateY oscillation)
+- Perfect circle masking
+- Clean modern look (no excessive effects)
+
+Hover Effects:
+- Pause animation on hover
+- Slight scale up (1.05)
+- Slight glow intensification
+- Cursor pointer
+
+--------------------------------------------
+📱 RESPONSIVENESS
+--------------------------------------------
+
+Desktop:
+Size: 260px
+
+Tablet:
+Size: 220px
+
+Mobile:
+Size: 180px
+
+Must remain centered and not overflow layout.
+
+--------------------------------------------
+⚡ PERFORMANCE REQUIREMENTS
+--------------------------------------------
+
+- Use hardware acceleration
+- Use will-change: transform
+- Avoid layout shifts
+- No reflows
+- Lightweight CSS
+- No heavy JS loops
+
+--------------------------------------------
+♿ ACCESSIBILITY
+--------------------------------------------
+
+- Proper alt tags
+- Respect prefers-reduced-motion:
+  If user prefers reduced motion:
+    - Disable rotation
+    - Show static Usha face only
+- No flashing effects
+- Maintain semantic structure
+
+--------------------------------------------
+🏗 CODE STRUCTURE REQUIREMENTS
+--------------------------------------------
+
+Return:
+
+1. Clean semantic HTML
+2. Modular BEM-style class naming
+3. Production-ready CSS
+4. Commented sections
+5. Optional minimal JS only if required
+6. Clear instructions where to paste code
+7. Folder structure recommendation
+
+Do NOT:
+- Use inline styles
+- Use absolute positioning that breaks layout
+- Use hacky CSS
+- Overcomplicate with unnecessary JS
+
+--------------------------------------------
+🧠 ANIMATION LOGIC DETAIL
+--------------------------------------------
+
+Position faces:
+
+Face 1:
+rotateY(0deg) translateZ(depth)
+
+Face 2:
+rotateY(120deg) translateZ(depth)
+
+Face 3:
+rotateY(240deg) translateZ(depth)
+
+Animate parent container with rotateY:
+
+0% - show Our Shiksha
+33% - rotate to Usha
+66% - rotate to Our Udyog
+100% - full 360deg
+
+Use smooth timing function:
+cubic-bezier(0.65, 0.05, 0.36, 1)
+
+--------------------------------------------
+✨ OPTIONAL ENHANCEMENTS (If possible)
+--------------------------------------------
+
+- Add subtle animated gradient ring behind object
+- Add soft breathing glow every 8 seconds
+- Add slight depth shadow illusion
+- Add scroll-trigger pause capability (future-ready)
+
+--------------------------------------------
+🎬 FINAL OUTPUT FORMAT
+--------------------------------------------
+
+Return:
+
+SECTION 1: HTML
+SECTION 2: CSS
+SECTION 3: Optional JS
+SECTION 4: File placement instructions
+SECTION 5: Performance notes
+
+This must look like a premium AI EdTech startup homepage animation suitable for investors and enterprise clients.
+
+Keep it elegant.
+Keep it minimal.
+Keep it powerful.

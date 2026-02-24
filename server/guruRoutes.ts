@@ -605,7 +605,7 @@ const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 guruRouter.post("/ai/generate-test", async (req: Request, res: Response) => {
   try {
-    const { courseTitle, level, questionCount = 10 } = req.body;
+    const { courseTitle, level, questionCount = 10, extraInstructions } = req.body;
     if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
 
     const clampedCount = Math.min(Math.max(questionCount, 5), 20);
@@ -649,7 +649,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-The correctAnswer is a zero-based index (0-3) indicating the correct option. Make questions clear, unambiguous, and educational. Vary the position of correct answers.`
+The correctAnswer is a zero-based index (0-3) indicating the correct option. Make questions clear, unambiguous, and educational. Vary the position of correct answers.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
       temperature: 0.7,
@@ -673,7 +673,7 @@ The correctAnswer is a zero-based index (0-3) indicating the correct option. Mak
 
 guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
   try {
-    const { courseTitle, level } = req.body;
+    const { courseTitle, level, extraInstructions } = req.body;
     if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
 
     const difficultyGuide = level === "beginner"
@@ -710,7 +710,7 @@ Return a JSON object with this exact structure:
   "estimatedHours": estimated hours as a number
 }
 
-Make the project practical, relevant to industry needs, and something students would be proud to add to their portfolio.`
+Make the project practical, relevant to industry needs, and something students would be proud to add to their portfolio.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
       temperature: 0.7,
@@ -734,7 +734,7 @@ Make the project practical, relevant to industry needs, and something students w
 
 guruRouter.post("/ai/generate-lab", async (req: Request, res: Response) => {
   try {
-    const { courseTitle, level, language = "javascript" } = req.body;
+    const { courseTitle, level, language = "javascript", extraInstructions } = req.body;
     if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
 
     const langName = language === "javascript" ? "JavaScript" : language === "python" ? "Python" : language === "html" ? "HTML" : language === "css" ? "CSS" : language;
@@ -771,7 +771,7 @@ Return a JSON object with this exact structure:
   "language": "${language}"
 }
 
-Make the lab practical, focused on a single concept, and ensure the starter code compiles/runs even before the student fills in their parts (use placeholder values or empty function bodies). The expected output must exactly match what the solution code produces when run.`
+Make the lab practical, focused on a single concept, and ensure the starter code compiles/runs even before the student fills in their parts (use placeholder values or empty function bodies). The expected output must exactly match what the solution code produces when run.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
       temperature: 0.7,

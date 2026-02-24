@@ -191,7 +191,7 @@ export default function GuruProjects() {
     setDeleteOpen(true);
   };
 
-  const handleAiGenerate = async ({ courseId, level }: { courseId: number; level: string }) => {
+  const handleAiGenerate = async ({ courseId, level, extraInstructions }: { courseId: number; level: string; extraInstructions: string }) => {
     const course = (courseOptions || []).find((c) => c.id === courseId);
     if (!course) return;
 
@@ -200,6 +200,7 @@ export default function GuruProjects() {
       const res = await apiRequest("POST", "/api/guru/ai/generate-project", {
         courseTitle: course.title,
         level,
+        extraInstructions,
       });
       const data = await res.json();
       setAiResult(data);

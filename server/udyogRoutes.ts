@@ -1389,7 +1389,7 @@ const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 // POST /admin/ai/generate-internship - AI Internship Builder
 udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Response) => {
   try {
-    const { title, skillLevel } = req.body;
+    const { title, skillLevel, extraInstructions } = req.body;
     if (!title || !skillLevel) {
       return res.status(400).json({ error: "Title and skill level are required" });
     }
@@ -1434,7 +1434,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-Generate 6-10 tasks that progressively build skills. Tasks should be specific, actionable, and relevant to the internship domain. Include a mix of individual and collaborative tasks.`
+Generate 6-10 tasks that progressively build skills. Tasks should be specific, actionable, and relevant to the internship domain. Include a mix of individual and collaborative tasks.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
       max_tokens: 3000,
@@ -1457,7 +1457,7 @@ Generate 6-10 tasks that progressively build skills. Tasks should be specific, a
 // POST /admin/ai/generate-job - AI Job Builder
 udyogRouter.post("/admin/ai/generate-job", async (req: Request, res: Response) => {
   try {
-    const { title, jobType } = req.body;
+    const { title, jobType, extraInstructions } = req.body;
     if (!title) {
       return res.status(400).json({ error: "Job title is required" });
     }
@@ -1488,7 +1488,7 @@ Return a JSON object with this exact structure:
   "jobType": "${jobType || "full-time"}"
 }
 
-Make the description professional, engaging, and realistic. Include specific technologies and responsibilities.`
+Make the description professional, engaging, and realistic. Include specific technologies and responsibilities.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
       max_tokens: 2000,
