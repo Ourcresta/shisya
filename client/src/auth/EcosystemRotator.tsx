@@ -130,10 +130,9 @@ function CoinMesh() {
     }
 
     if (groupRef.current) {
-      groupRef.current.rotation.z = currentAngleRef.current + mouseOffset.current.x * 0.3;
+      groupRef.current.rotation.y = currentAngleRef.current + mouseOffset.current.x * 0.3;
       groupRef.current.position.y = Math.sin(t * 0.8) * 0.15;
       groupRef.current.rotation.x = mouseOffset.current.y;
-      groupRef.current.rotation.y = 0.3;
     }
 
     if (shadowRef.current) {
@@ -146,12 +145,12 @@ function CoinMesh() {
 
   return (
     <>
-      <group ref={groupRef} rotation={[0, 0.3, 0]}>
+      <group ref={groupRef}>
         <mesh
           ref={meshRef}
           geometry={coinGeometry}
           material={coinMaterials}
-          rotation={[0, 0, Math.PI / 2]}
+          rotation={[Math.PI / 2, 0, 0]}
           castShadow
         />
       </group>
