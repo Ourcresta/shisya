@@ -222,18 +222,28 @@ export default function UdyogAssessment() {
     setIsSubmitting(true);
     try {
       const domain = questionBank[selectedDomain];
+      const formattedAnswers = answers.map((selectedIndex, i) => ({
+        selected: selectedIndex,
+        correct: selectedIndex === domain.questions[i].correctIndex,
+      }));
       const res = await apiRequest("POST", "/api/udyog/assess", {
         domain: domain.label,
-        answers,
+        answers: formattedAnswers,
       });
       const data = await res.json();
+      const clientScore = answers.filter((a, i) => a === domain.questions[i].correctIndex).length;
+      const clientPercentage = Math.round((clientScore / 10) * 100);
+      const score = data.score ?? clientPercentage;
+      let role = "Junior Intern";
+      if (score >= 80) role = "Lead Developer";
+      else if (score >= 40) role = "Project Associate";
       setResult({
-        score: data.score ?? answers.filter((a, i) => a === domain.questions[i].correctIndex).length,
+        score: data.assessment?.score ?? clientScore,
         total: 10,
-        percentage: data.percentage ?? Math.round((answers.filter((a, i) => a === domain.questions[i].correctIndex).length / 10) * 100),
-        level: data.level ?? "Beginner",
-        role: data.role ?? "Junior Developer",
-        assessmentId: data.assessmentId,
+        percentage: score,
+        level: data.level ?? data.assessment?.level ?? "Beginner",
+        role,
+        assessmentId: data.assessment?.id,
       });
       setScreen("result");
     } catch (err: any) {
@@ -242,8 +252,8 @@ export default function UdyogAssessment() {
       const percentage = Math.round((score / 10) * 100);
       let level = "Beginner";
       let role = "Junior Intern";
-      if (percentage >= 80) { level = "Advanced"; role = "Senior Developer Intern"; }
-      else if (percentage >= 50) { level = "Intermediate"; role = "Developer Intern"; }
+      if (percentage >= 80) { level = "Advanced"; role = "Lead Developer"; }
+      else if (percentage >= 50) { level = "Intermediate"; role = "Project Associate"; }
       setResult({ score, total: 10, percentage, level, role });
       setScreen("result");
     } finally {
@@ -253,13 +263,15 @@ export default function UdyogAssessment() {
 
   const handleStartInternship = useCallback(async () => {
     if (!result?.assessmentId) {
-      setLocation("/shishya/udyog/dashboard");
+      toast({ title: "Assessment Not Saved", description: "Your assessment wasn't saved properly. Please retake it.", variant: "destructive" });
       return;
     }
     setIsAssigning(true);
     try {
       await apiRequest("POST", "/api/udyog/assign", { assessmentId: result.assessmentId });
-      await queryClient.invalidateQueries({ queryKey: ["/api/udyog"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-assignment"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-batch"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/assessments"] });
       setLocation("/shishya/udyog/dashboard");
     } catch {
       toast({ title: "Assignment failed", description: "Please try again later.", variant: "destructive" });
