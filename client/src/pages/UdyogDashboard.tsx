@@ -1298,13 +1298,12 @@ export default function UdyogDashboard() {
 
         <div style={{ position: "relative", padding: "36px 44px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
 
+          <img src={udyogLogo} alt="Our Udyog" style={{ position: "absolute", top: "22px", left: "22px", width: "80px", height: "80px", objectFit: "contain", zIndex: 2 }} draggable={false} />
+
           <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginBottom: "2px" }}>
-              <img src={udyogLogo} alt="Our Udyog" style={{ width: "44px", height: "44px", objectFit: "contain" }} draggable={false} />
-              <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
-                OUR UDYOG
-              </h1>
-            </div>
+            <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
+              OUR UDYOG
+            </h1>
             <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" as const, marginTop: "4px", color: "#4a5568" }}>
               Virtual Internship Programme
             </div>
