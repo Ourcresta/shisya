@@ -325,8 +325,8 @@ udyogRouter.patch("/tasks/:taskId/status", requireAuth as any, async (req: Authe
 udyogRouter.post("/submissions", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { assignmentId, taskId, content } = req.body;
-    if (!assignmentId || !taskId || !content) {
-      return res.status(400).json({ error: "assignmentId, taskId, and content are required" });
+    if (!assignmentId || !content) {
+      return res.status(400).json({ error: "assignmentId and content are required" });
     }
     const [assignment] = await db.select().from(udyogAssignments)
       .where(and(
@@ -339,7 +339,7 @@ udyogRouter.post("/submissions", requireAuth as any, async (req: AuthenticatedRe
     }
     const [submission] = await db.insert(udyogSubmissions).values({
       assignmentId,
-      taskId,
+      taskId: taskId || null,
       content,
       status: "pending",
     }).returning();
