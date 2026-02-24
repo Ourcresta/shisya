@@ -1,17 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, CheckCircle2, Clock, Send, MessageSquare, Award,
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
   Medal, AlertCircle, Users, Calendar, Star, Bell,
   BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
-  Shield, ArrowRight, Zap, TrendingUp, Target
+  Shield, ArrowRight, Zap, TrendingUp, Target, Download
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const sidebarItems = [
   { key: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -153,6 +155,8 @@ export default function UdyogDashboard() {
   const [logHours, setLogHours] = useState("");
   const [logDesc, setLogDesc] = useState("");
   const [logLink, setLogLink] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const certificateRef = useRef<HTMLDivElement>(null);
 
   const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
     queryKey: ["/api/udyog/my-assignment"],
@@ -1189,49 +1193,208 @@ export default function UdyogDashboard() {
     </motion.div>
   );
 
+  const handleDownloadCertificate = async () => {
+    if (!certificateRef.current) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        allowTaint: true,
+        removeContainer: true,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = (pdfHeight - imgHeight * ratio) / 2;
+      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      const certId = assignment?.certificate?.certificateId || "UDYOG-CERT";
+      pdf.save(`${certId}-certificate.pdf`);
+      toast({ title: "Certificate Downloaded", description: "Your certificate PDF has been saved." });
+    } catch (err) {
+      toast({ title: "Download Failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const CertificatePreviewCard = () => {
+    const certId = assignment?.certificate?.certificateId || "UDYOG-XXXXXXXX";
+    const studentName = username;
+    const programTitle = internship?.title || "Virtual Internship";
+    const role = assignment?.assignedRole || "Intern";
+    const domain = internship?.domain || "";
+    const completionDate = assignment?.completedAt ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+    return (
+      <div
+        ref={certificateRef}
+        style={{
+          width: "800px",
+          height: "566px",
+          background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)",
+          position: "relative",
+          overflow: "hidden",
+          fontFamily: "'Inter', 'Segoe UI', sans-serif",
+        }}
+        data-testid="certificate-preview"
+      >
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
+        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "6px", background: "linear-gradient(180deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
+        <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "6px", background: "linear-gradient(180deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
+
+        <div style={{ position: "absolute", top: "30px", left: "30px", width: "120px", height: "120px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,245,255,0.08), transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "30px", right: "30px", width: "150px", height: "150px", borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%)" }} />
+
+        <div style={{ position: "relative", padding: "40px 50px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "8px" }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A" }}>U</span>
+              </div>
+              <span style={{ fontSize: "18px", fontWeight: 700, color: "#E2E8F0", letterSpacing: "2px", textTransform: "uppercase" }}>Our Udyog</span>
+            </div>
+            <p style={{ fontSize: "11px", color: "#64748B", letterSpacing: "4px", textTransform: "uppercase", margin: 0 }}>Certificate of Completion</p>
+          </div>
+
+          <div style={{ textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "8px", letterSpacing: "1px" }}>This is to certify that</p>
+            <h1 style={{ fontSize: "36px", fontWeight: 700, color: "#FFFFFF", marginBottom: "6px", fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+              {studentName}
+            </h1>
+            <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "20px" }}>
+              has successfully completed the internship program
+            </p>
+            <div style={{ display: "inline-block", margin: "0 auto", padding: "10px 28px", borderRadius: "8px", background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.15)" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#00F5FF", margin: 0, fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+                {programTitle}
+              </h2>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: "30px", marginTop: "18px" }}>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Role</p>
+                <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{role}</p>
+              </div>
+              {domain && (
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Domain</p>
+                  <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{domain}</p>
+                </div>
+              )}
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Tasks Completed</p>
+                <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{completedTasksCount}/{tasks.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            <div>
+              <div style={{ width: "120px", borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: "6px" }}>
+                <p style={{ fontSize: "10px", color: "#94A3B8", margin: 0 }}>Program Director</p>
+                <p style={{ fontSize: "11px", color: "#E2E8F0", fontWeight: 600, margin: "2px 0 0 0" }}>OurShiksha</p>
+              </div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "10px", color: "#64748B", margin: 0 }}>{completionDate}</p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ fontSize: "9px", color: "#475569", margin: 0 }}>Certificate ID</p>
+              <p style={{ fontSize: "11px", color: "#00F5FF", fontWeight: 600, fontFamily: "monospace", margin: "2px 0 0 0" }}>{certId}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderCertification = () => {
     const remainingTasks = tasks.filter((t: any) => t.status !== "completed");
     const certProgress = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0;
+    const hasCertificate = !!assignment?.certificate;
 
     return (
       <motion.div key="certification" {...fadeInUp} className="space-y-6">
         {allTasksCompleted ? (
-          <div className="text-center py-16">
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }}>
-              <div className="relative inline-flex items-center justify-center mb-8">
-                <div className="absolute w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%)", filter: "blur(20px)" }} />
-                <div className="w-28 h-28 rounded-full flex items-center justify-center relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "2px solid rgba(0,245,255,0.4)" }}>
-                  <Award className="w-14 h-14" style={{ color: "#00F5FF" }} />
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-congratulations">
-                Congratulations!
-              </h2>
-              <p className="mb-8 max-w-md mx-auto" style={{ color: "#94A3B8" }}>
-                You have completed all tasks in your internship. Generate your official certificate to showcase your achievement.
-              </p>
-              <button
-                onClick={() => generateCertMutation.mutate()}
-                disabled={generateCertMutation.isPending}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all text-lg"
-                style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
-                data-testid="button-generate-certificate"
-              >
-                <Award className="w-5 h-5" />
-                {generateCertMutation.isPending ? "Generating..." : "Generate Certificate"}
-              </button>
-              {assignment.certificate && (
-                <div className="mt-8 rounded-xl p-6 max-w-md mx-auto" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.2)" }} data-testid="certificate-details">
-                  <Award className="w-10 h-10 mx-auto mb-3" style={{ color: "#00F5FF" }} />
-                  <p className="font-medium mb-1" style={{ color: "#FFFFFF" }}>{internship?.title}</p>
-                  <p className="text-sm mb-4" style={{ color: "#94A3B8" }}>Certificate ID: {assignment.certificate.certificateId}</p>
+          <div>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
+              {!hasCertificate && (
+                <div className="text-center py-10 mb-6">
+                  <div className="relative inline-flex items-center justify-center mb-6">
+                    <div className="absolute w-32 h-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%)", filter: "blur(20px)" }} />
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "2px solid rgba(0,245,255,0.4)" }}>
+                      <Award className="w-10 h-10" style={{ color: "#00F5FF" }} />
+                    </div>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-congratulations">
+                    Congratulations!
+                  </h2>
+                  <p className="mb-6 max-w-md mx-auto text-sm" style={{ color: "#94A3B8" }}>
+                    You have completed all tasks. Generate your official certificate to showcase your achievement.
+                  </p>
                   <button
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium"
-                    style={{ border: "1px solid rgba(0,245,255,0.3)", background: "rgba(0,245,255,0.05)", color: "#00F5FF" }}
-                    data-testid="button-download-pdf"
+                    onClick={() => generateCertMutation.mutate()}
+                    disabled={generateCertMutation.isPending}
+                    className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all text-lg"
+                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                    data-testid="button-generate-certificate"
                   >
-                    Download PDF
+                    <Award className="w-5 h-5" />
+                    {generateCertMutation.isPending ? "Generating..." : "Generate Certificate"}
                   </button>
+                </div>
+              )}
+
+              {hasCertificate && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Your Certificate</h2>
+                      <p className="text-sm mt-1" style={{ color: "#94A3B8" }}>Certificate ID: <span style={{ color: "#00F5FF", fontFamily: "monospace" }}>{assignment.certificate.certificateId}</span></p>
+                    </div>
+                    <button
+                      onClick={handleDownloadCertificate}
+                      disabled={downloading}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all"
+                      style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                      data-testid="button-download-pdf"
+                    >
+                      <Download className="w-4 h-4" />
+                      {downloading ? "Generating PDF..." : "Download PDF"}
+                    </button>
+                  </div>
+
+                  <div className="rounded-xl overflow-hidden" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.15)" }}>
+                    <div className="overflow-x-auto flex justify-center p-6" style={{ background: "rgba(0,0,0,0.3)" }}>
+                      <CertificatePreviewCard />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="rounded-xl p-4 text-center" style={glassCard}>
+                      <Award className="w-6 h-6 mx-auto mb-2" style={{ color: "#00F5FF" }} />
+                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{internship?.title}</p>
+                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Program</p>
+                    </div>
+                    <div className="rounded-xl p-4 text-center" style={glassCard}>
+                      <CheckCircle2 className="w-6 h-6 mx-auto mb-2" style={{ color: "#10B981" }} />
+                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{completedTasksCount}/{tasks.length} Tasks</p>
+                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Completed</p>
+                    </div>
+                    <div className="rounded-xl p-4 text-center" style={glassCard}>
+                      <Shield className="w-6 h-6 mx-auto mb-2" style={{ color: "#A78BFA" }} />
+                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{assignment.assignedRole}</p>
+                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Role</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </motion.div>
