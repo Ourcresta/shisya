@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   GraduationCap,
   BookOpen,
@@ -192,6 +192,36 @@ function SectionGlow({ position = "center", color = C.teal }: { position?: strin
 
 function HeroSection() {
   const { user } = useAuth();
+  const [mode, setMode] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [underlineWidth, setUnderlineWidth] = useState("0%");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const modes = [
+    { headline: "Learn. Build. Prove.", subtext: "Certified by Our Shiksha." },
+    { headline: "Get Matched. Work. Prove.", subtext: "Certified by Our Udyog." },
+  ];
+
+  const triggerSwitch = useCallback(() => {
+    setVisible(false);
+    setUnderlineWidth("0%");
+    timerRef.current = setTimeout(() => {
+      setMode((prev) => (prev + 1) % 2);
+      setVisible(true);
+      setTimeout(() => setUnderlineWidth("100%"), 50);
+    }, 420);
+  }, []);
+
+  useEffect(() => {
+    setUnderlineWidth("100%");
+    const interval = setInterval(triggerSwitch, 4000);
+    return () => {
+      clearInterval(interval);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [triggerSwitch]);
+
+  const current = modes[mode];
 
   return (
     <section className="relative overflow-hidden py-20 md:py-28">
@@ -201,19 +231,55 @@ function HeroSection() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left space-y-6">
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
-              style={{
-                fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 60%, ${C.purple} 100%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                letterSpacing: "-0.02em",
-              }}
-              data-testid="text-hero-headline"
-            >
-              Learn. Practice. Prove.
-            </h1>
+            <div className="min-h-[140px] md:min-h-[170px] lg:min-h-[200px] flex flex-col justify-center">
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 50%, ${C.purple} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  letterSpacing: "-0.02em",
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(10px)",
+                  transition: "opacity 400ms ease, transform 400ms ease",
+                  textShadow: "0 0 40px rgba(0,245,255,0.15)",
+                  filter: visible ? "drop-shadow(0 0 20px rgba(0,245,255,0.2))" : "none",
+                }}
+                data-testid="text-hero-headline"
+              >
+                {current.headline}
+              </h1>
+
+              <div className="relative inline-block mt-3">
+                <p
+                  className="text-base md:text-lg font-medium tracking-wide"
+                  style={{
+                    color: "rgba(148,163,184,0.9)",
+                    opacity: visible ? 1 : 0,
+                    transform: visible ? "translateY(0)" : "translateY(10px)",
+                    transition: "opacity 400ms ease 80ms, transform 400ms ease 80ms",
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="text-hero-subtext"
+                >
+                  {current.subtext}
+                </p>
+                <div
+                  className="mt-2 h-[2px] rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${C.teal}, ${C.purple})`,
+                    width: underlineWidth,
+                    maxWidth: mode === 0 ? "210px" : "200px",
+                    transition: "width 800ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    boxShadow: `0 0 8px rgba(0,245,255,0.5), 0 0 20px rgba(0,245,255,0.2)`,
+                    opacity: visible ? 1 : 0,
+                  }}
+                  data-testid="hero-underline-glow"
+                />
+              </div>
+            </div>
+
             <p
               className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0"
               style={{ color: C.textSecondary, lineHeight: "1.8" }}
