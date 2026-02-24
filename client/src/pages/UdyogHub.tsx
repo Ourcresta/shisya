@@ -520,9 +520,17 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           className="rounded-2xl border border-white/10 p-6"
           style={{ background: "rgba(255,255,255,0.03)" }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <Brain className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-cyan-400" />
+              <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
+            </div>
+            <Link href="/shishya/udyog/assess">
+              <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-retake-assessment-active">
+                Retake Assessment
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {assessments.map((a: any, idx: number) => {
