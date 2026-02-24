@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Home } from "lucide-react";
 import { Link } from "wouter";
 
-const ThreeCoin = lazy(() => import("./ThreeCoin"));
+const EcosystemRotator = lazy(() => import("./EcosystemRotator"));
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -64,8 +64,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <Suspense fallback={<div style={{ width: 200, height: 200 }} />}>
-                <ThreeCoin />
+              <Suspense fallback={<div style={{ width: 260, height: 320 }} />}>
+                <EcosystemRotator />
               </Suspense>
             </motion.div>
 
@@ -75,7 +75,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               Learn. Build. Get Certified.<br />
               Launch Your Career with AI Guidance.
             </p>
-            <p className="auth-brand-powered">Powered by Usha AI Mentor</p>
+            <div className="auth-ecosystem-flow">
+              <span className="auth-ecosystem-step">Learning</span>
+              <span className="auth-ecosystem-arrow">→</span>
+              <span className="auth-ecosystem-step">AI Guidance</span>
+              <span className="auth-ecosystem-arrow">→</span>
+              <span className="auth-ecosystem-step">Industry Placement</span>
+            </div>
           </motion.div>
 
           <div className="auth-floating-icons">
