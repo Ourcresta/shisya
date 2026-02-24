@@ -3,7 +3,7 @@ import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Hom
 import { Link } from "wouter";
 import sealLogo from "@assets/image_1771692892158.png";
 import ushaAvatar from "@assets/image_1767697725032.png";
-import udyogSeal from "@assets/image_1771917397879.png";
+import udyogSeal from "@assets/image_1771923592033.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
