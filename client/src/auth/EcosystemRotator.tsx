@@ -1,4 +1,4 @@
-import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useRef, useMemo, Suspense, useEffect } from "react";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import * as THREE from "three";
@@ -6,14 +6,34 @@ import shikshaCoin from "@assets/image_1771927817215.png";
 import udyogCoin from "@assets/image_1771927824621.png";
 import ushaCoin from "@assets/image_1771927836393.png";
 
+const HOLD_DURATION = 5;
+const FLIP_DURATION = 0.9;
+
+function cubicBezierEase(t: number): number {
+  const p1x = 0.22, p1y = 1.0;
+  const p2x = 0.36, p2y = 1.0;
+
+  let lo = 0, hi = 1;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    const bx = 3 * p1x * mid * (1 - mid) * (1 - mid) + 3 * p2x * mid * mid * (1 - mid) + mid * mid * mid;
+    if (bx < t) lo = mid;
+    else hi = mid;
+  }
+  const u = (lo + hi) / 2;
+  return 3 * p1y * u * (1 - u) * (1 - u) + 3 * p2y * u * u * (1 - u) + u * u * u;
+}
+
 function CoinMesh() {
   const coinRef = useRef<THREE.Group>(null!);
   const shadowRef = useRef<THREE.Mesh>(null!);
-  const frontMatRef = useRef<THREE.MeshStandardMaterial>(null!);
   const backMatRef = useRef<THREE.MeshStandardMaterial>(null!);
-  const spinBoost = useRef(0);
   const mouseOffset = useRef({ x: 0, y: 0 });
-  const currentPair = useRef(0);
+
+  const phaseRef = useRef<"hold" | "flipping" | "showing" | "flipping_back">("hold");
+  const phaseStartRef = useRef(0);
+  const flipCountRef = useRef(0);
+  const currentAngleRef = useRef(0);
 
   const [shikshaTex, ushaTex, udyogTex] = useLoader(THREE.TextureLoader, [
     shikshaCoin,
@@ -32,14 +52,7 @@ function CoinMesh() {
     return all;
   }, [shikshaTex, ushaTex, udyogTex]);
 
-  const pairs = useMemo(
-    () => [
-      [0, 1],
-      [1, 2],
-      [2, 0],
-    ],
-    []
-  );
+  const backTextures = useMemo(() => [textures[0], textures[2]], [textures]);
 
   const edgeMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
@@ -83,40 +96,62 @@ function CoinMesh() {
 
   useEffect(() => {
     const canvas = gl.domElement;
-
     const onPointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseOffset.current.x = ((e.clientX - rect.left) / rect.width - 0.5) * 0.15;
-      mouseOffset.current.y = ((e.clientY - rect.top) / rect.height - 0.5) * 0.1;
+      mouseOffset.current.x = ((e.clientX - rect.left) / rect.width - 0.5) * 0.12;
+      mouseOffset.current.y = ((e.clientY - rect.top) / rect.height - 0.5) * 0.08;
     };
-
-    const onClick = () => {
-      spinBoost.current = 8;
-    };
-
     canvas.addEventListener("pointermove", onPointerMove);
-    canvas.addEventListener("click", onClick);
-    return () => {
-      canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("click", onClick);
-    };
+    return () => canvas.removeEventListener("pointermove", onPointerMove);
   }, [gl]);
 
-  useFrame(({ clock }, delta) => {
+  useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
+    const elapsed = t - phaseStartRef.current;
 
-    if (spinBoost.current > 0) {
-      spinBoost.current = Math.max(0, spinBoost.current - delta * 4);
+    if (phaseRef.current === "hold") {
+      if (elapsed >= HOLD_DURATION) {
+        phaseRef.current = "flipping";
+        phaseStartRef.current = t;
+
+        if (backMatRef.current) {
+          const texIdx = flipCountRef.current % 2;
+          backMatRef.current.map = backTextures[texIdx];
+          backMatRef.current.needsUpdate = true;
+        }
+      }
+    } else if (phaseRef.current === "flipping") {
+      const progress = Math.min(elapsed / FLIP_DURATION, 1);
+      const eased = cubicBezierEase(progress);
+      currentAngleRef.current = eased * Math.PI;
+
+      if (progress >= 1) {
+        currentAngleRef.current = Math.PI;
+        phaseRef.current = "showing";
+        phaseStartRef.current = t;
+      }
+    } else if (phaseRef.current === "showing") {
+      if (elapsed >= HOLD_DURATION) {
+        phaseRef.current = "flipping_back";
+        phaseStartRef.current = t;
+      }
+    } else if (phaseRef.current === "flipping_back") {
+      const progress = Math.min(elapsed / FLIP_DURATION, 1);
+      const eased = cubicBezierEase(progress);
+      currentAngleRef.current = Math.PI + eased * Math.PI;
+
+      if (progress >= 1) {
+        currentAngleRef.current = 0;
+        phaseRef.current = "hold";
+        phaseStartRef.current = t;
+        flipCountRef.current += 1;
+      }
     }
 
     if (coinRef.current) {
-      const baseSpeed = 0.4;
-      const speed = baseSpeed + spinBoost.current;
-      coinRef.current.rotation.y += speed * delta;
+      coinRef.current.rotation.y = currentAngleRef.current;
       coinRef.current.position.y = Math.sin(t * 0.8) * 0.08;
-
-      coinRef.current.rotation.x =
-        Math.PI * 0.08 + mouseOffset.current.y;
+      coinRef.current.rotation.x = Math.PI * 0.08 + mouseOffset.current.y;
       coinRef.current.rotation.z = mouseOffset.current.x * 0.3;
     }
 
@@ -125,25 +160,6 @@ function CoinMesh() {
       shadowRef.current.scale.set(scale, scale, 1);
       const mat = shadowRef.current.material as THREE.MeshBasicMaterial;
       mat.opacity = 0.25 + Math.sin(t * 0.8) * 0.03;
-    }
-
-    if (coinRef.current && frontMatRef.current && backMatRef.current) {
-      const rotY = coinRef.current.rotation.y % (Math.PI * 2);
-      const isEdgeView =
-        (rotY > Math.PI * 0.4 && rotY < Math.PI * 0.6) ||
-        (rotY > Math.PI * 1.4 && rotY < Math.PI * 1.6);
-
-      if (isEdgeView) {
-        const newPair = (currentPair.current + 1) % pairs.length;
-        if (newPair !== currentPair.current) {
-          currentPair.current = newPair;
-          const [fi, bi] = pairs[newPair];
-          frontMatRef.current.map = textures[fi];
-          frontMatRef.current.needsUpdate = true;
-          backMatRef.current.map = textures[bi];
-          backMatRef.current.needsUpdate = true;
-        }
-      }
     }
   });
 
@@ -162,8 +178,7 @@ function CoinMesh() {
           rotation={[-Math.PI / 2, 0, 0]}
         >
           <meshStandardMaterial
-            ref={frontMatRef}
-            map={textures[0]}
+            map={textures[1]}
             metalness={0.5}
             roughness={0.25}
             envMapIntensity={0.8}
@@ -177,7 +192,7 @@ function CoinMesh() {
         >
           <meshStandardMaterial
             ref={backMatRef}
-            map={textures[1]}
+            map={textures[0]}
             metalness={0.5}
             roughness={0.25}
             envMapIntensity={0.8}
