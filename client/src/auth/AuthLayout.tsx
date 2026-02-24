@@ -1,7 +1,10 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Home } from "lucide-react";
 import { Link } from "wouter";
 import sealLogo from "@assets/image_1771692892158.png";
+import ushaAvatar from "@assets/image_1767697725032.png";
+import udyogSeal from "@assets/image_1771917397879.png";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -17,7 +20,29 @@ const floatingIcons = [
   { Icon: Globe, delay: 1.8, x: "55%", y: "88%", size: 22 },
 ];
 
+const sealFaces = [
+  { src: ushaAvatar, alt: "Usha AI Mentor" },
+  { src: sealLogo, alt: "OurShiksha Seal" },
+  { src: ushaAvatar, alt: "Usha AI Mentor" },
+  { src: udyogSeal, alt: "Our Udyog Seal" },
+];
+
 export default function AuthLayout({ children }: AuthLayoutProps) {
+  const [faceIndex, setFaceIndex] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIsFlipping(true);
+      setTimeout(() => {
+        setFaceIndex((prev) => (prev + 1) % sealFaces.length);
+        setIsFlipping(false);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentFace = sealFaces[faceIndex];
 
   return (
     <div className="auth-page-wrapper">
@@ -65,11 +90,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
               <div className="auth-seal-glow" />
-              <img
-                src={sealLogo}
-                alt="OurShiksha Seal"
-                className="auth-seal-image"
-              />
+              <div className={`auth-seal-flipper ${isFlipping ? "auth-seal-flipping" : ""}`}>
+                <img
+                  src={currentFace.src}
+                  alt={currentFace.alt}
+                  className="auth-seal-image"
+                />
+              </div>
             </motion.div>
 
             <h1 className="auth-brand-tagline">Welcome to the Future of Learning</h1>

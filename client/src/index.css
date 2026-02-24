@@ -1415,6 +1415,7 @@ html.dark body {
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+  perspective: 800px;
 }
 
 .auth-seal-glow {
@@ -1427,6 +1428,16 @@ html.dark body {
   box-shadow: 0 0 60px rgba(0,180,220,0.15), 0 0 120px rgba(0,100,200,0.08);
 }
 
+.auth-seal-flipper {
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotateY(0deg);
+}
+
+.auth-seal-flipper.auth-seal-flipping {
+  transform: rotateY(90deg);
+}
+
 .auth-seal-image {
   width: 170px;
   height: 170px;
@@ -1435,6 +1446,7 @@ html.dark body {
   z-index: 1;
   filter: drop-shadow(0 0 20px rgba(0,180,220,0.3)) drop-shadow(0 0 40px rgba(0,150,200,0.15));
   animation: auth-seal-float 6s ease-in-out infinite;
+  object-fit: cover;
 }
 
 @keyframes auth-seal-pulse {
