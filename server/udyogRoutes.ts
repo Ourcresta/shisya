@@ -94,14 +94,40 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
     if (!assessment) {
       return res.status(404).json({ error: "Assessment not found" });
     }
-    const [internship] = await db.select().from(udyogInternships)
-      .where(and(
-        eq(udyogInternships.skillLevel, assessment.level),
-        eq(udyogInternships.isActive, true)
-      ))
-      .limit(1);
+    let internship: any = null;
+    // 1. Try exact match: domain + skill level
+    if (assessment.domain) {
+      const [exact] = await db.select().from(udyogInternships)
+        .where(and(
+          eq(udyogInternships.domain, assessment.domain),
+          eq(udyogInternships.skillLevel, assessment.level),
+          eq(udyogInternships.isActive, true)
+        ))
+        .limit(1);
+      internship = exact || null;
+    }
+    // 2. Fallback: domain only (any skill level)
+    if (!internship && assessment.domain) {
+      const [domainOnly] = await db.select().from(udyogInternships)
+        .where(and(
+          eq(udyogInternships.domain, assessment.domain),
+          eq(udyogInternships.isActive, true)
+        ))
+        .limit(1);
+      internship = domainOnly || null;
+    }
+    // 3. Fallback: skill level only (any domain)
     if (!internship) {
-      return res.status(404).json({ error: "No matching internship found for your skill level" });
+      const [levelOnly] = await db.select().from(udyogInternships)
+        .where(and(
+          eq(udyogInternships.skillLevel, assessment.level),
+          eq(udyogInternships.isActive, true)
+        ))
+        .limit(1);
+      internship = levelOnly || null;
+    }
+    if (!internship) {
+      return res.status(404).json({ error: "No matching internship found for your domain and skill level" });
     }
     const roleMap: Record<string, string> = {
       beginner: "Junior Intern",

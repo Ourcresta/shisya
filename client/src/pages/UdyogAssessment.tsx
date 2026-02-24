@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Code, Database, Smartphone, Palette, Server, Shield,
   ArrowRight, ArrowLeft, Clock, CheckCircle, Award,
-  Rocket, ChevronRight, Target, Zap, Brain
+  Rocket, ChevronRight, Target, Zap, Brain, Home
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -301,6 +301,19 @@ export default function UdyogAssessment() {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.5 }}
             >
+              <div className="mb-6">
+                <Link href="/shishya/udyog/hub">
+                  <Button
+                    variant="outline"
+                    className="border-white/10 text-gray-300 bg-transparent hover:bg-white/5"
+                    data-testid="button-back-hub"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+                </Link>
+              </div>
+
               <div className="text-center mb-12">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
