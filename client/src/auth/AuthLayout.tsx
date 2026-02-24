@@ -66,6 +66,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
               <div className="auth-seal-glow" />
+              <div className="auth-coin-edge" />
               <div className="auth-seal-flipper">
                 <div className="auth-seal-face auth-seal-face--usha">
                   <img src={ushaAvatar} alt="Usha AI Mentor" className="auth-seal-image" />
@@ -77,6 +78,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                   <img src={udyogSeal} alt="Our Udyog Seal" className="auth-seal-image" />
                 </div>
               </div>
+              <div className="auth-seal-shadow" />
             </motion.div>
 
             <h1 className="auth-brand-tagline">Welcome to the Future of Learning</h1>
