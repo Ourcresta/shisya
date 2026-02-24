@@ -49,3 +49,4 @@ The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind 
 - **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
 - **OpenAI:** Used for the Usha AI Tutor (gpt-4.1-mini model).
 - **Zoho TrainerCentral:** Integrated with the GURU admin portal for course/curriculum sync and auto student/course enrollment.
+- **Three.js / @react-three/fiber / @react-three/drei:** Real 3D coin animation on auth pages. Component at `client/src/auth/ThreeCoin.tsx`. Uses CylinderGeometry with metallic MeshStandardMaterial, ribbed edge, studio environment lighting, front face = OurShiksha logo, back face = OurUdyog logo, continuous Y-axis rotation (8s per revolution), subtle floating sine motion, transparent background.
