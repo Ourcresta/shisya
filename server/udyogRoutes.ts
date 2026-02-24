@@ -389,8 +389,21 @@ udyogRouter.post("/certificate/generate", requireAuth as any, async (req: Authen
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found" });
     }
-    const tasks = await db.select().from(udyogTasks)
-      .where(eq(udyogTasks.internshipId, assignment.internshipId));
+    let tasks;
+    if (assignment.batchId) {
+      tasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, assignment.internshipId),
+          eq(udyogTasks.batchId, assignment.batchId)
+        ));
+    }
+    if (!tasks || tasks.length === 0) {
+      tasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, assignment.internshipId),
+          sql`${udyogTasks.batchId} IS NULL`
+        ));
+    }
     const allCompleted = tasks.length > 0 && tasks.every(t => t.status === "completed");
     if (!allCompleted) {
       return res.status(400).json({ error: "All tasks must be completed before generating a certificate" });
