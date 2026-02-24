@@ -4,9 +4,9 @@ import {
   LayoutDashboard, Briefcase, Search, MapPin, Calendar,
   Send, BadgeCheck, Building2, Clock, Eye, ArrowRight,
   Rocket, Settings, Bell, Shield, Globe, ChevronRight,
-  Award, Target, Brain, Zap, TrendingUp,
+  Award, Target, Brain, Zap, TrendingUp, Play,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -152,6 +152,10 @@ export default function UdyogHub() {
 }
 
 function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [assigningId, setAssigningId] = useState<number | null>(null);
+
   const { data: assignmentData, isLoading } = useQuery<any>({
     queryKey: ["/api/udyog/my-assignment"],
     enabled: !!user,
@@ -171,6 +175,27 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
   const { data: allAssignments = [] } = useQuery<any[]>({
     queryKey: ["/api/udyog/my-assignments"],
     enabled: !!user,
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: async (assessmentId: number) => {
+      setAssigningId(assessmentId);
+      return apiRequest("POST", "/api/udyog/assign", { assessmentId });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-assignment"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-batch"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/assessments"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-assignments"] });
+      toast({ title: "Internship Assigned!", description: "You've been matched with an internship based on your assessment. Opening your workspace..." });
+      setLocation("/shishya/udyog/dashboard");
+    },
+    onError: (error: any) => {
+      toast({ title: "Assignment Failed", description: error?.message || "No matching internship found. Try a different domain.", variant: "destructive" });
+    },
+    onSettled: () => {
+      setAssigningId(null);
+    },
   });
 
   const hasBatch = !!batchData?.batch;
@@ -266,6 +291,8 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 {assessments.map((a: any, idx: number) => {
                   const levelStyle = assessmentLevelColors[a.level?.toLowerCase()] || assessmentLevelColors.beginner;
+                  const isAssigning = assigningId === a.id;
+                  const roleLabel = a.score >= 80 ? "Lead Developer" : a.score >= 40 ? "Project Associate" : "Junior Intern";
                   return (
                     <motion.div
                       key={a.id || idx}
@@ -295,9 +322,29 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                           style={{ width: `${a.score}%`, background: `linear-gradient(90deg, ${levelStyle.text}, #22D3EE)` }}
                         />
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-2">
+                      <p className="text-[10px] text-gray-500 mt-2 mb-3">
                         {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}
                       </p>
+                      <div className="pt-3 border-t border-white/5">
+                        <p className="text-[10px] text-gray-500 mb-2">
+                          Qualifies as: <span className="text-cyan-400 font-medium">{roleLabel}</span>
+                        </p>
+                        <Button
+                          size="sm"
+                          className="w-full text-white border-0 text-xs"
+                          style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                          onClick={() => assignMutation.mutate(a.id)}
+                          disabled={assignMutation.isPending}
+                          data-testid={`button-start-internship-${a.id || idx}`}
+                        >
+                          {isAssigning ? "Assigning..." : (
+                            <>
+                              <Rocket className="w-3.5 h-3.5 mr-1.5" />
+                              Start {a.domain} Internship
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </motion.div>
                   );
                 })}
@@ -332,17 +379,17 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
               <div className="flex items-center gap-3 mb-4">
                 <Zap className="w-5 h-5 text-yellow-400" />
                 <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                  Ready to Start Your Internship?
+                  Want to Try Another Domain?
                 </h3>
               </div>
               <p className="text-sm text-gray-400 mb-4">
-                You've completed your assessment. Browse available internship programs and apply to get matched with a role that fits your skill level.
+                Take a new assessment in a different domain, or retake one to improve your score and get matched with a better role.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href={ctaHref}>
                   <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-retake-assessment-hub">
                     <Target className="w-4 h-4 mr-2" />
-                    Retake Assessment
+                    Take Assessment
                   </Button>
                 </Link>
               </div>
