@@ -5,7 +5,7 @@ import {
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
   Medal, AlertCircle, Users, Calendar, Star, Bell,
   BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
-  Shield, ArrowRight, Zap, TrendingUp, Target, Download
+  Shield, ArrowRight, Zap, TrendingUp, Target, Download, Eye, X
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -156,6 +156,7 @@ export default function UdyogDashboard() {
   const [logDesc, setLogDesc] = useState("");
   const [logLink, setLogLink] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [viewCertificate, setViewCertificate] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
@@ -1225,17 +1226,17 @@ export default function UdyogDashboard() {
     }
   };
 
-  const CertificatePreviewCard = () => {
-    const certId = assignment?.certificate?.certificateId || "UDYOG-XXXXXXXX";
+  const renderCertificateBody = (attachRef: boolean) => {
+    const certIdVal = assignment?.certificate?.certificateId || "UDYOG-XXXXXXXX";
     const studentName = username;
     const programTitle = internship?.title || "Virtual Internship";
     const role = assignment?.assignedRole || "Intern";
     const domain = internship?.domain || "";
-    const completionDate = assignment?.completedAt ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    const completionDateStr = assignment?.completedAt ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
     return (
       <div
-        ref={certificateRef}
+        ref={attachRef ? certificateRef : undefined}
         style={{
           width: "800px",
           height: "566px",
@@ -1304,11 +1305,11 @@ export default function UdyogDashboard() {
               </div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "10px", color: "#64748B", margin: 0 }}>{completionDate}</p>
+              <p style={{ fontSize: "10px", color: "#64748B", margin: 0 }}>{completionDateStr}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <p style={{ fontSize: "9px", color: "#475569", margin: 0 }}>Certificate ID</p>
-              <p style={{ fontSize: "11px", color: "#00F5FF", fontWeight: 600, fontFamily: "monospace", margin: "2px 0 0 0" }}>{certId}</p>
+              <p style={{ fontSize: "11px", color: "#00F5FF", fontWeight: 600, fontFamily: "monospace", margin: "2px 0 0 0" }}>{certIdVal}</p>
             </div>
           </div>
         </div>
@@ -1320,6 +1321,10 @@ export default function UdyogDashboard() {
     const remainingTasks = tasks.filter((t: any) => t.status !== "completed");
     const certProgress = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0;
     const hasCertificate = !!assignment?.certificate;
+    const certId = assignment?.certificate?.certificateId || "";
+    const completionDate = assignment?.completedAt
+      ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+      : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
     return (
       <motion.div key="certification" {...fadeInUp} className="space-y-6">
@@ -1355,26 +1360,69 @@ export default function UdyogDashboard() {
 
               {hasCertificate && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div>
-                      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Your Certificate</h2>
-                      <p className="text-sm mt-1" style={{ color: "#94A3B8" }}>Certificate ID: <span style={{ color: "#00F5FF", fontFamily: "monospace" }}>{assignment.certificate.certificateId}</span></p>
-                    </div>
-                    <button
-                      onClick={handleDownloadCertificate}
-                      disabled={downloading}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all"
-                      style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
-                      data-testid="button-download-pdf"
-                    >
-                      <Download className="w-4 h-4" />
-                      {downloading ? "Generating PDF..." : "Download PDF"}
-                    </button>
-                  </div>
+                  <div className="rounded-2xl overflow-hidden" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.15)" }} data-testid="certificate-card">
+                    <div className="relative p-1.5" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.08))" }}>
+                      <div className="rounded-xl p-6" style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)" }}>
+                        <div className="flex items-start gap-5">
+                          <div className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "1px solid rgba(0,245,255,0.3)" }}>
+                            <Award className="w-8 h-8" style={{ color: "#00F5FF" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.2)" }}>
+                                Verified
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-bold truncate" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                              {internship?.title || "Virtual Internship"}
+                            </h3>
+                            <p className="text-sm mt-1" style={{ color: "#94A3B8" }}>
+                              Certificate of Completion
+                            </p>
+                          </div>
+                        </div>
 
-                  <div className="rounded-xl overflow-hidden" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.15)" }}>
-                    <div className="overflow-x-auto flex justify-center p-6" style={{ background: "rgba(0,0,0,0.3)" }}>
-                      <CertificatePreviewCard />
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Certificate ID</p>
+                            <p className="text-xs font-semibold" style={{ color: "#00F5FF", fontFamily: "monospace" }}>{certId}</p>
+                          </div>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Role</p>
+                            <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{assignment.assignedRole}</p>
+                          </div>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Tasks Done</p>
+                            <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{completedTasksCount}/{tasks.length}</p>
+                          </div>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Date</p>
+                            <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{completionDate}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 mt-5">
+                          <button
+                            onClick={() => setViewCertificate(true)}
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
+                            style={{ border: "1px solid rgba(0,245,255,0.3)", background: "rgba(0,245,255,0.08)", color: "#00F5FF" }}
+                            data-testid="button-view-certificate"
+                          >
+                            <Eye className="w-4 h-4" />
+                            View Certificate
+                          </button>
+                          <button
+                            onClick={handleDownloadCertificate}
+                            disabled={downloading}
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
+                            style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                            data-testid="button-download-pdf"
+                          >
+                            <Download className="w-4 h-4" />
+                            {downloading ? "Generating..." : "Download PDF"}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1444,6 +1492,59 @@ export default function UdyogDashboard() {
             </div>
           </div>
         )}
+
+        {hasCertificate && (
+          <div style={{ position: "absolute", left: "-9999px", top: 0 }} aria-hidden="true">
+            {renderCertificateBody(true)}
+          </div>
+        )}
+
+        <AnimatePresence>
+          {viewCertificate && hasCertificate && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
+              onClick={() => setViewCertificate(false)}
+              data-testid="certificate-modal-overlay"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="relative max-w-[860px] w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setViewCertificate(false)}
+                  className="absolute -top-12 right-0 p-2 rounded-full transition-all hover:opacity-80"
+                  style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                  data-testid="button-close-certificate"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="rounded-xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(0,245,255,0.15)" }}>
+                  {renderCertificateBody(false)}
+                </div>
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleDownloadCertificate}
+                    disabled={downloading}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                    data-testid="button-modal-download-pdf"
+                  >
+                    <Download className="w-4 h-4" />
+                    {downloading ? "Generating PDF..." : "Download PDF"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     );
   };
