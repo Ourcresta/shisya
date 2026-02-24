@@ -1233,7 +1233,14 @@ export default function UdyogDashboard() {
     const programTitle = internship?.title || "Virtual Internship";
     const role = assignment?.assignedRole || "Intern";
     const domain = internship?.domain || "";
-    const completionDateStr = assignment?.completedAt ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    const batchLabel = batch ? `Batch ${batch.batchNumber}` : "";
+    const skills = internship?.requiredSkills ? internship.requiredSkills.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
+    const completionDateStr = assignment?.completedAt
+      ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()
+      : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+    const completionMonth = assignment?.completedAt
+      ? new Date(assignment.completedAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" }).toUpperCase()
+      : new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" }).toUpperCase();
 
     return (
       <div
@@ -1241,76 +1248,211 @@ export default function UdyogDashboard() {
         style={{
           width: "800px",
           height: "566px",
-          background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)",
+          backgroundColor: "#ffffff",
           position: "relative",
           overflow: "hidden",
-          fontFamily: "'Inter', 'Segoe UI', sans-serif",
+          fontFamily: "'Times New Roman', 'Libre Baskerville', serif",
         }}
         data-testid="certificate-preview"
       >
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
-        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "6px", background: "linear-gradient(180deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
-        <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "6px", background: "linear-gradient(180deg, #00F5FF, #0EA5E9, #7C3AED, #00F5FF)" }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "#ffffff",
+            background: `
+              #ffffff
+              linear-gradient(90deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
+              linear-gradient(90deg, transparent calc(100% - 10px), #1e3a5f calc(100% - 10px)),
+              linear-gradient(0deg, #1e3a5f 0%, #1e3a5f 10px, transparent 10px),
+              linear-gradient(0deg, transparent calc(100% - 10px), #1e3a5f calc(100% - 10px))
+            `,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            right: "16px",
+            bottom: "16px",
+            border: "1px solid #1e3a5f",
+            backgroundColor: "transparent",
+          }}
+        />
 
-        <div style={{ position: "absolute", top: "30px", left: "30px", width: "120px", height: "120px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,245,255,0.08), transparent 70%)" }} />
-        <div style={{ position: "absolute", bottom: "30px", right: "30px", width: "150px", height: "150px", borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%)" }} />
-
-        <div style={{ position: "relative", padding: "40px 50px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "8px" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A" }}>U</span>
-              </div>
-              <span style={{ fontSize: "18px", fontWeight: 700, color: "#E2E8F0", letterSpacing: "2px", textTransform: "uppercase" }}>Our Udyog</span>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0.05,
+            pointerEvents: "none" as const,
+          }}
+        >
+          <div style={{ width: "280px", height: "280px", borderRadius: "50%", border: "3px solid #1e3a5f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "28px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "3px" }}>OUR</div>
+              <div style={{ fontSize: "28px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "3px" }}>UDYOG</div>
             </div>
-            <p style={{ fontSize: "11px", color: "#64748B", letterSpacing: "4px", textTransform: "uppercase", margin: 0 }}>Certificate of Completion</p>
+          </div>
+        </div>
+
+        <div style={{ position: "relative", padding: "36px 44px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
+
+          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+            <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
+              OUR UDYOG
+            </h1>
+            <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" as const, marginTop: "4px", color: "#4a5568" }}>
+              Virtual Internship Programme
+            </div>
+            <div style={{ fontSize: "12px", marginTop: "3px", color: "#2d3748" }}>
+              Chennai – 600 025
+            </div>
           </div>
 
-          <div style={{ textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "8px", letterSpacing: "1px" }}>This is to certify that</p>
-            <h1 style={{ fontSize: "36px", fontWeight: 700, color: "#FFFFFF", marginBottom: "6px", fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-              {studentName}
-            </h1>
-            <p style={{ fontSize: "12px", color: "#94A3B8", marginBottom: "20px" }}>
-              has successfully completed the internship program
+          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "5px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
+              Internship Completion Certificate
+            </h2>
+          </div>
+
+          <div style={{ textAlign: "right", marginBottom: "6px" }}>
+            <span style={{ fontSize: "12px", color: "#4a5568" }}>Folio No. : </span>
+            <span style={{ fontSize: "12px", fontWeight: 500, color: "#1e3a5f" }}>{certIdVal}</span>
+          </div>
+
+          <div style={{ marginBottom: "10px", color: "#2d3748" }}>
+            <p style={{ fontStyle: "italic", fontSize: "12px", textAlign: "center", margin: 0 }}>
+              This is to certify that the undermentioned candidate has successfully completed
+              the requirements prescribed for the award of the above certificate as detailed below :
             </p>
-            <div style={{ display: "inline-block", margin: "0 auto", padding: "10px 28px", borderRadius: "8px", background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.15)" }}>
-              <h2 style={{ fontSize: "20px", fontWeight: 600, color: "#00F5FF", margin: 0, fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
-                {programTitle}
-              </h2>
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: "30px", marginTop: "18px" }}>
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Role</p>
-                <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{role}</p>
+          </div>
+
+          <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            <div>
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Name</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ fontWeight: 600, textTransform: "uppercase" as const, color: "#1e3a5f" }}>{studentName}</span>
+                </div>
               </div>
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Registration No.</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ color: "#1e3a5f" }}>{certIdVal}</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Internship Programme</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ fontWeight: 600, textTransform: "uppercase" as const, color: "#1e3a5f" }}>{programTitle}</span>
+                </div>
+              </div>
+
               {domain && (
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Domain</p>
-                  <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{domain}</p>
+                <div style={{ display: "flex", marginBottom: "5px" }}>
+                  <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Domain</div>
+                  <div style={{ width: "340px", fontSize: "12px" }}>
+                    <span style={{ marginRight: "8px" }}>:</span>
+                    <span style={{ textTransform: "uppercase" as const, color: "#1e3a5f" }}>{domain}</span>
+                  </div>
                 </div>
               )}
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: "10px", color: "#64748B", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "1px" }}>Tasks Completed</p>
-                <p style={{ fontSize: "13px", color: "#E2E8F0", fontWeight: 600 }}>{completedTasksCount}/{tasks.length}</p>
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Designated Role</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ textTransform: "uppercase" as const, color: "#1e3a5f", fontWeight: 600 }}>{role}</span>
+                </div>
+              </div>
+
+              {batchLabel && (
+                <div style={{ display: "flex", marginBottom: "5px" }}>
+                  <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Batch</div>
+                  <div style={{ width: "340px", fontSize: "12px" }}>
+                    <span style={{ marginRight: "8px" }}>:</span>
+                    <span style={{ textTransform: "uppercase" as const, color: "#1e3a5f" }}>{batchLabel}</span>
+                  </div>
+                </div>
+              )}
+
+              {skills.length > 0 && (
+                <div style={{ display: "flex", marginBottom: "5px" }}>
+                  <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Skills Acquired</div>
+                  <div style={{ width: "340px", fontSize: "12px" }}>
+                    <span style={{ marginRight: "8px" }}>:</span>
+                    <span style={{ textTransform: "uppercase" as const, color: "#1e3a5f" }}>{skills.slice(0, 4).join(", ")}</span>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Tasks Completed</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ color: "#1e3a5f", fontWeight: 500 }}>{completedTasksCount} OF {tasks.length}</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Month & Year of Completion</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ fontWeight: 500, color: "#1e3a5f" }}>{completionMonth}</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Classification</div>
+                <div style={{ width: "340px", fontSize: "12px" }}>
+                  <span style={{ marginRight: "8px" }}>:</span>
+                  <span style={{ fontWeight: 700, color: "#1e3a5f" }}>FIRST CLASS</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-            <div>
-              <div style={{ width: "120px", borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: "6px" }}>
-                <p style={{ fontSize: "10px", color: "#94A3B8", margin: 0 }}>Program Director</p>
-                <p style={{ fontSize: "11px", color: "#E2E8F0", fontWeight: 600, margin: "2px 0 0 0" }}>OurShiksha</p>
+          <div style={{ marginTop: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              <div>
+                <div style={{ fontSize: "12px", color: "#4a5568" }}>
+                  <span style={{ color: "#1e3a5f" }}>Date : </span>
+                  <span>{completionDateStr}</span>
+                </div>
               </div>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "10px", color: "#64748B", margin: 0 }}>{completionDateStr}</p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ fontSize: "9px", color: "#475569", margin: 0 }}>Certificate ID</p>
-              <p style={{ fontSize: "11px", color: "#00F5FF", fontWeight: 600, fontFamily: "monospace", margin: "2px 0 0 0" }}>{certIdVal}</p>
+
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ marginBottom: "24px" }} />
+                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "4px", minWidth: "130px" }}>
+                    <div style={{ fontSize: "10px", fontWeight: 500, color: "#1e3a5f" }}>Director of Certifications</div>
+                    <div style={{ fontSize: "9px", color: "#4a5568" }}>OUR UDYOG</div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{ width: "56px", height: "56px", borderRadius: "50%", border: "2px solid #1e3a5f", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.7 }}>
+                    <div style={{ textAlign: "center", lineHeight: 1.1 }}>
+                      <div style={{ fontSize: "7px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "1px" }}>OUR</div>
+                      <div style={{ fontSize: "7px", fontWeight: 700, color: "#1e3a5f", letterSpacing: "1px" }}>UDYOG</div>
+                      <div style={{ fontSize: "5px", color: "#4a5568" }}>VERIFIED</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "6px", marginTop: "3px", textAlign: "center", maxWidth: "70px", color: "#4a5568" }}>
+                    This certificate is digitally verifiable
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
