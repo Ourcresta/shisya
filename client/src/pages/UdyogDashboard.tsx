@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, CheckCircle2, Clock, Send, MessageSquare, Award,
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
-  Medal, AlertCircle, Users, Calendar, Star
+  Medal, AlertCircle, Users, Calendar, Star, Bell,
+  BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
+  Shield, ArrowRight, Zap, TrendingUp, Target
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,11 +14,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const sidebarItems = [
-  { key: "overview", label: "Overview", icon: LayoutDashboard },
+  { key: "overview", label: "Dashboard", icon: LayoutDashboard },
+  { key: "project", label: "My Project", icon: FolderKanban },
   { key: "tasks", label: "Tasks", icon: ListTodo },
-  { key: "submissions", label: "Submissions", icon: Upload },
+  { key: "daily-log", label: "Daily Log", icon: FileText },
+  { key: "performance", label: "Performance", icon: BarChart3 },
+  { key: "resources", label: "Resources", icon: BookOpen },
   { key: "mentor", label: "AI Mentor", icon: Bot },
-  { key: "certification", label: "Certification", icon: Medal },
+  { key: "certification", label: "Certificate", icon: Medal },
 ];
 
 const roleColors: Record<string, string> = {
@@ -90,10 +95,48 @@ function getDaysRemaining(startedAt: string, duration: string): number {
   return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+}
+
 interface ChatMessage {
   role: "user" | "ai";
   text: string;
 }
+
+interface DailyLog {
+  id: string;
+  date: string;
+  hours: number;
+  description: string;
+  link: string;
+}
+
+const glassCard = {
+  background: "rgba(255,255,255,0.04)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -12 },
+  transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+};
+
+const stagger = {
+  animate: { transition: { staggerChildren: 0.08 } },
+};
+
+const cardItem = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+};
 
 export default function UdyogDashboard() {
   const { user } = useAuth();
@@ -105,6 +148,11 @@ export default function UdyogDashboard() {
     { role: "ai", text: "Welcome! I'm Usha, your AI Mentor. I'm here to guide you through your internship journey. Ask me anything about your tasks, progress, or career development." },
   ]);
   const [chatInput, setChatInput] = useState("");
+  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+  const [logDate, setLogDate] = useState(new Date().toISOString().split("T")[0]);
+  const [logHours, setLogHours] = useState("");
+  const [logDesc, setLogDesc] = useState("");
+  const [logLink, setLogLink] = useState("");
 
   const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
     queryKey: ["/api/udyog/my-assignment"],
@@ -128,6 +176,15 @@ export default function UdyogDashboard() {
     queryKey: ["/api/udyog/submissions", assignmentId],
     enabled: !!assignmentId,
   });
+
+  useEffect(() => {
+    if (assignmentId) {
+      const stored = localStorage.getItem(`udyog_daily_logs_${assignmentId}`);
+      if (stored) {
+        try { setDailyLogs(JSON.parse(stored)); } catch {}
+      }
+    }
+  }, [assignmentId]);
 
   const taskStatusMutation = useMutation({
     mutationFn: async ({ taskId, status }: { taskId: number; status: string }) => {
@@ -188,7 +245,32 @@ export default function UdyogDashboard() {
     }, 800);
   };
 
+  const handleAddLog = () => {
+    if (!logDesc.trim()) {
+      toast({ title: "Required", description: "Please enter a description.", variant: "destructive" });
+      return;
+    }
+    const newLog: DailyLog = {
+      id: Date.now().toString(),
+      date: logDate,
+      hours: parseFloat(logHours) || 0,
+      description: logDesc.trim(),
+      link: logLink.trim(),
+    };
+    const updated = [newLog, ...dailyLogs];
+    setDailyLogs(updated);
+    if (assignmentId) {
+      localStorage.setItem(`udyog_daily_logs_${assignmentId}`, JSON.stringify(updated));
+    }
+    setLogDesc("");
+    setLogHours("");
+    setLogLink("");
+    toast({ title: "Log Added", description: "Daily log entry saved." });
+  };
+
   const completedTasksCount = tasks.filter((t: any) => t.status === "completed").length;
+  const inProgressCount = tasks.filter((t: any) => t.status === "in_progress").length;
+  const reviewCount = tasks.filter((t: any) => t.status === "review").length;
   const allTasksCompleted = tasks.length > 0 && completedTasksCount === tasks.length;
   const overallProgress = hasBatch ? (batchProgress || 0) : (assignment?.progress || 0);
 
@@ -204,19 +286,29 @@ export default function UdyogDashboard() {
     return 0;
   })();
 
+  const totalDays = internship?.duration ? parseDurationDays(internship.duration) : 30;
+  const daysActive = Math.max(0, totalDays - daysRemaining);
+
   const currentUserMember = batchMembers.find((m: any) => m.member?.userId === user?.id);
   const performanceScore = currentUserMember?.member?.performanceScore;
 
+  const username = user?.email ? user.email.split("@")[0] : "Intern";
+  const userInitial = username.charAt(0).toUpperCase();
+
+  const currentLabel = sidebarItems.find((s) => s.key === activeTab)?.label || "Dashboard";
+
   if (assignmentLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0e1a" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
         <motion.div
           className="flex flex-col items-center gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="w-12 h-12 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400 text-sm">Loading your workspace...</p>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid #00F5FF", borderTopColor: "transparent", animation: "spin 1s linear infinite" }}>
+            <Briefcase className="w-6 h-6" style={{ color: "#00F5FF" }} />
+          </div>
+          <p style={{ color: "#94A3B8" }} className="text-sm">Loading your workspace...</p>
         </motion.div>
       </div>
     );
@@ -224,7 +316,7 @@ export default function UdyogDashboard() {
 
   if (!assignment && !assignmentData) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0a0e1a" }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
         <motion.div
           className="text-center max-w-md"
           initial={{ opacity: 0, y: 30 }}
@@ -232,25 +324,25 @@ export default function UdyogDashboard() {
           transition={{ duration: 0.6 }}
         >
           <div
-            className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-            style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.3)" }}
+            className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center"
+            style={{ background: "radial-gradient(circle, rgba(0,245,255,0.15), transparent)", border: "2px solid rgba(0,245,255,0.3)" }}
           >
-            <Briefcase className="w-10 h-10 text-cyan-400" />
+            <Briefcase className="w-12 h-12" style={{ color: "#00F5FF" }} />
           </div>
           <h1
-            className="text-3xl font-bold text-white mb-3"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-3xl font-bold mb-3"
+            style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}
             data-testid="text-no-assignment"
           >
             No Active Internship
           </h1>
-          <p className="text-gray-400 mb-8" data-testid="text-no-assignment-desc">
+          <p style={{ color: "#94A3B8" }} className="mb-8" data-testid="text-no-assignment-desc">
             Take a skill assessment to get started on your virtual internship journey.
           </p>
           <Link href="/shishya/udyog/assess">
             <button
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-all"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
+              style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
               data-testid="button-start-assessment"
             >
               Start Assessment
@@ -262,182 +354,275 @@ export default function UdyogDashboard() {
     );
   }
 
-  const renderOverview = () => (
-    <motion.div
-      key="overview"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      className="space-y-6"
-    >
-      <div>
-        <div className="flex flex-wrap items-center gap-3 mb-2">
-          <h1
-            className="text-2xl md:text-3xl font-bold text-white"
-            style={{ fontFamily: "var(--font-display)" }}
-            data-testid="text-welcome-header"
-          >
-            Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}
-          </h1>
-          {assignment.assignedRole && (
-            <span
-              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-              style={{ background: "rgba(34,211,238,0.15)", color: "#22D3EE", border: "1px solid rgba(34,211,238,0.3)" }}
-              data-testid="badge-assigned-role"
+  const CircularProgress = ({ value, size = 72, stroke = 6 }: { value: number; size?: number; stroke?: number }) => {
+    const radius = (size - stroke) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (value / 100) * circumference;
+    return (
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+        <motion.circle
+          cx={size / 2} cy={size / 2} r={radius} fill="none"
+          stroke="url(#progressGrad)" strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        />
+        <defs>
+          <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00F5FF" />
+            <stop offset="100%" stopColor="#0EA5E9" />
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  };
+
+  const SkillBar = ({ label, value, color = "#00F5FF" }: { label: string; value: number; color?: string }) => (
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-sm" style={{ color: "#94A3B8" }}>{label}</span>
+        <span className="text-sm font-semibold" style={{ color }}>{value}%</span>
+      </div>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: `linear-gradient(90deg, ${color}, ${color}88)` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${value}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </div>
+    </div>
+  );
+
+  const renderOverview = () => {
+    const statsCards = [
+      { label: "Tasks Assigned", value: tasks.length, icon: Target, color: "#00F5FF" },
+      { label: "In Progress", value: inProgressCount, icon: Zap, color: "#0EA5E9" },
+      { label: "Under Review", value: reviewCount, icon: Clock, color: "#F59E0B" },
+      { label: "Performance", value: performanceScore ?? Math.round(overallProgress), icon: TrendingUp, color: "#10B981" },
+    ];
+
+    return (
+      <motion.div key="overview" {...fadeInUp} className="space-y-6">
+        <div className="rounded-2xl p-6 md:p-8 relative overflow-visible" style={{ ...glassCard, background: "linear-gradient(135deg, rgba(0,245,255,0.06), rgba(14,165,233,0.04), rgba(124,58,237,0.03))" }}>
+          <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(0,245,255,0.08), transparent 60%)", pointerEvents: "none" }} />
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-welcome-header">
+                {getGreeting()}, {username}
+              </h1>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                {assignment.assignedRole && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.25)" }} data-testid="badge-assigned-role">
+                    {assignment.assignedRole}
+                  </span>
+                )}
+                {hasBatch && batch && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }} data-testid="badge-batch-status">
+                    Batch #{batch.batchNumber} &middot; {batch.status}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-internship-title">
+                {internship?.title || "Virtual Internship"} &middot; {daysRemaining} days remaining
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative flex items-center justify-center">
+                <CircularProgress value={overallProgress} size={80} stroke={6} />
+                <span className="absolute text-lg font-bold" style={{ color: "#FFFFFF" }} data-testid="text-progress-percent">{overallProgress}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" variants={stagger} initial="initial" animate="animate">
+          {statsCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.label}
+                variants={cardItem}
+                className="rounded-xl p-5 transition-all cursor-default"
+                style={{ ...glassCard }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = `${stat.color}40`; e.currentTarget.style.boxShadow = `0 8px 32px ${stat.color}15`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.boxShadow = "none"; }}
+                data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `linear-gradient(135deg, ${stat.color}30, ${stat.color}10)` }}>
+                  <Icon className="w-5 h-5" style={{ color: stat.color }} />
+                </div>
+                <p className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>{stat.value}</p>
+                <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>{stat.label}</p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        <div className="rounded-xl p-6" style={glassCard}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div>
+              <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Current Project</h3>
+              <p className="text-sm" style={{ color: "#94A3B8" }}>{internship?.title || "Virtual Internship"}</p>
+            </div>
+            <button
+              onClick={() => setActiveTab("tasks")}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.2)" }}
+              data-testid="button-open-tasks"
             >
-              {assignment.assignedRole}
-            </span>
+              Open Tasks <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          {internship?.description && (
+            <p className="text-sm mb-4" style={{ color: "#94A3B8" }} data-testid="text-internship-desc">{internship.description}</p>
           )}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs" style={{ color: "#94A3B8" }}>Progress</span>
+            <span className="text-xs font-medium" style={{ color: "#00F5FF" }}>{overallProgress}%</span>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }} initial={{ width: 0 }} animate={{ width: `${overallProgress}%` }} transition={{ duration: 1 }} />
+          </div>
+          <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
+            <span className="text-xs" style={{ color: "#64748B" }}>
+              {assignment?.startedAt ? `Started ${new Date(assignment.startedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : ""}
+            </span>
+            <span className="text-xs" style={{ color: "#64748B" }}>{daysRemaining} days remaining</span>
+          </div>
         </div>
-        <p className="text-gray-400" data-testid="text-internship-title">
-          {internship?.title || "Virtual Internship"}
-        </p>
-      </div>
 
-      {internship?.description && (
-        <div
-          className="rounded-xl p-5 border"
-          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-        >
-          <p className="text-gray-300 text-sm leading-relaxed" data-testid="text-internship-desc">
-            {internship.description}
-          </p>
-        </div>
-      )}
-
-      <div
-        className="rounded-xl p-5 border"
-        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-400">Overall Progress</span>
-          <span className="text-sm font-medium text-cyan-400" data-testid="text-progress-percent">
-            {overallProgress}%
-          </span>
-        </div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
-          <motion.div
-            className="h-full rounded-full"
-            style={{ background: "linear-gradient(90deg, #22D3EE, #14B8A6)" }}
-            initial={{ width: 0 }}
-            animate={{ width: `${overallProgress}%` }}
-            transition={{ duration: 0.8 }}
-          />
-        </div>
-      </div>
-
-      {hasBatch && batch && (
-        <div
-          className="rounded-xl p-4 border flex flex-wrap items-center gap-3"
-          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-        >
-          <Users className="w-5 h-5 text-cyan-400" />
-          <span className="text-white font-medium text-sm" style={{ fontFamily: "var(--font-display)" }}>
-            Batch #{batch.batchNumber}
-          </span>
-          <span
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide"
-            style={{
-              background: batch.status === "active" ? "rgba(34,197,94,0.15)" : batch.status === "forming" ? "rgba(234,179,8,0.15)" : "rgba(107,114,128,0.15)",
-              color: batch.status === "active" ? "#4ade80" : batch.status === "forming" ? "#facc15" : "#9CA3AF",
-            }}
-            data-testid="badge-batch-status"
-          >
-            {batch.status}
-          </span>
-          {performanceScore !== undefined && performanceScore !== null && (
-            <div className="ml-auto flex items-center gap-1.5">
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm text-yellow-400 font-medium" data-testid="text-performance-score">
-                {performanceScore}
-              </span>
-              <span className="text-xs text-gray-500">Performance</span>
+        <div className="rounded-xl p-6" style={glassCard}>
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5" style={{ color: "#00F5FF" }} />
+            <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Team Members</h3>
+          </div>
+          {batchMembers.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {batchMembers.map((m: any) => {
+                const displayName = getMemberDisplayName(m);
+                const role = getMemberRole(m);
+                const color = getRoleColor(role);
+                const initials = getInitials(displayName);
+                const isCurrentUser = m.member?.userId === user?.id;
+                return (
+                  <div
+                    key={m.member?.id || m.member?.userId}
+                    className="flex items-center gap-3 p-3 rounded-lg"
+                    style={{ background: isCurrentUser ? "rgba(0,245,255,0.06)" : "rgba(255,255,255,0.03)", border: isCurrentUser ? "1px solid rgba(0,245,255,0.15)" : "1px solid transparent" }}
+                    data-testid={`team-member-${displayName.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: `${color}25`, color, border: `1px solid ${color}40` }}>
+                      {initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate" style={{ color: "#FFFFFF" }}>
+                        {displayName}{isCurrentUser ? " (You)" : ""}
+                      </p>
+                      <p className="text-xs" style={{ color }}>{role}</p>
+                    </div>
+                    {m.member?.performanceScore !== undefined && m.member?.performanceScore !== null && (
+                      <span className="text-xs shrink-0 px-2 py-0.5 rounded-full" style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B" }} data-testid={`member-score-${m.member?.id}`}>
+                        {m.member.performanceScore}pts
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Users className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
+              <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-no-team">
+                {batch?.status === "forming" ? "Batch is forming — team members will appear once the batch is full." : "No team members yet."}
+              </p>
             </div>
           )}
         </div>
-      )}
+      </motion.div>
+    );
+  };
 
-      <div className={`grid grid-cols-1 ${performanceScore !== undefined && performanceScore !== null && !hasBatch ? "sm:grid-cols-4" : "sm:grid-cols-3"} gap-4`}>
-        <div
-          className="rounded-xl p-5 border text-center"
-          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-          data-testid="stat-tasks-completed"
-        >
-          <CheckCircle2 className="w-6 h-6 text-green-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white">{completedTasksCount}/{tasks.length}</p>
-          <p className="text-xs text-gray-400 mt-1">Tasks Completed</p>
-        </div>
-        <div
-          className="rounded-xl p-5 border text-center"
-          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-          data-testid="stat-submissions"
-        >
-          <Upload className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white">{submissions.length}</p>
-          <p className="text-xs text-gray-400 mt-1">Submissions Made</p>
-        </div>
-        <div
-          className="rounded-xl p-5 border text-center"
-          style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-          data-testid="stat-days-remaining"
-        >
-          <Clock className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white">{daysRemaining}</p>
-          <p className="text-xs text-gray-400 mt-1">Days Remaining</p>
+  const renderProject = () => (
+    <motion.div key="project" {...fadeInUp} className="space-y-6">
+      <div className="rounded-2xl p-6 md:p-8 relative overflow-visible" style={{ ...glassCard, background: "linear-gradient(135deg, rgba(124,58,237,0.06), rgba(0,245,255,0.04))" }}>
+        <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse at 80% 30%, rgba(124,58,237,0.1), transparent 60%)", pointerEvents: "none" }} />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-2">
+            <FolderKanban className="w-5 h-5" style={{ color: "#A78BFA" }} />
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA" }}>
+              {internship?.level || "Intermediate"}
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-project-title">
+            {internship?.title || "Virtual Internship"}
+          </h2>
+          {internship?.description && (
+            <p className="text-sm mb-4" style={{ color: "#94A3B8" }}>{internship.description}</p>
+          )}
+          <div className="flex flex-wrap gap-4 mb-4">
+            <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
+              Duration: {internship?.duration || "4 weeks"}
+            </span>
+            <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
+              Tasks: {tasks.length}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs" style={{ color: "#94A3B8" }}>Overall Progress</span>
+            <span className="text-xs font-medium" style={{ color: "#00F5FF" }}>{overallProgress}%</span>
+          </div>
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }} initial={{ width: 0 }} animate={{ width: `${overallProgress}%` }} transition={{ duration: 1 }} />
+          </div>
         </div>
       </div>
 
-      <div
-        className="rounded-xl p-5 border"
-        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-      >
-        <h3 className="text-white font-semibold mb-4" style={{ fontFamily: "var(--font-display)" }}>
-          Team Members
-        </h3>
-        {batchMembers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {batchMembers.map((m: any) => {
-              const displayName = getMemberDisplayName(m);
-              const role = getMemberRole(m);
-              const color = getRoleColor(role);
-              const initials = getInitials(displayName);
-              const isCurrentUser = m.member?.userId === user?.id;
-              return (
-                <div
-                  key={m.member?.id || m.member?.userId}
-                  className="flex items-center gap-3 p-3 rounded-lg"
-                  style={{ background: isCurrentUser ? "rgba(34,211,238,0.05)" : "rgba(255,255,255,0.03)" }}
-                  data-testid={`team-member-${displayName.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  <div className="relative">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                      style={{ background: color }}
-                    >
-                      {initials}
+      <div className="rounded-xl p-6" style={glassCard}>
+        <h3 className="font-semibold mb-6" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Milestones</h3>
+        {tasks.length > 0 ? (
+          <div className="relative">
+            <div className="absolute left-[15px] top-0 bottom-0 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <div className="space-y-5">
+              {tasks.map((task: any, idx: number) => {
+                const isCompleted = task.status === "completed";
+                const isInProgress = task.status === "in_progress";
+                return (
+                  <div key={task.id} className="flex items-start gap-4 relative" data-testid={`milestone-${task.id}`}>
+                    <div className="relative z-10 shrink-0">
+                      {isCompleted ? (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(16,185,129,0.2)", border: "2px solid #10B981" }}>
+                          <CheckCircle2 className="w-4 h-4" style={{ color: "#10B981" }} />
+                        </div>
+                      ) : isInProgress ? (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(0,245,255,0.15)", border: "2px solid #00F5FF" }}>
+                          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: "#00F5FF" }} />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: "2px solid rgba(255,255,255,0.15)" }}>
+                          <div className="w-2 h-2 rounded-full" style={{ background: "#475569" }} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 pb-1">
+                      <p className="text-sm font-medium" style={{ color: isCompleted ? "#10B981" : "#FFFFFF" }}>{task.title}</p>
+                      {task.description && <p className="text-xs mt-0.5" style={{ color: "#64748B" }}>{task.description}</p>}
+                      <span className="text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full" style={{ background: `${statusColors[task.status]}20`, color: statusColors[task.status] }}>
+                        {statusLabels[task.status] || task.status}
+                      </span>
                     </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-white font-medium truncate">
-                      {displayName}{isCurrentUser ? " (You)" : ""}
-                    </p>
-                    <p className="text-xs" style={{ color }}>{role}</p>
-                  </div>
-                  {m.member?.performanceScore !== undefined && m.member?.performanceScore !== null && (
-                    <span className="text-xs text-gray-500 shrink-0" data-testid={`member-score-${m.member?.id}`}>
-                      {m.member.performanceScore}pts
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ) : (
-          <div className="text-center py-6">
-            <Users className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-            <p className="text-gray-400 text-sm" data-testid="text-no-team">
-              {batch?.status === "forming" ? "Batch is forming — team members will appear once the batch is full." : "No team members yet."}
-            </p>
+          <div className="text-center py-8">
+            <FolderKanban className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
+            <p className="text-sm" style={{ color: "#94A3B8" }}>No milestones yet</p>
           </div>
         )}
       </div>
@@ -445,103 +630,83 @@ export default function UdyogDashboard() {
   );
 
   const renderTasks = () => (
-    <motion.div
-      key="tasks"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      className="space-y-6"
-    >
-      <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-tasks-header">
-        Task Board
-      </h2>
+    <motion.div key="tasks" {...fadeInUp} className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-tasks-header">
+          Task Board
+        </h2>
+        <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+          {completedTasksCount}/{tasks.length} completed
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {statusColumns.map((col) => {
           const colTasks = tasks.filter((t: any) => t.status === col);
           return (
             <div key={col} className="space-y-3">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 px-1 mb-1">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: statusColors[col] }} />
-                <span className="text-sm font-medium text-gray-300">{statusLabels[col]}</span>
-                <span className="text-xs text-gray-500 ml-auto">{colTasks.length}</span>
+                <span className="text-sm font-medium" style={{ color: "#E2E8F0" }}>{statusLabels[col]}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full ml-auto font-medium" style={{ background: `${statusColors[col]}20`, color: statusColors[col] }}>
+                  {colTasks.length}
+                </span>
               </div>
-              <div className="space-y-2 min-h-[100px]">
+              <div className="space-y-2 min-h-[120px]">
                 {colTasks.map((task: any) => {
                   const assignedMember = task.assignedTo ? batchMembers.find((m: any) => m.member?.userId === task.assignedTo) : null;
                   const assignedName = assignedMember ? getMemberDisplayName(assignedMember) : null;
-                  return (<div
-                    key={task.id}
-                    className="rounded-lg p-4 border transition-all"
-                    style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-                    data-testid={`task-card-${task.id}`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h4 className="text-sm font-medium text-white">{task.title}</h4>
-                      {task.score !== undefined && task.score !== null && task.status === "completed" && (
-                        <span
-                          className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
-                          style={{ background: "rgba(34,197,94,0.15)", color: "#4ade80" }}
-                          data-testid={`task-score-${task.id}`}
-                        >
-                          {task.score}pts
-                        </span>
-                      )}
-                    </div>
-                    {task.description && (
-                      <p className="text-xs text-gray-400 mb-2 line-clamp-2">{task.description}</p>
-                    )}
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      {task.dueDate && (
-                        <span
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
-                          style={{ background: "rgba(234,179,8,0.1)", color: "#facc15" }}
-                          data-testid={`task-due-${task.id}`}
-                        >
-                          <Calendar className="w-2.5 h-2.5" />
-                          {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                        </span>
-                      )}
-                      {assignedName && (
-                        <span
-                          className="inline-flex items-center gap-1 text-[10px] text-gray-400"
-                          data-testid={`task-assigned-${task.id}`}
-                        >
-                          <span
-                            className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white"
-                            style={{ background: getRoleColor(getMemberRole(assignedMember!)) }}
-                          >
-                            {getInitials(assignedName).slice(0, 1)}
+                  return (
+                    <div key={task.id} className="rounded-xl p-4 transition-all" style={glassCard} data-testid={`task-card-${task.id}`}>
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <h4 className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{task.title}</h4>
+                        {task.score !== undefined && task.score !== null && task.status === "completed" && (
+                          <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ background: "rgba(16,185,129,0.15)", color: "#10B981" }} data-testid={`task-score-${task.id}`}>
+                            {task.score}pts
                           </span>
-                          {assignedName.split(" ")[0]}
-                        </span>
+                        )}
+                      </div>
+                      {task.description && (
+                        <p className="text-xs mb-2 line-clamp-2" style={{ color: "#64748B" }}>{task.description}</p>
                       )}
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {task.dueDate && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "rgba(245,158,11,0.12)", color: "#F59E0B" }} data-testid={`task-due-${task.id}`}>
+                            <Calendar className="w-2.5 h-2.5" />
+                            {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                          </span>
+                        )}
+                        {assignedName && (
+                          <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: "#94A3B8" }} data-testid={`task-assigned-${task.id}`}>
+                            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ background: getRoleColor(getMemberRole(assignedMember!)), color: "#FFFFFF" }}>
+                              {getInitials(assignedName).slice(0, 1)}
+                            </span>
+                            {assignedName.split(" ")[0]}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {statusColumns
+                          .filter((s) => s !== col)
+                          .map((newStatus) => (
+                            <button
+                              key={newStatus}
+                              onClick={() => taskStatusMutation.mutate({ taskId: task.id, status: newStatus })}
+                              className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all"
+                              style={{ background: `${statusColors[newStatus]}15`, color: statusColors[newStatus], border: `1px solid ${statusColors[newStatus]}30` }}
+                              disabled={taskStatusMutation.isPending}
+                              data-testid={`button-move-task-${task.id}-${newStatus}`}
+                            >
+                              {statusLabels[newStatus]}
+                            </button>
+                          ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {statusColumns
-                        .filter((s) => s !== col)
-                        .map((newStatus) => (
-                          <button
-                            key={newStatus}
-                            onClick={() => taskStatusMutation.mutate({ taskId: task.id, status: newStatus })}
-                            className="px-2 py-0.5 rounded text-[10px] font-medium transition-colors"
-                            style={{
-                              background: `${statusColors[newStatus]}20`,
-                              color: statusColors[newStatus],
-                              border: `1px solid ${statusColors[newStatus]}40`,
-                            }}
-                            disabled={taskStatusMutation.isPending}
-                            data-testid={`button-move-task-${task.id}-${newStatus}`}
-                          >
-                            {statusLabels[newStatus]}
-                          </button>
-                        ))}
-                    </div>
-                  </div>
                   );
                 })}
                 {colTasks.length === 0 && (
-                  <div className="rounded-lg p-4 border border-dashed text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                    <p className="text-xs text-gray-500">No tasks</p>
+                  <div className="rounded-xl p-6 text-center" style={{ border: "2px dashed rgba(255,255,255,0.08)" }}>
+                    <p className="text-xs" style={{ color: "#475569" }}>No tasks</p>
                   </div>
                 )}
               </div>
@@ -549,34 +714,17 @@ export default function UdyogDashboard() {
           );
         })}
       </div>
-    </motion.div>
-  );
 
-  const renderSubmissions = () => (
-    <motion.div
-      key="submissions"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      className="space-y-6"
-    >
-      <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-submissions-header">
-        Submissions
-      </h2>
-
-      <div
-        className="rounded-xl p-5 border"
-        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-      >
-        <h3 className="text-white font-medium mb-3">Submit New Work</h3>
+      <div className="rounded-xl p-6" style={glassCard}>
+        <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-submissions-header">Submit Work</h3>
         {tasks.length > 0 && (
           <div className="mb-3">
-            <label className="text-xs text-gray-400 mb-1 block">Select Task (optional)</label>
+            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Select Task (optional)</label>
             <select
               value={selectedTaskId || ""}
               onChange={(e) => setSelectedTaskId(e.target.value ? Number(e.target.value) : null)}
-              className="w-full rounded-lg px-3 py-2 text-sm text-white border"
-              style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+              className="w-full rounded-lg px-3 py-2.5 text-sm"
+              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
               data-testid="select-task"
             >
               <option value="">General Submission</option>
@@ -590,8 +738,8 @@ export default function UdyogDashboard() {
           value={submissionContent}
           onChange={(e) => setSubmissionContent(e.target.value)}
           placeholder="Describe your work, paste code, or share links..."
-          className="w-full rounded-lg px-4 py-3 text-sm text-white border resize-none min-h-[120px]"
-          style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+          className="w-full rounded-lg px-4 py-3 text-sm resize-none min-h-[120px]"
+          style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
           data-testid="textarea-submission"
         />
         <div className="flex justify-end mt-3">
@@ -601,15 +749,11 @@ export default function UdyogDashboard() {
                 toast({ title: "Required", description: "Please enter submission content.", variant: "destructive" });
                 return;
               }
-              submitWorkMutation.mutate({
-                assignmentId: assignmentId!,
-                taskId: selectedTaskId,
-                content: submissionContent,
-              });
+              submitWorkMutation.mutate({ assignmentId: assignmentId!, taskId: selectedTaskId, content: submissionContent });
             }}
             disabled={submitWorkMutation.isPending}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-white transition-all"
-            style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
+            style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
             data-testid="button-submit-work"
           >
             <Send className="w-4 h-4" />
@@ -618,98 +762,278 @@ export default function UdyogDashboard() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {submissions.length === 0 ? (
-          <div
-            className="rounded-xl p-8 border text-center"
-            style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
-          >
-            <Upload className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-            <p className="text-gray-400 text-sm" data-testid="text-no-submissions">No submissions yet</p>
-          </div>
-        ) : (
-          submissions.map((sub: any, idx: number) => {
+      {submissions.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Previous Submissions</h3>
+          {submissions.map((sub: any, idx: number) => {
             const statusStyle = submissionStatusColors[sub.status] || submissionStatusColors.pending;
             return (
-              <div
-                key={sub.id || idx}
-                className="rounded-xl p-5 border"
-                style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-                data-testid={`submission-card-${sub.id || idx}`}
-              >
+              <div key={sub.id || idx} className="rounded-xl p-5" style={glassCard} data-testid={`submission-card-${sub.id || idx}`}>
                 <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm" style={{ color: "#94A3B8" }}>
                     {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : ""}
                   </span>
-                  <span
-                    className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    style={{ background: statusStyle.bg, color: statusStyle.text }}
-                    data-testid={`badge-submission-status-${sub.id || idx}`}
-                  >
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ background: statusStyle.bg, color: statusStyle.text }} data-testid={`badge-submission-status-${sub.id || idx}`}>
                     {sub.status}
                   </span>
                 </div>
-                <p className="text-sm text-gray-300 mb-2">{sub.content}</p>
+                <p className="text-sm" style={{ color: "#CBD5E1" }}>{sub.content}</p>
                 {sub.aiFeedback && (
-                  <div className="mt-3 p-3 rounded-lg" style={{ background: "rgba(34,211,238,0.05)", border: "1px solid rgba(34,211,238,0.15)" }}>
-                    <p className="text-xs text-cyan-400 font-medium mb-1">AI Feedback</p>
-                    <p className="text-xs text-gray-300">{sub.aiFeedback}</p>
+                  <div className="mt-3 p-3 rounded-lg" style={{ background: "rgba(0,245,255,0.05)", border: "1px solid rgba(0,245,255,0.15)" }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: "#00F5FF" }}>AI Feedback</p>
+                    <p className="text-xs" style={{ color: "#CBD5E1" }}>{sub.aiFeedback}</p>
                   </div>
                 )}
                 {sub.feedback && (
-                  <div className="mt-2 p-3 rounded-lg" style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)" }}>
-                    <p className="text-xs text-green-400 font-medium mb-1">Reviewer Feedback</p>
-                    <p className="text-xs text-gray-300">{sub.feedback}</p>
+                  <div className="mt-2 p-3 rounded-lg" style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)" }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: "#10B981" }}>Reviewer Feedback</p>
+                    <p className="text-xs" style={{ color: "#CBD5E1" }}>{sub.feedback}</p>
                   </div>
                 )}
               </div>
             );
-          })
+          })}
+        </div>
+      )}
+    </motion.div>
+  );
+
+  const renderDailyLog = () => (
+    <motion.div key="daily-log" {...fadeInUp} className="space-y-6">
+      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Daily Log</h2>
+
+      <div className="rounded-xl p-6" style={glassCard}>
+        <h3 className="font-semibold mb-4" style={{ color: "#FFFFFF" }}>Add New Entry</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Date</label>
+            <input
+              type="date"
+              value={logDate}
+              onChange={(e) => setLogDate(e.target.value)}
+              className="w-full rounded-lg px-3 py-2.5 text-sm"
+              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none", colorScheme: "dark" }}
+              data-testid="input-log-date"
+            />
+          </div>
+          <div>
+            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Hours Worked</label>
+            <input
+              type="number"
+              value={logHours}
+              onChange={(e) => setLogHours(e.target.value)}
+              placeholder="e.g. 4"
+              min="0" max="24" step="0.5"
+              className="w-full rounded-lg px-3 py-2.5 text-sm"
+              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+              data-testid="input-log-hours"
+            />
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Description</label>
+          <textarea
+            value={logDesc}
+            onChange={(e) => setLogDesc(e.target.value)}
+            placeholder="What did you work on today?"
+            className="w-full rounded-lg px-4 py-3 text-sm resize-none min-h-[100px]"
+            style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+            data-testid="textarea-log-desc"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Link (GitHub/Drive URL)</label>
+          <input
+            type="url"
+            value={logLink}
+            onChange={(e) => setLogLink(e.target.value)}
+            placeholder="https://github.com/..."
+            className="w-full rounded-lg px-3 py-2.5 text-sm"
+            style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+            data-testid="input-log-link"
+          />
+        </div>
+        <button
+          onClick={handleAddLog}
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
+          style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+          data-testid="button-add-log"
+        >
+          <Plus className="w-4 h-4" />
+          Add Log Entry
+        </button>
+      </div>
+
+      <div className="rounded-xl overflow-hidden" style={glassCard}>
+        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Log History</h3>
+        </div>
+        {dailyLogs.length > 0 ? (
+          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            {dailyLogs.map((log) => (
+              <div key={log.id} className="px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }} data-testid={`log-entry-${log.id}`}>
+                <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+                  <span className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{new Date(log.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>{log.hours}h</span>
+                </div>
+                <p className="text-sm" style={{ color: "#94A3B8" }}>{log.description}</p>
+                {log.link && (
+                  <a href={log.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs" style={{ color: "#0EA5E9" }}>
+                    <ExternalLink className="w-3 h-3" /> View Link
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <FileText className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
+            <p className="text-sm" style={{ color: "#94A3B8" }}>No log entries yet. Start tracking your daily work above.</p>
+          </div>
         )}
       </div>
     </motion.div>
   );
 
+  const renderPerformance = () => {
+    const techSkill = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0;
+    const communication = 75;
+    const teamwork = batchMembers.length > 1 ? 80 : 60;
+    const problemSolving = Math.min(100, submissions.length * 20);
+    const overallScore = performanceScore ?? Math.round((techSkill + communication + teamwork + problemSolving) / 4);
+    const feedbackSub = submissions.find((s: any) => s.feedback);
+
+    return (
+      <motion.div key="performance" {...fadeInUp} className="space-y-6">
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Performance</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 rounded-xl p-6" style={glassCard}>
+            <h3 className="font-semibold mb-6" style={{ color: "#FFFFFF" }}>Skill Ratings</h3>
+            <SkillBar label="Technical Skills" value={techSkill} color="#00F5FF" />
+            <SkillBar label="Communication" value={communication} color="#0EA5E9" />
+            <SkillBar label="Teamwork" value={teamwork} color="#7C3AED" />
+            <SkillBar label="Problem Solving" value={problemSolving} color="#10B981" />
+          </div>
+
+          <div className="rounded-xl p-6 flex flex-col items-center justify-center" style={glassCard}>
+            <p className="text-xs mb-3 uppercase tracking-wider" style={{ color: "#94A3B8" }}>Overall Score</p>
+            <div className="relative flex items-center justify-center mb-3">
+              <CircularProgress value={overallScore} size={120} stroke={8} />
+              <span className="absolute text-3xl font-bold" style={{ color: "#FFFFFF" }}>{overallScore}</span>
+            </div>
+            <p className="text-xs" style={{ color: "#64748B" }}>out of 100</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="rounded-xl p-6" style={glassCard}>
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-5 h-5" style={{ color: "#F59E0B" }} />
+              <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Attendance</h3>
+            </div>
+            <div className="flex items-end gap-3 mb-2">
+              <span className="text-3xl font-bold" style={{ color: "#FFFFFF" }}>{daysActive}</span>
+              <span className="text-sm mb-1" style={{ color: "#94A3B8" }}>/ {totalDays} days</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #F59E0B, #F97316)" }} initial={{ width: 0 }} animate={{ width: `${totalDays > 0 ? (daysActive / totalDays) * 100 : 0}%` }} transition={{ duration: 1 }} />
+            </div>
+          </div>
+
+          <div className="rounded-xl p-6" style={glassCard}>
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className="w-5 h-5" style={{ color: "#10B981" }} />
+              <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Leader Feedback</h3>
+            </div>
+            {feedbackSub ? (
+              <div className="p-3 rounded-lg" style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)" }}>
+                <p className="text-sm" style={{ color: "#CBD5E1" }}>{feedbackSub.feedback}</p>
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: "#64748B" }}>Awaiting feedback from your mentor or team lead.</p>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderResources = () => {
+    const resources = [
+      { icon: FileText, title: "Project Documentation", desc: "Access project briefs and requirements", color: "#00F5FF" },
+      { icon: Shield, title: "Company Guidelines", desc: "Workplace policies and best practices", color: "#7C3AED" },
+      { icon: BookOpen, title: "Learning Modules", desc: "Skill development resources", color: "#0EA5E9" },
+      { icon: Video, title: "Meeting Recordings", desc: "Past team meeting archives", color: "#F59E0B" },
+    ];
+
+    return (
+      <motion.div key="resources" {...fadeInUp} className="space-y-6">
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Resources</h2>
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-4" variants={stagger} initial="initial" animate="animate">
+          {resources.map((res) => {
+            const Icon = res.icon;
+            return (
+              <motion.div
+                key={res.title}
+                variants={cardItem}
+                className="rounded-xl p-6 transition-all cursor-default"
+                style={glassCard}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 8px 32px ${res.color}10`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                data-testid={`resource-${res.title.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${res.color}15` }}>
+                    <Icon className="w-6 h-6" style={{ color: res.color }} />
+                  </div>
+                  <span className="text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>Coming Soon</span>
+                </div>
+                <h4 className="font-semibold mb-1" style={{ color: "#FFFFFF" }}>{res.title}</h4>
+                <p className="text-sm" style={{ color: "#64748B" }}>{res.desc}</p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   const renderMentor = () => (
-    <motion.div
-      key="mentor"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]"
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
-        >
-          <Bot className="w-5 h-5 text-white" />
+    <motion.div key="mentor" {...fadeInUp} className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
+      <div className="flex items-center gap-3 mb-4 p-4 rounded-xl" style={glassCard}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
+          <Bot className="w-5 h-5" style={{ color: "#050A18" }} />
         </div>
         <div>
-          <h2 className="text-white font-semibold" style={{ fontFamily: "var(--font-display)" }} data-testid="text-mentor-header">
+          <h2 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-mentor-header">
             Usha AI Mentor
           </h2>
-          <p className="text-xs text-green-400">Online</p>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ background: "#10B981" }} />
+            <span className="text-xs" style={{ color: "#10B981" }}>Online</span>
+          </div>
         </div>
       </div>
 
       <div
-        className="flex-1 overflow-y-auto rounded-xl p-4 border space-y-3 mb-4"
-        style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)" }}
+        className="flex-1 overflow-y-auto rounded-xl p-4 space-y-3 mb-4"
+        style={glassCard}
         data-testid="chat-messages-container"
       >
         {chatMessages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className="max-w-[80%] rounded-xl px-4 py-3"
+              className="max-w-[80%] rounded-2xl px-4 py-3"
               style={{
                 background: msg.role === "user"
-                  ? "linear-gradient(135deg, #22D3EE, #14B8A6)"
-                  : "rgba(255,255,255,0.05)",
+                  ? "linear-gradient(135deg, #00F5FF, #0EA5E9)"
+                  : "rgba(255,255,255,0.06)",
+                border: msg.role === "ai" ? "1px solid rgba(255,255,255,0.08)" : "none",
               }}
               data-testid={`chat-message-${idx}`}
             >
-              <p className={`text-sm ${msg.role === "user" ? "text-white" : "text-gray-300"}`}>
+              <p className="text-sm" style={{ color: msg.role === "user" ? "#050A18" : "#CBD5E1" }}>
                 {msg.text}
               </p>
             </div>
@@ -723,14 +1047,14 @@ export default function UdyogDashboard() {
           onChange={(e) => setChatInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
           placeholder="Ask Usha anything..."
-          className="flex-1 rounded-lg px-4 py-3 text-sm text-white border"
-          style={{ background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+          className="flex-1 rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
           data-testid="input-chat"
         />
         <button
           onClick={handleSendChat}
-          className="px-4 py-3 rounded-lg text-white transition-all"
-          style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+          className="px-4 py-3 rounded-xl transition-all"
+          style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
           data-testid="button-send-chat"
         >
           <Send className="w-4 h-4" />
@@ -741,60 +1065,43 @@ export default function UdyogDashboard() {
 
   const renderCertification = () => {
     const remainingTasks = tasks.filter((t: any) => t.status !== "completed");
+    const certProgress = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0;
 
     return (
-      <motion.div
-        key="certification"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        className="space-y-6"
-      >
+      <motion.div key="certification" {...fadeInUp} className="space-y-6">
         {allTasksCompleted ? (
-          <div className="text-center py-12">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div
-                className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(20,184,166,0.2))", border: "2px solid rgba(34,211,238,0.4)" }}
-              >
-                <Award className="w-12 h-12 text-cyan-400" />
+          <div className="text-center py-16">
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }}>
+              <div className="relative inline-flex items-center justify-center mb-8">
+                <div className="absolute w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%)", filter: "blur(20px)" }} />
+                <div className="w-28 h-28 rounded-full flex items-center justify-center relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "2px solid rgba(0,245,255,0.4)" }}>
+                  <Award className="w-14 h-14" style={{ color: "#00F5FF" }} />
+                </div>
               </div>
-              <h2
-                className="text-3xl font-bold text-white mb-3"
-                style={{ fontFamily: "var(--font-display)" }}
-                data-testid="text-congratulations"
-              >
+              <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-congratulations">
                 Congratulations!
               </h2>
-              <p className="text-gray-400 mb-8 max-w-md mx-auto">
+              <p className="mb-8 max-w-md mx-auto" style={{ color: "#94A3B8" }}>
                 You have completed all tasks in your internship. Generate your official certificate to showcase your achievement.
               </p>
               <button
                 onClick={() => generateCertMutation.mutate()}
                 disabled={generateCertMutation.isPending}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-white font-medium transition-all"
-                style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all text-lg"
+                style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
                 data-testid="button-generate-certificate"
               >
                 <Award className="w-5 h-5" />
                 {generateCertMutation.isPending ? "Generating..." : "Generate Certificate"}
               </button>
               {assignment.certificate && (
-                <div
-                  className="mt-8 rounded-xl p-6 border max-w-md mx-auto"
-                  style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(34,211,238,0.2)" }}
-                  data-testid="certificate-details"
-                >
-                  <Award className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-                  <p className="text-white font-medium mb-1">{internship?.title}</p>
-                  <p className="text-gray-400 text-sm mb-4">Certificate ID: {assignment.certificate.certificateId}</p>
+                <div className="mt-8 rounded-xl p-6 max-w-md mx-auto" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.2)" }} data-testid="certificate-details">
+                  <Award className="w-10 h-10 mx-auto mb-3" style={{ color: "#00F5FF" }} />
+                  <p className="font-medium mb-1" style={{ color: "#FFFFFF" }}>{internship?.title}</p>
+                  <p className="text-sm mb-4" style={{ color: "#94A3B8" }}>Certificate ID: {assignment.certificate.certificateId}</p>
                   <button
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-cyan-400 border"
-                    style={{ borderColor: "rgba(34,211,238,0.3)", background: "rgba(34,211,238,0.05)" }}
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium"
+                    style={{ border: "1px solid rgba(0,245,255,0.3)", background: "rgba(0,245,255,0.05)", color: "#00F5FF" }}
                     data-testid="button-download-pdf"
                   >
                     Download PDF
@@ -805,57 +1112,45 @@ export default function UdyogDashboard() {
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-display)" }} data-testid="text-certification-progress">
+            <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-certification-progress">
               Certification Progress
             </h2>
-            <div
-              className="rounded-xl p-5 border mb-6"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-            >
+
+            <div className="rounded-xl p-6 mb-6" style={glassCard}>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-400">Completion</span>
-                <span className="text-sm font-medium text-cyan-400">
+                <span className="text-sm" style={{ color: "#94A3B8" }}>Completion</span>
+                <span className="text-sm font-semibold" style={{ color: "#00F5FF" }}>
                   {completedTasksCount}/{tasks.length} tasks
                 </span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+              <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: "linear-gradient(90deg, #22D3EE, #14B8A6)" }}
+                  style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }}
                   initial={{ width: 0 }}
-                  animate={{ width: `${tasks.length > 0 ? (completedTasksCount / tasks.length) * 100 : 0}%` }}
-                  transition={{ duration: 0.8 }}
+                  animate={{ width: `${certProgress}%` }}
+                  transition={{ duration: 1 }}
                 />
               </div>
             </div>
 
             <div className="space-y-2 mb-6">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Remaining Tasks</h3>
+              <h3 className="text-sm font-medium mb-3" style={{ color: "#94A3B8" }}>Remaining Tasks</h3>
               {remainingTasks.map((task: any) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border"
-                  style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
-                  data-testid={`remaining-task-${task.id}`}
-                >
-                  <AlertCircle className="w-4 h-4 text-yellow-400 shrink-0" />
-                  <span className="text-sm text-gray-300">{task.title}</span>
-                  <span
-                    className="ml-auto px-2 py-0.5 rounded text-[10px] font-medium"
-                    style={{ background: `${statusColors[task.status]}20`, color: statusColors[task.status] }}
-                  >
+                <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ ...glassCard }} data-testid={`remaining-task-${task.id}`}>
+                  <AlertCircle className="w-4 h-4 shrink-0" style={{ color: "#F59E0B" }} />
+                  <span className="text-sm flex-1" style={{ color: "#CBD5E1" }}>{task.title}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: `${statusColors[task.status]}20`, color: statusColors[task.status] }}>
                     {statusLabels[task.status] || task.status}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div
-              className="rounded-xl p-5 border text-center"
-              style={{ background: "rgba(34,211,238,0.03)", borderColor: "rgba(34,211,238,0.1)" }}
-            >
-              <p className="text-cyan-400 text-sm font-medium" data-testid="text-motivational">
-                You're {Math.round((completedTasksCount / Math.max(tasks.length, 1)) * 100)}% there! Keep pushing — your certificate awaits.
+            <div className="rounded-xl p-5 text-center" style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.1)" }}>
+              <Zap className="w-5 h-5 mx-auto mb-2" style={{ color: "#00F5FF" }} />
+              <p className="text-sm font-medium" style={{ color: "#00F5FF" }} data-testid="text-motivational">
+                You're {certProgress}% there! Keep pushing — your certificate awaits.
               </p>
             </div>
           </div>
@@ -867,8 +1162,11 @@ export default function UdyogDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case "overview": return renderOverview();
+      case "project": return renderProject();
       case "tasks": return renderTasks();
-      case "submissions": return renderSubmissions();
+      case "daily-log": return renderDailyLog();
+      case "performance": return renderPerformance();
+      case "resources": return renderResources();
       case "mentor": return renderMentor();
       case "certification": return renderCertification();
       default: return renderOverview();
@@ -876,17 +1174,17 @@ export default function UdyogDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: "#0a0e1a" }}>
-      <div className="hidden md:flex flex-col w-60 shrink-0 fixed top-0 left-0 h-screen z-30" style={{ background: "#111827", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
-        <div className="p-5 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
-            >
-              <Briefcase className="w-4 h-4 text-white" />
+    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: "linear-gradient(180deg, #050A18, #0B1D3A, #0F172A)" }}>
+      <div
+        className="hidden md:flex flex-col w-64 shrink-0 fixed top-0 left-0 h-screen z-30"
+        style={{ background: "rgba(5,10,24,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div className="p-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
+              <Briefcase className="w-4.5 h-4.5" style={{ color: "#050A18" }} />
             </div>
-            <span className="text-white font-semibold text-sm" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="font-semibold text-sm" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
               Udyog Workspace
             </span>
           </div>
@@ -901,9 +1199,10 @@ export default function UdyogDashboard() {
                 onClick={() => setActiveTab(item.key)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left"
                 style={{
-                  background: isActive ? "rgba(34,211,238,0.2)" : "transparent",
-                  borderLeft: isActive ? "3px solid #22D3EE" : "3px solid transparent",
-                  color: isActive ? "#22D3EE" : "#9CA3AF",
+                  background: isActive ? "rgba(0,245,255,0.1)" : "transparent",
+                  borderLeft: isActive ? "3px solid #00F5FF" : "3px solid transparent",
+                  color: isActive ? "#00F5FF" : "#94A3B8",
+                  boxShadow: isActive ? "inset 0 0 20px rgba(0,245,255,0.05)" : "none",
                 }}
                 data-testid={`sidebar-item-${item.key}`}
               >
@@ -913,17 +1212,17 @@ export default function UdyogDashboard() {
             );
           })}
         </nav>
-        <div className="p-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <Link href="/shishya/dashboard">
-            <div className="flex items-center gap-2 text-gray-400 text-xs cursor-pointer" data-testid="link-back-dashboard">
-              <User className="w-3.5 h-3.5" />
-              <span>Back to Dashboard</span>
+            <div className="flex items-center gap-2 text-xs cursor-pointer transition-all" style={{ color: "#64748B" }} data-testid="link-back-dashboard">
+              <Home className="w-3.5 h-3.5" />
+              <span>Back to SHISHYA</span>
             </div>
           </Link>
         </div>
       </div>
 
-      <div className="md:hidden overflow-x-auto border-b" style={{ background: "#111827", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="md:hidden overflow-x-auto" style={{ background: "rgba(5,10,24,0.9)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex px-2 py-2 gap-1 min-w-max" data-testid="mobile-tab-bar">
           {sidebarItems.map((item) => {
             const isActive = activeTab === item.key;
@@ -934,8 +1233,8 @@ export default function UdyogDashboard() {
                 onClick={() => setActiveTab(item.key)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all"
                 style={{
-                  background: isActive ? "rgba(34,211,238,0.2)" : "transparent",
-                  color: isActive ? "#22D3EE" : "#9CA3AF",
+                  background: isActive ? "rgba(0,245,255,0.15)" : "transparent",
+                  color: isActive ? "#00F5FF" : "#94A3B8",
                 }}
                 data-testid={`mobile-tab-${item.key}`}
               >
@@ -947,8 +1246,27 @@ export default function UdyogDashboard() {
         </div>
       </div>
 
-      <div className="flex-1 md:ml-60">
-        <div className="p-4 md:p-8 max-w-6xl">
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+        <div
+          className="sticky top-0 z-20 hidden md:flex items-center justify-between px-8 py-4"
+          style={{ background: "rgba(5,10,24,0.7)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{currentLabel}</span>
+            <ChevronRight className="w-4 h-4" style={{ color: "#475569" }} />
+            <span className="text-sm" style={{ color: "#94A3B8" }}>{internship?.title || "Workspace"}</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative p-2 rounded-lg transition-all" style={{ background: "rgba(255,255,255,0.04)" }} data-testid="button-notifications">
+              <Bell className="w-5 h-5" style={{ color: "#94A3B8" }} />
+            </button>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }} data-testid="avatar-user">
+              {userInitial}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 p-4 md:p-8 max-w-6xl">
           <AnimatePresence mode="wait">
             {renderContent()}
           </AnimatePresence>

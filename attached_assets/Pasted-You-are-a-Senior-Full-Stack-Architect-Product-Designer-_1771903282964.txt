@@ -1,0 +1,202 @@
+You are a Senior Full Stack Architect, Product Designer, and UX Engineer.
+
+Build a production-ready Internship Dashboard (Student View) for a platform called "Our Udyog" which is part of the Our Shiksha ecosystem.
+
+The goal is to simulate a real corporate internship workspace (Jira + Asana + Slack + LinkedIn Learning vibe).
+
+Tech Stack:
+- Frontend: React + Tailwind CSS
+- Icons: Lucide or Heroicons
+- Animations: Framer Motion (subtle, premium)
+- State Management: useContext or Zustand
+- Backend-ready structure (mock JSON data for now)
+- Clean component-based folder architecture
+
+Design Theme:
+- Premium AI startup feel (Apple × Tesla × Corporate SaaS)
+- Light mode default, dark mode toggle ready
+- Glassmorphism cards
+- Soft gradients (indigo / violet / cyan accents)
+- Rounded-2xl containers
+- Subtle hover animations
+- Smooth micro-interactions
+
+--------------------------------------------------
+MAIN LAYOUT STRUCTURE
+--------------------------------------------------
+
+Sidebar (Fixed Left)
+- Dashboard
+- My Project
+- Tasks
+- Daily Log
+- Performance
+- Resources
+- Team Chat
+- Certificate
+- Settings
+
+Top Navbar:
+- Internship Name
+- Notification Bell
+- Dark Mode Toggle
+- Profile Dropdown
+
+--------------------------------------------------
+DASHBOARD CONTENT (Student View)
+--------------------------------------------------
+
+1. HERO SECTION
+- Greeting: "Good Morning, [Student Name]"
+- Role
+- Batch ID
+- Assigned Leader
+- Internship Duration
+
+2. STATS CARDS (Grid – 4 cards)
+- Tasks Assigned
+- In Progress
+- Under Review
+- Performance Score
+
+Each card:
+- Glass effect
+- Animated counter
+- Gradient icon
+- Hover elevation
+
+3. CURRENT PROJECT CARD
+- Project Name
+- Description
+- Start / End Date
+- Progress Bar (animated)
+- "Open Workspace" button
+
+4. AI MENTOR FLOATING PANEL
+Component: AIUshaMentor
+- Small chat UI
+- Input field
+- Mock AI response
+- Smooth open/close animation
+
+5. TASK MANAGEMENT (KANBAN BOARD)
+
+Columns:
+- Assigned
+- In Progress
+- Under Review
+- Completed
+
+Each task card:
+- Title
+- Short description
+- Priority badge (High/Medium/Low)
+- Due date
+- Comment count
+- Attachment icon
+
+Allow drag-and-drop between columns (basic functionality)
+
+6. DAILY WORK LOG SECTION
+Form with:
+- Date
+- Hours worked
+- Description textarea
+- Upload link field (GitHub/Drive)
+- Submit button
+
+Show submitted logs in table format below form.
+
+7. PERFORMANCE SECTION
+- Skill ratings (Communication, Technical, Teamwork)
+- Radar chart placeholder
+- Attendance %
+- Leader feedback card
+
+8. INTERNSHIP TIMELINE
+Vertical milestone timeline:
+- Offer Letter Issued
+- Project Assigned
+- Mid Review
+- Final Review
+- Certificate Eligible
+
+Completed steps glow in gradient.
+
+9. RESOURCES SECTION
+Cards for:
+- Project Docs
+- Company Guidelines
+- Meeting Recordings
+- Learning Modules
+
+10. CERTIFICATE STATUS CARD
+Show:
+- Internship Status
+- Completion %
+- Eligibility message
+- Download Certificate button (disabled until eligible)
+
+--------------------------------------------------
+ADVANCED UX FEATURES
+--------------------------------------------------
+
+- Real-time activity feed panel (mock data)
+- Intern level badge (Level 1 → Level 2)
+- Leaderboard placeholder
+- Animated loading skeletons
+- Responsive design (desktop-first, mobile optimized)
+- Clean reusable components
+
+--------------------------------------------------
+FOLDER STRUCTURE
+--------------------------------------------------
+
+/components
+   Sidebar.jsx
+   TopNavbar.jsx
+   StatsCard.jsx
+   ProjectCard.jsx
+   KanbanBoard.jsx
+   TaskCard.jsx
+   DailyLogForm.jsx
+   PerformancePanel.jsx
+   Timeline.jsx
+   ResourceCard.jsx
+   CertificateStatus.jsx
+   AIUshaMentor.jsx
+
+/pages
+   Dashboard.jsx
+
+/data
+   mockData.js
+
+/styles
+   theme.js
+
+--------------------------------------------------
+EXTRA REQUIREMENTS
+--------------------------------------------------
+
+- Use clean semantic HTML
+- Avoid unnecessary re-renders
+- Keep code scalable for backend integration
+- Use dummy JSON data for internship, tasks, logs, performance
+- Include comments explaining key architectural decisions
+- Make UI feel like a real SaaS product, not a student project
+- Use modern typography
+- No clutter, minimal but powerful
+
+--------------------------------------------------
+OUTPUT FORMAT
+--------------------------------------------------
+
+1. First generate full folder structure.
+2. Then generate each file with proper code.
+3. Ensure everything runs without error.
+4. Keep code clean and production-grade.
+5. Do NOT oversimplify UI.
+6. Use consistent spacing and styling tokens.
+
+Build this like a VC-funded AI internship platform.
