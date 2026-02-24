@@ -27,14 +27,17 @@ export default function EcosystemRotator() {
   useEffect(() => {
     const halfRotation = ROTATION_MS / 2;
     const firstDelay = ROTATION_MS / 4;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
 
     const firstTimer = setTimeout(() => {
       doSwap();
-      const interval = setInterval(doSwap, halfRotation);
-      return () => clearInterval(interval);
+      intervalId = setInterval(doSwap, halfRotation);
     }, firstDelay);
 
-    return () => clearTimeout(firstTimer);
+    return () => {
+      clearTimeout(firstTimer);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [doSwap]);
 
   return (
