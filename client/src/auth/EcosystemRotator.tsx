@@ -1,5 +1,5 @@
 import { useState } from "react";
-import shikshaSeal from "@assets/image_1771692892158.png";
+import shikshaSeal from "@assets/image_1766511184194.png";
 import udyogSeal from "@assets/image_1771923592033.png";
 import ushaAvatar from "@/assets/images/usha-avatar.png";
 
