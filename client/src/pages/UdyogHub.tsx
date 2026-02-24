@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Briefcase, Search, MapPin, Calendar,
   Send, BadgeCheck, Building2, Clock, Eye, ArrowRight,
   Rocket, Settings, Bell, Shield, Globe, ChevronRight,
+  Award, Target, Brain, Zap, TrendingUp,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -162,6 +163,16 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
     retry: false,
   });
 
+  const { data: assessments = [] } = useQuery<any[]>({
+    queryKey: ["/api/udyog/assessments"],
+    enabled: !!user,
+  });
+
+  const { data: allAssignments = [] } = useQuery<any[]>({
+    queryKey: ["/api/udyog/my-assignments"],
+    enabled: !!user,
+  });
+
   const hasBatch = !!batchData?.batch;
   const assignment = hasBatch ? batchData.assignment : assignmentData?.assignment || assignmentData;
   const internship = hasBatch ? batchData.internship : assignmentData?.internship;
@@ -171,6 +182,12 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
 
   const completedTasksCount = tasks.filter((t: any) => t.status === "completed").length;
   const overallProgress = hasBatch ? (batchProgress || 0) : (assignment?.progress || 0);
+
+  const assessmentLevelColors: Record<string, { bg: string; text: string; border: string }> = {
+    beginner: { bg: "rgba(239,68,68,0.15)", text: "#f87171", border: "rgba(239,68,68,0.3)" },
+    intermediate: { bg: "rgba(234,179,8,0.15)", text: "#facc15", border: "rgba(234,179,8,0.3)" },
+    advanced: { bg: "rgba(34,197,94,0.15)", text: "#4ade80", border: "rgba(34,197,94,0.3)" },
+  };
 
   if (!user) {
     return (
@@ -213,33 +230,180 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
   }
 
   if (!assignment && !assignmentData) {
+    const hasAssessments = assessments.length > 0;
+    const bestAssessment = hasAssessments
+      ? assessments.reduce((best: any, curr: any) => (!best || curr.score > best.score) ? curr : best, null)
+      : null;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
-        style={{ background: "rgba(255,255,255,0.02)" }}
+        className="space-y-6"
       >
-        <div
-          className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-          style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.3)" }}
-        >
-          <Briefcase className="w-10 h-10 text-cyan-400" />
-        </div>
-        <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }} data-testid="text-no-assignment-hub">
-          No Active Internship
-        </h3>
-        <p className="text-gray-400 max-w-md mx-auto mb-6">
-          Take a skill assessment to get matched with the perfect virtual internship.
-        </p>
-        <Link href={ctaHref}>
-          <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-start-assessment-hub">
-            <Rocket className="w-4 h-4 mr-2" />
-            Start Assessment
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
-        </Link>
+        {hasAssessments ? (
+          <>
+            <div
+              className="rounded-2xl border p-6"
+              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(34,211,238,0.2)" }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(20,184,166,0.15))", border: "1px solid rgba(34,211,238,0.3)" }}
+                >
+                  <Brain className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assessment-dashboard-title">
+                    Your Assessment Scores
+                  </h3>
+                  <p className="text-xs text-gray-400">AI-evaluated skill results across domains</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                {assessments.map((a: any, idx: number) => {
+                  const levelStyle = assessmentLevelColors[a.level?.toLowerCase()] || assessmentLevelColors.beginner;
+                  return (
+                    <motion.div
+                      key={a.id || idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.08 }}
+                      className="rounded-xl border p-4"
+                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
+                      data-testid={`assessment-card-${a.id || idx}`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-white">{a.domain}</span>
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border"
+                          style={{ background: levelStyle.bg, color: levelStyle.text, borderColor: levelStyle.border }}
+                        >
+                          {a.level}
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-2 mb-2">
+                        <span className="text-3xl font-bold text-white">{a.score}</span>
+                        <span className="text-sm text-gray-500 mb-1">/ 100</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${a.score}%`, background: `linear-gradient(90deg, ${levelStyle.text}, #22D3EE)` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-2">
+                        {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}
+                      </p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {bestAssessment && (
+                <div
+                  className="rounded-xl border p-4 flex flex-wrap items-center gap-4"
+                  style={{ background: "rgba(34,211,238,0.04)", borderColor: "rgba(34,211,238,0.15)" }}
+                  data-testid="best-assessment-summary"
+                >
+                  <Award className="w-8 h-8 text-cyan-400 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-white font-medium">
+                      Best Score: <span className="text-cyan-400">{bestAssessment.score}%</span> in {bestAssessment.domain}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Level: <span className="capitalize">{bestAssessment.level}</span> — You qualify as{" "}
+                      <span className="text-cyan-400 font-medium">
+                        {bestAssessment.score >= 80 ? "Lead Developer" : bestAssessment.score >= 40 ? "Project Associate" : "Junior Intern"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="rounded-2xl border p-6"
+              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
+                  Ready to Start Your Internship?
+                </h3>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">
+                You've completed your assessment. Browse available internship programs and apply to get matched with a role that fits your skill level.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href={ctaHref}>
+                  <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-retake-assessment-hub">
+                    <Target className="w-4 h-4 mr-2" />
+                    Retake Assessment
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {allAssignments.length > 0 && (
+              <div
+                className="rounded-2xl border border-white/10 p-6"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <h3 className="text-base font-semibold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>
+                  Past Internships
+                </h3>
+                <div className="space-y-3">
+                  {allAssignments.map((a: any, idx: number) => (
+                    <div
+                      key={a.id || idx}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-white/5"
+                      style={{ background: "rgba(255,255,255,0.02)" }}
+                      data-testid={`past-assignment-${a.id || idx}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm text-white font-medium truncate">{a.assignedRole || "Intern"}</p>
+                        <p className="text-xs text-gray-500 capitalize">{a.status}</p>
+                      </div>
+                      <span className="text-xs text-gray-500 shrink-0">
+                        {a.createdAt ? new Date(a.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
+            style={{ background: "rgba(255,255,255,0.02)" }}
+          >
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.3)" }}
+            >
+              <Briefcase className="w-10 h-10 text-cyan-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }} data-testid="text-no-assignment-hub">
+              Welcome to Our Udyog
+            </h3>
+            <p className="text-gray-400 max-w-md mx-auto mb-6">
+              Browse available internships and take a skill assessment to get matched with the perfect role.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href={ctaHref}>
+                <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-start-assessment-hub">
+                  <Rocket className="w-4 h-4 mr-2" />
+                  Take Assessment
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </motion.div>
     );
   }
@@ -303,6 +467,44 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           )}
         </div>
       </div>
+
+      {assessments.length > 0 && (
+        <div
+          className="rounded-2xl border border-white/10 p-6"
+          style={{ background: "rgba(255,255,255,0.03)" }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {assessments.map((a: any, idx: number) => {
+              const levelStyle = assessmentLevelColors[a.level?.toLowerCase()] || assessmentLevelColors.beginner;
+              return (
+                <div
+                  key={a.id || idx}
+                  className="rounded-xl border p-3 flex items-center gap-3"
+                  style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
+                  data-testid={`hub-assessment-score-${a.id || idx}`}
+                >
+                  <div className="text-center shrink-0">
+                    <p className="text-xl font-bold text-white">{a.score}%</p>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-gray-300 truncate">{a.domain}</p>
+                    <span
+                      className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase border mt-1"
+                      style={{ background: levelStyle.bg, color: levelStyle.text, borderColor: levelStyle.border }}
+                    >
+                      {a.level}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {tasks.length > 0 && (
         <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>

@@ -177,6 +177,10 @@ export default function UdyogDashboard() {
     enabled: !!assignmentId,
   });
 
+  const { data: assessments = [] } = useQuery<any[]>({
+    queryKey: ["/api/udyog/assessments"],
+  });
+
   useEffect(() => {
     if (assignmentId) {
       const stored = localStorage.getItem(`udyog_daily_logs_${assignmentId}`);
@@ -315,41 +319,163 @@ export default function UdyogDashboard() {
   }
 
   if (!assignment && !assignmentData) {
+    const hasAssessments = assessments.length > 0;
+    const bestAssessment = hasAssessments
+      ? assessments.reduce((best: any, curr: any) => (!best || curr.score > best.score) ? curr : best, null)
+      : null;
+
+    const assessmentLevelColors: Record<string, { bg: string; text: string; border: string }> = {
+      beginner: { bg: "rgba(239,68,68,0.15)", text: "#f87171", border: "rgba(239,68,68,0.3)" },
+      intermediate: { bg: "rgba(234,179,8,0.15)", text: "#facc15", border: "rgba(234,179,8,0.3)" },
+      advanced: { bg: "rgba(34,197,94,0.15)", text: "#4ade80", border: "rgba(34,197,94,0.3)" },
+    };
+
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
-        <motion.div
-          className="text-center max-w-md"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div
-            className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center"
-            style={{ background: "radial-gradient(circle, rgba(0,245,255,0.15), transparent)", border: "2px solid rgba(0,245,255,0.3)" }}
+      <div className="min-h-screen px-4 py-12" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <Briefcase className="w-12 h-12" style={{ color: "#00F5FF" }} />
-          </div>
-          <h1
-            className="text-3xl font-bold mb-3"
-            style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}
-            data-testid="text-no-assignment"
-          >
-            No Active Internship
-          </h1>
-          <p style={{ color: "#94A3B8" }} className="mb-8" data-testid="text-no-assignment-desc">
-            Take a skill assessment to get started on your virtual internship journey.
-          </p>
-          <Link href="/shishya/udyog/assess">
-            <button
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
-              style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
-              data-testid="button-start-assessment"
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: "radial-gradient(circle, rgba(0,245,255,0.15), transparent)", border: "2px solid rgba(0,245,255,0.3)" }}
             >
-              Start Assessment
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </Link>
-        </motion.div>
+              <Briefcase className="w-10 h-10" style={{ color: "#00F5FF" }} />
+            </div>
+            <h1
+              className="text-3xl font-bold mb-3"
+              style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}
+              data-testid="text-no-assignment"
+            >
+              {hasAssessments ? "Your Internship Dashboard" : "Welcome to Our Udyog"}
+            </h1>
+            <p style={{ color: "#94A3B8" }} className="max-w-md mx-auto" data-testid="text-no-assignment-desc">
+              {hasAssessments
+                ? "You've completed your skill assessment. Browse internships and apply to get started."
+                : "Take a skill assessment to get matched with the perfect virtual internship."}
+            </p>
+          </motion.div>
+
+          {hasAssessments && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="rounded-2xl p-6"
+              style={{ ...glassCard }}
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.2), rgba(14,165,233,0.15))", border: "1px solid rgba(0,245,255,0.3)" }}
+                >
+                  <Target className="w-5 h-5" style={{ color: "#00F5FF" }} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                    Assessment Scores
+                  </h2>
+                  <p className="text-xs" style={{ color: "#94A3B8" }}>Your AI-evaluated skill results</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+                {assessments.map((a: any, idx: number) => {
+                  const levelStyle = assessmentLevelColors[a.level?.toLowerCase()] || assessmentLevelColors.beginner;
+                  return (
+                    <motion.div
+                      key={a.id || idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + idx * 0.08 }}
+                      className="rounded-xl p-4"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+                      data-testid={`dashboard-assessment-${a.id || idx}`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{a.domain}</span>
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide"
+                          style={{ background: levelStyle.bg, color: levelStyle.text, border: `1px solid ${levelStyle.border}` }}
+                        >
+                          {a.level}
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-2 mb-2">
+                        <span className="text-3xl font-bold" style={{ color: "#FFFFFF" }}>{a.score}</span>
+                        <span className="text-sm mb-1" style={{ color: "#64748B" }}>/ 100</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ background: `linear-gradient(90deg, ${levelStyle.text}, #00F5FF)` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${a.score}%` }}
+                          transition={{ duration: 0.8, delay: 0.3 + idx * 0.1 }}
+                        />
+                      </div>
+                      <p className="text-[10px] mt-2" style={{ color: "#64748B" }}>
+                        {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}
+                      </p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {bestAssessment && (
+                <div
+                  className="rounded-xl p-4 flex flex-wrap items-center gap-4"
+                  style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.15)" }}
+                  data-testid="best-assessment-summary-dashboard"
+                >
+                  <Award className="w-8 h-8 shrink-0" style={{ color: "#00F5FF" }} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>
+                      Best Score: <span style={{ color: "#00F5FF" }}>{bestAssessment.score}%</span> in {bestAssessment.domain}
+                    </p>
+                    <p className="text-xs" style={{ color: "#94A3B8" }}>
+                      Level: <span className="capitalize">{bestAssessment.level}</span> — You qualify as{" "}
+                      <span style={{ color: "#00F5FF" }} className="font-medium">
+                        {bestAssessment.score >= 80 ? "Lead Developer" : bestAssessment.score >= 40 ? "Project Associate" : "Junior Intern"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: hasAssessments ? 0.4 : 0.2 }}
+            className="flex flex-wrap justify-center gap-4"
+          >
+            <Link href="/shishya/udyog/hub">
+              <button
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
+                style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                data-testid="button-browse-internships"
+              >
+                Browse Internships
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
+            <Link href="/shishya/udyog/assess">
+              <button
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                data-testid="button-start-assessment"
+              >
+                {hasAssessments ? "Retake Assessment" : "Take Assessment"}
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </Link>
+          </motion.div>
+        </div>
       </div>
     );
   }
