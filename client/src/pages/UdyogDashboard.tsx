@@ -296,7 +296,7 @@ export default function UdyogDashboard() {
   const currentUserMember = batchMembers.find((m: any) => m.member?.userId === user?.id);
   const performanceScore = currentUserMember?.member?.performanceScore;
 
-  const username = user?.email ? user.email.split("@")[0] : "Intern";
+  const username = user?.fullName || (user?.email ? user.email.split("@")[0] : "Intern");
   const userInitial = username.charAt(0).toUpperCase();
 
   const currentLabel = sidebarItems.find((s) => s.key === activeTab)?.label || "Dashboard";

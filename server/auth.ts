@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { db } from "./db";
-import { users, sessions, userCredits, creditTransactions, WELCOME_BONUS_CREDITS } from "@shared/schema";
+import { users, sessions, userCredits, creditTransactions, userProfiles, WELCOME_BONUS_CREDITS } from "@shared/schema";
 import { signupSchema, loginSchema, verifyOtpSchema } from "@shared/schema";
 import type { OtpPurpose } from "@shared/schema";
 import { eq, and, gt } from "drizzle-orm";
@@ -302,10 +302,13 @@ authRouter.get("/me", async (req: Request, res: Response) => {
     }
 
     const user = userResult[0];
+    const profileResult = await db.select().from(userProfiles).where(eq(userProfiles.userId, user.id)).limit(1);
+    const profile = profileResult.length > 0 ? profileResult[0] : null;
     res.json({
       user: {
         id: user.id,
         email: user.email,
+        fullName: profile?.fullName || null,
         emailVerified: user.emailVerified,
       },
     });
