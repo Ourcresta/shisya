@@ -1510,6 +1510,15 @@ html.dark body {
   transform-style: preserve-3d;
 }
 
+.coin3d__body--spinning {
+  animation: coin3d-spin 4s linear infinite;
+}
+
+@keyframes coin3d-spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
 .coin3d__face {
   position: absolute;
   inset: 0;
