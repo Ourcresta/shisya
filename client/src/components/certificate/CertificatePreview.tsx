@@ -5,7 +5,7 @@ import ourShikshaStamp from "@assets/image_1766511184194.png";
 
 import ourshiksha_stamp_rot from "@assets/ourshiksha stamp_rot.png";
 
-import ourshiksha_stamp2 from "@assets/ourshiksha stamp2.png";
+import ourshiksha_stamp2 from "@assets/image_1771947745098.png";
 
 interface CertificatePreviewProps {
   certificate: Certificate;
