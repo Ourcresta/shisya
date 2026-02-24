@@ -166,6 +166,43 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
       skillScore: assessment.score,
       assignedRole: roleMap[assessment.level] || "Junior Intern",
     }).returning();
+    // Immediately create tasks for this assignment by copying template tasks
+    const existingBatchTasks = await db.select().from(udyogTasks)
+      .where(and(
+        eq(udyogTasks.internshipId, internship.id),
+        eq(udyogTasks.batchId, formingBatch.id)
+      ));
+    if (existingBatchTasks.length === 0) {
+      const templateTasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, internship.id),
+          sql`${udyogTasks.batchId} IS NULL`
+        ))
+        .orderBy(udyogTasks.orderIndex);
+      for (const tpl of templateTasks) {
+        await db.insert(udyogTasks).values({
+          internshipId: internship.id,
+          batchId: formingBatch.id,
+          title: tpl.title,
+          description: tpl.description,
+          status: "todo",
+          orderIndex: tpl.orderIndex,
+        });
+      }
+    }
+    // Activate batch immediately so tasks are visible
+    if (formingBatch.status === "forming") {
+      const now = new Date();
+      const durationWeeks = parseInt(internship.duration) || 4;
+      const endDate = new Date(now.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
+      await db.update(udyogBatches).set({
+        status: "active",
+        startDate: now,
+        endDate,
+      }).where(eq(udyogBatches.id, formingBatch.id));
+      formingBatch = { ...formingBatch, status: "active", startDate: now, endDate };
+    }
+    // Assign team roles if batch reaches full size
     const members = await db.select().from(udyogBatchMembers)
       .where(eq(udyogBatchMembers.batchId, formingBatch.id));
     if (members.length >= batchSize) {
@@ -184,30 +221,6 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
             eq(udyogAssignments.userId, member.userId),
             eq(udyogAssignments.batchId, formingBatch.id)
           ));
-      }
-      const now = new Date();
-      const durationWeeks = parseInt(internship.duration) || 4;
-      const endDate = new Date(now.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
-      await db.update(udyogBatches).set({
-        status: "active",
-        startDate: now,
-        endDate,
-      }).where(eq(udyogBatches.id, formingBatch.id));
-      const templateTasks = await db.select().from(udyogTasks)
-        .where(and(
-          eq(udyogTasks.internshipId, internship.id),
-          sql`${udyogTasks.batchId} IS NULL`
-        ))
-        .orderBy(udyogTasks.orderIndex);
-      for (const tpl of templateTasks) {
-        await db.insert(udyogTasks).values({
-          internshipId: internship.id,
-          batchId: formingBatch.id,
-          title: tpl.title,
-          description: tpl.description,
-          status: "todo",
-          orderIndex: tpl.orderIndex,
-        });
       }
     }
     res.json({ assignment, internship, batch: formingBatch });
@@ -233,9 +246,23 @@ udyogRouter.get("/my-assignment", requireAuth as any, async (req: AuthenticatedR
     const [internship] = await db.select().from(udyogInternships)
       .where(eq(udyogInternships.id, assignment.internshipId))
       .limit(1);
-    const tasks = await db.select().from(udyogTasks)
-      .where(eq(udyogTasks.internshipId, assignment.internshipId))
-      .orderBy(udyogTasks.orderIndex);
+    let tasks;
+    if (assignment.batchId) {
+      tasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, assignment.internshipId),
+          eq(udyogTasks.batchId, assignment.batchId)
+        ))
+        .orderBy(udyogTasks.orderIndex);
+    }
+    if (!tasks || tasks.length === 0) {
+      tasks = await db.select().from(udyogTasks)
+        .where(and(
+          eq(udyogTasks.internshipId, assignment.internshipId),
+          sql`${udyogTasks.batchId} IS NULL`
+        ))
+        .orderBy(udyogTasks.orderIndex);
+    }
     res.json({ assignment, internship, tasks });
   } catch (error) {
     console.error("[Udyog] Error fetching assignment:", error);
