@@ -231,6 +231,7 @@ export default function UdyogDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-assignment"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/my-batch"] });
       toast({ title: "Certificate Generated", description: "Your internship certificate has been created." });
     },
     onError: () => {

@@ -230,10 +230,10 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
   }
 });
 
-// GET /my-assignment - Get current user's active assignment with internship details and tasks (auth required)
+// GET /my-assignment - Get current user's active or most recent assignment with internship details and tasks (auth required)
 udyogRouter.get("/my-assignment", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const [assignment] = await db.select().from(udyogAssignments)
+    let [assignment] = await db.select().from(udyogAssignments)
       .where(and(
         eq(udyogAssignments.userId, req.user!.id),
         eq(udyogAssignments.status, "active")
@@ -241,7 +241,13 @@ udyogRouter.get("/my-assignment", requireAuth as any, async (req: AuthenticatedR
       .orderBy(desc(udyogAssignments.createdAt))
       .limit(1);
     if (!assignment) {
-      return res.status(404).json({ error: "No active assignment found" });
+      [assignment] = await db.select().from(udyogAssignments)
+        .where(eq(udyogAssignments.userId, req.user!.id))
+        .orderBy(desc(udyogAssignments.createdAt))
+        .limit(1);
+    }
+    if (!assignment) {
+      return res.status(404).json({ error: "No assignment found" });
     }
     const [internship] = await db.select().from(udyogInternships)
       .where(eq(udyogInternships.id, assignment.internshipId))
@@ -263,7 +269,17 @@ udyogRouter.get("/my-assignment", requireAuth as any, async (req: AuthenticatedR
         ))
         .orderBy(udyogTasks.orderIndex);
     }
-    res.json({ assignment, internship, tasks });
+    let certificate = null;
+    if (assignment.status === "completed") {
+      const [cert] = await db.select().from(udyogCertificates)
+        .where(and(
+          eq(udyogCertificates.userId, req.user!.id),
+          eq(udyogCertificates.internshipId, assignment.internshipId)
+        ))
+        .limit(1);
+      certificate = cert || null;
+    }
+    res.json({ assignment: { ...assignment, certificate }, internship, tasks });
   } catch (error) {
     console.error("[Udyog] Error fetching assignment:", error);
     res.status(500).json({ error: "Failed to fetch assignment" });
@@ -654,18 +670,24 @@ udyogRouter.get("/batch/:batchId", requireAuth as any, async (req: Authenticated
   }
 });
 
-// GET /my-batch - Get current user's active batch (auth required)
+// GET /my-batch - Get current user's batch (auth required)
 udyogRouter.get("/my-batch", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const [assignment] = await db.select().from(udyogAssignments)
+    let [assignment] = await db.select().from(udyogAssignments)
       .where(and(
         eq(udyogAssignments.userId, req.user!.id),
         eq(udyogAssignments.status, "active")
       ))
       .orderBy(desc(udyogAssignments.createdAt))
       .limit(1);
+    if (!assignment) {
+      [assignment] = await db.select().from(udyogAssignments)
+        .where(eq(udyogAssignments.userId, req.user!.id))
+        .orderBy(desc(udyogAssignments.createdAt))
+        .limit(1);
+    }
     if (!assignment || !assignment.batchId) {
-      return res.status(404).json({ error: "No active batch found" });
+      return res.status(404).json({ error: "No batch found" });
     }
     const [batch] = await db.select().from(udyogBatches)
       .where(eq(udyogBatches.id, assignment.batchId))
@@ -688,7 +710,17 @@ udyogRouter.get("/my-batch", requireAuth as any, async (req: AuthenticatedReques
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.status === "completed").length;
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    res.json({ batch, internship, assignment, members, tasks, progress });
+    let certificate = null;
+    if (assignment.status === "completed") {
+      const [cert] = await db.select().from(udyogCertificates)
+        .where(and(
+          eq(udyogCertificates.userId, req.user!.id),
+          eq(udyogCertificates.internshipId, assignment.internshipId)
+        ))
+        .limit(1);
+      certificate = cert || null;
+    }
+    res.json({ batch, internship, assignment: { ...assignment, certificate }, members, tasks, progress });
   } catch (error) {
     console.error("[Udyog] Error fetching batch:", error);
     res.status(500).json({ error: "Failed to fetch batch" });
