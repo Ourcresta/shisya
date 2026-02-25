@@ -14,7 +14,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import udyogLogo from "@assets/image_1771943272315.png";
+import udyogLogo from "@assets/image_1772009491874.png";
 
 const sidebarItems = [
   { key: "overview", label: "Dashboard", icon: LayoutDashboard },
