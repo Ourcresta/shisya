@@ -1298,7 +1298,7 @@ export default function UdyogDashboard() {
           <img src={udyogLogo} alt="" style={{ width: "280px", height: "280px", objectFit: "contain" }} draggable={false} />
         </div>
 
-        <div style={{ position: "relative", padding: "36px 44px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
+        <div style={{ position: "relative", padding: "24px 44px 20px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
 
           <img src={udyogLogo} alt="Our Udyog" style={{ position: "absolute", top: "22px", left: "22px", width: "80px", height: "80px", objectFit: "contain", zIndex: 2 }} draggable={false} />
 
@@ -1431,10 +1431,10 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginBottom: "8px" }}>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "16px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <img src={udyogStamp} alt="Our Udyog Stamp" style={{ width: "80px", height: "80px", objectFit: "contain" }} draggable={false} />
-                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "3px", minWidth: "130px", textAlign: "center", marginTop: "2px" }}>
+                  <img src={udyogStamp} alt="Our Udyog Stamp" style={{ width: "72px", height: "72px", objectFit: "contain" }} draggable={false} />
+                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "3px", minWidth: "120px", textAlign: "center", marginTop: "2px" }}>
                     <div style={{ fontSize: "10px", fontWeight: 500, color: "#1e3a5f" }}>Director of Certifications</div>
                     <div style={{ fontSize: "9px", color: "#4a5568" }}>OUR UDYOG</div>
                   </div>
