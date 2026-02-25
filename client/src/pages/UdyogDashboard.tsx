@@ -1298,34 +1298,34 @@ export default function UdyogDashboard() {
           <img src={udyogLogo} alt="" style={{ width: "280px", height: "280px", objectFit: "contain" }} draggable={false} />
         </div>
 
-        <div style={{ position: "relative", padding: "24px 44px 20px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
+        <div style={{ position: "relative", padding: "20px 44px 14px", height: "100%", display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
 
           <img src={udyogLogo} alt="Our Udyog" style={{ position: "absolute", top: "22px", left: "22px", width: "80px", height: "80px", objectFit: "contain", zIndex: 2 }} draggable={false} />
 
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+          <div style={{ textAlign: "center", marginBottom: "6px" }}>
             <h1 style={{ fontSize: "26px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
               OUR UDYOG
             </h1>
-            <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" as const, marginTop: "4px", color: "#4a5568" }}>
+            <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase" as const, marginTop: "2px", color: "#4a5568" }}>
               Virtual Internship Programme
             </div>
-            <div style={{ fontSize: "12px", marginTop: "3px", color: "#2d3748" }}>
+            <div style={{ fontSize: "12px", marginTop: "2px", color: "#2d3748" }}>
               Chennai – 600 025
             </div>
           </div>
 
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+          <div style={{ textAlign: "center", marginBottom: "6px" }}>
             <h2 style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "5px", textTransform: "uppercase" as const, color: "#1e3a5f", margin: 0 }}>
               Internship Completion Certificate
             </h2>
           </div>
 
-          <div style={{ textAlign: "right", marginBottom: "6px" }}>
+          <div style={{ textAlign: "right", marginBottom: "4px" }}>
             <span style={{ fontSize: "12px", color: "#4a5568" }}>Folio No. : </span>
             <span style={{ fontSize: "12px", fontWeight: 500, color: "#1e3a5f" }}>{certIdVal}</span>
           </div>
 
-          <div style={{ marginBottom: "10px", color: "#2d3748" }}>
+          <div style={{ marginBottom: "6px", color: "#2d3748" }}>
             <p style={{ fontStyle: "italic", fontSize: "12px", textAlign: "center", margin: 0 }}>
               This is to certify that the undermentioned candidate has successfully completed
               the requirements prescribed for the award of the above certificate as detailed below :
@@ -1334,7 +1334,7 @@ export default function UdyogDashboard() {
 
           <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
             <div>
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Name</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1342,7 +1342,7 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Registration No.</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1350,7 +1350,7 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Internship Programme</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1359,7 +1359,7 @@ export default function UdyogDashboard() {
               </div>
 
               {domain && (
-                <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ display: "flex", marginBottom: "3px" }}>
                   <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Domain</div>
                   <div style={{ width: "340px", fontSize: "12px" }}>
                     <span style={{ marginRight: "8px" }}>:</span>
@@ -1368,7 +1368,7 @@ export default function UdyogDashboard() {
                 </div>
               )}
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Designated Role</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1377,7 +1377,7 @@ export default function UdyogDashboard() {
               </div>
 
               {batchLabel && (
-                <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ display: "flex", marginBottom: "3px" }}>
                   <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Batch</div>
                   <div style={{ width: "340px", fontSize: "12px" }}>
                     <span style={{ marginRight: "8px" }}>:</span>
@@ -1387,7 +1387,7 @@ export default function UdyogDashboard() {
               )}
 
               {skills.length > 0 && (
-                <div style={{ display: "flex", marginBottom: "5px" }}>
+                <div style={{ display: "flex", marginBottom: "3px" }}>
                   <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Skills Acquired</div>
                   <div style={{ width: "340px", fontSize: "12px" }}>
                     <span style={{ marginRight: "8px" }}>:</span>
@@ -1396,7 +1396,7 @@ export default function UdyogDashboard() {
                 </div>
               )}
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Tasks Completed</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1404,7 +1404,7 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Month & Year of Completion</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
@@ -1412,7 +1412,7 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", marginBottom: "5px" }}>
+              <div style={{ display: "flex", marginBottom: "3px" }}>
                 <div style={{ width: "170px", fontStyle: "italic", textAlign: "right", paddingRight: "14px", fontSize: "12px", color: "#4a5568" }}>Classification</div>
                 <div style={{ width: "340px", fontSize: "12px" }}>
                   <span style={{ marginRight: "8px" }}>:</span>
