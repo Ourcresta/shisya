@@ -51,7 +51,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           backgroundColor: "#ffffff"
         }}
       />
-      <div className="absolute inset-0 p-10 md:p-12 flex flex-col" style={{ backgroundColor: "transparent" }}>
+      <div className="absolute inset-0 flex flex-col" style={{ backgroundColor: "transparent", padding: "28px 40px 22px" }}>
         
         <div 
           className="absolute inset-0 opacity-[0.05] pointer-events-none flex items-center justify-center"
@@ -71,7 +71,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           />
         </div>
 
-        <div className="text-center mb-3 relative z-10">
+        <div className="text-center mb-2 relative z-10">
           <h1 
             className="text-2xl md:text-3xl font-bold tracking-[0.1em] uppercase"
             style={{ color: "#1e3a5f" }}
@@ -92,7 +92,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           </div>
         </div>
 
-        <div className="text-center mb-4 relative z-10">
+        <div className="text-center mb-2 relative z-10">
           <h2 
             className="text-lg md:text-xl font-bold tracking-[0.15em] uppercase"
             style={{ color: "#1e3a5f" }}
@@ -108,7 +108,7 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
           </span>
         </div>
 
-        <div className="mb-4 relative z-10" style={{ color: "#2d3748" }}>
+        <div className="mb-2 relative z-10" style={{ color: "#2d3748" }}>
           <p className="italic text-sm text-center">
             This is to certify that the undermentioned candidate has successfully completed 
             the requirements prescribed for the award of the above certificate as detailed below :
