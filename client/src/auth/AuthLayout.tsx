@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, GraduationCap, Briefcase } from "lucide-react";
+import { Code2, BarChart3, Atom, Lightbulb, BookOpen, Cpu, Globe, ArrowLeft, Home } from "lucide-react";
 import { Link } from "wouter";
 
 const EcosystemRotator = lazy(() => import("./EcosystemRotator"));
@@ -40,32 +40,19 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
       <div className="auth-split-layout">
         <div className="auth-left-panel">
-          <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 20, display: 'flex', gap: '8px' }}>
-            <Link href="/">
-              <motion.button
-                className="auth-back-home-btn"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                data-testid="button-our-shiksha"
-              >
-                <GraduationCap style={{ width: 16, height: 16 }} />
-                <span>Our Shiksha</span>
-              </motion.button>
-            </Link>
-            <Link href="/shishya/udyog">
-              <motion.button
-                className="auth-back-home-btn"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.45 }}
-                data-testid="button-our-udyog"
-              >
-                <Briefcase style={{ width: 16, height: 16 }} />
-                <span>Our Udyog</span>
-              </motion.button>
-            </Link>
-          </div>
+          <Link href="/" style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 20 }}>
+            <motion.button
+              className="auth-back-home-btn"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              data-testid="button-back-home"
+            >
+              <ArrowLeft style={{ width: 16, height: 16 }} />
+              <Home style={{ width: 16, height: 16 }} />
+              <span>Home</span>
+            </motion.button>
+          </Link>
           <motion.div
             className="auth-branding"
             initial={{ opacity: 0, y: 30 }}
