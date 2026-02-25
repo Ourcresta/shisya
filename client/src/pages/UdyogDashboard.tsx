@@ -5,7 +5,7 @@ import {
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
   Medal, AlertCircle, Users, Calendar, Star, Bell,
   BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
-  Shield, ArrowRight, Zap, TrendingUp, Target, Download, Eye, X
+  Shield, ArrowRight, ArrowLeft, Zap, TrendingUp, Target, Download, Eye, X, Copy, Check
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -160,6 +160,7 @@ export default function UdyogDashboard() {
   const [logLink, setLogLink] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [viewCertificate, setViewCertificate] = useState(false);
+  const [copied, setCopied] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
@@ -1643,43 +1644,87 @@ export default function UdyogDashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 overflow-y-auto"
               style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
               onClick={() => setViewCertificate(false)}
               data-testid="certificate-modal-overlay"
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative max-w-[860px] w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  onClick={() => setViewCertificate(false)}
-                  className="absolute -top-12 right-0 p-2 rounded-full transition-all hover:opacity-80"
-                  style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}
-                  data-testid="button-close-certificate"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <div className="rounded-xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(0,245,255,0.15)" }}>
-                  {renderCertificateBody(false)}
-                </div>
-                <div className="flex justify-center mt-4">
+              <div className="min-h-full flex flex-col items-center px-4 py-6">
+                <div className="w-full max-w-[860px] mb-4">
                   <button
-                    onClick={handleDownloadCertificate}
-                    disabled={downloading}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
-                    data-testid="button-modal-download-pdf"
+                    onClick={() => setViewCertificate(false)}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                    style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                    data-testid="button-close-certificate"
                   >
-                    <Download className="w-4 h-4" />
-                    {downloading ? "Generating PDF..." : "Download PDF"}
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Certification
                   </button>
                 </div>
-              </motion.div>
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                  className="w-full max-w-[860px] space-y-5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="rounded-xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(0,245,255,0.15)" }}>
+                    {renderCertificateBody(false)}
+                  </div>
+
+                  <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <button
+                        onClick={handleDownloadCertificate}
+                        disabled={downloading}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
+                        style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                        data-testid="button-modal-download-pdf"
+                      >
+                        <Download className="w-4 h-4" />
+                        {downloading ? "Generating PDF..." : "Download PDF"}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const certIdVal = assignment?.certificate?.certificateId || "";
+                          const url = `${window.location.origin}/verify/udyog/${certIdVal}`;
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            setCopied(true);
+                            toast({ title: "Link Copied", description: "Verification link copied to clipboard." });
+                            setTimeout(() => setCopied(false), 2000);
+                          } catch {
+                            toast({ title: "Copy Failed", description: "Could not copy link.", variant: "destructive" });
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
+                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", color: "#FFFFFF" }}
+                        data-testid="button-copy-verification"
+                      >
+                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {copied ? "Copied!" : "Copy Verification Link"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-center text-sm" style={{ color: "#94A3B8" }}>
+                    <p>
+                      Verify this certificate at:{" "}
+                      <a
+                        href={`${window.location.origin}/verify/udyog/${assignment?.certificate?.certificateId || ""}`}
+                        className="hover:underline"
+                        style={{ color: "#00F5FF" }}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {`${window.location.origin}/verify/udyog/${assignment?.certificate?.certificateId || ""}`}
+                      </a>
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
