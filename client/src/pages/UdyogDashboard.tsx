@@ -1839,9 +1839,11 @@ export default function UdyogDashboard() {
             <button className="relative p-2 rounded-lg transition-all" style={{ background: "rgba(255,255,255,0.04)" }} data-testid="button-notifications">
               <Bell className="w-5 h-5" style={{ color: "#94A3B8" }} />
             </button>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }} data-testid="avatar-user">
-              {userInitial}
-            </div>
+            <Link href="/shishya/profile">
+              <button className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer transition-all hover:scale-105 hover:shadow-lg" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }} data-testid="avatar-user">
+                {userInitial}
+              </button>
+            </Link>
           </div>
         </div>
 
