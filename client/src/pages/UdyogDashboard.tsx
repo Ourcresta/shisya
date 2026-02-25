@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import udyogLogo from "@assets/image_1772009491874.png";
+import udyogStamp from "@assets/image_1772010327298.png";
 import { QRCodeSVG } from "qrcode.react";
 
 const sidebarItems = [
@@ -1431,9 +1432,9 @@ export default function UdyogDashboard() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ marginBottom: "24px" }} />
-                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "4px", minWidth: "130px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <img src={udyogStamp} alt="Our Udyog Stamp" style={{ width: "88px", height: "88px", objectFit: "contain" }} draggable={false} />
+                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "4px", minWidth: "130px", textAlign: "center", marginTop: "4px" }}>
                     <div style={{ fontSize: "10px", fontWeight: 500, color: "#1e3a5f" }}>Director of Certifications</div>
                     <div style={{ fontSize: "9px", color: "#4a5568" }}>OUR UDYOG</div>
                   </div>
