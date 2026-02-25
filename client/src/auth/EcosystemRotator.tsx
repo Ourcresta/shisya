@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import shikshaCoin from "@assets/image_1771941689932.png";
-import udyogCoin from "@assets/image_1771941747918.png";
+import udyogCoin from "@assets/image_1772016230351.png";
 import ushaCoin from "@assets/image_1771941793408.png";
 
 const ROTATION_MS = 4000;

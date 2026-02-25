@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, CheckCircle2, Clock, Send, MessageSquare, Award,
   ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
   Medal, AlertCircle, Users, Calendar, Star, Bell,
   BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
-  Shield, ArrowRight, ArrowLeft, Zap, TrendingUp, Target, Download, Eye, X, Copy, Check
+  Shield, ArrowRight, ArrowLeft, Zap, TrendingUp, Target, Download, Eye, X, Copy, Check,
+  Globe, Pencil, Camera, EyeOff, Link2, Sparkles, GraduationCap, MapPin, Github, Linkedin
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +18,15 @@ import jsPDF from "jspdf";
 import udyogLogo from "@assets/image_1772009491874.png";
 import udyogStamp from "@assets/image_1772010327298.png";
 import { QRCodeSVG } from "qrcode.react";
+import { getProfile, saveProfile, updateProfile, initializeDefaultProfile, canMakeProfilePublic } from "@/lib/profile";
+import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
+import { getAllSubmissions } from "@/lib/submissions";
+import { getPassedTestsCount } from "@/lib/testAttempts";
+import { getExternalCertifications } from "@/lib/portfolioExtras";
+import ProfileForm from "@/components/profile/ProfileForm";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { StudentProfile, Certificate } from "@shared/schema";
 
 const sidebarItems = [
   { key: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +37,7 @@ const sidebarItems = [
   { key: "resources", label: "Resources", icon: BookOpen },
   { key: "mentor", label: "AI Mentor", icon: Bot },
   { key: "certification", label: "Certificate", icon: Medal },
+  { key: "portfolio", label: "Portfolio", icon: User },
 ];
 
 const roleColors: Record<string, string> = {
@@ -163,6 +174,16 @@ export default function UdyogDashboard() {
   const [copied, setCopied] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
 
+  const [portfolioProfile, setPortfolioProfile] = useState<StudentProfile | null>(null);
+  const [portfolioCerts, setPortfolioCerts] = useState<Certificate[]>([]);
+  const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
+  const [portfolioTestsPassed, setPortfolioTestsPassed] = useState(0);
+  const [portfolioExtCerts, setPortfolioExtCerts] = useState<any[]>([]);
+  const [portfolioMode, setPortfolioMode] = useState<"overview" | "edit">("overview");
+  const [portfolioSaving, setPortfolioSaving] = useState(false);
+  const [portfolioCopied, setPortfolioCopied] = useState(false);
+  const portfolioPhotoRef = useRef<HTMLInputElement>(null);
+
   const { data: assignmentData, isLoading: assignmentLoading } = useQuery<any>({
     queryKey: ["/api/udyog/my-assignment"],
   });
@@ -198,6 +219,117 @@ export default function UdyogDashboard() {
       }
     }
   }, [assignmentId]);
+
+  useEffect(() => {
+    initializeMockCertificates();
+    let p = getProfile();
+    if (!p) p = initializeDefaultProfile(user?.fullName || "Student");
+    setPortfolioProfile(p);
+    setPortfolioCerts(getAllCertificates());
+    setPortfolioProjects(getAllSubmissions());
+    setPortfolioTestsPassed(getPassedTestsCount());
+    setPortfolioExtCerts(getExternalCertifications());
+  }, [user]);
+
+  const portfolioAllSkills = useMemo(() => {
+    const skills: string[] = [];
+    portfolioCerts.forEach(cert => { if (cert.skills) skills.push(...cert.skills); });
+    portfolioProjects.forEach(proj => { if (proj.skills) skills.push(...proj.skills); });
+    portfolioExtCerts.forEach(cert => { if (cert.skills) skills.push(...cert.skills); });
+    return Array.from(new Set(skills)).sort();
+  }, [portfolioCerts, portfolioProjects, portfolioExtCerts]);
+
+  const portfolioStrength = useMemo(() => {
+    if (!portfolioProfile) return { score: 0, items: [] as { label: string; done: boolean }[] };
+    const items = [
+      { label: "Profile photo", done: !!portfolioProfile.profilePhoto },
+      { label: "Headline", done: !!portfolioProfile.headline },
+      { label: "Bio", done: !!portfolioProfile.bio },
+      { label: "Location", done: !!portfolioProfile.location },
+      { label: "Skills", done: portfolioAllSkills.length > 0 },
+      { label: "Social links", done: !!(portfolioProfile.githubUrl || portfolioProfile.linkedinUrl) },
+      { label: "Projects", done: portfolioProjects.length > 0 },
+      { label: "Certificates", done: portfolioCerts.length > 0 },
+      { label: "Assessments", done: portfolioTestsPassed > 0 },
+      { label: "Public portfolio", done: !!portfolioProfile.portfolioVisible },
+    ];
+    const done = items.filter(i => i.done).length;
+    return { score: Math.round((done / items.length) * 100), items };
+  }, [portfolioProfile, portfolioAllSkills, portfolioProjects, portfolioCerts, portfolioTestsPassed]);
+
+  const handlePortfolioSave = (values: Partial<StudentProfile>) => {
+    setPortfolioSaving(true);
+    try {
+      if (!portfolioProfile) return;
+      const updated = saveProfile({
+        fullName: values.fullName || portfolioProfile.fullName,
+        username: values.username || portfolioProfile.username,
+        bio: values.bio || "",
+        profilePhoto: values.profilePhoto || "",
+        headline: values.headline || "",
+        location: values.location || "",
+        githubUrl: values.githubUrl || "",
+        linkedinUrl: values.linkedinUrl || "",
+        portfolioVisible: portfolioProfile.portfolioVisible,
+      });
+      setPortfolioProfile(updated);
+      setPortfolioMode("overview");
+      toast({ title: "Profile saved", description: "Your profile has been updated successfully." });
+    } catch {
+      toast({ title: "Error", description: "Failed to save profile.", variant: "destructive" });
+    } finally {
+      setPortfolioSaving(false);
+    }
+  };
+
+  const handlePortfolioVisibilityToggle = (visible: boolean) => {
+    if (!portfolioProfile) return;
+    const canPublish = canMakeProfilePublic(portfolioCerts.length, portfolioProjects.length);
+    if (visible && !canPublish) {
+      toast({ title: "Cannot make public", description: "Complete at least one course or submit a project first.", variant: "destructive" });
+      return;
+    }
+    const updated = updateProfile({ portfolioVisible: visible });
+    if (updated) {
+      setPortfolioProfile(updated);
+      toast({
+        title: visible ? "Portfolio is now public" : "Portfolio is now private",
+        description: visible ? "Anyone with your portfolio link can view it." : "Only you can see your portfolio.",
+      });
+    }
+  };
+
+  const handlePortfolioPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !portfolioProfile) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please select an image under 2MB.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      const updated = updateProfile({ profilePhoto: base64 });
+      if (updated) {
+        setPortfolioProfile(updated);
+        toast({ title: "Photo updated", description: "Your profile photo has been updated." });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePortfolioCopyLink = () => {
+    if (!portfolioProfile) return;
+    const url = `${window.location.origin}/portfolio/${portfolioProfile.username}`;
+    navigator.clipboard.writeText(url);
+    setPortfolioCopied(true);
+    toast({ title: "Link copied", description: "Public portfolio link copied to clipboard." });
+    setTimeout(() => setPortfolioCopied(false), 2000);
+  };
 
   const taskStatusMutation = useMutation({
     mutationFn: async ({ taskId, status }: { taskId: number; status: string }) => {
@@ -1738,6 +1870,407 @@ export default function UdyogDashboard() {
     );
   };
 
+  const renderPortfolio = () => {
+    const prof = portfolioProfile;
+    if (!prof) return null;
+
+    const initials = prof.fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    const publicUrl = `${window.location.origin}/portfolio/${prof.username}`;
+    const canPublish = canMakeProfilePublic(portfolioCerts.length, portfolioProjects.length);
+    const strengthScore = portfolioStrength.score;
+    const strengthColor = strengthScore >= 80 ? "#10B981" : strengthScore >= 50 ? "#F59E0B" : "#EF4444";
+    const strengthLabel = strengthScore >= 80 ? "Strong" : strengthScore >= 50 ? "Good" : "Needs Work";
+
+    const pStats = [
+      { label: "Courses", value: portfolioCerts.length, icon: BookOpen, color: "#3B82F6" },
+      { label: "Projects", value: portfolioProjects.length, icon: FolderKanban, color: "#10B981" },
+      { label: "Tests Passed", value: portfolioTestsPassed, icon: Target, color: "#F59E0B" },
+      { label: "Certificates", value: portfolioCerts.length + portfolioExtCerts.length, icon: Award, color: "#A78BFA" },
+    ];
+
+    return (
+      <motion.div key="portfolio" {...fadeInUp} className="space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-portfolio-title">
+              My Portfolio
+            </h2>
+            <p className="text-xs mt-0.5" style={{ color: "#64748B" }}>Manage your profile and see how recruiters view it</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+              <button
+                onClick={() => setPortfolioMode("overview")}
+                className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-all"
+                style={{
+                  background: portfolioMode === "overview" ? "rgba(0,245,255,0.15)" : "transparent",
+                  color: portfolioMode === "overview" ? "#00F5FF" : "#94A3B8",
+                }}
+                data-testid="button-portfolio-overview"
+              >
+                <Eye className="w-3.5 h-3.5" /> Overview
+              </button>
+              <button
+                onClick={() => setPortfolioMode("edit")}
+                className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-all"
+                style={{
+                  background: portfolioMode === "edit" ? "rgba(0,245,255,0.15)" : "transparent",
+                  color: portfolioMode === "edit" ? "#00F5FF" : "#94A3B8",
+                }}
+                data-testid="button-portfolio-edit"
+              >
+                <Pencil className="w-3.5 h-3.5" /> Edit
+              </button>
+            </div>
+            {portfolioMode === "overview" && prof.portfolioVisible && (
+              <>
+                <button
+                  onClick={handlePortfolioCopyLink}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:opacity-80"
+                  style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#FFFFFF", background: "rgba(255,255,255,0.05)" }}
+                  data-testid="button-portfolio-copy-link"
+                >
+                  {portfolioCopied ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+                  {portfolioCopied ? "Copied" : "Copy Link"}
+                </button>
+                <a
+                  href={`/portfolio/${prof.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                  data-testid="button-portfolio-open-public"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open Public
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+
+        {portfolioMode === "edit" ? (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="rounded-xl p-6" style={{ ...glassCard, background: "rgba(255,255,255,0.03)" }}>
+              <ProfileForm
+                profile={prof}
+                onSave={handlePortfolioSave}
+                isPending={portfolioSaving}
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <div className="space-y-5">
+            {!prof.portfolioVisible && (
+              <div className="rounded-xl p-4" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-md shrink-0 mt-0.5" style={{ background: "rgba(245,158,11,0.15)" }}>
+                    <Globe className="w-4 h-4" style={{ color: "#F59E0B" }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium" style={{ color: "#FBBF24" }}>Portfolio is Private</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#D97706" }}>Enable public sharing to let recruiters find you.</p>
+                  </div>
+                  {canPublish && (
+                    <button
+                      onClick={() => handlePortfolioVisibilityToggle(true)}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 shrink-0 transition-all hover:opacity-80"
+                      style={{ border: "1px solid rgba(245,158,11,0.3)", color: "#FBBF24" }}
+                      data-testid="button-portfolio-publish"
+                    >
+                      <Globe className="w-3.5 h-3.5" /> Publish
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-xl overflow-hidden" style={glassCard}>
+              <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.12), rgba(124,58,237,0.08), transparent)" }}>
+                <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ background: "rgba(5,10,24,0.7)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <span className="flex items-center gap-1" style={{ color: "#94A3B8" }}>
+                    {prof.portfolioVisible ? <><Eye className="w-3 h-3" /> Public</> : <><EyeOff className="w-3 h-3" /> Private</>}
+                  </span>
+                  <Switch
+                    checked={prof.portfolioVisible}
+                    onCheckedChange={handlePortfolioVisibilityToggle}
+                    disabled={!canPublish && !prof.portfolioVisible}
+                    className="scale-75"
+                    data-testid="switch-portfolio-visibility"
+                  />
+                </div>
+              </div>
+              <div className="relative px-6 pb-6">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 -mt-12">
+                  <div className="relative shrink-0 group">
+                    <input
+                      ref={portfolioPhotoRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePortfolioPhotoUpload}
+                      data-testid="input-portfolio-photo"
+                    />
+                    <div className="p-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
+                      <Avatar
+                        className="w-20 h-20 cursor-pointer"
+                        style={{ border: "3px solid #0F172A" }}
+                        onClick={() => portfolioPhotoRef.current?.click()}
+                      >
+                        <AvatarImage src={prof.profilePhoto || undefined} alt={prof.fullName} />
+                        <AvatarFallback className="text-xl font-bold" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div
+                      className="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      style={{ background: "rgba(0,0,0,0.5)", margin: "2px" }}
+                      onClick={() => portfolioPhotoRef.current?.click()}
+                      data-testid="button-portfolio-change-photo"
+                    >
+                      <Camera className="w-5 h-5" style={{ color: "#FFFFFF" }} />
+                    </div>
+                    {prof.portfolioVisible && (
+                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full" style={{ background: "#0F172A" }}>
+                        <div className="p-0.5 rounded-full" style={{ background: "#10B981" }}>
+                          <CheckCircle2 className="w-3 h-3" style={{ color: "#FFFFFF" }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 pt-2 sm:pt-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-portfolio-name">
+                            {prof.fullName}
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.2)" }}>
+                            Verified
+                          </span>
+                        </div>
+                        {prof.headline ? (
+                          <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-portfolio-headline">{prof.headline}</p>
+                        ) : (
+                          <button onClick={() => setPortfolioMode("edit")} className="text-sm flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: "#64748B" }} data-testid="button-add-headline">
+                            <Pencil className="w-3 h-3" /> Add a headline
+                          </button>
+                        )}
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                          <span className="px-2 py-0.5 rounded text-xs font-mono" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }}>@{prof.username}</span>
+                          {prof.location && (
+                            <span className="flex items-center gap-1 text-xs" style={{ color: "#64748B" }}>
+                              <MapPin className="w-3 h-3" /> {prof.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => setPortfolioMode("edit")} className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="button-edit-portfolio">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        {prof.githubUrl && (
+                          <a href={prof.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="link-portfolio-github">
+                            <Github className="w-4 h-4" />
+                          </a>
+                        )}
+                        {prof.linkedinUrl && (
+                          <a href={prof.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="link-portfolio-linkedin">
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    {portfolioAllSkills.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {portfolioAllSkills.slice(0, 5).map(skill => (
+                          <span key={skill} className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "#00F5FF" }}>{skill}</span>
+                        ))}
+                        {portfolioAllSkills.length > 5 && (
+                          <span className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#64748B" }}>+{portfolioAllSkills.length - 5} more</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {pStats.map((stat) => (
+                <div key={stat.label} className="rounded-xl p-4" style={glassCard}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg" style={{ background: `${stat.color}15` }}>
+                      <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold" style={{ color: "#FFFFFF" }} data-testid={`stat-portfolio-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>{stat.value}</div>
+                      <div className="text-[11px]" style={{ color: "#64748B" }}>{stat.label}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <div className="lg:col-span-1 rounded-xl p-5" style={glassCard} data-testid="card-portfolio-strength">
+                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#FFFFFF" }}>
+                  <Zap className="w-4 h-4" style={{ color: "#00F5FF" }} /> Portfolio Strength
+                </h4>
+                <div className="flex flex-col items-center gap-3 mb-4">
+                  <div className="relative w-20 h-20">
+                    <svg className="w-20 h-20 -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                      <circle
+                        cx="50" cy="50" r="40" fill="none"
+                        stroke={strengthColor}
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={`${strengthScore * 2.51} 251`}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-lg font-bold" style={{ color: strengthColor }}>{strengthScore}%</span>
+                      <span className="text-[10px]" style={{ color: "#64748B" }}>{strengthLabel}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  {portfolioStrength.items.map((item) => (
+                    <button
+                      key={item.label}
+                      className="flex items-center gap-2 text-xs w-full text-left"
+                      onClick={() => { if (!item.done) setPortfolioMode("edit"); }}
+                      data-testid={`strength-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: item.done ? "#10B981" : "rgba(255,255,255,0.15)" }} />
+                      <span style={{ color: item.done ? "#E2E8F0" : "#64748B" }} className="flex-1">{item.label}</span>
+                      {item.done ? (
+                        <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: "#10B981" }} />
+                      ) : (
+                        <Pencil className="w-3 h-3 shrink-0" style={{ color: "rgba(255,255,255,0.2)" }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 rounded-xl p-5" style={glassCard}>
+                {prof.bio ? (
+                  <>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium flex items-center gap-2" style={{ color: "#FFFFFF" }}>
+                        <GraduationCap className="w-4 h-4" style={{ color: "#00F5FF" }} /> About
+                      </h4>
+                      <button onClick={() => setPortfolioMode("edit")} className="p-1.5 rounded-md transition-all hover:opacity-80" style={{ color: "#64748B" }} data-testid="button-edit-bio">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#94A3B8" }} data-testid="text-portfolio-bio">{prof.bio}</p>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <GraduationCap className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(255,255,255,0.15)" }} />
+                    <p className="text-sm mb-3" style={{ color: "#64748B" }}>Tell recruiters about yourself</p>
+                    <button
+                      onClick={() => setPortfolioMode("edit")}
+                      className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+                      style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#94A3B8" }}
+                      data-testid="button-add-bio"
+                    >
+                      <Pencil className="w-3.5 h-3.5 inline mr-1.5" /> Add Bio
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.06), rgba(124,58,237,0.06))", border: "1px solid rgba(0,245,255,0.12)" }}>
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,245,255,0.15)" }}>
+                    <Sparkles className="w-5 h-5" style={{ color: "#00F5FF" }} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Modern Portfolio</h3>
+                    <p className="text-xs" style={{ color: "#64748B" }}>Dark theme with 5 color options</p>
+                  </div>
+                </div>
+                <Link href="/shishya/profile/neon-portfolio">
+                  <button
+                    className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                    data-testid="button-try-neon-portfolio"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" /> Try Now
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {portfolioAllSkills.length > 0 && (
+              <div className="rounded-xl p-5" style={glassCard}>
+                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#FFFFFF" }}>
+                  <Sparkles className="w-4 h-4" style={{ color: "#00F5FF" }} /> Skills
+                  <span className="text-[10px] font-normal" style={{ color: "#64748B" }}>(auto-generated from learning)</span>
+                </h4>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {portfolioAllSkills.map(skill => (
+                    <span key={skill} className="px-2.5 py-1 rounded-lg text-xs" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "#00F5FF" }} data-testid={`skill-portfolio-${skill.toLowerCase().replace(/\s+/g, '-')}`}>{skill}</span>
+                  ))}
+                </div>
+                <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h5 className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#64748B" }}>Skill Categories</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(() => {
+                      const categories: Record<string, string[]> = {};
+                      portfolioAllSkills.forEach(skill => {
+                        const lower = skill.toLowerCase();
+                        let cat = "General";
+                        if (["react", "html", "css", "javascript", "typescript", "vue", "angular", "tailwind", "jsx", "responsive design"].some(k => lower.includes(k))) cat = "Frontend";
+                        else if (["node", "express", "api", "rest", "python", "django", "flask", "java", "mongodb", "sql"].some(k => lower.includes(k))) cat = "Backend";
+                        else if (["git", "docker", "aws", "cloud", "devops", "ci", "deploy", "linux"].some(k => lower.includes(k))) cat = "DevOps & Cloud";
+                        else if (["design", "ui", "ux", "figma"].some(k => lower.includes(k))) cat = "Design";
+                        if (!categories[cat]) categories[cat] = [];
+                        categories[cat].push(skill);
+                      });
+                      return Object.entries(categories).map(([cat, skills]) => (
+                        <div key={cat} className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium" style={{ color: "#E2E8F0" }}>{cat}</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: "rgba(255,255,255,0.06)", color: "#64748B" }}>{skills.length}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {skills.map((s, i) => (
+                              <span key={s} className="text-[11px]" style={{ color: "#94A3B8" }}>{s}{i < skills.length - 1 ? "," : ""}</span>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex items-center justify-center gap-2 text-sm" style={{ color: "#64748B" }}>
+                <GraduationCap className="w-4 h-4" />
+                <span>Portfolio by</span>
+                <span className="font-semibold" style={{ color: "#FFFFFF" }}>OurShiksha</span>
+              </div>
+              <p className="text-[11px] mt-1" style={{ color: "#475569" }}>
+                All skills and achievements verified through course completion, projects, and assessments.
+              </p>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    );
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "overview": return renderOverview();
@@ -1748,6 +2281,7 @@ export default function UdyogDashboard() {
       case "resources": return renderResources();
       case "mentor": return renderMentor();
       case "certification": return renderCertification();
+      case "portfolio": return renderPortfolio();
       default: return renderOverview();
     }
   };
