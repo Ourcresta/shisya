@@ -1431,10 +1431,10 @@ export default function UdyogDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "20px" }}>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginBottom: "8px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <img src={udyogStamp} alt="Our Udyog Stamp" style={{ width: "88px", height: "88px", objectFit: "contain" }} draggable={false} />
-                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "4px", minWidth: "130px", textAlign: "center", marginTop: "4px" }}>
+                  <img src={udyogStamp} alt="Our Udyog Stamp" style={{ width: "80px", height: "80px", objectFit: "contain" }} draggable={false} />
+                  <div style={{ borderTop: "1px solid #1e3a5f", paddingTop: "3px", minWidth: "130px", textAlign: "center", marginTop: "2px" }}>
                     <div style={{ fontSize: "10px", fontWeight: 500, color: "#1e3a5f" }}>Director of Certifications</div>
                     <div style={{ fontSize: "9px", color: "#4a5568" }}>OUR UDYOG</div>
                   </div>
@@ -1444,7 +1444,7 @@ export default function UdyogDashboard() {
                   <div style={{ padding: "4px", backgroundColor: "#ffffff", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
                     <QRCodeSVG
                       value={`${window.location.origin}/verify/udyog/${certIdVal}`}
-                      size={52}
+                      size={48}
                       level="M"
                       includeMargin={false}
                     />
