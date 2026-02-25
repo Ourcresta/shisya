@@ -3,13 +3,22 @@ import { Link, useLocation, useSearch, Redirect } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupInput } from "@shared/schema";
+import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, GraduationCap, Shield, ShieldCheck, UserPlus } from "lucide-react";
+import { Loader2, Mail, Lock, GraduationCap, Shield, ShieldCheck, UserPlus, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { SiGoogle } from "react-icons/si";
 import AuthLayout from "./AuthLayout";
+
+const guruSignupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type GuruSignupInput = z.infer<typeof guruSignupSchema>;
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -21,7 +30,7 @@ export default function Signup() {
 
   const redirectTo = new URLSearchParams(search).get("redirect") || "/shishya/dashboard";
 
-  const form = useForm<SignupInput>({
+  const shishyaForm = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
@@ -29,7 +38,16 @@ export default function Signup() {
     },
   });
 
-  const onSubmit = async (data: SignupInput) => {
+  const guruForm = useForm<GuruSignupInput>({
+    resolver: zodResolver(guruSignupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onShishyaSubmit = async (data: SignupInput) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/signup", {
@@ -56,6 +74,44 @@ export default function Signup() {
       });
 
       setLocation(`/verify-otp?email=${encodeURIComponent(data.email)}&redirect=${encodeURIComponent(redirectTo)}`);
+    } catch (error) {
+      toast({
+        title: "Signup failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onGuruSubmit = async (data: GuruSignupInput) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/guru/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: "Signup failed",
+          description: result.error || "Failed to create admin account",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Approval OTP sent",
+        description: "A verification code has been sent to the admin for approval",
+      });
+
+      setLocation(`/verify-otp?email=${encodeURIComponent(data.email)}&type=guru&redirect=${encodeURIComponent("/guru/dashboard")}`);
     } catch (error) {
       toast({
         title: "Signup failed",
@@ -118,7 +174,7 @@ export default function Signup() {
           <h2 className="auth-card-title">Create Your Account</h2>
           <p className="auth-card-description">Join SHISHYA and start learning today</p>
 
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={shishyaForm.handleSubmit(onShishyaSubmit)}>
             <div>
               <label className="auth-form-label">Email</label>
               <div className="auth-input-wrapper">
@@ -127,12 +183,12 @@ export default function Signup() {
                   placeholder="you@example.com"
                   className="auth-input-field"
                   data-testid="input-email"
-                  {...form.register("email")}
+                  {...shishyaForm.register("email")}
                 />
                 <Mail className="auth-input-icon" />
               </div>
-              {form.formState.errors.email && (
-                <p className="auth-error-text">{form.formState.errors.email.message}</p>
+              {shishyaForm.formState.errors.email && (
+                <p className="auth-error-text">{shishyaForm.formState.errors.email.message}</p>
               )}
             </div>
 
@@ -144,12 +200,12 @@ export default function Signup() {
                   placeholder="At least 8 characters"
                   className="auth-input-field"
                   data-testid="input-password"
-                  {...form.register("password")}
+                  {...shishyaForm.register("password")}
                 />
                 <Lock className="auth-input-icon" />
               </div>
-              {form.formState.errors.password && (
-                <p className="auth-error-text">{form.formState.errors.password.message}</p>
+              {shishyaForm.formState.errors.password && (
+                <p className="auth-error-text">{shishyaForm.formState.errors.password.message}</p>
               )}
             </div>
 
@@ -191,38 +247,86 @@ export default function Signup() {
         </>
       ) : (
         <>
-          <div className="auth-card-icon">
-            <Shield />
+          <div className="auth-card-icon" style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+            <Shield style={{ color: '#A78BFA' }} />
           </div>
-          <h2 className="auth-card-title">Guru Admin Access</h2>
-          <p className="auth-card-description">Admin accounts are managed by the platform</p>
+          <h2 className="auth-card-title">Register as Guru</h2>
+          <p className="auth-card-description">Apply for admin access to the Guru portal</p>
+
+          <form onSubmit={guruForm.handleSubmit(onGuruSubmit)}>
+            <div>
+              <label className="auth-form-label">Full Name</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Your full name"
+                  className="auth-input-field"
+                  data-testid="input-guru-name"
+                  {...guruForm.register("name")}
+                />
+                <User className="auth-input-icon" />
+              </div>
+              {guruForm.formState.errors.name && (
+                <p className="auth-error-text">{guruForm.formState.errors.name.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="auth-form-label">Email</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  className="auth-input-field"
+                  data-testid="input-guru-email"
+                  {...guruForm.register("email")}
+                />
+                <Mail className="auth-input-icon" />
+              </div>
+              {guruForm.formState.errors.email && (
+                <p className="auth-error-text">{guruForm.formState.errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="auth-form-label">Password</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="password"
+                  placeholder="At least 6 characters"
+                  className="auth-input-field"
+                  data-testid="input-guru-password"
+                  {...guruForm.register("password")}
+                />
+                <Lock className="auth-input-icon" />
+              </div>
+              {guruForm.formState.errors.password && (
+                <p className="auth-error-text">{guruForm.formState.errors.password.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              disabled={isLoading}
+              data-testid="button-guru-signup"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+            >
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Request Admin Access
+            </button>
+          </form>
 
           <div style={{
             textAlign: 'center',
-            padding: '2rem 1.5rem',
-            margin: '1rem 0',
-            borderRadius: '12px',
+            padding: '0.75rem 1rem',
+            margin: '0.75rem 0 0',
+            borderRadius: '8px',
             background: 'rgba(139, 92, 246, 0.06)',
             border: '1px solid rgba(139, 92, 246, 0.15)',
           }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: 'rgba(139, 92, 246, 0.12)',
-              border: '1px solid rgba(139, 92, 246, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1rem',
-            }}>
-              <Shield style={{ width: '24px', height: '24px', color: '#A78BFA' }} />
-            </div>
-            <p style={{ color: '#E2E8F0', fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.5rem' }}>
-              Guru accounts are provisioned by administrators
-            </p>
-            <p style={{ color: '#64748B', fontSize: '0.8rem', lineHeight: 1.5 }}>
-              If you are an instructor or admin, please contact the platform administrator to get your credentials.
+            <p style={{ color: '#94A3B8', fontSize: '0.75rem', lineHeight: 1.5, margin: 0 }}>
+              A verification OTP will be sent to the platform admin for approval. You'll need the admin-shared code to complete registration.
             </p>
           </div>
 

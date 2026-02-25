@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, KeyRound } from "lucide-react";
+import { Loader2, Mail, KeyRound, Shield } from "lucide-react";
 import AuthLayout from "./AuthLayout";
 
 export default function VerifyOtp() {
@@ -13,6 +13,7 @@ export default function VerifyOtp() {
   
   const [email, setEmail] = useState("");
   const [redirectTo, setRedirectTo] = useState("/shishya/dashboard");
+  const [verifyType, setVerifyType] = useState<"shishya" | "guru">("shishya");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -22,11 +23,15 @@ export default function VerifyOtp() {
     const params = new URLSearchParams(search);
     const emailParam = params.get("email");
     const redirectParam = params.get("redirect");
+    const typeParam = params.get("type");
     if (emailParam) {
       setEmail(emailParam);
     }
     if (redirectParam) {
       setRedirectTo(redirectParam);
+    }
+    if (typeParam === "guru") {
+      setVerifyType("guru");
     }
   }, [search]);
 
@@ -50,7 +55,11 @@ export default function VerifyOtp() {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/verify-otp", {
+      const endpoint = verifyType === "guru"
+        ? "/api/guru/auth/verify-otp"
+        : "/api/auth/verify-otp";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -68,12 +77,20 @@ export default function VerifyOtp() {
         return;
       }
 
-      login(result.user);
-      toast({
-        title: "Email verified!",
-        description: "Your account is now active",
-      });
-      setLocation(redirectTo);
+      if (verifyType === "guru") {
+        toast({
+          title: "Guru account activated!",
+          description: "You can now access the Guru admin portal",
+        });
+        setLocation("/guru/dashboard");
+      } else {
+        login(result.user);
+        toast({
+          title: "Email verified!",
+          description: "Your account is now active",
+        });
+        setLocation(redirectTo);
+      }
     } catch (error) {
       toast({
         title: "Verification failed",
@@ -90,7 +107,11 @@ export default function VerifyOtp() {
 
     setIsResending(true);
     try {
-      const response = await fetch("/api/auth/resend-otp", {
+      const endpoint = verifyType === "guru"
+        ? "/api/guru/auth/resend-otp"
+        : "/api/auth/resend-otp";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -110,7 +131,9 @@ export default function VerifyOtp() {
 
       toast({
         title: "Code sent",
-        description: "A new verification code has been sent to your email",
+        description: verifyType === "guru"
+          ? "A new approval code has been sent to the admin"
+          : "A new verification code has been sent to your email",
       });
       setResendCooldown(60);
     } catch (error) {
@@ -124,20 +147,36 @@ export default function VerifyOtp() {
     }
   };
 
+  const isGuru = verifyType === "guru";
+
   return (
     <AuthLayout>
-      <div className="auth-card-icon">
-        <Mail />
+      <div className="auth-card-icon" style={isGuru ? { background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)' } : undefined}>
+        {isGuru ? <Shield style={{ color: '#A78BFA' }} /> : <Mail />}
       </div>
-      <h2 className="auth-card-title">Verify Your Email</h2>
+      <h2 className="auth-card-title">
+        {isGuru ? "Enter Approval Code" : "Verify Your Email"}
+      </h2>
       <p className="auth-card-description">
-        We sent a verification code to<br />
-        <span style={{ color: '#00dce0', fontWeight: 500 }}>{email}</span>
+        {isGuru ? (
+          <>
+            An approval OTP has been sent to the platform admin.<br />
+            Enter the code shared by the admin to activate your Guru account for<br />
+            <span style={{ color: '#A78BFA', fontWeight: 500 }}>{email}</span>
+          </>
+        ) : (
+          <>
+            We sent a verification code to<br />
+            <span style={{ color: '#00dce0', fontWeight: 500 }}>{email}</span>
+          </>
+        )}
       </p>
 
       <form onSubmit={handleVerify}>
         <div>
-          <label className="auth-form-label">Verification Code</label>
+          <label className="auth-form-label">
+            {isGuru ? "Approval Code" : "Verification Code"}
+          </label>
           <div className="auth-input-wrapper">
             <input
               type="text"
@@ -157,9 +196,10 @@ export default function VerifyOtp() {
           className="auth-submit-btn"
           disabled={isLoading || otp.length !== 6}
           data-testid="button-verify"
+          style={isGuru ? { background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' } : undefined}
         >
           {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Verify Email
+          {isGuru ? "Activate Guru Account" : "Verify Email"}
         </button>
       </form>
 

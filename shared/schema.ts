@@ -841,7 +841,7 @@ export const insertGuruAdminSessionSchema = createInsertSchema(guruAdminSessions
 // ============ TYPE DEFINITIONS ============
 
 // OTP Purpose enum
-export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email"] as const;
+export const OTP_PURPOSES = ["signup", "login", "forgot_password", "verify_email", "guru_signup"] as const;
 export type OtpPurpose = typeof OTP_PURPOSES[number];
 
 // Course Content DB types (for database operations)

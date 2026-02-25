@@ -20,11 +20,12 @@ function getResendClient() {
 export async function sendOtpEmail(
   toEmail: string, 
   otp: string, 
-  purpose: OtpPurpose = "signup"
+  purpose: OtpPurpose = "signup",
+  extraData?: { applicantName?: string; applicantEmail?: string }
 ): Promise<boolean> {
   try {
     const { client, fromEmail } = getResendClient();
-    const { subject, html } = getOTPEmailTemplate(otp, purpose);
+    const { subject, html } = getOTPEmailTemplate(otp, purpose, extraData);
     
     const result = await client.emails.send({
       from: fromEmail,
