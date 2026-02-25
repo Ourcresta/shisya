@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import udyogLogo from "@assets/image_1772009491874.png";
+import { QRCodeSVG } from "qrcode.react";
 
 const sidebarItems = [
   { key: "overview", label: "Dashboard", icon: LayoutDashboard },
@@ -1439,7 +1440,14 @@ export default function UdyogDashboard() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <img src={udyogLogo} alt="Our Udyog" style={{ width: "56px", height: "56px", objectFit: "contain" }} draggable={false} />
+                  <div style={{ padding: "4px", backgroundColor: "#ffffff", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
+                    <QRCodeSVG
+                      value={`${window.location.origin}/verify/udyog/${certIdVal}`}
+                      size={52}
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
                   <div style={{ fontSize: "6px", marginTop: "3px", textAlign: "center", maxWidth: "70px", color: "#4a5568" }}>
                     This certificate is digitally verifiable
                   </div>
