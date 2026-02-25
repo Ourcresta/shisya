@@ -195,15 +195,13 @@ export default function CertificatePreview({ certificate, forPrint = false }: Ce
             </div>
 
             <div className="flex items-end gap-4">
-              <img 
-                src={ourshiksha_stamp2} 
-                alt="Official Seal" 
-                className="w-[88px] h-[88px] object-contain ml-[16.775px] mr-[16.775px]"
-              />
-              
-              <div className="text-right">
-                <div className="mb-6"></div>
-                <div className="border-t pt-1" style={{ borderColor: "#1e3a5f", minWidth: "130px" }}>
+              <div className="flex flex-col items-center">
+                <img 
+                  src={ourshiksha_stamp2} 
+                  alt="Official Seal" 
+                  className="w-[72px] h-[72px] object-contain"
+                />
+                <div className="border-t pt-1 mt-1 text-center" style={{ borderColor: "#1e3a5f", minWidth: "130px" }}>
                   <div className="text-xs font-medium" style={{ color: "#1e3a5f" }}>
                     Director of Certifications
                   </div>
