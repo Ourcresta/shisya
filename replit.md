@@ -29,7 +29,8 @@ The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind 
     - **Certificate System:** Auto-generated, unique IDs, QR codes, client-side PDF generation.
     - **Guided Labs:** Browser-based JS execution with sandboxing, output matching, code persistence.
 - **Profile & Portfolio:** Editable student profile and shareable public portfolio with verified badges, statistics, and skills.
-- **Usha AI Tutor:** Context-aware AI assistant (OpenAI's gpt-4.1-mini) for hints and guidance, with rate-limiting and conversation history in PostgreSQL.
+- **Usha AI Tutor:** Context-aware AI assistant (OpenAI's gpt-4.1-mini) for hints and guidance, with rate-limiting and conversation history in PostgreSQL. In-video AI tutor button (Usha face) in video player control bar; chat panel below video with STT (Web Speech API) and TTS (Speech Synthesis API).
+- **In-App Video Player:** Custom HTML5/HLS video player (`UshaVideoPlayer.tsx`) with hls.js for adaptive bitrate streaming, quality switching, buffer indicator, keyboard shortcuts (Space/K=play, Arrow=seek, M=mute, F=fullscreen), and Usha AI button integrated in the control bar. `VideoUshaChat.tsx` renders below the video (not overlaying) with context-aware AI chat, quick suggestions, voice input (STT), and text-to-speech (TTS). Wired into `LearnView.tsx` — lessons with `videoUrl` show embedded player; lessons without fall back to TrainerCentral link.
 - **Credit-Based Enrollment:** 500 welcome credits, free/paid course differentiation, credit deduction on enrollment, dashboard display, and API for credit management.
 - **Enhanced Dashboard:** 5-zone layout for welcome, learning snapshot, primary actions, pending actions, and achievements.
 - **Academic Marksheet System:** University-style marksheet with grades, CGPA, and PDF download, publicly verifiable.
@@ -49,5 +50,6 @@ The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind 
 - **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
 - **OpenAI:** Used for the Usha AI Tutor (gpt-4.1-mini model).
 - **Zoho TrainerCentral:** Integrated with the GURU admin portal for course/curriculum sync and auto student/course enrollment.
+- **hls.js:** HLS adaptive bitrate streaming for the in-app video player.
 - **Three.js / @react-three/fiber / @react-three/drei:** Available for 3D rendering. Previous ThreeCoin component replaced by CSS 3D ecosystem rotator.
 - **Auth Ecosystem Rotator:** CSS 3D rotating component at `client/src/auth/EcosystemRotator.tsx`. Shows 3 circular faces (Our Shiksha → Usha AI → Our Udyog) at 120° intervals, 12s rotation cycle with cubic-bezier easing, radial glow, breathing aura ring, gradient border ring, hover pause + scale, floating animation, responsive (260/220/180px), prefers-reduced-motion accessible. CSS in `index.css` under `.eco-rotator` BEM classes. Flow text "Learning → AI Guidance → Industry Placement" below. Udyog coin image: `image_1772016230351.png` (silver/navy shield emblem).
