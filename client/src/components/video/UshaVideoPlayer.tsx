@@ -636,6 +636,71 @@ export function UshaVideoPlayer({
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                 )}
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger
+                    className="text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                    data-testid="menu-settings-audio"
+                  >
+                    <Languages className="w-4 h-4 mr-2 opacity-70" />
+                    Audio ({audioTracks.length > 0
+                      ? (AVAILABLE_LANGUAGES.find((l) => l.code === selectedAudioTrack)?.name || "English")
+                      : "Default"})
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-[#1a1a2e] border-white/10">
+                    {audioTracks.length > 0 ? audioTracks.map((track) => (
+                      <DropdownMenuItem
+                        key={track.languageCode}
+                        onClick={() => setSelectedAudioTrack(track.languageCode)}
+                        className="flex items-center justify-between cursor-pointer text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                        data-testid={`menu-settings-audio-${track.languageCode}`}
+                      >
+                        <span>
+                          {track.languageName}
+                          {track.voiceName && <span className="text-white/50 ml-1 text-xs">({track.voiceName})</span>}
+                        </span>
+                        {selectedAudioTrack === track.languageCode && <Check className="w-4 h-4 text-cyan-400" />}
+                      </DropdownMenuItem>
+                    )) : (
+                      <DropdownMenuItem disabled className="text-white/40 text-sm">
+                        Default (video audio)
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger
+                    className="text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                    data-testid="menu-settings-subtitles"
+                  >
+                    <Subtitles className="w-4 h-4 mr-2 opacity-70" />
+                    Subtitles ({selectedSubtitle
+                      ? (subtitleTracks.find((t) => t.languageCode === selectedSubtitle)?.languageName || selectedSubtitle)
+                      : "Off"})
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-[#1a1a2e] border-white/10">
+                    <DropdownMenuItem
+                      onClick={() => setSelectedSubtitle(null)}
+                      className="flex items-center justify-between cursor-pointer text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                      data-testid="menu-settings-subtitle-off"
+                    >
+                      <span>Off</span>
+                      {selectedSubtitle === null && <Check className="w-4 h-4 text-cyan-400" />}
+                    </DropdownMenuItem>
+                    {subtitleTracks.map((track) => (
+                      <DropdownMenuItem
+                        key={track.languageCode}
+                        onClick={() => setSelectedSubtitle(track.languageCode)}
+                        className="flex items-center justify-between cursor-pointer text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                        data-testid={`menu-settings-subtitle-${track.languageCode}`}
+                      >
+                        <span>{track.languageName}</span>
+                        {selectedSubtitle === track.languageCode && <Check className="w-4 h-4 text-cyan-400" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
               </DropdownMenuContent>
             </DropdownMenu>
 
