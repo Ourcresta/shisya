@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Mic, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { X, Send, Mic, MicOff, Volume2, VolumeX, Loader2, PhoneCall, PhoneOff } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -48,6 +48,7 @@ interface SpeechRecognitionInstance {
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
+  abort: () => void;
 }
 
 declare global {
@@ -77,6 +78,28 @@ function simpleMarkdown(text: string): string {
   return `<p>${html}</p>`;
 }
 
+function getBestVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = [
+    "Google UK English Female",
+    "Google US English",
+    "Microsoft Zira Desktop",
+    "Microsoft Aria Online",
+    "Samantha",
+    "Victoria",
+    "Karen",
+    "Moira",
+  ];
+  for (const name of preferred) {
+    const v = voices.find((v) => v.name === name);
+    if (v) return v;
+  }
+  const femaleEn = voices.find((v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("female"));
+  if (femaleEn) return femaleEn;
+  const anyEn = voices.find((v) => v.lang.startsWith("en"));
+  return anyEn || voices[0] || null;
+}
+
 export function VideoUshaChat({
   courseId,
   lessonId,
@@ -91,53 +114,151 @@ export function VideoUshaChat({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [interimText, setInterimText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const voiceModeRef = useRef(false);
+  const isSpeakingRef = useRef(false);
 
   const hasSpeechRecognition = typeof window !== "undefined" &&
     ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
   const hasSpeechSynthesis = typeof window !== "undefined" && "speechSynthesis" in window;
 
+  const firstName = user?.name?.split(" ")[0] || "";
+
+  useEffect(() => {
+    voiceModeRef.current = voiceMode;
+  }, [voiceMode]);
+
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
+  }, [isSpeaking]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen && !voiceMode && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, voiceMode]);
 
   useEffect(() => {
     setMessages([]);
     setInput("");
+    setInterimText("");
+    setIsListening(false);
+    setVoiceMode(false);
   }, [lessonId]);
 
-  const speakText = useCallback((text: string) => {
-    if (!hasSpeechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const plainText = stripHtml(text);
-    const utterance = new SpeechSynthesisUtterance(plainText);
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-  }, [hasSpeechSynthesis]);
+  useEffect(() => {
+    if (!isOpen) {
+      stopSpeaking();
+      stopListening();
+      setVoiceMode(false);
+    }
+  }, [isOpen]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+    setInterimText("");
+  }, []);
 
   const stopSpeaking = useCallback(() => {
     if (hasSpeechSynthesis) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      isSpeakingRef.current = false;
     }
   }, [hasSpeechSynthesis]);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const speakText = useCallback((text: string, onDone?: () => void) => {
+    if (!hasSpeechSynthesis) {
+      onDone?.();
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const plainText = stripHtml(text).slice(0, 600);
+    const utterance = new SpeechSynthesisUtterance(plainText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.1;
+
+    const trySetVoice = () => {
+      const voice = getBestVoice();
+      if (voice) utterance.voice = voice;
+    };
+    if (window.speechSynthesis.getVoices().length > 0) {
+      trySetVoice();
+    } else {
+      window.speechSynthesis.addEventListener("voiceschanged", trySetVoice, { once: true });
+    }
+
+    utterance.onstart = () => { setIsSpeaking(true); isSpeakingRef.current = true; };
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      onDone?.();
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      onDone?.();
+    };
+    window.speechSynthesis.speak(utterance);
+  }, [hasSpeechSynthesis]);
+
+  const startListening = useCallback(() => {
+    if (!hasSpeechRecognition || isListening) return;
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognitionClass();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let transcript = "";
+      let isFinal = false;
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+        if (event.results[i].isFinal) isFinal = true;
+      }
+      setInterimText(transcript);
+      setInput(transcript);
+      if (isFinal) {
+        setIsListening(false);
+        setInterimText("");
+        if (voiceModeRef.current && transcript.trim()) {
+          sendMessageInternal(transcript.trim());
+        }
+      }
+    };
+
+    recognition.onerror = () => { setIsListening(false); setInterimText(""); };
+    recognition.onend = () => { setIsListening(false); setInterimText(""); };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [hasSpeechRecognition, isListening]);
+
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  const sendMessageInternal = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
     const userMsg: ChatMessage = {
@@ -148,6 +269,7 @@ export function VideoUshaChat({
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setInterimText("");
     setIsLoading(true);
 
     try {
@@ -158,13 +280,15 @@ export function VideoUshaChat({
         context: {
           lessonId,
           lessonTitle,
+          courseTitle,
           objectives: objectives?.join(", "),
+          studentName: user?.name || undefined,
         },
         language: "en",
       });
 
       const data = await res.json();
-      const aiContent = data.response || data.message || "I'm not sure how to answer that.";
+      const aiContent = data.answer || data.response || data.message || "I'm not sure how to answer that.";
 
       const aiMsg: ChatMessage = {
         id: `a-${Date.now()}`,
@@ -174,8 +298,12 @@ export function VideoUshaChat({
       };
       setMessages((prev) => [...prev, aiMsg]);
 
-      if (ttsEnabled) {
-        speakText(aiContent);
+      if (voiceModeRef.current) {
+        speakText(aiContent, () => {
+          if (voiceModeRef.current) {
+            setTimeout(() => startListening(), 600);
+          }
+        });
       }
     } catch (err: any) {
       const errorMsg: ChatMessage = {
@@ -187,49 +315,17 @@ export function VideoUshaChat({
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMsg]);
+      if (voiceModeRef.current) {
+        setTimeout(() => startListening(), 1000);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, courseId, lessonId, lessonTitle, objectives, ttsEnabled, speakText]);
+  }, [isLoading, courseId, lessonId, lessonTitle, courseTitle, objectives, user, speakText, startListening]);
 
-  const toggleListening = useCallback(() => {
-    if (!hasSpeechRecognition) return;
-
-    if (isListening && recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-      return;
-    }
-
-    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionClass();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let transcript = "";
-      for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      setInput(transcript);
-      if (event.results[0].isFinal) {
-        setIsListening(false);
-      }
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
-  }, [isListening, hasSpeechRecognition]);
+  const sendMessage = useCallback((text: string) => {
+    sendMessageInternal(text);
+  }, [sendMessageInternal]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -238,35 +334,59 @@ export function VideoUshaChat({
     }
   };
 
+  const enterVoiceMode = useCallback(() => {
+    setVoiceMode(true);
+    voiceModeRef.current = true;
+    stopSpeaking();
+    setTimeout(() => startListening(), 300);
+  }, [startListening, stopSpeaking]);
+
+  const exitVoiceMode = useCallback(() => {
+    setVoiceMode(false);
+    voiceModeRef.current = false;
+    stopListening();
+    stopSpeaking();
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, [stopListening, stopSpeaking]);
+
   if (!isOpen) return null;
 
   return (
     <div className="vuc-panel" data-testid="video-usha-chat">
+      {/* Header */}
       <div className="vuc-header">
-        <Avatar className="h-8 w-8 border border-cyan-500/30">
-          <AvatarImage src={ushaAvatarImage} alt="Usha AI" />
-          <AvatarFallback className="bg-cyan-500/20 text-cyan-400 text-xs font-bold">U</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-8 w-8 border border-cyan-500/30">
+            <AvatarImage src={ushaAvatarImage} alt="Usha AI" />
+            <AvatarFallback className="bg-cyan-500/20 text-cyan-400 text-xs font-bold">U</AvatarFallback>
+          </Avatar>
+          {isSpeaking && (
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400 border border-black animate-pulse" />
+          )}
+        </div>
         <div className="vuc-header-info">
           <div className="vuc-header-name">Usha AI Tutor</div>
-          <div className="vuc-header-status">Online</div>
+          <div className="vuc-header-status" style={{ color: isSpeaking ? "#22d3ee" : isListening ? "#4ade80" : undefined }}>
+            {isSpeaking ? "Speaking…" : isListening ? "Listening…" : voiceMode ? "Voice Mode" : "Online"}
+          </div>
         </div>
-        {hasSpeechSynthesis && (
+
+        {/* Voice Mode toggle */}
+        {hasSpeechRecognition && (
           <button
             className="vuc-tts-btn"
-            onClick={() => {
-              if (ttsEnabled) stopSpeaking();
-              setTtsEnabled(!ttsEnabled);
-            }}
-            title={ttsEnabled ? "Disable auto-read" : "Enable auto-read"}
-            data-testid="button-tts-toggle"
+            onClick={voiceMode ? exitVoiceMode : enterVoiceMode}
+            title={voiceMode ? "Exit voice conversation" : "Start voice conversation"}
+            data-testid="button-voice-mode"
+            style={{ color: voiceMode ? "#22d3ee" : undefined }}
           >
-            {ttsEnabled ? <Volume2 className="w-4 h-4 text-cyan-500" /> : <VolumeX className="w-4 h-4" />}
+            {voiceMode ? <PhoneOff className="w-4 h-4" /> : <PhoneCall className="w-4 h-4" />}
           </button>
         )}
+
         <button
           className="vp-ctrl-btn"
-          onClick={onClose}
+          onClick={() => { stopSpeaking(); stopListening(); onClose(); }}
           style={{ color: "hsl(var(--muted-foreground))", width: 28, height: 28 }}
           data-testid="button-close-chat"
         >
@@ -274,18 +394,23 @@ export function VideoUshaChat({
         </button>
       </div>
 
+      {/* Messages */}
       <div className="vuc-messages hide-scrollbar" data-testid="chat-messages">
         {messages.length === 0 && (
           <div className="text-center py-6 space-y-2">
-            <Avatar className="h-12 w-12 mx-auto border border-cyan-500/30">
-              <AvatarImage src={ushaAvatarImage} alt="Usha AI" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <p className="text-sm font-medium" style={{ fontFamily: "var(--font-display)" }}>
-              Hi! I'm Usha, your AI tutor
+            <div className="relative mx-auto w-fit">
+              <Avatar className="h-14 w-14 mx-auto border-2 border-cyan-500/40">
+                <AvatarImage src={ushaAvatarImage} alt="Usha AI" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-black" />
+            </div>
+            <p className="text-sm font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+              {firstName ? `Hi ${firstName}! I'm Usha 👋` : "Hi! I'm Usha 👋"}
             </p>
-            <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
-              Ask me anything about "{lessonTitle}" — I'm here to help you learn!
+            <p className="text-xs text-muted-foreground max-w-[230px] mx-auto leading-relaxed">
+              Your AI tutor for "{lessonTitle}". Ask me anything — or tap the{" "}
+              <PhoneCall className="inline w-3 h-3 text-cyan-400" /> button to talk to me!
             </p>
           </div>
         )}
@@ -326,7 +451,8 @@ export function VideoUshaChat({
         <div ref={messagesEndRef} />
       </div>
 
-      {messages.length === 0 && (
+      {/* Quick Suggestions */}
+      {messages.length === 0 && !voiceMode && (
         <div className="vuc-suggestions">
           {QUICK_SUGGESTIONS.map((suggestion) => (
             <button
@@ -341,37 +467,81 @@ export function VideoUshaChat({
         </div>
       )}
 
-      <div className="vuc-input-area">
-        {hasSpeechRecognition && (
+      {/* Voice Mode UI */}
+      {voiceMode ? (
+        <div className="flex flex-col items-center gap-3 px-4 py-5">
+          {/* Big listen button */}
           <button
-            className={`vuc-mic-btn ${isListening ? "vuc-mic-btn-active" : ""}`}
-            onClick={toggleListening}
-            title={isListening ? "Stop listening" : "Speak your question"}
-            data-testid="button-mic"
+            className={`vuc-voice-orb ${isListening ? "vuc-voice-orb-listening" : isSpeaking ? "vuc-voice-orb-speaking" : ""}`}
+            onClick={() => {
+              if (isSpeaking) { stopSpeaking(); setTimeout(() => startListening(), 200); }
+              else if (isListening) { stopListening(); }
+              else { startListening(); }
+            }}
+            data-testid="button-voice-orb"
+            title={isListening ? "Tap to stop" : isSpeaking ? "Tap to interrupt" : "Tap to speak"}
           >
-            <Mic className="w-4 h-4" />
+            {isLoading ? (
+              <Loader2 className="w-8 h-8 animate-spin text-cyan-300" />
+            ) : isSpeaking ? (
+              <Volume2 className="w-8 h-8 text-cyan-300" />
+            ) : isListening ? (
+              <Mic className="w-8 h-8 text-white" />
+            ) : (
+              <Mic className="w-8 h-8 text-cyan-400" />
+            )}
           </button>
-        )}
-        <input
-          ref={inputRef}
-          type="text"
-          className="vuc-input"
-          placeholder={isListening ? "Listening..." : "Ask Usha a question..."}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isLoading}
-          data-testid="input-chat"
-        />
-        <button
-          className="vuc-send-btn"
-          onClick={() => sendMessage(input)}
-          disabled={!input.trim() || isLoading}
-          data-testid="button-send"
-        >
-          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-        </button>
-      </div>
+
+          <p className="text-xs text-center text-muted-foreground min-h-[16px]">
+            {isLoading ? "Usha is thinking…" : isSpeaking ? "Usha is speaking — tap to interrupt" : isListening ? (interimText || "Listening… speak now") : "Tap the mic to speak"}
+          </p>
+
+          {interimText && (
+            <p className="text-xs text-center text-cyan-300/80 italic max-w-[220px] line-clamp-2">"{interimText}"</p>
+          )}
+
+          <button
+            className="text-xs text-muted-foreground underline underline-offset-2 mt-1"
+            onClick={exitVoiceMode}
+            data-testid="button-exit-voice"
+          >
+            Switch to text
+          </button>
+        </div>
+      ) : (
+        /* Text Input */
+        <div className="vuc-input-area">
+          {hasSpeechRecognition && (
+            <button
+              className={`vuc-mic-btn ${isListening ? "vuc-mic-btn-active" : ""}`}
+              onClick={toggleListening}
+              title={isListening ? "Stop listening" : "Speak your question"}
+              data-testid="button-mic"
+            >
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+          )}
+          <input
+            ref={inputRef}
+            type="text"
+            className="vuc-input"
+            placeholder={isListening ? `Listening${interimText ? `: ${interimText}` : "…"}` : "Ask Usha anything…"}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+            data-testid="input-chat"
+          />
+          <button
+            className="vuc-send-btn"
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim() || isLoading}
+            data-testid="button-send"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

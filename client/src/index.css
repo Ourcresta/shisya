@@ -2694,3 +2694,46 @@ html.dark body {
 .vuc-tts-btn:hover {
   color: hsl(var(--primary));
 }
+
+/* Voice conversation orb */
+.vuc-voice-orb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 2.5px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  outline: none;
+}
+.vuc-voice-orb:hover {
+  border-color: #22d3ee;
+  background: #22d3ee14;
+  color: #22d3ee;
+  transform: scale(1.05);
+}
+.vuc-voice-orb-listening {
+  border-color: #4ade80 !important;
+  background: #4ade8014 !important;
+  color: #4ade80 !important;
+  animation: vuc-orb-pulse 1.2s ease-in-out infinite;
+}
+.vuc-voice-orb-speaking {
+  border-color: #22d3ee !important;
+  background: #22d3ee14 !important;
+  color: #22d3ee !important;
+  animation: vuc-orb-wave 1.8s ease-in-out infinite;
+}
+@keyframes vuc-orb-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 #4ade8040; transform: scale(1); }
+  50%       { box-shadow: 0 0 0 12px #4ade8000; transform: scale(1.04); }
+}
+@keyframes vuc-orb-wave {
+  0%, 100% { box-shadow: 0 0 0 0 #22d3ee40; }
+  50%       { box-shadow: 0 0 0 14px #22d3ee00; }
+}

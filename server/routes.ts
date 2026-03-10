@@ -13,6 +13,7 @@ import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { guruRouter } from "./guruRoutes";
+import { r2Router } from "./r2Upload";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
@@ -100,6 +101,9 @@ export async function registerRoutes(
     }
   });
   
+  // Cloudflare R2 video upload (must be before broad /api/guru mount)
+  app.use("/api/guru/r2", r2Router);
+
   // Guru Admin dashboard routes
   app.use("/api/guru", guruRouter);
   

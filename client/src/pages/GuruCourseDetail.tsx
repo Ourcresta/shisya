@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -60,6 +60,8 @@ import {
   Video,
   Check,
   X,
+  Upload,
+  Loader2,
 } from "lucide-react";
 
 interface Course {
@@ -149,6 +151,44 @@ export default function GuruCourseDetail() {
   const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "" });
   const [editingTcUrl, setEditingTcUrl] = useState(false);
   const [tcUrlValue, setTcUrlValue] = useState("");
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleVideoUpload = async (file: File) => {
+    if (!file) return;
+    setIsUploading(true);
+    setUploadProgress(0);
+    try {
+      const presignRes = await apiRequest("POST", "/api/guru/r2/presign", {
+        fileName: file.name,
+        fileType: file.type,
+      });
+      const { uploadUrl, publicUrl } = await presignRes.json();
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
+        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.send(file);
+      });
+
+      setLessonForm((prev) => ({ ...prev, videoUrl: publicUrl }));
+      toast({ title: "Video uploaded!", description: "The R2 URL has been filled in automatically." });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
+    }
+  };
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/guru/courses", courseId],
@@ -945,13 +985,56 @@ export default function GuruCourseDetail() {
             </div>
             <div>
               <Label htmlFor="lesson-video-url">Video URL</Label>
-              <Input
-                id="lesson-video-url"
-                value={lessonForm.videoUrl}
-                onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
-                placeholder="https://..."
-                data-testid="input-lesson-video-url"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="lesson-video-url"
+                  value={lessonForm.videoUrl}
+                  onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
+                  placeholder="https://... or upload a video file →"
+                  data-testid="input-lesson-video-url"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploading}
+                  onClick={() => videoFileInputRef.current?.click()}
+                  data-testid="button-upload-video"
+                  className="shrink-0 gap-1.5"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {uploadProgress > 0 ? `${uploadProgress}%` : "Uploading…"}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      Upload to R2
+                    </>
+                  )}
+                </Button>
+                <input
+                  ref={videoFileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleVideoUpload(file);
+                  }}
+                  data-testid="input-video-file"
+                />
+              </div>
+              {isUploading && uploadProgress > 0 && (
+                <div className="mt-1.5 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-200"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

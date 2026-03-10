@@ -410,6 +410,10 @@ function buildContextPrompt(
   contextDesc += `- Page type: ${context.pageType}\n`;
   contextDesc += `- Help level: ${helpLevel.toUpperCase()}\n`;
   contextDesc += `- Response language: ${language.toUpperCase()}\n`;
+  if (context.studentName) {
+    const firstName = context.studentName.split(" ")[0];
+    contextDesc += `- Student's name: ${context.studentName} (address them as "${firstName}" naturally — especially for greetings, encouragement, or personal moments)\n`;
+  }
   
   if (context.courseTitle) {
     contextDesc += `- Course: "${context.courseTitle}"`;
@@ -643,6 +647,7 @@ export function registerUshaRoutes(app: Express): void {
         courseId: courseId || 0,
         pageType,
         studentId: userId,
+        studentName: context?.studentName,
         lessonId: context?.lessonId,
         labId: context?.labId,
         projectId: context?.projectId,

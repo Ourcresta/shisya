@@ -1455,6 +1455,7 @@ export const ushaRequestSchema = z.object({
     isVideoPlaying: z.boolean().optional(),
     hasInteractedWithContent: z.boolean().optional(),
     lessonCompleted: z.boolean().optional(),
+    studentName: z.string().optional(),
   }).optional(),
   helpLevel: z.enum(USHA_HELP_LEVELS).optional(),
   language: z.enum(SUPPORTED_LANGUAGES).optional().default("en"),
@@ -1496,6 +1497,7 @@ export interface UshaContext {
   projectTitle?: string;
   pageType?: UshaPageType;
   studentId?: string;
+  studentName?: string;
   language?: SupportedLanguage;
   studentProgressSummary?: StudentProgressSummary;
   previousUshaTurns?: UshaTurn[];
