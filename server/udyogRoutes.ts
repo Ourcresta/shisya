@@ -2,10 +2,10 @@ import { Router, Request, Response } from "express";
 import OpenAI from "openai";
 import { db } from "./db";
 import {
-  udyogInternships, udyogAssignments, udyogTasks, udyogSubmissions,
+  udyogInternships, udyogAssignments, udyogTasks, udyogSubtasks, udyogSubmissions,
   udyogCertificates, udyogSkillAssessments, udyogBatches, udyogBatchMembers,
   udyogHrUsers, udyogJobs, udyogApplications,
-  insertUdyogInternshipSchema, insertUdyogJobSchema,
+  insertUdyogInternshipSchema, insertUdyogJobSchema, insertUdyogSubtaskSchema,
   shishyaUsers, shishyaUserProfiles,
 } from "@shared/schema";
 import { eq, and, desc, sql, gte, lte, or, inArray, count } from "drizzle-orm";
@@ -28,7 +28,35 @@ udyogRouter.get("/internships", async (req: Request, res: Response) => {
   }
 });
 
-// GET /internships/:id - Get internship details with tasks (public)
+// Helper: fetch tasks with their subtasks for an internship
+async function getTasksWithSubtasks(internshipId: number, batchId?: number | null) {
+  let tasksQuery;
+  if (batchId) {
+    tasksQuery = await db.select().from(udyogTasks)
+      .where(and(eq(udyogTasks.internshipId, internshipId), eq(udyogTasks.batchId, batchId)))
+      .orderBy(udyogTasks.orderIndex);
+    if (!tasksQuery.length) {
+      tasksQuery = await db.select().from(udyogTasks)
+        .where(and(eq(udyogTasks.internshipId, internshipId), sql`${udyogTasks.batchId} IS NULL`))
+        .orderBy(udyogTasks.orderIndex);
+    }
+  } else {
+    tasksQuery = await db.select().from(udyogTasks)
+      .where(eq(udyogTasks.internshipId, internshipId))
+      .orderBy(udyogTasks.orderIndex);
+  }
+  if (!tasksQuery.length) return [];
+  const taskIds = tasksQuery.map((t) => t.id);
+  const allSubtasks = await db.select().from(udyogSubtasks)
+    .where(inArray(udyogSubtasks.taskId, taskIds))
+    .orderBy(udyogSubtasks.orderIndex);
+  return tasksQuery.map((task) => ({
+    ...task,
+    subtasks: allSubtasks.filter((s) => s.taskId === task.id),
+  }));
+}
+
+// GET /internships/:id - Get internship details with tasks + subtasks (public)
 udyogRouter.get("/internships/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -38,9 +66,7 @@ udyogRouter.get("/internships/:id", async (req: Request, res: Response) => {
     if (!internship) {
       return res.status(404).json({ error: "Internship not found" });
     }
-    const tasks = await db.select().from(udyogTasks)
-      .where(eq(udyogTasks.internshipId, id))
-      .orderBy(udyogTasks.orderIndex);
+    const tasks = await getTasksWithSubtasks(id);
     res.json({ ...internship, tasks });
   } catch (error) {
     console.error("[Udyog] Error fetching internship:", error);
@@ -252,23 +278,7 @@ udyogRouter.get("/my-assignment", requireAuth as any, async (req: AuthenticatedR
     const [internship] = await db.select().from(udyogInternships)
       .where(eq(udyogInternships.id, assignment.internshipId))
       .limit(1);
-    let tasks;
-    if (assignment.batchId) {
-      tasks = await db.select().from(udyogTasks)
-        .where(and(
-          eq(udyogTasks.internshipId, assignment.internshipId),
-          eq(udyogTasks.batchId, assignment.batchId)
-        ))
-        .orderBy(udyogTasks.orderIndex);
-    }
-    if (!tasks || tasks.length === 0) {
-      tasks = await db.select().from(udyogTasks)
-        .where(and(
-          eq(udyogTasks.internshipId, assignment.internshipId),
-          sql`${udyogTasks.batchId} IS NULL`
-        ))
-        .orderBy(udyogTasks.orderIndex);
-    }
+    const tasks = await getTasksWithSubtasks(assignment.internshipId, assignment.batchId);
     let certificate = null;
     if (assignment.status === "completed") {
       const [cert] = await db.select().from(udyogCertificates)
@@ -551,7 +561,7 @@ udyogRouter.delete("/admin/internships/:id", async (req: Request, res: Response)
   }
 });
 
-// POST /admin/internships/:id/tasks - Add task to internship
+// POST /admin/internships/:id/tasks - Add task (with optional subtasks) to internship
 udyogRouter.post("/admin/internships/:id/tasks", async (req: Request, res: Response) => {
   try {
     const internshipId = parseInt(req.params.id, 10);
@@ -561,7 +571,7 @@ udyogRouter.post("/admin/internships/:id/tasks", async (req: Request, res: Respo
     if (!existing) {
       return res.status(404).json({ error: "Internship not found" });
     }
-    const { title, description, orderIndex } = req.body;
+    const { title, description, orderIndex, subtasks } = req.body;
     if (!title) {
       return res.status(400).json({ error: "Task title is required" });
     }
@@ -572,10 +582,77 @@ udyogRouter.post("/admin/internships/:id/tasks", async (req: Request, res: Respo
       orderIndex: orderIndex || 0,
       status: "todo",
     }).returning();
-    res.json(task);
+    let savedSubtasks: any[] = [];
+    if (subtasks && Array.isArray(subtasks) && subtasks.length > 0) {
+      const subtaskValues = subtasks.map((s: any, idx: number) => ({
+        taskId: task.id,
+        title: s.title,
+        description: s.description || null,
+        orderIndex: s.orderIndex ?? idx,
+        status: "todo" as const,
+      }));
+      savedSubtasks = await db.insert(udyogSubtasks).values(subtaskValues).returning();
+    }
+    res.json({ ...task, subtasks: savedSubtasks });
   } catch (error) {
     console.error("[Udyog Admin] Error adding task:", error);
     res.status(500).json({ error: "Failed to add task" });
+  }
+});
+
+// POST /admin/tasks/:taskId/subtasks - Add subtask to a task
+udyogRouter.post("/admin/tasks/:taskId/subtasks", async (req: Request, res: Response) => {
+  try {
+    const taskId = parseInt(req.params.taskId, 10);
+    const [task] = await db.select().from(udyogTasks).where(eq(udyogTasks.id, taskId)).limit(1);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    const { title, description, orderIndex } = req.body;
+    if (!title) return res.status(400).json({ error: "Subtask title is required" });
+    const [subtask] = await db.insert(udyogSubtasks).values({
+      taskId,
+      title,
+      description: description || null,
+      orderIndex: orderIndex ?? 0,
+      status: "todo",
+    }).returning();
+    res.json(subtask);
+  } catch (error) {
+    console.error("[Udyog Admin] Error adding subtask:", error);
+    res.status(500).json({ error: "Failed to add subtask" });
+  }
+});
+
+// PATCH /admin/subtasks/:subtaskId - Update a subtask
+udyogRouter.patch("/admin/subtasks/:subtaskId", async (req: Request, res: Response) => {
+  try {
+    const subtaskId = parseInt(req.params.subtaskId, 10);
+    const { title, description, orderIndex, status } = req.body;
+    const updateData: Record<string, any> = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (orderIndex !== undefined) updateData.orderIndex = orderIndex;
+    if (status !== undefined) updateData.status = status;
+    const [updated] = await db.update(udyogSubtasks)
+      .set(updateData)
+      .where(eq(udyogSubtasks.id, subtaskId))
+      .returning();
+    if (!updated) return res.status(404).json({ error: "Subtask not found" });
+    res.json(updated);
+  } catch (error) {
+    console.error("[Udyog Admin] Error updating subtask:", error);
+    res.status(500).json({ error: "Failed to update subtask" });
+  }
+});
+
+// DELETE /admin/subtasks/:subtaskId - Delete a subtask
+udyogRouter.delete("/admin/subtasks/:subtaskId", async (req: Request, res: Response) => {
+  try {
+    const subtaskId = parseInt(req.params.subtaskId, 10);
+    await db.delete(udyogSubtasks).where(eq(udyogSubtasks.id, subtaskId));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Udyog Admin] Error deleting subtask:", error);
+    res.status(500).json({ error: "Failed to delete subtask" });
   }
 });
 
@@ -1429,18 +1506,18 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
       messages: [
         {
           role: "system",
-          content: `You are an expert internship program designer for an AI-powered virtual internship platform called "Our Udyog". Design realistic, industry-relevant virtual internships that simulate real workplace environments. Students work in batches of 5 with roles (Team Lead, Developer, QA/Tester). Return ONLY valid JSON, no markdown.`
+          content: `You are an expert internship program designer for an AI-powered virtual internship platform called "Our Udyog". Design realistic, industry-relevant virtual internships with a 3-level hierarchy: Project → Tasks → Sub-Tasks. Students work in batches of 5 with roles (Team Lead, Developer, QA/Tester). Each task must have detailed sub-tasks that serve as step-by-step guidance for students. Return ONLY valid JSON, no markdown.`
         },
         {
           role: "user",
-          content: `Create a virtual internship program with the following details:
+          content: `Create a complete virtual internship program with the following details:
 Title: "${title}"
 Skill Level: ${skillLevel} - ${levelGuide[skillLevel] || levelGuide.beginner}
 
-Return a JSON object with this exact structure:
+Return a JSON object with this EXACT structure (3-level hierarchy):
 {
   "title": "${title}",
-  "description": "Detailed 2-3 paragraph description of the internship program, what students will learn, technologies used, and what they'll build",
+  "description": "Detailed 2-3 paragraph description of the internship program, what students will learn, technologies used, and what they will build",
   "shortDescription": "One-line summary (max 100 chars) for card display",
   "skillLevel": "${skillLevel}",
   "domain": "The primary domain (e.g., Web Development, Data Science, Mobile Development, DevOps, UI/UX Design, Machine Learning, Cybersecurity, Cloud Computing)",
@@ -1450,17 +1527,29 @@ Return a JSON object with this exact structure:
   "batchSize": 5,
   "tasks": [
     {
-      "title": "Task title",
-      "description": "Detailed task description with clear deliverables",
-      "orderIndex": 1
+      "title": "Task 1: [Task Name]",
+      "description": "Clear description of the overall task goal, what the student will accomplish, and why it matters in the project",
+      "orderIndex": 1,
+      "subtasks": [
+        {
+          "title": "Sub-task title — a specific, actionable step",
+          "description": "Detailed step-by-step instructions for completing this sub-task, including what to do, tools to use, and expected output",
+          "orderIndex": 1
+        },
+        {
+          "title": "Another specific step",
+          "description": "Clear instructions with deliverables",
+          "orderIndex": 2
+        }
+      ]
     }
   ]
 }
 
-Generate 6-10 tasks that progressively build skills. Tasks should be specific, actionable, and relevant to the internship domain. Include a mix of individual and collaborative tasks.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
+Generate 5-7 tasks that progressively build skills, each with 3-5 sub-tasks. Sub-tasks are the step-by-step guidance students follow to complete each task. Make them specific, actionable, and sequentially ordered.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
-      max_tokens: 3000,
+      max_tokens: 4500,
       temperature: 0.7,
     });
 

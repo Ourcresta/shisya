@@ -878,6 +878,18 @@ export default function UdyogDashboard() {
                     <div className="flex-1 pb-1">
                       <p className="text-sm font-medium" style={{ color: isCompleted ? "#10B981" : "#FFFFFF" }}>{task.title}</p>
                       {task.description && <p className="text-xs mt-0.5" style={{ color: "#64748B" }}>{task.description}</p>}
+                      {task.subtasks && task.subtasks.length > 0 && (
+                        <div className="mt-1.5 space-y-0.5">
+                          {task.subtasks.slice(0, 3).map((sub: any, si: number) => (
+                            <p key={si} className="text-[10px] flex items-center gap-1" style={{ color: "#64748B" }}>
+                              <span style={{ color: "#7C3AED" }}>›</span> {sub.title}
+                            </p>
+                          ))}
+                          {task.subtasks.length > 3 && (
+                            <p className="text-[10px]" style={{ color: "#475569" }}>+{task.subtasks.length - 3} more steps</p>
+                          )}
+                        </div>
+                      )}
                       <span className="text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full" style={{ background: `${statusColors[task.status]}20`, color: statusColors[task.status] }}>
                         {statusLabels[task.status] || task.status}
                       </span>
@@ -936,6 +948,22 @@ export default function UdyogDashboard() {
                       </div>
                       {task.description && (
                         <p className="text-xs mb-2 line-clamp-2" style={{ color: "#64748B" }}>{task.description}</p>
+                      )}
+                      {task.subtasks && task.subtasks.length > 0 && (
+                        <div className="mb-2 space-y-1" data-testid={`subtask-list-${task.id}`}>
+                          <p className="text-[10px] font-medium mb-1" style={{ color: "#7C3AED" }}>
+                            Steps ({task.subtasks.length})
+                          </p>
+                          {task.subtasks.slice(0, 3).map((sub: any, si: number) => (
+                            <div key={si} className="flex items-center gap-1.5">
+                              <div className="w-3 h-3 rounded-full shrink-0" style={{ border: "1.5px solid rgba(124,58,237,0.5)", background: "rgba(124,58,237,0.08)" }} />
+                              <span className="text-[10px] line-clamp-1" style={{ color: "#94A3B8" }}>{sub.title}</span>
+                            </div>
+                          ))}
+                          {task.subtasks.length > 3 && (
+                            <p className="text-[10px] pl-4.5" style={{ color: "#475569" }}>+{task.subtasks.length - 3} more</p>
+                          )}
+                        </div>
                       )}
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         {task.dueDate && (

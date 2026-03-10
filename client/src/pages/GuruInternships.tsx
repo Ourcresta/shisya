@@ -60,6 +60,9 @@ import {
   Sparkles,
   Loader2,
   MessageSquarePlus,
+  ChevronDown,
+  ChevronRight,
+  ListTree,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -88,6 +91,16 @@ interface InternshipForm {
   isActive: boolean;
 }
 
+interface Subtask {
+  id: number;
+  taskId: number;
+  title: string;
+  description: string | null;
+  orderIndex: number;
+  status: string;
+  createdAt: string;
+}
+
 interface Task {
   id: number;
   internshipId: number;
@@ -96,6 +109,7 @@ interface Task {
   status: string;
   orderIndex: number;
   createdAt: string;
+  subtasks?: Subtask[];
 }
 
 interface TaskForm {
@@ -206,6 +220,26 @@ export default function GuruInternships() {
   const [aiPreview, setAiPreview] = useState<any>(null);
   const [aiExtraInstructions, setAiExtraInstructions] = useState("");
 
+  const [expandedTaskIndexes, setExpandedTaskIndexes] = useState<Set<number>>(new Set());
+  const [expandedAdminTaskIds, setExpandedAdminTaskIds] = useState<Set<number>>(new Set());
+  const [subtaskForms, setSubtaskForms] = useState<Record<number, { title: string; description: string }>>({});
+
+  const toggleAiTaskExpand = (idx: number) => {
+    setExpandedTaskIndexes((prev) => {
+      const next = new Set(prev);
+      next.has(idx) ? next.delete(idx) : next.add(idx);
+      return next;
+    });
+  };
+
+  const toggleAdminTaskExpand = (taskId: number) => {
+    setExpandedAdminTaskIds((prev) => {
+      const next = new Set(prev);
+      next.has(taskId) ? next.delete(taskId) : next.add(taskId);
+      return next;
+    });
+  };
+
   const [membersDialogBatchId, setMembersDialogBatchId] = useState<number | null>(null);
   const [editingMemberRole, setEditingMemberRole] = useState<{ memberId: number; role: string } | null>(null);
   const [editingMemberScores, setEditingMemberScores] = useState<{
@@ -308,6 +342,35 @@ export default function GuruInternships() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to add task", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const addSubtaskMutation = useMutation({
+    mutationFn: async ({ taskId, title, description }: { taskId: number; title: string; description: string }) => {
+      const res = await apiRequest("POST", `/api/udyog/admin/tasks/${taskId}/subtasks`, { title, description, orderIndex: 0 });
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/internships", selectedInternshipId] });
+      setSubtaskForms((prev) => ({ ...prev, [variables.taskId]: { title: "", description: "" } }));
+      toast({ title: "Sub-task added successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to add sub-task", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteSubtaskMutation = useMutation({
+    mutationFn: async (subtaskId: number) => {
+      const res = await apiRequest("DELETE", `/api/udyog/admin/subtasks/${subtaskId}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/udyog/internships", selectedInternshipId] });
+      toast({ title: "Sub-task deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete sub-task", description: error.message, variant: "destructive" });
     },
   });
 
@@ -416,6 +479,7 @@ export default function GuruInternships() {
                   title: task.title,
                   description: task.description,
                   orderIndex: task.orderIndex,
+                  subtasks: task.subtasks || [],
                 });
               } catch {}
             }
@@ -427,6 +491,7 @@ export default function GuruInternships() {
         setAiTitle("");
         setAiSkillLevel("beginner");
         setAiExtraInstructions("");
+        setExpandedTaskIndexes(new Set());
         toast({ title: "Internship created with AI-generated content!" });
       },
     });
@@ -704,42 +769,120 @@ export default function GuruInternships() {
               </Card>
 
               {internshipDetail?.tasks && internshipDetail.tasks.length > 0 ? (
-                <Card>
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Order</TableHead>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead>Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {internshipDetail.tasks.map((task) => (
-                          <TableRow key={task.id} data-testid={`row-task-${task.id}`}>
-                            <TableCell className="text-muted-foreground tabular-nums" data-testid={`text-task-order-${task.id}`}>
-                              {task.orderIndex}
-                            </TableCell>
-                            <TableCell>
-                              <span className="font-medium" data-testid={`text-task-title-${task.id}`}>
-                                {task.title}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground max-w-xs truncate" data-testid={`text-task-desc-${task.id}`}>
-                              {task.description || "-"}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="capitalize" data-testid={`badge-task-status-${task.id}`}>
+                <div className="space-y-3" data-testid="task-accordion-list">
+                  {internshipDetail.tasks.map((task) => {
+                    const isExpanded = expandedAdminTaskIds.has(task.id);
+                    const subtaskCount = task.subtasks?.length || 0;
+                    const subtaskForm = subtaskForms[task.id] || { title: "", description: "" };
+                    return (
+                      <Card key={task.id} data-testid={`card-task-${task.id}`}>
+                        <button
+                          type="button"
+                          className="w-full flex items-start gap-3 p-4 text-left hover:bg-muted/30 transition-colors rounded-t-lg"
+                          onClick={() => toggleAdminTaskExpand(task.id)}
+                        >
+                          {isExpanded
+                            ? <ChevronDown className="w-4 h-4 text-purple-500 shrink-0 mt-1" />
+                            : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                          }
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-muted-foreground font-mono">#{task.orderIndex}</span>
+                              <span className="font-medium text-sm" data-testid={`text-task-title-${task.id}`}>{task.title}</span>
+                              <Badge variant="outline" className="capitalize text-xs" data-testid={`badge-task-status-${task.id}`}>
                                 {task.status}
                               </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
+                              <Badge variant="secondary" className="text-xs px-1.5">
+                                <ListTree className="w-3 h-3 mr-1" />
+                                {subtaskCount} sub-task{subtaskCount !== 1 ? "s" : ""}
+                              </Badge>
+                            </div>
+                            {task.description && !isExpanded && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{task.description}</p>
+                            )}
+                          </div>
+                        </button>
+
+                        {isExpanded && (
+                          <CardContent className="pt-0 border-t">
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground py-3">{task.description}</p>
+                            )}
+
+                            <div className="space-y-2 mb-4">
+                              {task.subtasks && task.subtasks.length > 0 ? (
+                                task.subtasks.map((sub, idx) => (
+                                  <div key={sub.id} className="flex items-start gap-2 pl-2 border-l-2 border-purple-200 dark:border-purple-800 py-1" data-testid={`subtask-${sub.id}`}>
+                                    <span className="text-purple-500 font-mono text-xs shrink-0 mt-0.5">{idx + 1}.</span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium">{sub.title}</p>
+                                      {sub.description && (
+                                        <p className="text-xs text-muted-foreground">{sub.description}</p>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-6 w-6 text-destructive hover:text-destructive shrink-0"
+                                      onClick={() => deleteSubtaskMutation.mutate(sub.id)}
+                                      disabled={deleteSubtaskMutation.isPending}
+                                      data-testid={`button-delete-subtask-${sub.id}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-muted-foreground pl-2 py-1">No sub-tasks yet.</p>
+                              )}
+                            </div>
+
+                            <div className="border-t pt-3 space-y-2">
+                              <p className="text-xs font-medium text-muted-foreground">Add Sub-task</p>
+                              <Input
+                                placeholder="Sub-task title"
+                                value={subtaskForm.title}
+                                onChange={(e) => setSubtaskForms((prev) => ({
+                                  ...prev,
+                                  [task.id]: { ...subtaskForm, title: e.target.value }
+                                }))}
+                                className="h-8 text-sm"
+                                data-testid={`input-subtask-title-${task.id}`}
+                              />
+                              <Input
+                                placeholder="Sub-task description (optional)"
+                                value={subtaskForm.description}
+                                onChange={(e) => setSubtaskForms((prev) => ({
+                                  ...prev,
+                                  [task.id]: { ...subtaskForm, description: e.target.value }
+                                }))}
+                                className="h-8 text-sm"
+                                data-testid={`input-subtask-desc-${task.id}`}
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  if (!subtaskForm.title.trim()) return;
+                                  addSubtaskMutation.mutate({
+                                    taskId: task.id,
+                                    title: subtaskForm.title.trim(),
+                                    description: subtaskForm.description.trim(),
+                                  });
+                                }}
+                                disabled={!subtaskForm.title.trim() || addSubtaskMutation.isPending}
+                                className="h-8"
+                                data-testid={`button-add-subtask-${task.id}`}
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Add Sub-task
+                              </Button>
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
               ) : (
                 <Card data-testid="empty-tasks">
                   <CardContent className="p-8 text-center">
@@ -1600,17 +1743,65 @@ export default function GuruInternships() {
                 )}
                 {aiPreview.tasks && aiPreview.tasks.length > 0 && (
                   <div>
-                    <Label className="text-muted-foreground text-xs">Tasks ({aiPreview.tasks.length})</Label>
-                    <div className="space-y-2 mt-1">
-                      {aiPreview.tasks.map((task: any, i: number) => (
-                        <div key={i} className="flex gap-2 text-sm border rounded p-2 bg-background">
-                          <span className="text-muted-foreground font-mono shrink-0">{task.orderIndex || i + 1}.</span>
-                          <div>
-                            <p className="font-medium">{task.title}</p>
-                            <p className="text-muted-foreground text-xs mt-0.5">{task.description}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ListTree className="w-4 h-4 text-purple-600" />
+                      <Label className="text-muted-foreground text-xs">
+                        Tasks ({aiPreview.tasks.length}) — click to expand sub-tasks
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      {aiPreview.tasks.map((task: any, i: number) => {
+                        const isExpanded = expandedTaskIndexes.has(i);
+                        const subtaskCount = task.subtasks?.length || 0;
+                        return (
+                          <div key={i} className="border rounded-lg bg-background overflow-hidden">
+                            <button
+                              type="button"
+                              className="w-full flex items-start gap-2 p-3 text-left hover:bg-muted/40 transition-colors"
+                              onClick={() => toggleAiTaskExpand(i)}
+                            >
+                              {isExpanded
+                                ? <ChevronDown className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                                : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                              }
+                              <span className="text-muted-foreground font-mono text-xs shrink-0 mt-0.5">
+                                {task.orderIndex || i + 1}.
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-medium text-sm">{task.title}</span>
+                                  {subtaskCount > 0 && (
+                                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                                      {subtaskCount} sub-task{subtaskCount !== 1 ? "s" : ""}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {!isExpanded && (
+                                  <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">{task.description}</p>
+                                )}
+                              </div>
+                            </button>
+                            {isExpanded && (
+                              <div className="border-t px-3 pb-3 pt-2 bg-muted/20">
+                                <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
+                                {task.subtasks && task.subtasks.length > 0 && (
+                                  <div className="space-y-2 pl-4 border-l-2 border-purple-200 dark:border-purple-800">
+                                    {task.subtasks.map((sub: any, j: number) => (
+                                      <div key={j} className="flex gap-2">
+                                        <span className="text-purple-500 font-mono text-xs shrink-0 mt-0.5">{j + 1}.</span>
+                                        <div>
+                                          <p className="text-sm font-medium">{sub.title}</p>
+                                          <p className="text-xs text-muted-foreground">{sub.description}</p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -677,6 +677,21 @@ export const insertUdyogTaskSchema = createInsertSchema(udyogTasks).omit({ id: t
 export type InsertUdyogTask = z.infer<typeof insertUdyogTaskSchema>;
 export type UdyogTask = typeof udyogTasks.$inferSelect;
 
+// ============ UDYOG SUBTASKS TABLE ============
+export const udyogSubtasks = pgTable("udyog_subtasks", {
+  id: serial("id").primaryKey(),
+  taskId: integer("task_id").notNull().references(() => udyogTasks.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  orderIndex: integer("order_index").notNull().default(0),
+  status: varchar("status", { length: 20 }).notNull().default("todo"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUdyogSubtaskSchema = createInsertSchema(udyogSubtasks).omit({ id: true, createdAt: true });
+export type InsertUdyogSubtask = z.infer<typeof insertUdyogSubtaskSchema>;
+export type UdyogSubtask = typeof udyogSubtasks.$inferSelect;
+
 export const insertUdyogSubmissionSchema = createInsertSchema(udyogSubmissions).omit({ id: true, submittedAt: true });
 export type InsertUdyogSubmission = z.infer<typeof insertUdyogSubmissionSchema>;
 export type UdyogSubmission = typeof udyogSubmissions.$inferSelect;
