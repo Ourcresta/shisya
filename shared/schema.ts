@@ -1504,6 +1504,24 @@ export interface UshaContext {
   lessonCompleted?: boolean;
 }
 
+// ============ CREDIT PACKS TABLE ============
+
+export const creditPacks = pgTable("credit_packs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  price: integer("price").notNull(),
+  points: integer("points").notNull(),
+  bonusPercent: integer("bonus_percent").notNull().default(0),
+  description: text("description"),
+  popular: boolean("popular").default(false),
+  isActive: boolean("is_active").default(true),
+  orderIndex: integer("order_index").default(0),
+});
+
+export const insertCreditPackSchema = createInsertSchema(creditPacks).omit({ id: true });
+export type InsertCreditPack = z.infer<typeof insertCreditPackSchema>;
+export type CreditPack = typeof creditPacks.$inferSelect;
+
 // Student progress summary for Usha
 export interface StudentProgressSummary {
   lessonsCompleted: number;

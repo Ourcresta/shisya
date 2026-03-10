@@ -135,6 +135,297 @@ interface Course {
   category: string | null;
 }
 
+interface CreditPackData {
+  id: number;
+  name: string;
+  price: number;
+  points: number;
+  bonusPercent: number;
+  description: string | null;
+  popular: boolean | null;
+  isActive: boolean | null;
+  orderIndex: number | null;
+}
+
+const emptyCreditPack: Omit<CreditPackData, "id"> = {
+  name: "",
+  price: 0,
+  points: 0,
+  bonusPercent: 0,
+  description: "",
+  popular: false,
+  isActive: true,
+  orderIndex: 0,
+};
+
+function CreditPacksManager() {
+  const { toast } = useToast();
+  const [editPack, setEditPack] = useState<CreditPackData | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newPack, setNewPack] = useState<Omit<CreditPackData, "id">>(emptyCreditPack);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const { data: packs, isLoading } = useQuery<CreditPackData[]>({
+    queryKey: ["/api/guru/credit-packs"],
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: Omit<CreditPackData, "id">) => {
+      const res = await apiRequest("POST", "/api/guru/credit-packs", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/credit-packs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credit-packs"] });
+      setIsCreating(false);
+      setNewPack(emptyCreditPack);
+      toast({ title: "Credit pack created" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to create pack", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Omit<CreditPackData, "id"> }) => {
+      const res = await apiRequest("PUT", `/api/guru/credit-packs/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/credit-packs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credit-packs"] });
+      setEditPack(null);
+      toast({ title: "Credit pack updated" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to update pack", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/guru/credit-packs/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/guru/credit-packs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credit-packs"] });
+      setDeleteId(null);
+      toast({ title: "Credit pack deleted" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to delete pack", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const moveOrder = async (pack: CreditPackData, direction: "up" | "down") => {
+    const sorted = [...(packs || [])].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    const idx = sorted.findIndex((p) => p.id === pack.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const swapPack = sorted[swapIdx];
+    await Promise.all([
+      apiRequest("PUT", `/api/guru/credit-packs/${pack.id}`, { ...pack, orderIndex: swapPack.orderIndex }),
+      apiRequest("PUT", `/api/guru/credit-packs/${swapPack.id}`, { ...swapPack, orderIndex: pack.orderIndex }),
+    ]);
+    queryClient.invalidateQueries({ queryKey: ["/api/guru/credit-packs"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/credit-packs"] });
+  };
+
+  const totalPacks = packs?.length ?? 0;
+  const activePacks = packs?.filter((p) => p.isActive).length ?? 0;
+
+  function PackFormFields({ data, onChange }: { data: Omit<CreditPackData, "id">; onChange: (d: Omit<CreditPackData, "id">) => void }) {
+    return (
+      <div className="grid gap-4 py-2">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="pack-name">Name</Label>
+            <Input id="pack-name" value={data.name} onChange={(e) => onChange({ ...data, name: e.target.value })} placeholder="Starter Pack" data-testid="input-pack-name" />
+          </div>
+          <div>
+            <Label htmlFor="pack-price">Price (₹)</Label>
+            <Input id="pack-price" type="number" min={0} value={data.price} onChange={(e) => onChange({ ...data, price: Number(e.target.value) })} data-testid="input-pack-price" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="pack-points">Points</Label>
+            <Input id="pack-points" type="number" min={0} value={data.points} onChange={(e) => onChange({ ...data, points: Number(e.target.value) })} data-testid="input-pack-points" />
+          </div>
+          <div>
+            <Label htmlFor="pack-bonus">Bonus % (0 = none)</Label>
+            <Input id="pack-bonus" type="number" min={0} max={100} value={data.bonusPercent} onChange={(e) => onChange({ ...data, bonusPercent: Number(e.target.value) })} data-testid="input-pack-bonus" />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="pack-desc">Description</Label>
+          <Input id="pack-desc" value={data.description ?? ""} onChange={(e) => onChange({ ...data, description: e.target.value })} placeholder="Best for beginners" data-testid="input-pack-desc" />
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Switch id="pack-popular" checked={data.popular ?? false} onCheckedChange={(v) => onChange({ ...data, popular: v })} data-testid="switch-pack-popular" />
+            <Label htmlFor="pack-popular">Popular</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="pack-active" checked={data.isActive ?? true} onCheckedChange={(v) => onChange({ ...data, isActive: v })} data-testid="switch-pack-active" />
+            <Label htmlFor="pack-active">Active</Label>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold" data-testid="text-credit-packs-title">
+            Credit Packs
+          </h2>
+          <p className="text-sm text-muted-foreground" data-testid="text-credit-packs-subtitle">
+            {totalPacks} of 5 packs ({activePacks} active) — shown on the Wallet page
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsCreating(true)}
+          disabled={totalPacks >= 5}
+          data-testid="button-add-credit-pack"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Pack
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
+        </div>
+      ) : packs && packs.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...packs].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)).map((pack, idx, arr) => (
+            <Card key={pack.id} className={`relative ${pack.popular ? "border-primary ring-2 ring-primary/20" : ""} ${!pack.isActive ? "opacity-60" : ""}`} data-testid={`card-pack-${pack.id}`}>
+              {pack.popular && (
+                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs" data-testid={`badge-popular-${pack.id}`}>
+                  Most Popular
+                </Badge>
+              )}
+              {!pack.isActive && (
+                <Badge variant="secondary" className="absolute -top-2 right-3 text-xs no-default-hover-elevate" data-testid={`badge-hidden-${pack.id}`}>
+                  Hidden
+                </Badge>
+              )}
+              <CardContent className="pt-6 text-center space-y-2">
+                <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/30 w-fit mx-auto">
+                  <Coins className="w-7 h-7 text-amber-500" />
+                </div>
+                <h3 className="font-semibold" data-testid={`text-pack-name-${pack.id}`}>{pack.name}</h3>
+                <p className="text-2xl font-bold" data-testid={`text-pack-points-${pack.id}`}>{pack.points.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">points</p>
+                {(pack.bonusPercent ?? 0) > 0 && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 no-default-hover-elevate" data-testid={`badge-bonus-${pack.id}`}>
+                    +{pack.bonusPercent}% Bonus
+                  </Badge>
+                )}
+                <p className="font-semibold text-base">₹{pack.price.toLocaleString()}</p>
+                {pack.description && <p className="text-xs text-muted-foreground">{pack.description}</p>}
+              </CardContent>
+              <CardFooter className="flex items-center justify-center gap-1 pt-0 pb-4">
+                <Button variant="ghost" size="icon" onClick={() => moveOrder(pack, "up")} disabled={idx === 0} data-testid={`button-up-pack-${pack.id}`}>
+                  <ArrowUp className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => moveOrder(pack, "down")} disabled={idx === arr.length - 1} data-testid={`button-down-pack-${pack.id}`}>
+                  <ArrowDown className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setEditPack(pack)} data-testid={`button-edit-pack-${pack.id}`}>
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setDeleteId(pack.id)} disabled={totalPacks <= 1} className="text-destructive hover:text-destructive" data-testid={`button-delete-pack-${pack.id}`}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card data-testid="empty-credit-packs">
+          <CardContent className="p-8 text-center">
+            <Coins className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+            <p className="text-muted-foreground">No credit packs yet. Add one to get started.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Create Dialog */}
+      <Dialog open={isCreating} onOpenChange={setIsCreating}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle data-testid="text-create-pack-dialog-title">Add Credit Pack</DialogTitle>
+            <DialogDescription>Create a new credit pack visible on the Wallet page.</DialogDescription>
+          </DialogHeader>
+          <PackFormFields data={newPack} onChange={setNewPack} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setIsCreating(false); setNewPack(emptyCreditPack); }} data-testid="button-cancel-create-pack">Cancel</Button>
+            <Button onClick={() => createMutation.mutate(newPack)} disabled={!newPack.name || newPack.price <= 0 || newPack.points <= 0 || createMutation.isPending} data-testid="button-submit-create-pack">
+              {createMutation.isPending ? "Creating..." : "Create Pack"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editPack} onOpenChange={(o) => { if (!o) setEditPack(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle data-testid="text-edit-pack-dialog-title">Edit Credit Pack</DialogTitle>
+            <DialogDescription>Update the credit pack details.</DialogDescription>
+          </DialogHeader>
+          {editPack && (
+            <PackFormFields
+              data={{ name: editPack.name, price: editPack.price, points: editPack.points, bonusPercent: editPack.bonusPercent, description: editPack.description, popular: editPack.popular, isActive: editPack.isActive, orderIndex: editPack.orderIndex }}
+              onChange={(d) => setEditPack({ ...editPack, ...d })}
+            />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditPack(null)} data-testid="button-cancel-edit-pack">Cancel</Button>
+            <Button
+              onClick={() => editPack && updateMutation.mutate({ id: editPack.id, data: { name: editPack.name, price: editPack.price, points: editPack.points, bonusPercent: editPack.bonusPercent, description: editPack.description, popular: editPack.popular, isActive: editPack.isActive, orderIndex: editPack.orderIndex } })}
+              disabled={!editPack?.name || updateMutation.isPending}
+              data-testid="button-submit-edit-pack"
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteId !== null} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle data-testid="text-delete-pack-dialog-title">Delete Credit Pack</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this credit pack? This cannot be undone.
+              {totalPacks <= 1 && " You must have at least one pack."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-pack">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId !== null && deleteMutation.mutate(deleteId)}
+              disabled={deleteMutation.isPending || totalPacks <= 1}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-pack"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
 function PricingPlansManager() {
   const { toast } = useToast();
   const [editPlan, setEditPlan] = useState<PricingPlan | null>(null);
@@ -759,11 +1050,16 @@ export default function GuruPricing() {
       <Tabs defaultValue="plans" className="w-full">
         <TabsList data-testid="tabs-pricing">
           <TabsTrigger value="plans" data-testid="tab-subscription-plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="credit-packs" data-testid="tab-credit-packs">Credit Packs</TabsTrigger>
           <TabsTrigger value="courses" data-testid="tab-course-pricing">Course Pricing</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plans" className="mt-6">
           <PricingPlansManager />
+        </TabsContent>
+
+        <TabsContent value="credit-packs" className="mt-6">
+          <CreditPacksManager />
         </TabsContent>
 
         <TabsContent value="courses" className="mt-6 space-y-6">

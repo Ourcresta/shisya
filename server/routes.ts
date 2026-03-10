@@ -16,8 +16,8 @@ import { guruRouter } from "./guruRoutes";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable } from "@shared/schema";
-import { eq, like, or, and, desc as descOrder, sql, count } from "drizzle-orm";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks } from "@shared/schema";
+import { eq, like, or, and, desc as descOrder, sql, count, asc } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -55,6 +55,23 @@ export async function registerRoutes(
   
   // Seed Guru admin user
   seedGuruAdmin();
+
+  // Seed default credit packs if table is empty
+  (async () => {
+    try {
+      const existing = await db.select().from(creditPacks).limit(1);
+      if (existing.length === 0) {
+        await db.insert(creditPacks).values([
+          { name: "Starter Pack", price: 500, points: 500, bonusPercent: 0, description: "Best for beginners", popular: false, isActive: true, orderIndex: 0 },
+          { name: "Pro Pack", price: 1000, points: 1100, bonusPercent: 10, description: "+10% bonus points", popular: false, isActive: true, orderIndex: 1 },
+          { name: "Power Pack", price: 2000, points: 2300, bonusPercent: 15, description: "+15% bonus (Recommended)", popular: true, isActive: true, orderIndex: 2 },
+        ]);
+        console.log("[CreditPacks] Seeded 3 default credit packs");
+      }
+    } catch (e) {
+      console.error("[CreditPacks] Seed error:", e);
+    }
+  })();
 
   // Auth routes
   app.use("/api/auth", authRouter);
@@ -95,6 +112,21 @@ export async function registerRoutes(
   
   // Notifications routes
   app.use("/api/notifications", notificationsRouter);
+
+  // ============ CREDIT PACKS PUBLIC ROUTE ============
+
+  // GET /api/credit-packs - Public route to fetch active credit packs
+  app.get("/api/credit-packs", async (req, res) => {
+    try {
+      const packs = await db.select().from(creditPacks)
+        .where(eq(creditPacks.isActive, true))
+        .orderBy(asc(creditPacks.orderIndex));
+      res.json(packs);
+    } catch (error) {
+      console.error("[CreditPacks] Error fetching packs:", error);
+      res.status(500).json({ error: "Failed to fetch credit packs" });
+    }
+  });
 
   // ============ PUBLIC CONFIG ROUTES ============
 

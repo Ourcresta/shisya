@@ -2,47 +2,12 @@ import { Router, Request, Response } from 'express';
 import { createHmac } from 'crypto';
 import { getRazorpayClient, getRazorpayKeyId } from './razorpayClient';
 import { db } from './db';
-import { userCredits, creditTransactions } from '@shared/schema';
+import { userCredits, creditTransactions, creditPacks } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth, type AuthenticatedRequest } from './auth';
 import { NotificationTriggers } from './notifications';
 
 export const razorpayRouter = Router();
-
-interface CreditPack {
-  id: string;
-  name: string;
-  credits: number;
-  priceInPaise: number;
-  priceDisplay: string;
-  bonus?: string;
-}
-
-const CREDIT_PACKS: Record<string, CreditPack> = {
-  starter: {
-    id: 'starter',
-    name: 'Starter Pack',
-    credits: 500,
-    priceInPaise: 50000, // ₹500
-    priceDisplay: '₹500',
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro Pack',
-    credits: 1100,
-    priceInPaise: 100000, // ₹1000
-    priceDisplay: '₹1,000',
-    bonus: '+10% bonus',
-  },
-  power: {
-    id: 'power',
-    name: 'Power Pack',
-    credits: 2300,
-    priceInPaise: 200000, // ₹2000
-    priceDisplay: '₹2,000',
-    bonus: '+15% bonus',
-  },
-};
 
 // GET /api/payments/razorpay-key - Get Razorpay key ID for frontend
 razorpayRouter.get('/razorpay-key', (req: Request, res: Response) => {
@@ -63,22 +28,26 @@ razorpayRouter.post('/create-order', requireAuth, async (req: AuthenticatedReque
     }
 
     const { packId } = req.body;
-    
-    if (!packId || !CREDIT_PACKS[packId]) {
-      return res.status(400).json({ error: 'Invalid pack selected' });
+
+    if (!packId) {
+      return res.status(400).json({ error: 'Pack ID is required' });
     }
 
-    const pack = CREDIT_PACKS[packId];
+    const [pack] = await db.select().from(creditPacks).where(eq(creditPacks.id, Number(packId))).limit(1);
+    if (!pack || !pack.isActive) {
+      return res.status(400).json({ error: 'Invalid or unavailable pack selected' });
+    }
+
     const razorpay = getRazorpayClient();
 
     const order = await razorpay.orders.create({
-      amount: pack.priceInPaise,
+      amount: pack.price * 100,
       currency: 'INR',
       receipt: `order_${req.user.id}_${Date.now()}`,
       notes: {
         userId: req.user.id,
-        packId: pack.id,
-        credits: pack.credits.toString(),
+        packId: pack.id.toString(),
+        credits: pack.points.toString(),
         userEmail: req.user.email,
       },
     });
@@ -88,7 +57,7 @@ razorpayRouter.post('/create-order', requireAuth, async (req: AuthenticatedReque
       amount: order.amount,
       currency: order.currency,
       packName: pack.name,
-      credits: pack.credits,
+      credits: pack.points,
     });
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
@@ -109,7 +78,12 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
       return res.status(400).json({ error: 'Missing payment details' });
     }
 
-    if (!packId || !CREDIT_PACKS[packId]) {
+    if (!packId) {
+      return res.status(400).json({ error: 'Pack ID is required' });
+    }
+
+    const [pack] = await db.select().from(creditPacks).where(eq(creditPacks.id, Number(packId))).limit(1);
+    if (!pack) {
       return res.status(400).json({ error: 'Invalid pack' });
     }
 
@@ -129,7 +103,6 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
     }
 
     // Credit the user's account
-    const pack = CREDIT_PACKS[packId];
     const userId = req.user.id;
 
     // Get current balance
@@ -142,8 +115,7 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
     let newBalance: number;
 
     if (currentCredits.length === 0) {
-      // Create new credits record
-      newBalance = pack.credits;
+      newBalance = pack.points;
       await db.insert(userCredits).values({
         userId,
         balance: newBalance,
@@ -151,13 +123,12 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
         totalSpent: 0,
       });
     } else {
-      // Update existing balance
-      newBalance = currentCredits[0].balance + pack.credits;
+      newBalance = currentCredits[0].balance + pack.points;
       await db
         .update(userCredits)
         .set({
           balance: newBalance,
-          totalEarned: currentCredits[0].totalEarned + pack.credits,
+          totalEarned: currentCredits[0].totalEarned + pack.points,
         })
         .where(eq(userCredits.userId, userId));
     }
@@ -165,27 +136,27 @@ razorpayRouter.post('/verify', requireAuth, async (req: AuthenticatedRequest, re
     // Record transaction
     await db.insert(creditTransactions).values({
       userId,
-      amount: pack.credits,
+      amount: pack.points,
       type: 'PURCHASE',
       reason: 'CREDIT_PURCHASE',
-      description: `Purchased ${pack.name} - ${pack.credits} learning points (Payment: ${razorpay_payment_id})`,
+      description: `Purchased ${pack.name} - ${pack.points} learning points (Payment: ${razorpay_payment_id})`,
       balanceAfter: newBalance,
     });
 
-    console.log(`[Credits] User ${userId} purchased ${pack.credits} credits via Razorpay (${razorpay_payment_id})`);
+    console.log(`[Credits] User ${userId} purchased ${pack.points} credits via Razorpay (${razorpay_payment_id})`);
 
     // Send payment success notification
     try {
-      await NotificationTriggers.paymentSuccess(userId, pack.credits, pack.name);
+      await NotificationTriggers.paymentSuccess(userId, pack.points, pack.name);
     } catch (notifError) {
       console.error('Failed to send payment notification:', notifError);
     }
 
     res.json({
       success: true,
-      credits: pack.credits,
+      credits: pack.points,
       newBalance,
-      message: `Successfully added ${pack.credits} learning points!`,
+      message: `Successfully added ${pack.points} learning points!`,
     });
   } catch (error) {
     console.error('Error verifying payment:', error);

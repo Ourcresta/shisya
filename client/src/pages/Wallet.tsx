@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -29,43 +29,44 @@ import {
   ShieldCheck,
   CreditCard,
   Package,
-  Loader2
+  Loader2,
+  X,
+  LayoutGrid,
+  Zap,
+  Crown,
+  Building2,
+  Star,
+  DollarSign,
+  type LucideIcon,
 } from "lucide-react";
 import { staggerContainer, staggerItem, slideUp } from "@/lib/animations";
 import { useCredits } from "@/contexts/CreditContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { queryClient } from "@/lib/queryClient";
-import type { CreditTransaction } from "@shared/schema";
+import type { CreditTransaction, CreditPack } from "@shared/schema";
 
-const creditPacks = [
-  {
-    id: "starter",
-    name: "Starter Pack",
-    price: 500,
-    points: 500,
-    bonus: 0,
-    description: "Best for beginners",
-    popular: false,
-  },
-  {
-    id: "pro",
-    name: "Pro Pack",
-    price: 1000,
-    points: 1100,
-    bonus: 10,
-    description: "+10% bonus points",
-    popular: false,
-  },
-  {
-    id: "power",
-    name: "Power Pack",
-    price: 2000,
-    points: 2300,
-    bonus: 15,
-    description: "+15% bonus (Recommended)",
-    popular: true,
-  },
-];
+interface DBPlan {
+  id: number;
+  name: string;
+  subtitle: string | null;
+  price: string;
+  period: string | null;
+  coins: string | null;
+  coinsLabel: string | null;
+  iconName: string;
+  features: string[];
+  notIncluded: string[];
+  cta: string;
+  href: string;
+  buttonVariant: string;
+  popular: boolean;
+  orderIndex: number;
+  isActive: boolean;
+}
+
+const PLAN_ICON_MAP: Record<string, LucideIcon> = {
+  Gift, Zap, Crown, Building2, Star, Coins, CreditCard, DollarSign,
+};
 
 const giftBoxes = [
   {
@@ -104,8 +105,17 @@ export default function Wallet() {
   const [location] = useLocation();
   const [voucherCode, setVoucherCode] = useState("");
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [purchasingPack, setPurchasingPack] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"history" | "buy" | "voucher" | "gift">("history");
+  const [purchasingPack, setPurchasingPack] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"history" | "buy" | "voucher" | "gift" | "plans">("history");
+
+  const { data: packsList = [], isLoading: packsLoading } = useQuery<CreditPack[]>({
+    queryKey: ["/api/credit-packs"],
+  });
+
+  const { data: pricingPlans = [], isLoading: plansLoading } = useQuery<DBPlan[]>({
+    queryKey: ["/api/pricing-plans"],
+    enabled: activeTab === "plans",
+  });
 
   const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null);
 
@@ -121,7 +131,7 @@ export default function Wallet() {
       .catch(err => console.error("Failed to load Razorpay key:", err));
   }, []);
 
-  const handleBuyCredits = async (packId: string) => {
+  const handleBuyCredits = async (packId: number) => {
     if (!razorpayKeyId) {
       toast({
         title: "Payment gateway not ready",
@@ -434,6 +444,14 @@ export default function Wallet() {
                 <Gift className="w-4 h-4 mr-2" />
                 Gift Credits
               </Button>
+              <Button 
+                variant={activeTab === "plans" ? "default" : "outline"}
+                onClick={() => setActiveTab("plans")}
+                data-testid="button-tab-plans"
+              >
+                <LayoutGrid className="w-4 h-4 mr-2" />
+                Plans
+              </Button>
             </div>
           </motion.div>
 
@@ -521,59 +539,70 @@ export default function Wallet() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Credit Packs */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {creditPacks.map((pack) => (
-                      <Card 
-                        key={pack.id}
-                        className={`relative hover-elevate cursor-pointer transition-all ${
-                          pack.popular ? "border-primary ring-2 ring-primary/20" : ""
-                        }`}
-                        data-testid={`pack-${pack.id}`}
-                      >
-                        {pack.popular && (
-                          <Badge 
-                            className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary"
-                          >
-                            Most Popular
-                          </Badge>
-                        )}
-                        <CardContent className="pt-6 text-center">
-                          <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/30 w-fit mx-auto mb-3">
-                            <Coins className="w-8 h-8 text-amber-500" />
-                          </div>
-                          <h3 className="font-semibold text-lg">{pack.name}</h3>
-                          <p className="text-2xl font-bold mt-2">
-                            {pack.points.toLocaleString()}
-                          </p>
-                          <p className="text-sm text-muted-foreground">points</p>
-                          {pack.bonus > 0 && (
-                            <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
-                              +{pack.bonus}% Bonus
+                  {packsLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
+                    </div>
+                  ) : packsList.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Coins className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground">No credit packs available at this time.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {packsList.map((pack) => (
+                        <Card 
+                          key={pack.id}
+                          className={`relative hover-elevate cursor-pointer transition-all ${
+                            pack.popular ? "border-primary ring-2 ring-primary/20" : ""
+                          }`}
+                          data-testid={`pack-${pack.id}`}
+                        >
+                          {pack.popular && (
+                            <Badge 
+                              className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary"
+                            >
+                              Most Popular
                             </Badge>
                           )}
-                          <Separator className="my-4" />
-                          <p className="text-lg font-semibold">₹{pack.price}</p>
-                          <p className="text-xs text-muted-foreground mb-4">{pack.description}</p>
-                          <Button 
-                            className="w-full"
-                            variant={pack.popular ? "default" : "outline"}
-                            onClick={() => handleBuyCredits(pack.id)}
-                            disabled={purchasingPack !== null}
-                            data-testid={`button-buy-${pack.id}`}
-                          >
-                            {purchasingPack === pack.id ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Processing...
-                              </>
-                            ) : (
-                              "Buy Now"
+                          <CardContent className="pt-6 text-center">
+                            <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/30 w-fit mx-auto mb-3">
+                              <Coins className="w-8 h-8 text-amber-500" />
+                            </div>
+                            <h3 className="font-semibold text-lg">{pack.name}</h3>
+                            <p className="text-2xl font-bold mt-2">
+                              {pack.points.toLocaleString()}
+                            </p>
+                            <p className="text-sm text-muted-foreground">points</p>
+                            {(pack.bonusPercent ?? 0) > 0 && (
+                              <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                                +{pack.bonusPercent}% Bonus
+                              </Badge>
                             )}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            <Separator className="my-4" />
+                            <p className="text-lg font-semibold">₹{pack.price.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground mb-4">{pack.description}</p>
+                            <Button 
+                              className="w-full"
+                              variant={pack.popular ? "default" : "outline"}
+                              onClick={() => handleBuyCredits(pack.id)}
+                              disabled={purchasingPack !== null}
+                              data-testid={`button-buy-${pack.id}`}
+                            >
+                              {purchasingPack === pack.id ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Buy Now"
+                              )}
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Info */}
                   <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
@@ -693,6 +722,97 @@ export default function Wallet() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {activeTab === "plans" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold">Subscription Plans</h2>
+                  <p className="text-sm text-muted-foreground">Choose a plan that fits your learning goals</p>
+                </div>
+                {plansLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-80 w-full rounded-xl" />)}
+                  </div>
+                ) : pricingPlans.filter(p => p.isActive).length === 0 ? (
+                  <div className="text-center py-10">
+                    <LayoutGrid className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">No plans available at this time.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {pricingPlans.filter(p => p.isActive).sort((a, b) => a.orderIndex - b.orderIndex).map((plan) => {
+                      const PlanIcon = PLAN_ICON_MAP[plan.iconName] ?? Gift;
+                      return (
+                        <Card
+                          key={plan.id}
+                          className={`relative flex flex-col ${plan.popular ? "border-primary ring-2 ring-primary/20" : ""}`}
+                          data-testid={`plan-card-${plan.id}`}
+                        >
+                          {plan.popular && (
+                            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs" data-testid={`badge-plan-popular-${plan.id}`}>
+                              Most Popular
+                            </Badge>
+                          )}
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-lg bg-primary/10">
+                                <PlanIcon className="w-5 h-5 text-primary" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-base" data-testid={`text-plan-name-${plan.id}`}>{plan.name}</CardTitle>
+                                {plan.subtitle && <p className="text-xs text-muted-foreground">{plan.subtitle}</p>}
+                              </div>
+                            </div>
+                            <div className="mt-3">
+                              <span className="text-2xl font-bold" data-testid={`text-plan-price-${plan.id}`}>{plan.price}</span>
+                              {plan.period && <span className="text-sm text-muted-foreground ml-1">{plan.period}</span>}
+                            </div>
+                            {plan.coins && (
+                              <Badge variant="secondary" className="w-fit bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 no-default-hover-elevate" data-testid={`badge-plan-coins-${plan.id}`}>
+                                <Coins className="w-3 h-3 mr-1" />
+                                {plan.coins} {plan.coinsLabel ?? "points"}
+                              </Badge>
+                            )}
+                          </CardHeader>
+                          <CardContent className="flex-1 space-y-1.5">
+                            {plan.features.map((f, i) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0 mt-0.5" />
+                                <span className="text-xs text-muted-foreground">{f}</span>
+                              </div>
+                            ))}
+                            {plan.notIncluded?.map((f, i) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <X className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                                <span className="text-xs text-muted-foreground line-through">{f}</span>
+                              </div>
+                            ))}
+                          </CardContent>
+                          <CardFooter className="pt-3">
+                            <Link href={plan.href} className="w-full">
+                              <Button
+                                className="w-full"
+                                variant={(plan.buttonVariant as any) || "outline"}
+                                data-testid={`button-plan-cta-${plan.id}`}
+                              >
+                                {plan.cta}
+                              </Button>
+                            </Link>
+                          </CardFooter>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="text-center">
+                  <Link href="/pricing">
+                    <Button variant="link" className="text-sm text-muted-foreground" data-testid="link-full-pricing">
+                      See full feature comparison →
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             )}
           </motion.div>
 

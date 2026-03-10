@@ -5,7 +5,7 @@ import {
   shishyaUsers, shishyaCourseEnrollments, shishyaUserCredits,
   shishyaUserProfiles, shishyaUserProgress, shishyaUserTestAttempts,
   shishyaUserProjectSubmissions, shishyaUserCertificates, shishyaCreditTransactions,
-  pricingPlans,
+  pricingPlans, creditPacks,
 } from "@shared/schema";
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
@@ -978,5 +978,79 @@ guruRouter.delete("/pricing-plans/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[Guru] Delete pricing plan error:", error);
     res.status(500).json({ error: "Failed to delete pricing plan" });
+  }
+});
+
+// ============ CREDIT PACKS CRUD ============
+
+// GET /api/guru/credit-packs - List all credit packs
+guruRouter.get("/credit-packs", async (req: Request, res: Response) => {
+  try {
+    const packs = await db.select().from(creditPacks).orderBy(asc(creditPacks.orderIndex));
+    res.json(packs);
+  } catch (error) {
+    console.error("[Guru] Error fetching credit packs:", error);
+    res.status(500).json({ error: "Failed to fetch credit packs" });
+  }
+});
+
+// POST /api/guru/credit-packs - Create a credit pack
+guruRouter.post("/credit-packs", async (req: Request, res: Response) => {
+  try {
+    const [countResult] = await db.select({ count: count() }).from(creditPacks);
+    if (Number(countResult.count) >= 5) {
+      return res.status(400).json({ error: "Maximum of 5 credit packs allowed" });
+    }
+    const { name, price, points, bonusPercent, description, popular, isActive, orderIndex } = req.body;
+    const [pack] = await db.insert(creditPacks).values({
+      name, price: Number(price), points: Number(points),
+      bonusPercent: Number(bonusPercent) || 0,
+      description: description || null,
+      popular: popular ?? false,
+      isActive: isActive ?? true,
+      orderIndex: Number(orderIndex) || 0,
+    }).returning();
+    res.json(pack);
+  } catch (error) {
+    console.error("[Guru] Error creating credit pack:", error);
+    res.status(500).json({ error: "Failed to create credit pack" });
+  }
+});
+
+// PUT /api/guru/credit-packs/:id - Update a credit pack
+guruRouter.put("/credit-packs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { name, price, points, bonusPercent, description, popular, isActive, orderIndex } = req.body;
+    const [updated] = await db.update(creditPacks).set({
+      name, price: Number(price), points: Number(points),
+      bonusPercent: Number(bonusPercent) || 0,
+      description: description || null,
+      popular: popular ?? false,
+      isActive: isActive ?? true,
+      orderIndex: Number(orderIndex) || 0,
+    }).where(eq(creditPacks.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Credit pack not found" });
+    res.json(updated);
+  } catch (error) {
+    console.error("[Guru] Error updating credit pack:", error);
+    res.status(500).json({ error: "Failed to update credit pack" });
+  }
+});
+
+// DELETE /api/guru/credit-packs/:id - Delete a credit pack
+guruRouter.delete("/credit-packs/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const [countResult] = await db.select({ count: count() }).from(creditPacks);
+    if (Number(countResult.count) <= 1) {
+      return res.status(400).json({ error: "At least one credit pack must remain" });
+    }
+    const [deleted] = await db.delete(creditPacks).where(eq(creditPacks.id, id)).returning();
+    if (!deleted) return res.status(404).json({ error: "Credit pack not found" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Guru] Error deleting credit pack:", error);
+    res.status(500).json({ error: "Failed to delete credit pack" });
   }
 });

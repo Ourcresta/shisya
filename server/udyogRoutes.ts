@@ -1248,8 +1248,31 @@ udyogRouter.get("/admin/jobs", async (req: Request, res: Response) => {
 udyogRouter.post("/admin/jobs", async (req: Request, res: Response) => {
   try {
     const { title, description, requiredSkills, internshipRequired, minSkillScore, location, salaryRange, jobType, status, deadline, hrId } = req.body;
+
+    // Resolve hrId — ensure a default system HR user exists
+    let resolvedHrId: number;
+    if (hrId) {
+      resolvedHrId = hrId;
+    } else {
+      const existingHr = await db.select().from(udyogHrUsers).limit(1);
+      if (existingHr.length > 0) {
+        resolvedHrId = existingHr[0].id;
+      } else {
+        const [defaultHr] = await db.insert(udyogHrUsers).values({
+          email: "platform@ourshiksha.com",
+          passwordHash: "system",
+          name: "OurShiksha Platform",
+          companyName: "OurShiksha",
+          designation: "Platform Admin",
+          isApproved: true,
+          isActive: true,
+        }).returning();
+        resolvedHrId = defaultHr.id;
+      }
+    }
+
     const [job] = await db.insert(udyogJobs).values({
-      hrId: hrId || 1,
+      hrId: resolvedHrId,
       title,
       description,
       requiredSkills: requiredSkills || null,
