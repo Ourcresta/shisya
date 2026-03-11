@@ -159,6 +159,7 @@ udyogRouter.post("/assign", requireAuth as any, async (req: AuthenticatedRequest
       beginner: "Junior Intern",
       intermediate: "Project Associate",
       advanced: "Lead Developer",
+      mastery: "Principal Engineer",
     };
     const batchSize = internship.batchSize || 5;
     let [formingBatch] = await db.select().from(udyogBatches)
@@ -1498,6 +1499,7 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
       beginner: "Entry-level, no prior experience needed. Duration: 4 weeks. Focus on fundamentals and guided tasks.",
       intermediate: "Some experience expected. Duration: 6 weeks. Focus on practical application and independent work.",
       advanced: "Strong prior knowledge required. Duration: 8 weeks. Focus on complex projects, leadership, and architecture.",
+      mastery: "Expert/Principal level. Duration: 12 weeks. Production-grade project with full architecture, team leadership, and live deployment.",
     };
 
     const openai = getOpenAI();
@@ -1506,50 +1508,90 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
       messages: [
         {
           role: "system",
-          content: `You are an expert internship program designer for an AI-powered virtual internship platform called "Our Udyog". Design realistic, industry-relevant virtual internships with a 3-level hierarchy: Project → Tasks → Sub-Tasks. Students work in batches of 5 with roles (Team Lead, Developer, QA/Tester). Each task must have detailed sub-tasks that serve as step-by-step guidance for students. Return ONLY valid JSON, no markdown.`
+          content: `You are an expert curriculum architect for an AI-powered virtual internship platform called "Our Udyog". You design complete, deeply-structured project guidance documents that take students from zero to a live working product. Your output follows a strict 9-level hierarchy. Students work in batches of 5 (Team Lead, Developer, QA/Tester). Return ONLY valid JSON, no markdown, no explanation text outside the JSON.`
         },
         {
           role: "user",
-          content: `Create a complete virtual internship program with the following details:
+          content: `Create a complete virtual internship project guide for:
 Title: "${title}"
-Skill Level: ${skillLevel} - ${levelGuide[skillLevel] || levelGuide.beginner}
+Skill Level: ${skillLevel} — ${levelGuide[skillLevel] || levelGuide.beginner}
 
-Return a JSON object with this EXACT structure (3-level hierarchy):
+Return a JSON object with this EXACT structure. Every field is required:
+
 {
   "title": "${title}",
-  "description": "Detailed 2-3 paragraph description of the internship program, what students will learn, technologies used, and what they will build",
-  "shortDescription": "One-line summary (max 100 chars) for card display",
+  "description": "Rich 2-3 paragraph overview of the internship: what it is, what technologies are used, what problem is being solved, and what students will build",
+  "shortDescription": "One compelling line (max 100 chars)",
   "skillLevel": "${skillLevel}",
-  "domain": "The primary domain (e.g., Web Development, Data Science, Mobile Development, DevOps, UI/UX Design, Machine Learning, Cybersecurity, Cloud Computing)",
+  "domain": "Primary domain (e.g., Web Development, Data Science, Mobile Development, DevOps, UI/UX Design, Machine Learning, Cybersecurity, Cloud Computing, Blockchain)",
   "duration": "X weeks",
   "requiredSkills": "Comma-separated list of 4-6 prerequisite skills",
-  "milestones": "Comma-separated list of 4-6 key milestones students should achieve",
+  "milestones": "Comma-separated list of 5-7 key deliverable milestones",
   "batchSize": 5,
-  "tasks": [
+
+  "introduction": "A detailed 2-3 paragraph project introduction. Cover: the real-world problem being solved, the industry context, the technologies stack, the team structure, and what success looks like for this internship.",
+
+  "goal": "A clear, motivating statement of what students will achieve. Describe the final product, what skills they will have gained, and how this prepares them for real jobs.",
+
+  "initiatives": [
     {
-      "title": "Task 1: [Task Name]",
-      "description": "Clear description of the overall task goal, what the student will accomplish, and why it matters in the project",
-      "orderIndex": 1,
-      "subtasks": [
+      "title": "Initiative 1: [Phase Title, e.g. Foundation & Setup]",
+      "description": "What this initiative covers and why it is the right starting point",
+      "epics": [
         {
-          "title": "Sub-task title — a specific, actionable step",
-          "description": "Detailed step-by-step instructions for completing this sub-task, including what to do, tools to use, and expected output",
-          "orderIndex": 1
-        },
-        {
-          "title": "Another specific step",
-          "description": "Clear instructions with deliverables",
-          "orderIndex": 2
+          "title": "Epic 1.1: [Topic, e.g. Development Environment]",
+          "description": "What this epic accomplishes",
+          "features": [
+            {
+              "title": "Feature 1.1.1: [Specific Feature Name]",
+              "description": "What this feature implements and why it matters",
+              "tasks": [
+                {
+                  "title": "Task: [Action verb + specific outcome]",
+                  "description": "What this task accomplishes and why",
+                  "taskProcess": "The methodology and workflow: how to approach this task, what order to do things, what to watch out for, and how to know you are done",
+                  "orderIndex": 1,
+                  "subtasks": [
+                    {
+                      "title": "Subtask: [Specific atomic action]",
+                      "description": "Brief description of this step",
+                      "subtaskProcess": "Exact step-by-step approach: the precise commands, configs, or actions needed",
+                      "steps": [
+                        "Step 1: [Detailed instruction with expected result]",
+                        "Step 2: [Next action]",
+                        "Step 3: [Verification step]"
+                      ],
+                      "checklist": [
+                        "[ ] Item 1 completed and verified",
+                        "[ ] Item 2 tested",
+                        "[ ] Item 3 committed to repository"
+                      ],
+                      "orderIndex": 1
+                    }
+                  ]
+                }
+              ],
+              "practice": "A hands-on practice exercise for this feature. Describe exactly what the student should build/do independently to solidify this concept, including what to submit as proof of completion."
+            }
+          ]
         }
       ]
     }
-  ]
+  ],
+
+  "finalIntegration": "Detailed guide on how to integrate all components into a unified working system. Include: what connects to what, how data flows, how to resolve common integration issues, and how to do a complete end-to-end test.",
+
+  "testing": "Complete testing strategy: unit tests (what to test and how), integration tests, user acceptance testing, performance testing checklist, and how to document test results. Include example test cases.",
+
+  "deployment": "Step-by-step deployment guide: platform recommendations with rationale, environment variables to configure, build commands, CI/CD pipeline setup, health checks, and rollback plan.",
+
+  "liveProjectOutput": "Description of the final live deliverable: what it does, how to demo it, what metrics prove it works, how to present it to stakeholders, and what the student portfolio entry should say."
 }
 
-Generate 5-7 tasks that progressively build skills, each with 3-5 sub-tasks. Sub-tasks are the step-by-step guidance students follow to complete each task. Make them specific, actionable, and sequentially ordered.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
+Generate 2-3 initiatives, each with 2-3 epics, each with 1-2 features, each with 1-2 tasks, each with 2-3 subtasks. Make every piece of guidance specific, actionable, and genuinely useful for a student doing this work for the first time.${extraInstructions ? `\n\nAdditional admin instructions: ${extraInstructions}` : ""}`
         }
       ],
-      max_tokens: 4500,
+      max_tokens: 6000,
       temperature: 0.7,
     });
 

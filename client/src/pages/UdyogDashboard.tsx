@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, CheckCircle2, Clock, Send, MessageSquare, Award,
-  ChevronRight, User, LayoutDashboard, ListTodo, Upload, Bot,
+  ChevronRight, ChevronDown, User, LayoutDashboard, ListTodo, Upload, Bot,
   Medal, AlertCircle, Users, Calendar, Star, Bell,
   BarChart3, FileText, FolderKanban, BookOpen, Video, ExternalLink, Home, Plus,
   Shield, ArrowRight, ArrowLeft, Zap, TrendingUp, Target, Download, Eye, X, Copy, Check,
-  Globe, Pencil, Camera, EyeOff, Link2, Sparkles, GraduationCap, MapPin, Github, Linkedin
+  Globe, Pencil, Camera, EyeOff, Link2, Sparkles, GraduationCap, MapPin, Github, Linkedin,
+  Trophy, FlaskConical, Rocket, Layers
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -172,6 +173,15 @@ export default function UdyogDashboard() {
   const [downloading, setDownloading] = useState(false);
   const [viewCertificate, setViewCertificate] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [expandedProjectNodes, setExpandedProjectNodes] = useState<Set<string>>(new Set());
+
+  const toggleProjectNode = (key: string) => {
+    setExpandedProjectNodes((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const [portfolioProfile, setPortfolioProfile] = useState<StudentProfile | null>(null);
@@ -814,100 +824,6 @@ export default function UdyogDashboard() {
     );
   };
 
-  const renderProject = () => (
-    <motion.div key="project" {...fadeInUp} className="space-y-6">
-      <div className="rounded-2xl p-6 md:p-8 relative overflow-visible" style={{ ...glassCard, background: "linear-gradient(135deg, rgba(124,58,237,0.06), rgba(0,245,255,0.04))" }}>
-        <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse at 80% 30%, rgba(124,58,237,0.1), transparent 60%)", pointerEvents: "none" }} />
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-2">
-            <FolderKanban className="w-5 h-5" style={{ color: "#A78BFA" }} />
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA" }}>
-              {internship?.level || "Intermediate"}
-            </span>
-          </div>
-          <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-project-title">
-            {internship?.title || "Virtual Internship"}
-          </h2>
-          {internship?.description && (
-            <p className="text-sm mb-4" style={{ color: "#94A3B8" }}>{internship.description}</p>
-          )}
-          <div className="flex flex-wrap gap-4 mb-4">
-            <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
-              Duration: {internship?.duration || "4 weeks"}
-            </span>
-            <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
-              Tasks: {tasks.length}
-            </span>
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs" style={{ color: "#94A3B8" }}>Overall Progress</span>
-            <span className="text-xs font-medium" style={{ color: "#00F5FF" }}>{overallProgress}%</span>
-          </div>
-          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-            <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }} initial={{ width: 0 }} animate={{ width: `${overallProgress}%` }} transition={{ duration: 1 }} />
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-xl p-6" style={glassCard}>
-        <h3 className="font-semibold mb-6" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Milestones</h3>
-        {tasks.length > 0 ? (
-          <div className="relative">
-            <div className="absolute left-[15px] top-0 bottom-0 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-            <div className="space-y-5">
-              {tasks.map((task: any, idx: number) => {
-                const isCompleted = task.status === "completed";
-                const isInProgress = task.status === "in_progress";
-                return (
-                  <div key={task.id} className="flex items-start gap-4 relative" data-testid={`milestone-${task.id}`}>
-                    <div className="relative z-10 shrink-0">
-                      {isCompleted ? (
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(16,185,129,0.2)", border: "2px solid #10B981" }}>
-                          <CheckCircle2 className="w-4 h-4" style={{ color: "#10B981" }} />
-                        </div>
-                      ) : isInProgress ? (
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(0,245,255,0.15)", border: "2px solid #00F5FF" }}>
-                          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: "#00F5FF" }} />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: "2px solid rgba(255,255,255,0.15)" }}>
-                          <div className="w-2 h-2 rounded-full" style={{ background: "#475569" }} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 pb-1">
-                      <p className="text-sm font-medium" style={{ color: isCompleted ? "#10B981" : "#FFFFFF" }}>{task.title}</p>
-                      {task.description && <p className="text-xs mt-0.5" style={{ color: "#64748B" }}>{task.description}</p>}
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <div className="mt-1.5 space-y-0.5">
-                          {task.subtasks.slice(0, 3).map((sub: any, si: number) => (
-                            <p key={si} className="text-[10px] flex items-center gap-1" style={{ color: "#64748B" }}>
-                              <span style={{ color: "#7C3AED" }}>›</span> {sub.title}
-                            </p>
-                          ))}
-                          {task.subtasks.length > 3 && (
-                            <p className="text-[10px]" style={{ color: "#475569" }}>+{task.subtasks.length - 3} more steps</p>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full" style={{ background: `${statusColors[task.status]}20`, color: statusColors[task.status] }}>
-                        {statusLabels[task.status] || task.status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <FolderKanban className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
-            <p className="text-sm" style={{ color: "#94A3B8" }}>No milestones yet</p>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
 
   const renderTasks = () => (
     <motion.div key="tasks" {...fadeInUp} className="space-y-6">
@@ -2295,6 +2211,253 @@ export default function UdyogDashboard() {
             </div>
           </div>
         )}
+      </motion.div>
+    );
+  };
+
+  const renderProject = () => {
+    const glassCard = {
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      borderRadius: "16px",
+      padding: "24px",
+    };
+    const sectionLabel = (text: string, color: string) => (
+      <p style={{ color, fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "6px" }}>{text}</p>
+    );
+
+    if (!internship) {
+      return (
+        <div className="p-6" style={{ color: "#94A3B8" }}>
+          <div style={{ ...glassCard, textAlign: "center", padding: "40px" }}>
+            <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p style={{ color: "#94A3B8" }}>No internship assigned yet. Complete the skill assessment to get started.</p>
+          </div>
+        </div>
+      );
+    }
+
+    let projectStructure: { initiatives?: any[] } | null = null;
+    try {
+      if (internship.projectStructure) projectStructure = JSON.parse(internship.projectStructure);
+    } catch {}
+
+    const initiatives = projectStructure?.initiatives || [];
+
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-6 space-y-4">
+        <div style={glassCard}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #7C3AED, #00F5FF)" }}>
+              <Layers className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{internship.title}</h2>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {internship.domain && (
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(0,245,255,0.12)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.25)" }}>{internship.domain}</span>
+                )}
+                {internship.skillLevel && (
+                  <span className="text-xs px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.3)" }}>{internship.skillLevel}</span>
+                )}
+                {internship.duration && (
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>{internship.duration}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {internship.introduction && (
+          <div style={{ ...glassCard, borderLeft: "4px solid #7C3AED", padding: "20px" }}>
+            {sectionLabel("Project Introduction", "#A78BFA")}
+            <p style={{ color: "#CBD5E1", fontSize: "14px", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{internship.introduction}</p>
+          </div>
+        )}
+
+        {internship.goal && (
+          <div style={{ ...glassCard, borderLeft: "4px solid #00F5FF", padding: "20px" }}>
+            {sectionLabel("Project Goal", "#00F5FF")}
+            <p style={{ color: "#CBD5E1", fontSize: "14px", lineHeight: "1.7" }}>{internship.goal}</p>
+          </div>
+        )}
+
+        {!internship.projectStructure && !internship.introduction && (
+          <div style={{ ...glassCard, textAlign: "center" as const, padding: "32px" }}>
+            <Layers className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "#00F5FF" }} />
+            <p style={{ color: "#64748B", fontSize: "14px" }}>Project guide not yet available for this internship.</p>
+            <p style={{ color: "#475569", fontSize: "12px", marginTop: "4px" }}>Your admin will update this soon.</p>
+          </div>
+        )}
+
+        {initiatives.length > 0 && (
+          <div style={glassCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <Layers className="w-4 h-4" style={{ color: "#00F5FF" }} />
+              <p style={{ color: "#FFFFFF", fontSize: "13px", fontWeight: 600 }}>Project Structure</p>
+              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>{initiatives.length} Initiatives</span>
+            </div>
+            <div className="space-y-2">
+              {initiatives.map((initiative: any, ii: number) => {
+                const iKey = `i${ii}`;
+                const iOpen = expandedProjectNodes.has(iKey);
+                return (
+                  <div key={ii} style={{ border: "1px solid rgba(124,58,237,0.3)", borderRadius: "12px", overflow: "hidden" }}>
+                    <button type="button" onClick={() => toggleProjectNode(iKey)} className="w-full flex items-center gap-2 p-3 text-left transition-colors" style={{ background: iOpen ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.05)" }}>
+                      {iOpen ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: "#A78BFA" }} /> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "#64748B" }} />}
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#7C3AED" }} />
+                      <span style={{ color: "#C4B5FD", fontWeight: 600, fontSize: "14px" }}>{initiative.title}</span>
+                      <span className="ml-auto text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA" }}>{initiative.epics?.length || 0} epics</span>
+                    </button>
+                    {iOpen && (
+                      <div style={{ padding: "8px 8px 8px 16px", background: "rgba(0,0,0,0.15)" }} className="space-y-2">
+                        {initiative.description && <p style={{ color: "#64748B", fontSize: "12px", paddingLeft: "8px", paddingBottom: "4px" }}>{initiative.description}</p>}
+                        {(initiative.epics || []).map((epic: any, ei: number) => {
+                          const eKey = `i${ii}-e${ei}`;
+                          const eOpen = expandedProjectNodes.has(eKey);
+                          return (
+                            <div key={ei} style={{ border: "1px solid rgba(59,130,246,0.25)", borderRadius: "10px", overflow: "hidden" }}>
+                              <button type="button" onClick={() => toggleProjectNode(eKey)} className="w-full flex items-center gap-2 p-2.5 text-left transition-colors" style={{ background: eOpen ? "rgba(59,130,246,0.1)" : "rgba(59,130,246,0.04)" }}>
+                                {eOpen ? <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: "#60A5FA" }} /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "#475569" }} />}
+                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#3B82F6" }} />
+                                <span style={{ color: "#93C5FD", fontWeight: 600, fontSize: "13px" }}>{epic.title}</span>
+                                <span className="ml-auto text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(59,130,246,0.12)", color: "#60A5FA" }}>{epic.features?.length || 0} features</span>
+                              </button>
+                              {eOpen && (
+                                <div style={{ padding: "8px 8px 8px 14px", background: "rgba(0,0,0,0.12)" }} className="space-y-2">
+                                  {epic.description && <p style={{ color: "#64748B", fontSize: "12px", paddingLeft: "8px", paddingBottom: "4px" }}>{epic.description}</p>}
+                                  {(epic.features || []).map((feature: any, fi: number) => {
+                                    const fKey = `i${ii}-e${ei}-f${fi}`;
+                                    const fOpen = expandedProjectNodes.has(fKey);
+                                    return (
+                                      <div key={fi} style={{ border: "1px solid rgba(20,184,166,0.25)", borderRadius: "10px", overflow: "hidden" }}>
+                                        <button type="button" onClick={() => toggleProjectNode(fKey)} className="w-full flex items-center gap-2 p-2.5 text-left transition-colors" style={{ background: fOpen ? "rgba(20,184,166,0.1)" : "rgba(20,184,166,0.04)" }}>
+                                          {fOpen ? <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: "#2DD4BF" }} /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "#475569" }} />}
+                                          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#14B8A6" }} />
+                                          <span style={{ color: "#99F6E4", fontWeight: 600, fontSize: "13px" }}>{feature.title}</span>
+                                          <span className="ml-auto text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(20,184,166,0.12)", color: "#2DD4BF" }}>{feature.tasks?.length || 0} tasks</span>
+                                        </button>
+                                        {fOpen && (
+                                          <div style={{ padding: "8px 8px 8px 14px", background: "rgba(0,0,0,0.1)" }} className="space-y-2">
+                                            {feature.description && <p style={{ color: "#64748B", fontSize: "12px", paddingLeft: "8px", paddingBottom: "4px" }}>{feature.description}</p>}
+                                            {(feature.tasks || []).map((task: any, ti: number) => {
+                                              const tKey = `i${ii}-e${ei}-f${fi}-t${ti}`;
+                                              const tOpen = expandedProjectNodes.has(tKey);
+                                              return (
+                                                <div key={ti} style={{ border: "1px solid rgba(245,158,11,0.25)", borderRadius: "8px", overflow: "hidden" }}>
+                                                  <button type="button" onClick={() => toggleProjectNode(tKey)} className="w-full flex items-center gap-2 p-2 text-left transition-colors" style={{ background: tOpen ? "rgba(245,158,11,0.08)" : "rgba(245,158,11,0.03)" }}>
+                                                    {tOpen ? <ChevronDown className="w-3 h-3 shrink-0" style={{ color: "#FBBF24" }} /> : <ChevronRight className="w-3 h-3 shrink-0" style={{ color: "#475569" }} />}
+                                                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#F59E0B" }} />
+                                                    <span style={{ color: "#FDE68A", fontWeight: 500, fontSize: "12px" }}>{task.title}</span>
+                                                    <span className="ml-auto text-[10px] px-1 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.12)", color: "#FBBF24" }}>{task.subtasks?.length || 0} sub</span>
+                                                  </button>
+                                                  {tOpen && (
+                                                    <div style={{ padding: "8px 10px 10px 12px", background: "rgba(0,0,0,0.08)" }} className="space-y-2">
+                                                      {task.description && <p style={{ color: "#94A3B8", fontSize: "12px" }}>{task.description}</p>}
+                                                      {task.taskProcess && (
+                                                        <div style={{ background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "8px", padding: "10px" }}>
+                                                          <p style={{ color: "#FBBF24", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>Task Process</p>
+                                                          <p style={{ color: "#CBD5E1", fontSize: "12px", lineHeight: "1.6" }}>{task.taskProcess}</p>
+                                                        </div>
+                                                      )}
+                                                      {(task.subtasks || []).map((sub: any, si: number) => {
+                                                        const sKey = `i${ii}-e${ei}-f${fi}-t${ti}-s${si}`;
+                                                        const sOpen = expandedProjectNodes.has(sKey);
+                                                        return (
+                                                          <div key={si} style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", overflow: "hidden" }}>
+                                                            <button type="button" onClick={() => toggleProjectNode(sKey)} className="w-full flex items-center gap-1.5 p-2 text-left transition-colors" style={{ background: sOpen ? "rgba(255,255,255,0.04)" : "transparent" }}>
+                                                              {sOpen ? <ChevronDown className="w-3 h-3 shrink-0" style={{ color: "#475569" }} /> : <ChevronRight className="w-3 h-3 shrink-0" style={{ color: "#475569" }} />}
+                                                              <span style={{ color: "#64748B", fontFamily: "monospace", fontSize: "10px" }}>{si + 1}.</span>
+                                                              <span style={{ color: "#E2E8F0", fontSize: "12px", fontWeight: 500 }}>{sub.title}</span>
+                                                            </button>
+                                                            {sOpen && (
+                                                              <div style={{ padding: "8px 10px 10px 14px", background: "rgba(0,0,0,0.06)" }} className="space-y-2">
+                                                                {sub.subtaskProcess && <p style={{ color: "#94A3B8", fontSize: "12px", lineHeight: "1.6" }}>{sub.subtaskProcess}</p>}
+                                                                {sub.steps && sub.steps.length > 0 && (
+                                                                  <div>
+                                                                    <p style={{ color: "#64748B", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "6px" }}>Steps</p>
+                                                                    <ol className="space-y-1 list-decimal list-inside">
+                                                                      {sub.steps.map((step: string, sti: number) => (
+                                                                        <li key={sti} style={{ color: "#CBD5E1", fontSize: "12px" }}>{step}</li>
+                                                                      ))}
+                                                                    </ol>
+                                                                  </div>
+                                                                )}
+                                                                {sub.checklist && sub.checklist.length > 0 && (
+                                                                  <div>
+                                                                    <p style={{ color: "#64748B", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "6px" }}>Checklist</p>
+                                                                    <ul className="space-y-1">
+                                                                      {sub.checklist.map((item: string, ci: number) => (
+                                                                        <li key={ci} className="flex items-start gap-2" style={{ color: "#94A3B8", fontSize: "12px" }}>
+                                                                          <span style={{ color: "#22C55E", marginTop: "1px" }}>☐</span>
+                                                                          <span>{item.replace(/^\[\s*\]\s*/, "")}</span>
+                                                                        </li>
+                                                                      ))}
+                                                                    </ul>
+                                                                  </div>
+                                                                )}
+                                                              </div>
+                                                            )}
+                                                          </div>
+                                                        );
+                                                      })}
+                                                      {feature.practice && (
+                                                        <div style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "8px", padding: "10px", marginTop: "4px" }}>
+                                                          <p style={{ color: "#4ADE80", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>Practice Exercise</p>
+                                                          <p style={{ color: "#CBD5E1", fontSize: "12px", lineHeight: "1.6" }}>{feature.practice}</p>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {[
+          { field: "finalIntegration", label: "Final Integration", icon: <Layers className="w-5 h-5" />, color: "#00F5FF", bg: "rgba(0,245,255,0.07)", border: "rgba(0,245,255,0.2)" },
+          { field: "testing", label: "Testing", icon: <FlaskConical className="w-5 h-5" />, color: "#FBBF24", bg: "rgba(245,158,11,0.07)", border: "rgba(245,158,11,0.2)" },
+          { field: "deployment", label: "Deployment", icon: <Rocket className="w-5 h-5" />, color: "#FB923C", bg: "rgba(251,146,60,0.07)", border: "rgba(251,146,60,0.2)" },
+          { field: "liveProjectOutput", label: "Live Project Output", icon: <Trophy className="w-5 h-5" />, color: "#4ADE80", bg: "rgba(74,222,128,0.07)", border: "rgba(74,222,128,0.2)" },
+        ].map(({ field, label, icon, color, bg, border }) => {
+          const val = internship[field as keyof typeof internship] as string | undefined;
+          if (!val) return null;
+          const sKey = `section-${field}`;
+          const sOpen = expandedProjectNodes.has(sKey);
+          return (
+            <div key={field} style={{ background: bg, border: `1px solid ${border}`, borderRadius: "12px", overflow: "hidden" }}>
+              <button type="button" onClick={() => toggleProjectNode(sKey)} className="w-full flex items-center gap-3 p-4 text-left transition-opacity hover:opacity-80">
+                <div style={{ color }}>{icon}</div>
+                <span style={{ color, fontWeight: 600, fontSize: "14px" }}>{label}</span>
+                {sOpen ? <ChevronDown className="w-4 h-4 ml-auto" style={{ color: "#64748B" }} /> : <ChevronRight className="w-4 h-4 ml-auto" style={{ color: "#64748B" }} />}
+              </button>
+              {sOpen && (
+                <div style={{ padding: "0 16px 16px 16px" }}>
+                  <div style={{ borderTop: `1px solid ${border}`, paddingTop: "14px" }}>
+                    <p style={{ color: "#CBD5E1", fontSize: "14px", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{val}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </motion.div>
     );
   };

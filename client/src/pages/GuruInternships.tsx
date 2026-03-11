@@ -223,6 +223,15 @@ export default function GuruInternships() {
   const [expandedTaskIndexes, setExpandedTaskIndexes] = useState<Set<number>>(new Set());
   const [expandedAdminTaskIds, setExpandedAdminTaskIds] = useState<Set<number>>(new Set());
   const [subtaskForms, setSubtaskForms] = useState<Record<number, { title: string; description: string }>>({});
+  const [expandedPreviewNodes, setExpandedPreviewNodes] = useState<Set<string>>(new Set());
+
+  const togglePreviewNode = (key: string) => {
+    setExpandedPreviewNodes((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
 
   const toggleAiTaskExpand = (idx: number) => {
     setExpandedTaskIndexes((prev) => {
@@ -469,22 +478,54 @@ export default function GuruInternships() {
     };
     createMutation.mutate(internshipData, {
       onSuccess: async () => {
-        if (aiPreview.tasks && aiPreview.tasks.length > 0) {
-          const latestInternships = await fetch("/api/udyog/admin/internships").then(r => r.json());
-          const newest = latestInternships[0];
-          if (newest) {
-            for (const task of aiPreview.tasks) {
-              try {
-                await apiRequest("POST", `/api/udyog/admin/internships/${newest.id}/tasks`, {
-                  title: task.title,
-                  description: task.description,
-                  orderIndex: task.orderIndex,
-                  subtasks: task.subtasks || [],
-                });
-              } catch {}
+        const latestInternships = await fetch("/api/udyog/admin/internships").then(r => r.json());
+        const newest = latestInternships[0];
+        if (newest) {
+          try {
+            await apiRequest("PUT", `/api/udyog/admin/internships/${newest.id}`, {
+              introduction: aiPreview.introduction || null,
+              goal: aiPreview.goal || null,
+              projectStructure: aiPreview.initiatives ? JSON.stringify({ initiatives: aiPreview.initiatives }) : null,
+              finalIntegration: aiPreview.finalIntegration || null,
+              testing: aiPreview.testing || null,
+              deployment: aiPreview.deployment || null,
+              liveProjectOutput: aiPreview.liveProjectOutput || null,
+            });
+          } catch {}
+
+          const allTasks: Array<{ title: string; description: string; orderIndex: number; subtasks: any[] }> = [];
+          if (aiPreview.initiatives && Array.isArray(aiPreview.initiatives)) {
+            let orderIdx = 1;
+            for (const initiative of aiPreview.initiatives) {
+              for (const epic of (initiative.epics || [])) {
+                for (const feature of (epic.features || [])) {
+                  for (const task of (feature.tasks || [])) {
+                    allTasks.push({
+                      title: task.title,
+                      description: task.description || "",
+                      orderIndex: task.orderIndex || orderIdx++,
+                      subtasks: (task.subtasks || []).map((s: any) => ({
+                        title: s.title,
+                        description: [s.subtaskProcess, s.steps ? s.steps.join(" | ") : ""].filter(Boolean).join("\n") || s.description || "",
+                        orderIndex: s.orderIndex || 0,
+                      })),
+                    });
+                  }
+                }
+              }
             }
-            queryClient.invalidateQueries({ queryKey: ["/api/udyog/internships"] });
+          } else if (aiPreview.tasks && Array.isArray(aiPreview.tasks)) {
+            for (const task of aiPreview.tasks) {
+              allTasks.push({ title: task.title, description: task.description || "", orderIndex: task.orderIndex || 0, subtasks: task.subtasks || [] });
+            }
           }
+
+          for (const task of allTasks) {
+            try {
+              await apiRequest("POST", `/api/udyog/admin/internships/${newest.id}/tasks`, task);
+            } catch {}
+          }
+          queryClient.invalidateQueries({ queryKey: ["/api/udyog/internships"] });
         }
         setAiBuilderOpen(false);
         setAiPreview(null);
@@ -492,7 +533,8 @@ export default function GuruInternships() {
         setAiSkillLevel("beginner");
         setAiExtraInstructions("");
         setExpandedTaskIndexes(new Set());
-        toast({ title: "Internship created with AI-generated content!" });
+        setExpandedPreviewNodes(new Set());
+        toast({ title: "Internship created with full project guide!" });
       },
     });
   };
@@ -1651,6 +1693,7 @@ export default function GuruInternships() {
                   <SelectItem value="beginner">Beginner (Score &lt; 40)</SelectItem>
                   <SelectItem value="intermediate">Intermediate (Score 40-75)</SelectItem>
                   <SelectItem value="advanced">Advanced (Score &gt; 75)</SelectItem>
+                  <SelectItem value="mastery">Mastery (Expert)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1741,62 +1784,151 @@ export default function GuruInternships() {
                     </div>
                   </div>
                 )}
-                {aiPreview.tasks && aiPreview.tasks.length > 0 && (
+                {aiPreview.introduction && (
+                  <div className="rounded-lg border-l-4 border-purple-400 bg-purple-50 dark:bg-purple-950/30 p-3">
+                    <Label className="text-purple-700 dark:text-purple-400 text-xs font-semibold uppercase tracking-wide">Project Introduction</Label>
+                    <p className="text-sm mt-1 text-foreground/80 whitespace-pre-wrap">{aiPreview.introduction}</p>
+                  </div>
+                )}
+                {aiPreview.goal && (
+                  <div className="rounded-lg border-l-4 border-teal-400 bg-teal-50 dark:bg-teal-950/30 p-3">
+                    <Label className="text-teal-700 dark:text-teal-400 text-xs font-semibold uppercase tracking-wide">Goal</Label>
+                    <p className="text-sm mt-1 text-foreground/80">{aiPreview.goal}</p>
+                  </div>
+                )}
+                {aiPreview.initiatives && aiPreview.initiatives.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <ListTree className="w-4 h-4 text-purple-600" />
-                      <Label className="text-muted-foreground text-xs">
-                        Tasks ({aiPreview.tasks.length}) — click to expand sub-tasks
+                      <Label className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
+                        Project Structure ({aiPreview.initiatives.length} Initiatives)
                       </Label>
                     </div>
                     <div className="space-y-2">
-                      {aiPreview.tasks.map((task: any, i: number) => {
-                        const isExpanded = expandedTaskIndexes.has(i);
-                        const subtaskCount = task.subtasks?.length || 0;
+                      {aiPreview.initiatives.map((initiative: any, ii: number) => {
+                        const iKey = `i${ii}`;
+                        const iExpanded = expandedPreviewNodes.has(iKey);
                         return (
-                          <div key={i} className="border rounded-lg bg-background overflow-hidden">
-                            <button
-                              type="button"
-                              className="w-full flex items-start gap-2 p-3 text-left hover:bg-muted/40 transition-colors"
-                              onClick={() => toggleAiTaskExpand(i)}
-                            >
-                              {isExpanded
-                                ? <ChevronDown className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
-                                : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                              }
-                              <span className="text-muted-foreground font-mono text-xs shrink-0 mt-0.5">
-                                {task.orderIndex || i + 1}.
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-medium text-sm">{task.title}</span>
-                                  {subtaskCount > 0 && (
-                                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                                      {subtaskCount} sub-task{subtaskCount !== 1 ? "s" : ""}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {!isExpanded && (
-                                  <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">{task.description}</p>
-                                )}
-                              </div>
+                          <div key={ii} className="border rounded-lg overflow-hidden bg-background">
+                            <button type="button" className="w-full flex items-center gap-2 p-3 text-left hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-colors" onClick={() => togglePreviewNode(iKey)}>
+                              {iExpanded ? <ChevronDown className="w-4 h-4 text-purple-500 shrink-0" /> : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />}
+                              <div className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                              <span className="font-semibold text-sm text-purple-700 dark:text-purple-300">{initiative.title}</span>
+                              <Badge variant="secondary" className="text-xs ml-auto">{initiative.epics?.length || 0} epics</Badge>
                             </button>
-                            {isExpanded && (
-                              <div className="border-t px-3 pb-3 pt-2 bg-muted/20">
-                                <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
-                                {task.subtasks && task.subtasks.length > 0 && (
-                                  <div className="space-y-2 pl-4 border-l-2 border-purple-200 dark:border-purple-800">
-                                    {task.subtasks.map((sub: any, j: number) => (
-                                      <div key={j} className="flex gap-2">
-                                        <span className="text-purple-500 font-mono text-xs shrink-0 mt-0.5">{j + 1}.</span>
-                                        <div>
-                                          <p className="text-sm font-medium">{sub.title}</p>
-                                          <p className="text-xs text-muted-foreground">{sub.description}</p>
+                            {iExpanded && (
+                              <div className="border-t bg-muted/10 pl-4 pr-2 py-2 space-y-2">
+                                {initiative.description && <p className="text-xs text-muted-foreground mb-2 pl-2">{initiative.description}</p>}
+                                {(initiative.epics || []).map((epic: any, ei: number) => {
+                                  const eKey = `i${ii}-e${ei}`;
+                                  const eExpanded = expandedPreviewNodes.has(eKey);
+                                  return (
+                                    <div key={ei} className="border rounded-lg overflow-hidden bg-background">
+                                      <button type="button" className="w-full flex items-center gap-2 p-2.5 text-left hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors" onClick={() => togglePreviewNode(eKey)}>
+                                        {eExpanded ? <ChevronDown className="w-3.5 h-3.5 text-blue-500 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                                        <span className="font-medium text-sm text-blue-700 dark:text-blue-300">{epic.title}</span>
+                                        <Badge variant="outline" className="text-xs ml-auto">{epic.features?.length || 0} features</Badge>
+                                      </button>
+                                      {eExpanded && (
+                                        <div className="border-t bg-muted/10 pl-4 pr-2 py-2 space-y-2">
+                                          {epic.description && <p className="text-xs text-muted-foreground mb-2 pl-2">{epic.description}</p>}
+                                          {(epic.features || []).map((feature: any, fi: number) => {
+                                            const fKey = `i${ii}-e${ei}-f${fi}`;
+                                            const fExpanded = expandedPreviewNodes.has(fKey);
+                                            return (
+                                              <div key={fi} className="border rounded-lg overflow-hidden bg-background">
+                                                <button type="button" className="w-full flex items-center gap-2 p-2.5 text-left hover:bg-teal-50 dark:hover:bg-teal-950/20 transition-colors" onClick={() => togglePreviewNode(fKey)}>
+                                                  {fExpanded ? <ChevronDown className="w-3.5 h-3.5 text-teal-500 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
+                                                  <div className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
+                                                  <span className="font-medium text-sm text-teal-700 dark:text-teal-300">{feature.title}</span>
+                                                  <Badge variant="outline" className="text-xs ml-auto border-teal-300">{feature.tasks?.length || 0} tasks</Badge>
+                                                </button>
+                                                {fExpanded && (
+                                                  <div className="border-t bg-muted/10 pl-4 pr-2 py-2 space-y-2">
+                                                    {feature.description && <p className="text-xs text-muted-foreground mb-2 pl-2">{feature.description}</p>}
+                                                    {(feature.tasks || []).map((task: any, ti: number) => {
+                                                      const tKey = `i${ii}-e${ei}-f${fi}-t${ti}`;
+                                                      const tExpanded = expandedPreviewNodes.has(tKey);
+                                                      return (
+                                                        <div key={ti} className="border rounded-lg overflow-hidden bg-background">
+                                                          <button type="button" className="w-full flex items-center gap-2 p-2 text-left hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-colors" onClick={() => togglePreviewNode(tKey)}>
+                                                            {tExpanded ? <ChevronDown className="w-3 h-3 text-amber-500 shrink-0" /> : <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />}
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                                                            <span className="text-xs font-medium text-amber-700 dark:text-amber-300">{task.title}</span>
+                                                            <Badge variant="outline" className="text-[10px] ml-auto border-amber-300 py-0">{task.subtasks?.length || 0} subtasks</Badge>
+                                                          </button>
+                                                          {tExpanded && (
+                                                            <div className="border-t px-3 py-2 space-y-2 bg-muted/5">
+                                                              {task.description && <p className="text-xs text-muted-foreground">{task.description}</p>}
+                                                              {task.taskProcess && (
+                                                                <div className="rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-2">
+                                                                  <p className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-0.5">Task Process</p>
+                                                                  <p className="text-xs text-foreground/80">{task.taskProcess}</p>
+                                                                </div>
+                                                              )}
+                                                              {(task.subtasks || []).map((sub: any, si: number) => {
+                                                                const sKey = `i${ii}-e${ei}-f${fi}-t${ti}-s${si}`;
+                                                                const sExpanded = expandedPreviewNodes.has(sKey);
+                                                                return (
+                                                                  <div key={si} className="border rounded overflow-hidden bg-background">
+                                                                    <button type="button" className="w-full flex items-center gap-1.5 p-2 text-left hover:bg-muted/40 transition-colors" onClick={() => togglePreviewNode(sKey)}>
+                                                                      {sExpanded ? <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />}
+                                                                      <span className="text-muted-foreground font-mono text-[10px] shrink-0">{si + 1}.</span>
+                                                                      <span className="text-xs font-medium">{sub.title}</span>
+                                                                    </button>
+                                                                    {sExpanded && (
+                                                                      <div className="border-t px-3 py-2 space-y-2 bg-muted/5 text-xs">
+                                                                        {sub.subtaskProcess && <p className="text-muted-foreground">{sub.subtaskProcess}</p>}
+                                                                        {sub.steps && sub.steps.length > 0 && (
+                                                                          <div>
+                                                                            <p className="font-semibold text-[10px] uppercase tracking-wide mb-1">Steps</p>
+                                                                            <ol className="space-y-0.5 list-decimal list-inside">
+                                                                              {sub.steps.map((step: string, sti: number) => (
+                                                                                <li key={sti} className="text-muted-foreground">{step}</li>
+                                                                              ))}
+                                                                            </ol>
+                                                                          </div>
+                                                                        )}
+                                                                        {sub.checklist && sub.checklist.length > 0 && (
+                                                                          <div>
+                                                                            <p className="font-semibold text-[10px] uppercase tracking-wide mb-1">Checklist</p>
+                                                                            <ul className="space-y-0.5">
+                                                                              {sub.checklist.map((item: string, ci: number) => (
+                                                                                <li key={ci} className="flex items-start gap-1 text-muted-foreground">
+                                                                                  <span className="shrink-0 text-green-500">☐</span>
+                                                                                  <span>{item.replace(/^\[\s*\]\s*/, "")}</span>
+                                                                                </li>
+                                                                              ))}
+                                                                            </ul>
+                                                                          </div>
+                                                                        )}
+                                                                      </div>
+                                                                    )}
+                                                                  </div>
+                                                                );
+                                                              })}
+                                                            </div>
+                                                          )}
+                                                        </div>
+                                                      );
+                                                    })}
+                                                    {feature.practice && (
+                                                      <div className="rounded bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-2 mt-1">
+                                                        <p className="text-[10px] font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-0.5">Practice Exercise</p>
+                                                        <p className="text-xs text-foreground/80">{feature.practice}</p>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
                                         </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -1805,6 +1937,24 @@ export default function GuruInternships() {
                     </div>
                   </div>
                 )}
+                {[
+                  { key: "finalIntegration", label: "Final Integration", color: "blue" },
+                  { key: "testing", label: "Testing", color: "yellow" },
+                  { key: "deployment", label: "Deployment", color: "orange" },
+                  { key: "liveProjectOutput", label: "Live Project Output", color: "green" },
+                ].map(({ key, label, color }) => aiPreview[key] ? (
+                  <div key={key} className="border rounded-lg overflow-hidden bg-background">
+                    <button type="button" className="w-full flex items-center gap-2 p-3 text-left hover:bg-muted/30 transition-colors" onClick={() => togglePreviewNode(`section-${key}`)}>
+                      {expandedPreviewNodes.has(`section-${key}`) ? <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />}
+                      <span className="font-medium text-sm">{label}</span>
+                    </button>
+                    {expandedPreviewNodes.has(`section-${key}`) && (
+                      <div className="border-t px-4 py-3 bg-muted/10">
+                        <p className="text-sm text-foreground/80 whitespace-pre-wrap">{aiPreview[key]}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : null)}
               </div>
             </div>
           )}
@@ -1881,6 +2031,7 @@ function InternshipFormFields({
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
               <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="mastery">Mastery</SelectItem>
             </SelectContent>
           </Select>
         </div>
