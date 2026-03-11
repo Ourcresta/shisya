@@ -1505,93 +1505,87 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content: `You are an expert curriculum architect for an AI-powered virtual internship platform called "Our Udyog". You design complete, deeply-structured project guidance documents that take students from zero to a live working product. Your output follows a strict 9-level hierarchy. Students work in batches of 5 (Team Lead, Developer, QA/Tester). Return ONLY valid JSON, no markdown, no explanation text outside the JSON.`
+          content: `You are a curriculum architect for "Our Udyog", an AI-powered virtual internship platform. Design structured project guidance following a deep hierarchy. Output ONLY a JSON object — no markdown, no extra text.`
         },
         {
           role: "user",
-          content: `Create a complete virtual internship project guide for:
+          content: `Design a virtual internship for:
 Title: "${title}"
 Skill Level: ${skillLevel} — ${levelGuide[skillLevel] || levelGuide.beginner}
-
-Return a JSON object with this EXACT structure. Every field is required:
+${extraInstructions ? `Admin notes: ${extraInstructions}\n` : ""}
+Return this exact JSON shape (keep text values concise — 1-2 sentences each unless noted):
 
 {
-  "title": "${title}",
-  "description": "Rich 2-3 paragraph overview of the internship: what it is, what technologies are used, what problem is being solved, and what students will build",
-  "shortDescription": "One compelling line (max 100 chars)",
+  "title": "...",
+  "description": "2 paragraphs: what students will build, technologies used, and why it matters",
+  "shortDescription": "one line, max 80 chars",
   "skillLevel": "${skillLevel}",
-  "domain": "Primary domain (e.g., Web Development, Data Science, Mobile Development, DevOps, UI/UX Design, Machine Learning, Cybersecurity, Cloud Computing, Blockchain)",
+  "domain": "primary domain",
   "duration": "X weeks",
-  "requiredSkills": "Comma-separated list of 4-6 prerequisite skills",
-  "milestones": "Comma-separated list of 5-7 key deliverable milestones",
+  "requiredSkills": "skill1, skill2, skill3, skill4",
+  "milestones": "milestone1, milestone2, milestone3, milestone4, milestone5",
   "batchSize": 5,
-
-  "introduction": "A detailed 2-3 paragraph project introduction. Cover: the real-world problem being solved, the industry context, the technologies stack, the team structure, and what success looks like for this internship.",
-
-  "goal": "A clear, motivating statement of what students will achieve. Describe the final product, what skills they will have gained, and how this prepares them for real jobs.",
-
+  "introduction": "2 paragraphs: the real-world problem, industry context, tech stack, team structure, and what success looks like",
+  "goal": "1 paragraph: what students will have built, skills gained, and career readiness after this internship",
   "initiatives": [
     {
-      "title": "Initiative 1: [Phase Title, e.g. Foundation & Setup]",
-      "description": "What this initiative covers and why it is the right starting point",
+      "title": "Initiative 1: Phase name",
+      "description": "1 sentence covering what this phase achieves",
       "epics": [
         {
-          "title": "Epic 1.1: [Topic, e.g. Development Environment]",
-          "description": "What this epic accomplishes",
+          "title": "Epic 1.1: Topic",
+          "description": "1 sentence",
           "features": [
             {
-              "title": "Feature 1.1.1: [Specific Feature Name]",
-              "description": "What this feature implements and why it matters",
+              "title": "Feature 1.1.1: Name",
+              "description": "1 sentence",
               "tasks": [
                 {
-                  "title": "Task: [Action verb + specific outcome]",
-                  "description": "What this task accomplishes and why",
-                  "taskProcess": "The methodology and workflow: how to approach this task, what order to do things, what to watch out for, and how to know you are done",
+                  "title": "Task: verb + outcome",
+                  "description": "1 sentence",
+                  "taskProcess": "2-3 sentences: how to approach this task, order of operations, done criteria",
                   "orderIndex": 1,
                   "subtasks": [
                     {
-                      "title": "Subtask: [Specific atomic action]",
-                      "description": "Brief description of this step",
-                      "subtaskProcess": "Exact step-by-step approach: the precise commands, configs, or actions needed",
-                      "steps": [
-                        "Step 1: [Detailed instruction with expected result]",
-                        "Step 2: [Next action]",
-                        "Step 3: [Verification step]"
-                      ],
-                      "checklist": [
-                        "[ ] Item 1 completed and verified",
-                        "[ ] Item 2 tested",
-                        "[ ] Item 3 committed to repository"
-                      ],
+                      "title": "Subtask: atomic action",
+                      "description": "1 sentence",
+                      "subtaskProcess": "2-3 sentences: exact approach",
+                      "steps": ["Step 1: action and expected result", "Step 2: next action", "Step 3: verify"],
+                      "checklist": ["[ ] item verified", "[ ] item tested", "[ ] committed"],
                       "orderIndex": 1
+                    },
+                    {
+                      "title": "Subtask 2: next action",
+                      "description": "1 sentence",
+                      "subtaskProcess": "2-3 sentences",
+                      "steps": ["Step 1: ...", "Step 2: ...", "Step 3: ..."],
+                      "checklist": ["[ ] done", "[ ] tested"],
+                      "orderIndex": 2
                     }
                   ]
                 }
               ],
-              "practice": "A hands-on practice exercise for this feature. Describe exactly what the student should build/do independently to solidify this concept, including what to submit as proof of completion."
+              "practice": "1-2 sentences: a hands-on exercise students do independently to solidify this feature"
             }
           ]
         }
       ]
     }
   ],
-
-  "finalIntegration": "Detailed guide on how to integrate all components into a unified working system. Include: what connects to what, how data flows, how to resolve common integration issues, and how to do a complete end-to-end test.",
-
-  "testing": "Complete testing strategy: unit tests (what to test and how), integration tests, user acceptance testing, performance testing checklist, and how to document test results. Include example test cases.",
-
-  "deployment": "Step-by-step deployment guide: platform recommendations with rationale, environment variables to configure, build commands, CI/CD pipeline setup, health checks, and rollback plan.",
-
-  "liveProjectOutput": "Description of the final live deliverable: what it does, how to demo it, what metrics prove it works, how to present it to stakeholders, and what the student portfolio entry should say."
+  "finalIntegration": "2-3 sentences: how to wire all parts into one working system and do end-to-end testing",
+  "testing": "2-3 sentences: what to test, tools to use, and how to document results",
+  "deployment": "2-3 sentences: where to deploy, key configs, and how to verify it is live",
+  "liveProjectOutput": "2-3 sentences: what the finished deliverable is, how to demo it, and what to say in a portfolio"
 }
 
-Generate 2-3 initiatives, each with 2-3 epics, each with 1-2 features, each with 1-2 tasks, each with 2-3 subtasks. Make every piece of guidance specific, actionable, and genuinely useful for a student doing this work for the first time.${extraInstructions ? `\n\nAdditional admin instructions: ${extraInstructions}` : ""}`
+Generate exactly 2 initiatives. Each initiative has exactly 2 epics. Each epic has exactly 1 feature. Each feature has exactly 2 tasks. Each task has exactly 2 subtasks. Keep all text values concise.`
         }
       ],
-      max_tokens: 6000,
+      max_tokens: 4000,
       temperature: 0.7,
     });
 
