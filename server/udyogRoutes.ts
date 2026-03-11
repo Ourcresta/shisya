@@ -1504,97 +1504,157 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4.1",
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content: `You are a curriculum architect for "Our Udyog", an AI-powered virtual internship platform. Design structured project guidance following a deep hierarchy. Output ONLY a JSON object — no markdown, no extra text.`
+          content: `You are a senior software engineering mentor and curriculum designer for "Our Udyog", a professional AI-powered virtual internship platform. You write complete, production-quality project guidance that a student can follow from zero to a deployed live product without needing external resources. Every instruction must be specific, actionable, and technically accurate — include exact terminal commands, precise file paths, actual code patterns, expected console output, and concrete verification steps. Never write vague instructions like "set up the database" — instead write exactly what command to run, exactly what file to create, exactly what the output should look like. Output ONLY a valid JSON object, no markdown fences, no extra text.`
         },
         {
           role: "user",
-          content: `Design a virtual internship for:
+          content: `Create a complete professional virtual internship guide for:
 Title: "${title}"
 Skill Level: ${skillLevel} — ${levelGuide[skillLevel] || levelGuide.beginner}
-${extraInstructions ? `Admin notes: ${extraInstructions}\n` : ""}
-Return this exact JSON shape (keep text values concise — 1-2 sentences each unless noted):
+${extraInstructions ? `Admin requirements: ${extraInstructions}\n` : ""}
+Return exactly this JSON structure:
 
 {
-  "title": "...",
-  "description": "2 paragraphs: what students will build, technologies used, and why it matters",
-  "shortDescription": "one line, max 80 chars",
+  "title": "${title}",
+  "description": "3 detailed paragraphs covering: (1) the real-world problem this project solves and its industry importance, (2) the full technology stack with version recommendations and why each technology was chosen, (3) what the final product will do and how it is architected",
+  "shortDescription": "compelling one-liner max 80 chars",
   "skillLevel": "${skillLevel}",
-  "domain": "primary domain",
+  "domain": "specific domain name",
   "duration": "X weeks",
-  "requiredSkills": "skill1, skill2, skill3, skill4",
-  "milestones": "milestone1, milestone2, milestone3, milestone4, milestone5",
+  "requiredSkills": "comma-separated prerequisite skills with proficiency notes",
+  "milestones": "Week 1: X, Week 2: Y, Week 3: Z, Week 4: A, Week 5: B",
   "batchSize": 5,
-  "introduction": "2 paragraphs: the real-world problem, industry context, tech stack, team structure, and what success looks like",
-  "goal": "1 paragraph: what students will have built, skills gained, and career readiness after this internship",
+
+  "introduction": "3 detailed paragraphs: paragraph 1 — the real-world problem, industry context, and why companies need this solution today. Paragraph 2 — the full tech stack, tools, frameworks, and development environment with specific version numbers. Paragraph 3 — how the team of 5 is structured (Team Lead: architecture & PR reviews, Developer 1: frontend, Developer 2: backend/API, QA: testing & bug reporting, DevOps: deployment), communication workflow, and what success metrics look like.",
+
+  "goal": "3 sentences: sentence 1 — exactly what the student will have built and deployed by the end. Sentence 2 — the specific technical skills they will have mastered (be explicit about technologies and patterns). Sentence 3 — how this project positions them for junior/mid-level roles and what they can say in interviews.",
+
   "initiatives": [
     {
-      "title": "Initiative 1: Phase name",
-      "description": "1 sentence covering what this phase achieves",
+      "title": "Initiative 1: [Phase Title]",
+      "description": "2 sentences: what this phase achieves and what deliverables mark it as complete",
       "epics": [
         {
-          "title": "Epic 1.1: Topic",
-          "description": "1 sentence",
+          "title": "Epic 1.1: [Topic]",
+          "description": "2 sentences: the problem this epic solves and how it fits into the overall project",
           "features": [
             {
-              "title": "Feature 1.1.1: Name",
-              "description": "1 sentence",
+              "title": "Feature 1.1.1: [Feature Name]",
+              "description": "2 sentences: what this feature does functionally and technically",
               "tasks": [
                 {
-                  "title": "Task: verb + outcome",
-                  "description": "1 sentence",
-                  "taskProcess": "2-3 sentences: how to approach this task, order of operations, done criteria",
+                  "title": "Task: [specific action verb + measurable outcome]",
+                  "description": "2 sentences: what this task produces and how to know it is done correctly",
+                  "taskProcess": "A detailed 4-5 sentence technical explanation covering: the exact workflow to follow, which files to create or modify and in what order, which tools or commands to use at each stage, common mistakes to avoid, and the specific criteria that confirm this task is complete",
                   "orderIndex": 1,
                   "subtasks": [
                     {
-                      "title": "Subtask: atomic action",
-                      "description": "1 sentence",
-                      "subtaskProcess": "2-3 sentences: exact approach",
-                      "steps": ["Step 1: action and expected result", "Step 2: next action", "Step 3: verify"],
-                      "checklist": ["[ ] item verified", "[ ] item tested", "[ ] committed"],
+                      "title": "Subtask: [atomic technical action]",
+                      "description": "1-2 sentences describing exactly what this subtask accomplishes",
+                      "subtaskProcess": "A precise 3-4 sentence technical walkthrough: name the exact tools/libraries involved, describe the exact sequence of operations, specify what files are created/modified and their purpose, explain how to verify the result is correct",
+                      "steps": [
+                        "Step 1: [exact terminal command or file creation instruction] — expected output: [what you should see in the terminal or browser]",
+                        "Step 2: [next exact action with precise file path, function name, or config key] — example: [show concrete value or code pattern]",
+                        "Step 3: [verification action] — confirm by: [what to look for in terminal output, browser console, or file contents]",
+                        "Step 4: [commit or save step] — run: [exact git command or save action] — result: [expected confirmation]"
+                      ],
+                      "checklist": [
+                        "[ ] [specific verifiable item with exact file or output to check]",
+                        "[ ] [second verifiable item]",
+                        "[ ] [third verifiable item — functional test or command that should return X]",
+                        "[ ] [fourth verifiable item — code committed / PR ready]"
+                      ],
                       "orderIndex": 1
                     },
                     {
-                      "title": "Subtask 2: next action",
-                      "description": "1 sentence",
-                      "subtaskProcess": "2-3 sentences",
-                      "steps": ["Step 1: ...", "Step 2: ...", "Step 3: ..."],
-                      "checklist": ["[ ] done", "[ ] tested"],
+                      "title": "Subtask 2: [next atomic action]",
+                      "description": "1-2 sentences",
+                      "subtaskProcess": "3-4 sentence precise technical walkthrough",
+                      "steps": [
+                        "Step 1: [exact command] — expected: [result]",
+                        "Step 2: [exact action] — example: [value or pattern]",
+                        "Step 3: [verify] — confirm by: [what to look for]",
+                        "Step 4: [save/commit] — run: [command]"
+                      ],
+                      "checklist": [
+                        "[ ] [verifiable item 1]",
+                        "[ ] [verifiable item 2]",
+                        "[ ] [verifiable item 3]",
+                        "[ ] [verifiable item 4]"
+                      ],
+                      "orderIndex": 2
+                    }
+                  ]
+                },
+                {
+                  "title": "Task 2: [action + outcome]",
+                  "description": "2 sentences",
+                  "taskProcess": "4-5 sentence detailed technical explanation",
+                  "orderIndex": 2,
+                  "subtasks": [
+                    {
+                      "title": "Subtask: [atomic action]",
+                      "description": "1-2 sentences",
+                      "subtaskProcess": "3-4 sentence precise walkthrough",
+                      "steps": ["Step 1: [command] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [verify] — confirm by: [what]", "Step 4: [commit]"],
+                      "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+                      "orderIndex": 1
+                    },
+                    {
+                      "title": "Subtask 2: [action]",
+                      "description": "1-2 sentences",
+                      "subtaskProcess": "3-4 sentence precise walkthrough",
+                      "steps": ["Step 1: [command] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [verify] — confirm by: [what]", "Step 4: [commit]"],
+                      "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
                       "orderIndex": 2
                     }
                   ]
                 }
               ],
-              "practice": "1-2 sentences: a hands-on exercise students do independently to solidify this feature"
+              "practice": "A self-directed practice challenge with a specific deliverable: describe exactly what to build independently, name the exact technologies to use, specify what the output should look like, and state what file or screenshot to submit as proof of completion"
             }
           ]
         }
       ]
     }
   ],
-  "finalIntegration": "2-3 sentences: how to wire all parts into one working system and do end-to-end testing",
-  "testing": "2-3 sentences: what to test, tools to use, and how to document results",
-  "deployment": "2-3 sentences: where to deploy, key configs, and how to verify it is live",
-  "liveProjectOutput": "2-3 sentences: what the finished deliverable is, how to demo it, and what to say in a portfolio"
+
+  "finalIntegration": "A detailed 4-paragraph integration guide: paragraph 1 — list every component that needs to connect and describe the data flow between them in sequence. Paragraph 2 — step-by-step connection instructions with exact environment variables, API endpoints, and configuration keys to wire up. Paragraph 3 — how to run a complete end-to-end test covering every feature (list the specific test scenarios). Paragraph 4 — common integration failures and their exact fixes.",
+
+  "testing": "A comprehensive 3-paragraph testing strategy: paragraph 1 — unit testing setup (exact framework, config command, and 3 example test cases with actual function signatures). Paragraph 2 — integration and API testing (tool, how to set up test database, 3 specific endpoint test scenarios with expected status codes and response shapes). Paragraph 3 — manual QA checklist (8-10 user journeys to manually verify before deployment, with pass/fail criteria).",
+
+  "deployment": "A step-by-step deployment guide in 4 paragraphs: paragraph 1 — recommended hosting platform with rationale, account setup steps, and project configuration. Paragraph 2 — environment variables to configure (list each variable name, what value to set, and where to get it). Paragraph 3 — exact build and deploy commands in sequence with expected output after each command. Paragraph 4 — post-deployment verification steps (5 specific things to test on the live URL to confirm successful deployment).",
+
+  "liveProjectOutput": "A 3-paragraph description of the final deliverable: paragraph 1 — what the live application does (list every working feature a user can interact with). Paragraph 2 — how to demo it effectively (the exact 5-step demo flow to show stakeholders, with which features to highlight and what to say). Paragraph 3 — how to write the portfolio entry (provide an actual portfolio description template they can use, listing technologies, your role, key challenges solved, and measurable outcomes)."
 }
 
-Generate exactly 2 initiatives. Each initiative has exactly 2 epics. Each epic has exactly 1 feature. Each feature has exactly 2 tasks. Each task has exactly 2 subtasks. Keep all text values concise.`
+Generate exactly 2 initiatives. Each initiative has exactly 2 epics. Each epic has exactly 1 feature. Each feature has exactly 2 tasks. Each task has exactly 2 subtasks. The technical detail in steps and processes must be specific to the "${title}" project domain — use real technology names, real command patterns, real file names, and real expected outputs that match this specific project.`
         }
       ],
-      max_tokens: 4000,
-      temperature: 0.7,
+      max_tokens: 12000,
+      temperature: 0.65,
     });
 
-    const content = response.choices[0]?.message?.content || "";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return res.status(500).json({ error: "Failed to parse AI response" });
+    const choice = response.choices[0];
+    if (choice?.finish_reason === "length") {
+      console.error("[Udyog AI] Response truncated by token limit");
+      return res.status(500).json({ error: "AI response was too long. Please use a shorter title or reduce requirements." });
     }
-    const parsed = JSON.parse(jsonMatch[0]);
+    const content = choice?.message?.content || "";
+    let parsed: any;
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return res.status(500).json({ error: "Failed to parse AI response" });
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch (parseErr: any) {
+      console.error("[Udyog AI] JSON parse error:", parseErr?.message);
+      return res.status(500).json({ error: "AI generated invalid JSON. Please try again." });
+    }
     res.json(parsed);
   } catch (error) {
     console.error("[Udyog AI] Error generating internship:", error);

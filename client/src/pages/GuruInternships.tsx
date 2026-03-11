@@ -1669,7 +1669,7 @@ export default function GuruInternships() {
               <Sparkles className="w-5 h-5 text-purple-500" />
               AI Internship Builder
             </DialogTitle>
-            <DialogDescription>Enter a title and skill level - AI will generate the full internship with tasks</DialogDescription>
+            <DialogDescription>Enter a title and skill level — AI generates a complete project guide with exact commands, steps, checklists, and deployment instructions</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
