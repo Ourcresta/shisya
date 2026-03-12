@@ -51,3 +51,7 @@ LEGAL_EMAIL = "legal@ourshiksha.com"
 COMPANY_LOCATION = "Mumbai, Maharastra, India"
 ADMIN_DATABASE_URL = "postgresql://postgres:password@helium/heliumdb?sslmode=disable"
 DATABASE_URL_OS = "postgresql://neondb_owner:npg_ml54UeIOaZpW@ep-withered-surf-ailtyoqd-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
