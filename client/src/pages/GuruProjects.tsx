@@ -232,7 +232,7 @@ export default function GuruProjects() {
     const requirementsData = tasks.length > 0 ? JSON.stringify(tasks) : (aiResult.requirements || null);
     const allTools = aiResult.tools || [];
     const resourcesData = allTools.length > 0
-      ? allTools.map(t => `\u2022 ${t}`).join("\n")
+      ? allTools.map((t: string) => t.split(" (")[0].trim()).join("\n")
       : (aiResult.resources || null);
     createMutation.mutate({
       courseId: aiSelectedCourseId,
