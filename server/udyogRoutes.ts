@@ -1502,6 +1502,17 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
       mastery: "Expert/Principal level. Duration: 12 weeks. Production-grade project with full architecture, team leadership, and live deployment.",
     };
 
+    const freeToolsGuide = `Free tools students MUST use (always recommend these over paid alternatives):
+- Frontend hosting: Vercel (vercel.com) — free tier, deploy with \`npx vercel\`
+- Backend hosting: Railway (railway.app) or Render (render.com) — free tier
+- Database: Neon (neon.tech) — free PostgreSQL, or Supabase (supabase.com) — free PostgreSQL + auth
+- Auth: Clerk (clerk.com) free tier, or NextAuth.js (free, self-hosted)
+- Email: Resend (resend.com) free 3000 emails/month, or Nodemailer with Gmail SMTP
+- File uploads: Cloudinary (cloudinary.com) free 25GB, or Uploadthing (uploadthing.com) free
+- Version control: GitHub (github.com) — free repos, GitHub Actions for CI/CD
+- AI/ML: Groq (groq.com) free API, or Hugging Face (huggingface.co) free inference
+- Monitoring: Vercel Analytics (free), or LogSnag free tier`;
+
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4.1",
@@ -1509,131 +1520,169 @@ udyogRouter.post("/admin/ai/generate-internship", async (req: Request, res: Resp
       messages: [
         {
           role: "system",
-          content: `You are a senior software engineering mentor and curriculum designer for "Our Udyog", a professional AI-powered virtual internship platform. You write complete, production-quality project guidance that a student can follow from zero to a deployed live product without needing external resources. Every instruction must be specific, actionable, and technically accurate — include exact terminal commands, precise file paths, actual code patterns, expected console output, and concrete verification steps. Never write vague instructions like "set up the database" — instead write exactly what command to run, exactly what file to create, exactly what the output should look like. Output ONLY a valid JSON object, no markdown fences, no extra text.`
+          content: `You are a senior software engineering mentor for "Our Udyog", an AI-powered virtual internship platform for students. You create complete, practical project guides that students can follow from zero to a deployed live product using only FREE tools. Every step must include exact terminal commands, real file paths, real expected output, and free tool names with their URLs. Never use paid services. Never be vague — always write exactly what to type, click, or run. Output ONLY a valid JSON object, no markdown fences, no extra text.`
         },
         {
           role: "user",
-          content: `Create a complete professional virtual internship guide for:
+          content: `Create a complete virtual internship project guide for students:
 Title: "${title}"
 Skill Level: ${skillLevel} — ${levelGuide[skillLevel] || levelGuide.beginner}
 ${extraInstructions ? `Admin requirements: ${extraInstructions}\n` : ""}
-Return exactly this JSON structure:
+
+${freeToolsGuide}
+
+Return EXACTLY this JSON structure (no extra fields, no markdown):
 
 {
   "title": "${title}",
-  "description": "3 detailed paragraphs covering: (1) the real-world problem this project solves and its industry importance, (2) the full technology stack with version recommendations and why each technology was chosen, (3) what the final product will do and how it is architected",
-  "shortDescription": "compelling one-liner max 80 chars",
+  "description": "2 paragraphs: (1) what real-world problem this project solves and why it matters for companies today. (2) the complete tech stack using only free tools — framework, database, hosting, and why each was chosen for this project.",
+  "shortDescription": "compelling one-liner under 80 chars",
   "skillLevel": "${skillLevel}",
-  "domain": "specific domain name",
+  "domain": "specific domain e.g. Web Development, Data Engineering, AI/ML",
   "duration": "X weeks",
-  "requiredSkills": "comma-separated prerequisite skills with proficiency notes",
-  "milestones": "Week 1: X, Week 2: Y, Week 3: Z, Week 4: A, Week 5: B",
+  "requiredSkills": "comma-separated list of skills students need before starting",
+  "milestones": "Week 1: milestone, Week 2: milestone, Week 3: milestone",
   "batchSize": 5,
 
-  "introduction": "3 detailed paragraphs: paragraph 1 — the real-world problem, industry context, and why companies need this solution today. Paragraph 2 — the full tech stack, tools, frameworks, and development environment with specific version numbers. Paragraph 3 — how the team of 5 is structured (Team Lead: architecture & PR reviews, Developer 1: frontend, Developer 2: backend/API, QA: testing & bug reporting, DevOps: deployment), communication workflow, and what success metrics look like.",
+  "introduction": "2 paragraphs: (1) The real-world problem this project solves with specific industry context — which companies face this problem, why it matters, and what a working solution enables. (2) The full technology stack with exact versions: framework, database (Neon/Supabase), hosting (Vercel/Railway/Render), auth (Clerk/NextAuth), email (Resend), and any domain-specific tools — explain why each free tool was chosen.",
 
-  "goal": "3 sentences: sentence 1 — exactly what the student will have built and deployed by the end. Sentence 2 — the specific technical skills they will have mastered (be explicit about technologies and patterns). Sentence 3 — how this project positions them for junior/mid-level roles and what they can say in interviews.",
+  "goal": "2 sentences: (1) exactly what the student will have built and deployed live by the end — name the specific features and the live URL format. (2) the specific technical skills mastered and how this project helps them land a junior developer role.",
 
-  "initiatives": [
+  "features": [
     {
-      "title": "Initiative 1: [Phase Title]",
-      "description": "2 sentences: what this phase achieves and what deliverables mark it as complete",
-      "epics": [
+      "title": "Feature 1: [specific feature name]",
+      "description": "1-2 sentences describing exactly what this feature does and what problem it solves for users",
+      "tasks": [
         {
-          "title": "Epic 1.1: [Topic]",
-          "description": "2 sentences: the problem this epic solves and how it fits into the overall project",
-          "features": [
-            {
-              "title": "Feature 1.1.1: [Feature Name]",
-              "description": "2 sentences: what this feature does functionally and technically",
-              "tasks": [
-                {
-                  "title": "Task: [specific action verb + measurable outcome]",
-                  "description": "2 sentences: what this task produces and how to know it is done correctly",
-                  "taskProcess": "A detailed 4-5 sentence technical explanation covering: the exact workflow to follow, which files to create or modify and in what order, which tools or commands to use at each stage, common mistakes to avoid, and the specific criteria that confirm this task is complete",
-                  "orderIndex": 1,
-                  "subtasks": [
-                    {
-                      "title": "Subtask: [atomic technical action]",
-                      "description": "1-2 sentences describing exactly what this subtask accomplishes",
-                      "subtaskProcess": "A precise 3-4 sentence technical walkthrough: name the exact tools/libraries involved, describe the exact sequence of operations, specify what files are created/modified and their purpose, explain how to verify the result is correct",
-                      "steps": [
-                        "Step 1: [exact terminal command or file creation instruction] — expected output: [what you should see in the terminal or browser]",
-                        "Step 2: [next exact action with precise file path, function name, or config key] — example: [show concrete value or code pattern]",
-                        "Step 3: [verification action] — confirm by: [what to look for in terminal output, browser console, or file contents]",
-                        "Step 4: [commit or save step] — run: [exact git command or save action] — result: [expected confirmation]"
-                      ],
-                      "checklist": [
-                        "[ ] [specific verifiable item with exact file or output to check]",
-                        "[ ] [second verifiable item]",
-                        "[ ] [third verifiable item — functional test or command that should return X]",
-                        "[ ] [fourth verifiable item — code committed / PR ready]"
-                      ],
-                      "orderIndex": 1
-                    },
-                    {
-                      "title": "Subtask 2: [next atomic action]",
-                      "description": "1-2 sentences",
-                      "subtaskProcess": "3-4 sentence precise technical walkthrough",
-                      "steps": [
-                        "Step 1: [exact command] — expected: [result]",
-                        "Step 2: [exact action] — example: [value or pattern]",
-                        "Step 3: [verify] — confirm by: [what to look for]",
-                        "Step 4: [save/commit] — run: [command]"
-                      ],
-                      "checklist": [
-                        "[ ] [verifiable item 1]",
-                        "[ ] [verifiable item 2]",
-                        "[ ] [verifiable item 3]",
-                        "[ ] [verifiable item 4]"
-                      ],
-                      "orderIndex": 2
-                    }
-                  ]
-                },
-                {
-                  "title": "Task 2: [action + outcome]",
-                  "description": "2 sentences",
-                  "taskProcess": "4-5 sentence detailed technical explanation",
-                  "orderIndex": 2,
-                  "subtasks": [
-                    {
-                      "title": "Subtask: [atomic action]",
-                      "description": "1-2 sentences",
-                      "subtaskProcess": "3-4 sentence precise walkthrough",
-                      "steps": ["Step 1: [command] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [verify] — confirm by: [what]", "Step 4: [commit]"],
-                      "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
-                      "orderIndex": 1
-                    },
-                    {
-                      "title": "Subtask 2: [action]",
-                      "description": "1-2 sentences",
-                      "subtaskProcess": "3-4 sentence precise walkthrough",
-                      "steps": ["Step 1: [command] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [verify] — confirm by: [what]", "Step 4: [commit]"],
-                      "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
-                      "orderIndex": 2
-                    }
-                  ]
-                }
-              ],
-              "practice": "A self-directed practice challenge with a specific deliverable: describe exactly what to build independently, name the exact technologies to use, specify what the output should look like, and state what file or screenshot to submit as proof of completion"
-            }
-          ]
+          "title": "Task 1: [action verb + specific outcome]",
+          "description": "1-2 sentences: what this task produces and the concrete done criteria",
+          "tools": ["ToolName1 (url)", "ToolName2 (url)"],
+          "process": "3-4 sentence step-by-step overview: what to do first, what files to create, what commands to run in sequence, and how to know it worked",
+          "steps": [
+            "Step 1: [exact terminal command or action] — expected output: [what appears in terminal/browser]",
+            "Step 2: [exact file path and what to write or edit] — example: [show real value or code snippet]",
+            "Step 3: [next exact command or browser action] — confirm by: [specific thing to check]",
+            "Step 4: [verification step] — run: [command] — result: [expected output]",
+            "Step 5: [git commit or deploy step] — run: git add . && git commit -m 'feat: [description]' — result: [expected output]"
+          ],
+          "checklist": [
+            "[ ] [specific file exists at exact path]",
+            "[ ] [command output or API response matches expected value]",
+            "[ ] [feature visible and working in browser at localhost:PORT]",
+            "[ ] [code committed to GitHub with meaningful commit message]"
+          ],
+          "practice": "Build [specific thing] independently using [specific free tools]. Expected output: [what it should look like or return]. Submit: [exact file or screenshot to submit]."
+        },
+        {
+          "title": "Task 2: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": [
+            "Step 1: [exact command] — expected output: [result]",
+            "Step 2: [exact action] — example: [value]",
+            "Step 3: [next action] — confirm by: [check]",
+            "Step 4: [verify] — run: [command] — result: [output]",
+            "Step 5: [commit] — run: git add . && git commit -m 'feat: [msg]'"
+          ],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing] independently. Submit: [deliverable]."
+        },
+        {
+          "title": "Task 3: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": [
+            "Step 1: [command] — expected: [result]",
+            "Step 2: [action] — example: [value]",
+            "Step 3: [next] — confirm by: [check]",
+            "Step 4: [verify] — run: [cmd]",
+            "Step 5: [commit]"
+          ],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing] independently. Submit: [deliverable]."
+        }
+      ]
+    },
+    {
+      "title": "Feature 2: [feature name]",
+      "description": "1-2 sentences",
+      "tasks": [
+        {
+          "title": "Task 1: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [next] — confirm by: [check]", "Step 4: [verify] — run: [cmd]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
+        },
+        {
+          "title": "Task 2: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd] — expected: [result]", "Step 2: [action] — example: [value]", "Step 3: [next] — confirm by: [check]", "Step 4: [verify]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
+        },
+        {
+          "title": "Task 3: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd] — expected: [result]", "Step 2: [action]", "Step 3: [next]", "Step 4: [verify]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
+        }
+      ]
+    },
+    {
+      "title": "Feature 3: [feature name]",
+      "description": "1-2 sentences",
+      "tasks": [
+        {
+          "title": "Task 1: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd] — expected: [result]", "Step 2: [action]", "Step 3: [next]", "Step 4: [verify]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
+        },
+        {
+          "title": "Task 2: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd]", "Step 2: [action]", "Step 3: [next]", "Step 4: [verify]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
+        },
+        {
+          "title": "Task 3: [action + outcome]",
+          "description": "1-2 sentences",
+          "tools": ["ToolName (url)"],
+          "process": "3-4 sentence overview",
+          "steps": ["Step 1: [cmd]", "Step 2: [action]", "Step 3: [next]", "Step 4: [verify]", "Step 5: [commit]"],
+          "checklist": ["[ ] item 1", "[ ] item 2", "[ ] item 3", "[ ] item 4"],
+          "practice": "Build [thing]. Submit: [deliverable]."
         }
       ]
     }
   ],
 
-  "finalIntegration": "A detailed 4-paragraph integration guide: paragraph 1 — list every component that needs to connect and describe the data flow between them in sequence. Paragraph 2 — step-by-step connection instructions with exact environment variables, API endpoints, and configuration keys to wire up. Paragraph 3 — how to run a complete end-to-end test covering every feature (list the specific test scenarios). Paragraph 4 — common integration failures and their exact fixes.",
+  "finalIntegration": "3 paragraphs: (1) How all 3 features connect — describe the data flow from user action through each feature to the database and back. (2) Exact steps to wire everything together: environment variables to set, how frontend calls backend, how backend connects to Neon/Supabase database — include example .env keys. (3) Run the full project locally: the exact commands to start frontend and backend, the 5 specific user journeys to test end-to-end before deploying.",
 
-  "testing": "A comprehensive 3-paragraph testing strategy: paragraph 1 — unit testing setup (exact framework, config command, and 3 example test cases with actual function signatures). Paragraph 2 — integration and API testing (tool, how to set up test database, 3 specific endpoint test scenarios with expected status codes and response shapes). Paragraph 3 — manual QA checklist (8-10 user journeys to manually verify before deployment, with pass/fail criteria).",
+  "testing": "2 paragraphs: (1) Manual testing checklist — list 8 specific user journeys to test in the browser with exact expected outcomes (what to click, what should appear). (2) How to test API endpoints using curl or Thunder Client (VS Code extension, free) — give 3 specific curl commands with expected JSON responses.",
 
-  "deployment": "A step-by-step deployment guide in 4 paragraphs: paragraph 1 — recommended hosting platform with rationale, account setup steps, and project configuration. Paragraph 2 — environment variables to configure (list each variable name, what value to set, and where to get it). Paragraph 3 — exact build and deploy commands in sequence with expected output after each command. Paragraph 4 — post-deployment verification steps (5 specific things to test on the live URL to confirm successful deployment).",
+  "deployment": "3 paragraphs: (1) Deploy frontend to Vercel: run 'npm run build' then 'npx vercel --prod', set environment variables in Vercel dashboard (list exact variable names), confirm live URL format. (2) Deploy backend to Railway or Render: push to GitHub, connect repo, set environment variables (list each one), confirm deployment URL. (3) Post-deployment checklist: 5 specific things to test on the live URL to confirm everything works.",
 
-  "liveProjectOutput": "A 3-paragraph description of the final deliverable: paragraph 1 — what the live application does (list every working feature a user can interact with). Paragraph 2 — how to demo it effectively (the exact 5-step demo flow to show stakeholders, with which features to highlight and what to say). Paragraph 3 — how to write the portfolio entry (provide an actual portfolio description template they can use, listing technologies, your role, key challenges solved, and measurable outcomes)."
+  "liveProjectOutput": "2 paragraphs: (1) What the live app does — list every feature a user can interact with, the live URL format (e.g. https://project-name.vercel.app), and any admin features. (2) Portfolio entry template: 'Built [project name] — a [description] using [tech stack]. Deployed at [url]. Implemented [feature 1], [feature 2], [feature 3]. Solved [specific challenge]. Tech: [list all tools used].'"
 }
 
-Generate exactly 2 initiatives. Each initiative has exactly 2 epics. Each epic has exactly 1 feature. Each feature has exactly 2 tasks. Each task has exactly 2 subtasks. The technical detail in steps and processes must be specific to the "${title}" project domain — use real technology names, real command patterns, real file names, and real expected outputs that match this specific project.`
+Generate exactly 3 features. Each feature has exactly 3 tasks. Each task must have exactly 5 steps and 4 checklist items. Always use free tools (Vercel, Neon, Railway, Render, Clerk, Resend, Cloudinary, GitHub). Make steps technically specific to "${title}" — use real command names, real file paths, real expected outputs for this exact project domain.`
         }
       ],
       max_tokens: 12000,
