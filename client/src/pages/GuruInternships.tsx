@@ -63,6 +63,15 @@ import {
   ChevronDown,
   ChevronRight,
   ListTree,
+  Wrench,
+  BookOpen,
+  Rocket,
+  Clock,
+  Code2,
+  LayoutList,
+  GraduationCap,
+  ClipboardList,
+  Zap,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -224,6 +233,9 @@ export default function GuruInternships() {
   const [expandedAdminTaskIds, setExpandedAdminTaskIds] = useState<Set<number>>(new Set());
   const [subtaskForms, setSubtaskForms] = useState<Record<number, { title: string; description: string }>>({});
   const [expandedPreviewNodes, setExpandedPreviewNodes] = useState<Set<string>>(new Set());
+  const [expandedGuideFeatures, setExpandedGuideFeatures] = useState<Set<number>>(new Set([0]));
+  const [expandedGuideTasks, setExpandedGuideTasks] = useState<Set<string>>(new Set());
+  const [showProjectGuide, setShowProjectGuide] = useState(true);
 
   const togglePreviewNode = (key: string) => {
     setExpandedPreviewNodes((prev) => {
@@ -264,7 +276,7 @@ export default function GuruInternships() {
     queryKey: ["/api/udyog/admin/internships"],
   });
 
-  const { data: internshipDetail } = useQuery<{ tasks: Task[] }>({
+  const { data: internshipDetail } = useQuery<Internship & { tasks: Task[]; projectStructure?: string | null; introduction?: string | null; goal?: string | null; finalIntegration?: string | null; testing?: string | null; deployment?: string | null; liveProjectOutput?: string | null; requiredSkills?: string | null; milestones?: string | null; batchSize?: number | null }>({
     queryKey: ["/api/udyog/internships", selectedInternshipId],
     enabled: !!selectedInternshipId,
   });
@@ -763,7 +775,7 @@ export default function GuruInternships() {
           <div className="flex items-center gap-4 flex-wrap">
             <div className="w-72">
               <Label>Select Internship</Label>
-              <Select value={selectedInternshipId} onValueChange={setSelectedInternshipId}>
+              <Select value={selectedInternshipId} onValueChange={(v) => { setSelectedInternshipId(v); setExpandedGuideFeatures(new Set([0])); setExpandedGuideTasks(new Set()); setShowProjectGuide(true); }}>
                 <SelectTrigger data-testid="select-internship-for-tasks">
                   <SelectValue placeholder="Choose an internship" />
                 </SelectTrigger>
@@ -778,8 +790,287 @@ export default function GuruInternships() {
             </div>
           </div>
 
-          {selectedInternshipId ? (
+          {selectedInternshipId ? (() => {
+            const parsedStructure = (() => {
+              try { return internshipDetail?.projectStructure ? JSON.parse(internshipDetail.projectStructure) : null; } catch { return null; }
+            })();
+            const guideFeatures: any[] = parsedStructure?.features || [];
+            const featurePalettes = [
+              { border: "border-teal-500", bg: "bg-teal-500/10", text: "text-teal-700 dark:text-teal-400", badge: "bg-teal-500/20 text-teal-700 dark:text-teal-300", dot: "bg-teal-500" },
+              { border: "border-blue-500", bg: "bg-blue-500/10", text: "text-blue-700 dark:text-blue-400", badge: "bg-blue-500/20 text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
+              { border: "border-purple-500", bg: "bg-purple-500/10", text: "text-purple-700 dark:text-purple-400", badge: "bg-purple-500/20 text-purple-700 dark:text-purple-300", dot: "bg-purple-500" },
+            ];
+            return (
             <div className="space-y-4">
+
+              {/* Internship Overview Header */}
+              {internshipDetail && (
+                <Card className="border-l-4 border-l-primary" data-testid="internship-overview-header">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-base truncate" data-testid="text-detail-title">{internshipDetail.title}</h3>
+                        {internshipDetail.goal && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{internshipDetail.goal}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <Badge variant="outline" className="capitalize gap-1">
+                          <GraduationCap className="w-3 h-3" />
+                          {internshipDetail.skillLevel}
+                        </Badge>
+                        {internshipDetail.domain && (
+                          <Badge variant="outline" className="gap-1">
+                            <Code2 className="w-3 h-3" />
+                            {internshipDetail.domain}
+                          </Badge>
+                        )}
+                        {internshipDetail.duration && (
+                          <Badge variant="outline" className="gap-1">
+                            <Clock className="w-3 h-3" />
+                            {internshipDetail.duration}
+                          </Badge>
+                        )}
+                        {guideFeatures.length > 0 && (
+                          <Badge className="gap-1 bg-primary/10 text-primary border-primary/30">
+                            <LayoutList className="w-3 h-3" />
+                            {guideFeatures.length} Features · {guideFeatures.reduce((a: number, f: any) => a + (f.tasks?.length || 0), 0)} Tasks
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* AI Project Guide */}
+              {guideFeatures.length > 0 && (
+                <div className="space-y-3" data-testid="project-guide-section">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold text-sm">AI Project Guide</h3>
+                      <Badge variant="secondary" className="text-xs">{guideFeatures.length} Features</Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowProjectGuide(v => !v)}
+                      className="text-xs text-muted-foreground h-7"
+                      data-testid="button-toggle-project-guide"
+                    >
+                      {showProjectGuide ? <><ChevronDown className="w-3 h-3 mr-1" />Hide Guide</> : <><ChevronRight className="w-3 h-3 mr-1" />Show Guide</>}
+                    </Button>
+                  </div>
+
+                  {showProjectGuide && (
+                    <div className="space-y-3">
+                      {guideFeatures.map((feature: any, fi: number) => {
+                        const pal = featurePalettes[fi % featurePalettes.length];
+                        const isFeatureOpen = expandedGuideFeatures.has(fi);
+                        const tasks: any[] = feature.tasks || [];
+                        return (
+                          <div key={fi} className={`rounded-xl border-2 ${pal.border} overflow-hidden`} data-testid={`guide-feature-${fi}`}>
+                            <button
+                              type="button"
+                              className={`w-full flex items-center gap-3 p-4 text-left ${pal.bg} hover:brightness-95 transition-all`}
+                              onClick={() => setExpandedGuideFeatures(prev => {
+                                const next = new Set(prev);
+                                next.has(fi) ? next.delete(fi) : next.add(fi);
+                                return next;
+                              })}
+                            >
+                              <div className={`w-6 h-6 rounded-full ${pal.dot} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                                {fi + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-semibold text-sm ${pal.text}`}>{feature.title}</p>
+                                {feature.description && !isFeatureOpen && (
+                                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{feature.description}</p>
+                                )}
+                              </div>
+                              <Badge variant="outline" className={`text-xs shrink-0 ${pal.badge}`}>
+                                {tasks.length} task{tasks.length !== 1 ? "s" : ""}
+                              </Badge>
+                              {isFeatureOpen
+                                ? <ChevronDown className={`w-4 h-4 shrink-0 ${pal.text}`} />
+                                : <ChevronRight className={`w-4 h-4 shrink-0 text-muted-foreground`} />
+                              }
+                            </button>
+
+                            {isFeatureOpen && (
+                              <div className="p-3 space-y-2 bg-background/60">
+                                {feature.description && (
+                                  <p className="text-sm text-muted-foreground px-1 pb-1 border-b">{feature.description}</p>
+                                )}
+                                {tasks.map((task: any, ti: number) => {
+                                  const taskKey = `${fi}-${ti}`;
+                                  const isTaskOpen = expandedGuideTasks.has(taskKey);
+                                  return (
+                                    <div key={ti} className="rounded-lg border border-amber-200 dark:border-amber-800 overflow-hidden" data-testid={`guide-task-${fi}-${ti}`}>
+                                      <button
+                                        type="button"
+                                        className="w-full flex items-center gap-3 p-3 text-left bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                                        onClick={() => setExpandedGuideTasks(prev => {
+                                          const next = new Set(prev);
+                                          next.has(taskKey) ? next.delete(taskKey) : next.add(taskKey);
+                                          return next;
+                                        })}
+                                      >
+                                        <div className="w-5 h-5 rounded bg-amber-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                          {ti + 1}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-sm text-amber-800 dark:text-amber-200">{task.title}</p>
+                                          {(task.tools || []).length > 0 && !isTaskOpen && (
+                                            <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                              {(task.tools || []).slice(0, 3).map((tool: string, tli: number) => (
+                                                <span key={tli} className="text-xs bg-teal-500/15 text-teal-700 dark:text-teal-300 px-1.5 py-0.5 rounded">
+                                                  {tool.split(" (")[0]}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                        {isTaskOpen
+                                          ? <ChevronDown className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                                          : <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                                        }
+                                      </button>
+
+                                      {isTaskOpen && (
+                                        <div className="p-4 space-y-4 bg-background">
+                                          {/* Tool Badges */}
+                                          {(task.tools || []).length > 0 && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                                <Wrench className="w-3 h-3" /> Tools
+                                              </p>
+                                              <div className="flex flex-wrap gap-1.5">
+                                                {(task.tools || []).map((tool: string, tli: number) => {
+                                                  const [name, urlPart] = tool.split(" (");
+                                                  const url = urlPart ? urlPart.replace(")", "") : null;
+                                                  return url ? (
+                                                    <a key={tli} href={url} target="_blank" rel="noopener noreferrer"
+                                                      className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                                                      {name}
+                                                    </a>
+                                                  ) : (
+                                                    <span key={tli} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                                                      {name}
+                                                    </span>
+                                                  );
+                                                })}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Process */}
+                                          {task.process && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                                <BookOpen className="w-3 h-3" /> Process
+                                              </p>
+                                              <p className="text-sm text-foreground/80 leading-relaxed bg-muted/40 rounded-lg p-3">{task.process}</p>
+                                            </div>
+                                          )}
+
+                                          {/* Steps */}
+                                          {(task.steps || []).length > 0 && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                                <ClipboardList className="w-3 h-3" /> Steps
+                                              </p>
+                                              <div className="space-y-2">
+                                                {(task.steps || []).map((step: string, si: number) => (
+                                                  <div key={si} className="flex gap-3 items-start">
+                                                    <div className="w-6 h-6 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                                      {si + 1}
+                                                    </div>
+                                                    <p className="text-sm text-foreground/80 leading-snug font-mono text-xs bg-slate-50 dark:bg-slate-900 border rounded p-2 flex-1">
+                                                      {step}
+                                                    </p>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Checklist */}
+                                          {(task.checklist || []).length > 0 && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                                <CheckCircle className="w-3 h-3 text-green-600" /> Checklist
+                                              </p>
+                                              <div className="space-y-1 bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
+                                                {(task.checklist || []).map((item: string, ci: number) => (
+                                                  <div key={ci} className="flex items-start gap-2 text-sm">
+                                                    <CheckCircle className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+                                                    <span className="text-foreground/80">{item.replace(/^\[\s*\]\s*/, "")}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Practice */}
+                                          {task.practice && (
+                                            <div className="space-y-1">
+                                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                                <Zap className="w-3 h-3 text-purple-600" /> Practice Exercise
+                                              </p>
+                                              <p className="text-sm italic text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-lg p-3 leading-relaxed">
+                                                {task.practice}
+                                              </p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Closing Sections */}
+                      {(internshipDetail?.finalIntegration || internshipDetail?.testing || internshipDetail?.deployment) && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                          {internshipDetail.finalIntegration && (
+                            <div className="rounded-lg border p-3 bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-800">
+                              <p className="text-xs font-semibold text-sky-700 dark:text-sky-300 flex items-center gap-1 mb-1"><Rocket className="w-3 h-3" />Final Integration</p>
+                              <p className="text-xs text-foreground/70 line-clamp-3">{internshipDetail.finalIntegration}</p>
+                            </div>
+                          )}
+                          {internshipDetail.testing && (
+                            <div className="rounded-lg border p-3 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+                              <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-1 mb-1"><ClipboardList className="w-3 h-3" />Testing</p>
+                              <p className="text-xs text-foreground/70 line-clamp-3">{internshipDetail.testing}</p>
+                            </div>
+                          )}
+                          {internshipDetail.deployment && (
+                            <div className="rounded-lg border p-3 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800">
+                              <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1 mb-1"><Rocket className="w-3 h-3" />Deployment</p>
+                              <p className="text-xs text-foreground/70 line-clamp-3">{internshipDetail.deployment}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Kanban Task Management */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="font-semibold text-sm">Kanban Tasks</h3>
+                  <Badge variant="secondary" className="text-xs">{internshipDetail?.tasks?.length || 0} tasks</Badge>
+                </div>
+
               <Card>
                 <CardContent className="p-4 space-y-4">
                   <h3 className="font-semibold" data-testid="text-add-task-title">Add New Task</h3>
@@ -942,26 +1233,39 @@ export default function GuruInternships() {
                   })}
                 </div>
               ) : (
-                <Card data-testid="empty-tasks">
-                  <CardContent className="p-8 text-center">
-                    <ListChecks className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-muted-foreground">
-                      No tasks for this internship yet. Add your first task above.
+                <Card data-testid="empty-tasks" className="border-dashed">
+                  <CardContent className="p-10 text-center">
+                    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                      <ListChecks className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <p className="font-semibold text-base mb-1">No Kanban tasks yet</p>
+                    <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+                      {guideFeatures.length > 0
+                        ? "This internship has an AI project guide above. Tasks are auto-created when you generate an internship with the AI Builder."
+                        : "Add your first task using the form above, or generate a full project plan with the AI Builder."}
                     </p>
+                    {guideFeatures.length === 0 && (
+                      <Button variant="outline" size="sm" onClick={() => setAiBuilderOpen(true)} data-testid="button-open-ai-builder-from-empty">
+                        <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                        Open AI Builder
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
+              </div>
             </div>
-          ) : (
-            <Card data-testid="no-internship-selected">
-              <CardContent className="p-8 text-center">
-                <Briefcase className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">
-                  Select an internship to manage its tasks.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          );
+        })() : (
+          <Card data-testid="no-internship-selected">
+            <CardContent className="p-8 text-center">
+              <Briefcase className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">
+                Select an internship to manage its tasks.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         </TabsContent>
 
         <TabsContent value="submissions" className="space-y-4">
