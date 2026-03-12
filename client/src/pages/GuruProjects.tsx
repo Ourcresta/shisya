@@ -230,7 +230,14 @@ export default function GuruProjects() {
     if (!aiResult || !aiSelectedCourseId) return;
     const tasks = aiResult.tasks || [];
     const requirementsData = tasks.length > 0 ? JSON.stringify(tasks) : (aiResult.requirements || null);
-    const allTools = aiResult.tools || [];
+    let allTools = aiResult.tools || [];
+    if (allTools.length === 0 && Array.isArray(aiResult.tasks)) {
+      const taskToolSet = new Set<string>();
+      aiResult.tasks.forEach((t: any) => {
+        if (Array.isArray(t.tools)) t.tools.forEach((tool: string) => taskToolSet.add(tool));
+      });
+      allTools = Array.from(taskToolSet);
+    }
     const resourcesData = allTools.length > 0
       ? allTools.map((t: string) => t.split(" (")[0].trim()).join("\n")
       : (aiResult.resources || null);
