@@ -57,6 +57,28 @@ export async function registerRoutes(
   // Seed Guru admin user
   seedGuruAdmin();
 
+  // Run DB migrations for udyog_internships extended fields
+  (async () => {
+    try {
+      const { pool } = await import("./db");
+      await pool.query(`
+        ALTER TABLE udyog_internships
+          ADD COLUMN IF NOT EXISTS introduction TEXT,
+          ADD COLUMN IF NOT EXISTS goal TEXT,
+          ADD COLUMN IF NOT EXISTS project_structure TEXT,
+          ADD COLUMN IF NOT EXISTS final_integration TEXT,
+          ADD COLUMN IF NOT EXISTS testing TEXT,
+          ADD COLUMN IF NOT EXISTS deployment TEXT,
+          ADD COLUMN IF NOT EXISTS live_project_output TEXT;
+        ALTER TABLE udyog_internships
+          ALTER COLUMN skill_level TYPE VARCHAR(30);
+      `);
+      console.log("[Migration] udyog_internships columns ensured");
+    } catch (err: any) {
+      console.error("[Migration] udyog_internships migration error:", err.message);
+    }
+  })();
+
   // Seed default credit packs if table is empty
   (async () => {
     try {
