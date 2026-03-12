@@ -554,7 +554,36 @@ udyogRouter.delete("/admin/internships/:id", async (req: Request, res: Response)
     if (!existing) {
       return res.status(404).json({ error: "Internship not found" });
     }
-    await db.delete(udyogInternships).where(eq(udyogInternships.id, id));
+    await db.transaction(async (tx) => {
+      const taskIds = (await tx.select({ id: udyogTasks.id }).from(udyogTasks).where(eq(udyogTasks.internshipId, id))).map(t => t.id);
+
+      if (taskIds.length > 0) {
+        await tx.delete(udyogSubtasks).where(inArray(udyogSubtasks.taskId, taskIds));
+        await tx.delete(udyogSubmissions).where(inArray(udyogSubmissions.taskId, taskIds));
+      }
+
+      await tx.delete(udyogTasks).where(eq(udyogTasks.internshipId, id));
+
+      const assignmentIds = (await tx.select({ id: udyogAssignments.id }).from(udyogAssignments).where(eq(udyogAssignments.internshipId, id))).map(a => a.id);
+
+      if (assignmentIds.length > 0) {
+        await tx.delete(udyogSubmissions).where(inArray(udyogSubmissions.assignmentId, assignmentIds));
+      }
+
+      await tx.delete(udyogAssignments).where(eq(udyogAssignments.internshipId, id));
+
+      await tx.delete(udyogCertificates).where(eq(udyogCertificates.internshipId, id));
+
+      const batchIds = (await tx.select({ id: udyogBatches.id }).from(udyogBatches).where(eq(udyogBatches.internshipId, id))).map(b => b.id);
+
+      if (batchIds.length > 0) {
+        await tx.delete(udyogBatchMembers).where(inArray(udyogBatchMembers.batchId, batchIds));
+      }
+
+      await tx.delete(udyogBatches).where(eq(udyogBatches.internshipId, id));
+      await tx.delete(udyogInternships).where(eq(udyogInternships.id, id));
+    });
+
     res.json({ message: "Internship deleted successfully" });
   } catch (error) {
     console.error("[Udyog Admin] Error deleting internship:", error);
