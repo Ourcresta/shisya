@@ -636,20 +636,29 @@ export async function registerRoutes(
       const { courseId } = req.params;
       const courseIdNum = parseInt(courseId, 10);
 
+      // Always fetch locally-created projects from DB
+      const localProjects = await db.select().from(projectsTable).where(eq(projectsTable.courseId, courseIdNum));
+
       if (USE_MOCK_DATA) {
-        const projects = mockProjects[courseIdNum] || [];
-        return res.json(projects);
+        const mockP = mockProjects[courseIdNum] || [];
+        return res.json([...mockP, ...localProjects]);
       }
 
-      const response = await fetchFromAdmin(`/courses/${courseId}/projects`);
-      if (!response.ok) {
-        console.log(`[AISiksha] Projects API failed, using mock data for course ${courseId}`);
-        const projects = mockProjects[courseIdNum] || [];
-        return res.json(projects);
+      let externalProjects: any[] = [];
+      try {
+        const response = await fetchFromAdmin(`/courses/${courseId}/projects`);
+        if (response.ok) {
+          const data = await response.json();
+          externalProjects = data.projects || data || [];
+        }
+      } catch {
+        // External API failed, fallback to mock for this course
+        externalProjects = mockProjects[courseIdNum] || [];
       }
-      const data = await response.json();
-      const projects = data.projects || data;
-      res.json(projects);
+
+      // Merge: external first, then local DB (local DB uses negative-range IDs won't clash)
+      const merged = [...externalProjects, ...localProjects];
+      res.json(merged);
     } catch (error) {
       console.error("Error fetching projects:", error);
       const courseIdNum = parseInt(req.params.courseId, 10);
@@ -663,6 +672,12 @@ export async function registerRoutes(
     try {
       const { projectId } = req.params;
       const projectIdNum = parseInt(projectId, 10);
+
+      // Check local DB first
+      const [localProject] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectIdNum));
+      if (localProject) {
+        return res.json(localProject);
+      }
 
       if (USE_MOCK_DATA) {
         const allProjects = getAllProjects();
