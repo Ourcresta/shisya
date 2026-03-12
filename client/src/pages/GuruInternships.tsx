@@ -844,7 +844,7 @@ export default function GuruInternships() {
               )}
 
               {/* AI Project Guide */}
-              {guideFeatures.length > 0 && (
+              {guideFeatures.length > 0 ? (
                 <div className="space-y-3" data-testid="project-guide-section">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1061,7 +1061,33 @@ export default function GuruInternships() {
                     </div>
                   )}
                 </div>
-              )}
+              ) : internshipDetail ? (
+                <Card className="border-dashed border-primary/30 bg-primary/5" data-testid="no-guide-prompt">
+                  <CardContent className="p-8 text-center">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-7 h-7 text-primary" />
+                    </div>
+                    <p className="font-bold text-base mb-1">No AI Project Guide Yet</p>
+                    <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
+                      This internship doesn't have an AI-generated project guide. Generate one to get a complete step-by-step plan with colour-coded Feature cards, Task accordions, tool badges, numbered steps, checklists, and practice exercises.
+                    </p>
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <Button
+                        onClick={() => {
+                          setAiTitle(internshipDetail.title);
+                          setAiSkillLevel(internshipDetail.skillLevel || "beginner");
+                          setAiBuilderOpen(true);
+                        }}
+                        data-testid="button-generate-guide"
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate AI Project Guide
+                      </Button>
+                      <p className="text-xs text-muted-foreground">Pre-filled with "{internshipDetail.title}"</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : null}
 
               {/* Kanban Task Management */}
               <div className="space-y-3">
