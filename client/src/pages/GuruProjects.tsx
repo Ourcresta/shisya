@@ -21,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, FolderKanban, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FolderKanban, Sparkles, Loader2, CheckCircle2, ChevronDown, ChevronRight, Wrench, BookOpen, ClipboardList, CheckCircle, Zap } from "lucide-react";
 import { AiGenerateDialog } from "@/components/guru/AiGenerateDialog";
 import { Label } from "@/components/ui/label";
 
@@ -63,13 +63,23 @@ const defaultForm: ProjectForm = {
   estimatedHours: "",
 };
 
+interface AIProjectTask {
+  title: string;
+  tools: string[];
+  process: string;
+  steps: string[];
+  checklist: string[];
+}
+
 interface AIGeneratedProject {
   title: string;
   description: string;
   difficulty: string;
-  requirements: string;
-  resources: string;
+  requirements?: string;
+  resources?: string;
   estimatedHours: number;
+  tools?: string[];
+  tasks?: AIProjectTask[];
 }
 
 export default function GuruProjects() {
@@ -85,6 +95,7 @@ export default function GuruProjects() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiResult, setAiResult] = useState<AIGeneratedProject | null>(null);
   const [aiSelectedCourseId, setAiSelectedCourseId] = useState<number | null>(null);
+  const [expandedPreviewTasks, setExpandedPreviewTasks] = useState<Set<number>>(new Set([0]));
 
   const { data: projectList, isLoading } = useQuery<ProjectItem[]>({
     queryKey: ["/api/guru/projects"],
@@ -205,6 +216,7 @@ export default function GuruProjects() {
       const data = await res.json();
       setAiResult(data);
       setAiSelectedCourseId(courseId);
+      setExpandedPreviewTasks(new Set([0]));
       setAiDialogOpen(false);
       setAiPreviewOpen(true);
     } catch (error: any) {
@@ -216,13 +228,19 @@ export default function GuruProjects() {
 
   const handleAiSave = () => {
     if (!aiResult || !aiSelectedCourseId) return;
+    const tasks = aiResult.tasks || [];
+    const requirementsData = tasks.length > 0 ? JSON.stringify(tasks) : (aiResult.requirements || null);
+    const allTools = aiResult.tools || [];
+    const resourcesData = allTools.length > 0
+      ? allTools.map(t => `\u2022 ${t}`).join("\n")
+      : (aiResult.resources || null);
     createMutation.mutate({
       courseId: aiSelectedCourseId,
       title: aiResult.title,
       description: aiResult.description,
       difficulty: aiResult.difficulty || "medium",
-      requirements: aiResult.requirements || null,
-      resources: aiResult.resources || null,
+      requirements: requirementsData,
+      resources: resourcesData,
       estimatedHours: aiResult.estimatedHours || null,
     });
     setAiPreviewOpen(false);
@@ -437,7 +455,7 @@ export default function GuruProjects() {
       />
 
       <Dialog open={aiPreviewOpen} onOpenChange={setAiPreviewOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle data-testid="text-ai-preview-project-title">
               <div className="flex items-center gap-2">
@@ -446,7 +464,7 @@ export default function GuruProjects() {
               </div>
             </DialogTitle>
             <DialogDescription>
-              Review the generated project. You can save it as-is or close and make manual changes.
+              Review the generated project with its structured tasks, steps, and tools. Save it or discard.
             </DialogDescription>
           </DialogHeader>
           {aiResult && (
@@ -475,18 +493,165 @@ export default function GuruProjects() {
                     {aiResult.estimatedHours} hours
                   </Badge>
                 )}
+                {(aiResult.tasks || []).length > 0 && (
+                  <Badge variant="secondary" className="no-default-hover-elevate no-default-active-elevate">
+                    {aiResult.tasks!.length} tasks
+                  </Badge>
+                )}
               </div>
               <div>
                 <Label className="text-muted-foreground text-xs">Description</Label>
                 <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-desc">{aiResult.description}</p>
               </div>
-              {aiResult.requirements && (
+
+              {(aiResult.tools || []).length > 0 && (
+                <div>
+                  <Label className="text-muted-foreground text-xs flex items-center gap-1 mb-1.5">
+                    <Wrench className="w-3 h-3" /> Free Tools Used
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5" data-testid="ai-preview-tools">
+                    {(aiResult.tools || []).map((tool, i) => {
+                      const [name, urlPart] = tool.split(" (");
+                      const url = urlPart ? urlPart.replace(")", "") : null;
+                      return url ? (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                          className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                          {name.trim()}
+                        </a>
+                      ) : (
+                        <span key={i} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                          {name.trim()}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {(aiResult.tasks || []).length > 0 && (
+                <div className="space-y-2" data-testid="ai-preview-tasks">
+                  <Label className="text-muted-foreground text-xs flex items-center gap-1">
+                    <ClipboardList className="w-3 h-3" /> Project Tasks
+                  </Label>
+                  {(aiResult.tasks || []).map((task, ti) => {
+                    const isOpen = expandedPreviewTasks.has(ti);
+                    return (
+                      <div key={ti} className="rounded-lg border border-amber-200 dark:border-amber-800 overflow-hidden" data-testid={`ai-preview-task-${ti}`}>
+                        <button
+                          type="button"
+                          className="w-full flex items-center gap-3 p-3 text-left bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                          onClick={() => setExpandedPreviewTasks(prev => {
+                            const next = new Set(prev);
+                            next.has(ti) ? next.delete(ti) : next.add(ti);
+                            return next;
+                          })}
+                        >
+                          <div className="w-5 h-5 rounded bg-amber-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                            {ti + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-amber-800 dark:text-amber-200">{task.title}</p>
+                            {(task.tools || []).length > 0 && !isOpen && (
+                              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                {(task.tools || []).slice(0, 3).map((tool, tli) => (
+                                  <span key={tli} className="text-xs bg-teal-500/15 text-teal-700 dark:text-teal-300 px-1.5 py-0.5 rounded">
+                                    {tool.split(" (")[0]}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {isOpen
+                            ? <ChevronDown className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                            : <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                          }
+                        </button>
+
+                        {isOpen && (
+                          <div className="p-4 space-y-4 bg-background">
+                            {(task.tools || []).length > 0 && (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                  <Wrench className="w-3 h-3" /> Tools
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {(task.tools || []).map((tool, tli) => {
+                                    const [name, urlPart] = tool.split(" (");
+                                    const url = urlPart ? urlPart.replace(")", "") : null;
+                                    return url ? (
+                                      <a key={tli} href={url} target="_blank" rel="noopener noreferrer"
+                                        className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                                        {name.trim()}
+                                      </a>
+                                    ) : (
+                                      <span key={tli} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                                        {name.trim()}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {task.process && (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                  <BookOpen className="w-3 h-3" /> Process
+                                </p>
+                                <p className="text-sm text-foreground/80 leading-relaxed bg-muted/40 rounded-lg p-3">{task.process}</p>
+                              </div>
+                            )}
+
+                            {(task.steps || []).length > 0 && (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                  <ClipboardList className="w-3 h-3" /> Steps
+                                </p>
+                                <div className="space-y-2">
+                                  {(task.steps || []).map((step, si) => (
+                                    <div key={si} className="flex gap-3 items-start">
+                                      <div className="w-6 h-6 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                        {si + 1}
+                                      </div>
+                                      <p className="text-foreground/80 leading-snug font-mono text-xs bg-slate-50 dark:bg-slate-900 border rounded p-2 flex-1">
+                                        {step}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {(task.checklist || []).length > 0 && (
+                              <div className="space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                                  <CheckCircle className="w-3 h-3 text-green-600" /> Checklist
+                                </p>
+                                <div className="space-y-1 bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
+                                  {(task.checklist || []).map((item, ci) => (
+                                    <div key={ci} className="flex items-start gap-2 text-sm">
+                                      <CheckCircle className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+                                      <span className="text-foreground/80">{item.replace(/^\[\s*\]\s*/, "")}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {aiResult.requirements && !(aiResult.tasks || []).length && (
                 <div>
                   <Label className="text-muted-foreground text-xs">Requirements</Label>
                   <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-reqs">{aiResult.requirements}</p>
                 </div>
               )}
-              {aiResult.resources && (
+              {aiResult.resources && !(aiResult.tools || []).length && (
                 <div>
                   <Label className="text-muted-foreground text-xs">Resources</Label>
                   <p className="text-sm whitespace-pre-wrap" data-testid="text-ai-preview-project-resources">{aiResult.resources}</p>

@@ -676,6 +676,9 @@ guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
     const { courseTitle, level, extraInstructions } = req.body;
     if (!courseTitle) return res.status(400).json({ error: "Course title is required" });
 
+    const taskCount = level === "beginner" ? 3 : level === "intermediate" ? 4 : level === "masters" ? 5 : 5;
+    const stepCount = level === "beginner" ? 3 : level === "masters" ? 5 : 4;
+
     const difficultyGuide = level === "beginner"
       ? "The project should be simple and achievable, focusing on applying basic concepts learned in the course. Estimated 2-5 hours."
       : level === "intermediate"
@@ -688,11 +691,12 @@ guruRouter.post("/ai/generate-project", async (req: Request, res: Response) => {
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4.1",
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content: `You are an expert educator for an online learning platform. You design practical, hands-on projects for students. Create projects that are engaging, educational, and build portfolio-worthy skills. Return ONLY valid JSON, no markdown.`
+          content: `You are an expert educator designing structured, hands-on projects for an online learning platform. Every project MUST use ONLY free or free-tier tools and services. Preferred free tools include: Vercel (https://vercel.com), Railway (https://railway.app), Render (https://render.com), Neon (https://neon.tech), Supabase (https://supabase.com), Clerk (https://clerk.com), NextAuth (https://next-auth.js.org), Resend (https://resend.com), Cloudinary (https://cloudinary.com), Uploadthing (https://uploadthing.com), GitHub (https://github.com), Groq (https://groq.com), Hugging Face (https://huggingface.co). Never suggest paid-only services. Return valid JSON only.`
         },
         {
           role: "user",
@@ -703,18 +707,32 @@ ${difficultyGuide}
 Return a JSON object with this exact structure:
 {
   "title": "Project title",
-  "description": "Detailed project description (2-3 paragraphs explaining what the student will build and why)",
+  "description": "Detailed project description (2-3 paragraphs explaining what the student will build and why it matters for their portfolio)",
   "difficulty": "${projectDifficulty}",
-  "requirements": "Bullet-pointed list of specific deliverables and requirements the student must complete (use newlines to separate each requirement, prefix each with •)",
-  "resources": "Helpful resources, references, and tools the student can use (use newlines to separate each, prefix each with •)",
-  "estimatedHours": estimated hours as a number
+  "estimatedHours": estimated hours as a number,
+  "tools": ["ToolName (https://tool-url.com)", ...],
+  "tasks": [
+    {
+      "title": "Task title (clear and action-oriented)",
+      "tools": ["ToolName (https://tool-url.com)", ...],
+      "process": "1-2 sentence walkthrough of what the student does in this task and why",
+      "steps": [
+        "Step 1: exact command or action — expected output: what the student should see",
+        ...
+      ],
+      "checklist": [
+        "Verification item the student checks to confirm this task is done",
+        ...
+      ]
+    }
+  ]
 }
 
-Make the project practical, relevant to industry needs, and something students would be proud to add to their portfolio.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
+Generate exactly ${taskCount} tasks, each with ${stepCount} steps and 3-4 checklist items. Every tool referenced must be free or have a generous free tier. Make steps concrete with exact terminal commands, file paths, or UI actions and their expected outputs.${extraInstructions ? `\n\nAdditional Instructions from admin: ${extraInstructions}` : ""}`
         }
       ],
-      temperature: 0.7,
-      max_completion_tokens: 2048,
+      temperature: 0.65,
+      max_completion_tokens: 8000,
     });
 
     const content = response.choices[0]?.message?.content || "";
@@ -724,6 +742,17 @@ Make the project practical, relevant to industry needs, and something students w
     if (!parsed.title || !parsed.description) {
       return res.status(500).json({ error: "AI generated invalid project structure" });
     }
+
+    if (!Array.isArray(parsed.tools)) parsed.tools = [];
+    if (!Array.isArray(parsed.tasks)) parsed.tasks = [];
+    parsed.tasks = parsed.tasks.map((t: any) => ({
+      title: typeof t.title === "string" ? t.title : "Untitled Task",
+      tools: Array.isArray(t.tools) ? t.tools.filter((x: any) => typeof x === "string") : [],
+      process: typeof t.process === "string" ? t.process : "",
+      steps: Array.isArray(t.steps) ? t.steps.filter((x: any) => typeof x === "string") : [],
+      checklist: Array.isArray(t.checklist) ? t.checklist.filter((x: any) => typeof x === "string") : [],
+    }));
+    parsed.tools = parsed.tools.filter((t: any) => typeof t === "string");
 
     res.json(parsed);
   } catch (error: any) {
