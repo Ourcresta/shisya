@@ -208,25 +208,46 @@ export async function registerRoutes(
       }
 
       const manifestText = await upstream.text();
-      const baseDir = rawUrl.substring(0, rawUrl.lastIndexOf("/") + 1);
+
+      const resolveRef = (ref: string): string => {
+        if (ref.startsWith("http")) return ref;
+        return new URL(ref, rawUrl).toString();
+      };
+
+      const isPlaylistRef = (ref: string): boolean =>
+        ref.endsWith(".m3u8") || ref.endsWith(".m3u");
+
+      let nextLineIsVariant = false;
 
       const rewritten = manifestText
         .split("\n")
         .map((line) => {
           const trimmed = line.trim();
-          if (!trimmed || trimmed.startsWith("#")) {
-            // Rewrite URI="..." references inside EXT-X-KEY / EXT-X-MAP tags
+
+          if (!trimmed) return line;
+
+          if (trimmed.startsWith("#")) {
+            nextLineIsVariant = trimmed.startsWith("#EXT-X-STREAM-INF");
+
             if (trimmed.includes('URI="')) {
               return trimmed.replace(/URI="([^"]+)"/g, (_match, uri) => {
-                const abs = uri.startsWith("http") ? uri : baseDir + uri;
-                return `URI="/api/video-proxy?url=${encodeURIComponent(abs)}"`;
+                const abs = resolveRef(uri);
+                const proxy = isPlaylistRef(uri) ? "/api/hls-proxy" : "/api/video-proxy";
+                return `URI="${proxy}?url=${encodeURIComponent(abs)}"`;
               });
             }
             return line;
           }
-          // Non-comment, non-empty line → segment filename
-          const absSegment = trimmed.startsWith("http") ? trimmed : baseDir + trimmed;
-          return `/api/video-proxy?url=${encodeURIComponent(absSegment)}`;
+
+          const abs = resolveRef(trimmed);
+
+          if (nextLineIsVariant || isPlaylistRef(trimmed)) {
+            nextLineIsVariant = false;
+            return `/api/hls-proxy?url=${encodeURIComponent(abs)}`;
+          }
+
+          nextLineIsVariant = false;
+          return `/api/video-proxy?url=${encodeURIComponent(abs)}`;
         })
         .join("\n");
 
