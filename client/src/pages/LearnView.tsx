@@ -431,7 +431,21 @@ function LessonContent({
     );
   }
 
-  const hasVideo = !!lesson.videoUrl;
+  const hasVideo = !!lesson.videoUrl || !!lesson.hlsUrl;
+
+  // Parse JSON audio/subtitle tracks stored as text in DB
+  const parsedAudioTracks = (() => {
+    try {
+      const raw = (lesson as any).audioTracks;
+      return Array.isArray(raw) ? raw : (typeof raw === "string" ? JSON.parse(raw) : []);
+    } catch { return []; }
+  })();
+  const parsedSubtitleTracks = (() => {
+    try {
+      const raw = (lesson as any).subtitleTracks;
+      return Array.isArray(raw) ? raw : (typeof raw === "string" ? JSON.parse(raw) : []);
+    } catch { return []; }
+  })();
 
   return (
     <div className="max-w-3xl mx-auto p-4 lg:p-6 space-y-5 pb-8">
@@ -454,7 +468,10 @@ function LessonContent({
       {hasVideo && (
         <div className="space-y-3">
           <UshaVideoPlayer
-            videoUrl={lesson.videoUrl!}
+            videoUrl={lesson.videoUrl || ""}
+            hlsUrl={(lesson as any).hlsUrl || null}
+            audioTracks={parsedAudioTracks}
+            subtitleTracks={parsedSubtitleTracks}
             title={lesson.title}
             onUshaToggle={() => setIsUshaOpen(!isUshaOpen)}
             isUshaOpen={isUshaOpen}

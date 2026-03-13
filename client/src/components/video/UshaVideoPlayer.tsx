@@ -10,7 +10,7 @@ import {
   Minimize,
   Settings,
   Languages,
-  Subtitles,
+  Captions,
   SkipBack,
   SkipForward,
   Check,
@@ -50,6 +50,7 @@ export interface SubtitleTrack {
 
 interface UshaVideoPlayerProps {
   videoUrl: string;
+  hlsUrl?: string | null;
   audioTracks?: AudioTrack[];
   subtitleTracks?: SubtitleTrack[];
   poster?: string;
@@ -106,6 +107,7 @@ function resolveVideoUrl(url: string): string {
 
 export function UshaVideoPlayer({
   videoUrl,
+  hlsUrl,
   audioTracks = [],
   subtitleTracks = [],
   poster,
@@ -149,21 +151,36 @@ export function UshaVideoPlayer({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !videoUrl) return;
+    if (!video) return;
 
-    // Resolve the URL — R2 uploads are routed through the server proxy to avoid CORS
-    const resolvedUrl = resolveVideoUrl(videoUrl);
+    // Prefer HLS stream when available; fall back to direct MP4
+    const activeHlsUrl = hlsUrl || (videoUrl && isHlsUrl(videoUrl) ? videoUrl : null);
+    const activeMp4Url = videoUrl && !isHlsUrl(videoUrl) ? videoUrl : null;
 
-    if (isHlsUrl(videoUrl) && Hls.isSupported()) {
+    if (activeHlsUrl && Hls.isSupported()) {
+      // For R2 HLS streams: load the ORIGINAL URL so hls.js can correctly resolve
+      // segment relative paths. Use xhrSetup to proxy each request (manifest + .ts segments)
+      // through the server to bypass browser CORS restrictions.
+      const isR2Url = (u: string) =>
+        u.includes("r2.dev") || u.includes("cloudflarestorage.com");
+
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
+        xhrSetup: (xhr, url) => {
+          if (isR2Url(url)) {
+            // Re-open the request via the server proxy without changing hls.js's
+            // internal base URL (so relative segment paths still resolve correctly).
+            xhr.open("GET", `/api/video-proxy?url=${encodeURIComponent(url)}`);
+          }
+        },
       });
       hlsRef.current = hls;
 
-      hls.loadSource(resolvedUrl);
+      // Load the original R2 URL — xhrSetup intercepts all requests
+      hls.loadSource(activeHlsUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
@@ -194,12 +211,14 @@ export function UshaVideoPlayer({
         hls.destroy();
         hlsRef.current = null;
       };
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = resolvedUrl;
-    } else {
-      video.src = resolvedUrl;
+    } else if (activeHlsUrl && video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Safari — native HLS support
+      video.src = activeHlsUrl;
+    } else if (activeMp4Url) {
+      // Regular MP4 — route R2 through proxy
+      video.src = resolveVideoUrl(activeMp4Url);
     }
-  }, [videoUrl]);
+  }, [videoUrl, hlsUrl]);
 
   const handleQualityChange = useCallback((levelIndex: number) => {
     if (hlsRef.current) {
@@ -576,7 +595,7 @@ export function UshaVideoPlayer({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className={`vp-ctrl-btn ${selectedSubtitle ? "vp-ctrl-btn-active" : ""}`} data-testid="button-subtitles">
-                    <Subtitles className="w-5 h-5" />
+                    <Captions className="w-5 h-5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-[#1a1a2e] border-white/10 text-white">
@@ -695,7 +714,7 @@ export function UshaVideoPlayer({
                     className="text-white/90 hover:bg-white/10 focus:bg-white/10 focus:text-white"
                     data-testid="menu-settings-subtitles"
                   >
-                    <Subtitles className="w-4 h-4 mr-2 opacity-70" />
+                    <Captions className="w-4 h-4 mr-2 opacity-70" />
                     Subtitles ({selectedSubtitle
                       ? (subtitleTracks.find((t) => t.languageCode === selectedSubtitle)?.languageName || selectedSubtitle)
                       : "Off"})
