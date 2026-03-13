@@ -180,6 +180,66 @@ export async function registerRoutes(
     }
   });
 
+  // HLS manifest proxy — fetches a .m3u8 from R2 and rewrites segment paths
+  // so every .ts segment URL points through /api/video-proxy, avoiding CORS.
+  app.get("/api/hls-proxy", async (req: any, res: any) => {
+    const rawUrl = req.query.url as string;
+    if (!rawUrl) return res.status(400).json({ error: "url query param is required" });
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(rawUrl);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL" });
+    }
+
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com"];
+    const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
+    if (!isAllowed) {
+      return res.status(403).json({ error: "URL not allowed" });
+    }
+
+    try {
+      const upstream = await fetch(rawUrl, {
+        headers: { "User-Agent": "OurShiksha/1.0" },
+      });
+      if (!upstream.ok) {
+        return res.status(upstream.status).json({ error: "Failed to fetch manifest" });
+      }
+
+      const manifestText = await upstream.text();
+      const baseDir = rawUrl.substring(0, rawUrl.lastIndexOf("/") + 1);
+
+      const rewritten = manifestText
+        .split("\n")
+        .map((line) => {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith("#")) {
+            // Rewrite URI="..." references inside EXT-X-KEY / EXT-X-MAP tags
+            if (trimmed.includes('URI="')) {
+              return trimmed.replace(/URI="([^"]+)"/g, (_match, uri) => {
+                const abs = uri.startsWith("http") ? uri : baseDir + uri;
+                return `URI="/api/video-proxy?url=${encodeURIComponent(abs)}"`;
+              });
+            }
+            return line;
+          }
+          // Non-comment, non-empty line → segment filename
+          const absSegment = trimmed.startsWith("http") ? trimmed : baseDir + trimmed;
+          return `/api/video-proxy?url=${encodeURIComponent(absSegment)}`;
+        })
+        .join("\n");
+
+      res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+      res.setHeader("Cache-Control", "public, max-age=300");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.send(rewritten);
+    } catch (err) {
+      console.error("[HlsProxy] Error:", err);
+      res.status(502).json({ error: "Failed to proxy HLS manifest" });
+    }
+  });
+
   // Guru Admin dashboard routes
   app.use("/api/guru", guruRouter);
   

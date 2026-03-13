@@ -162,9 +162,6 @@ export function UshaVideoPlayer({
     const activeMp4Url = videoUrl && !isHlsUrl(videoUrl) ? videoUrl : null;
 
     if (activeHlsUrl && Hls.isSupported()) {
-      // For R2 HLS streams: load the ORIGINAL URL so hls.js can correctly resolve
-      // segment relative paths. Use xhrSetup to proxy each request (manifest + .ts segments)
-      // through the server to bypass browser CORS restrictions.
       const isR2Url = (u: string) =>
         u.includes("r2.dev") || u.includes("cloudflarestorage.com");
 
@@ -173,18 +170,14 @@ export function UshaVideoPlayer({
         lowLatencyMode: false,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
-        xhrSetup: (xhr, url) => {
-          if (isR2Url(url)) {
-            // Re-open the request via the server proxy without changing hls.js's
-            // internal base URL (so relative segment paths still resolve correctly).
-            xhr.open("GET", `/api/video-proxy?url=${encodeURIComponent(url)}`);
-          }
-        },
       });
       hlsRef.current = hls;
 
-      // Load the original R2 URL — xhrSetup intercepts all requests
-      hls.loadSource(activeHlsUrl);
+      const sourceUrl = isR2Url(activeHlsUrl)
+        ? `/api/hls-proxy?url=${encodeURIComponent(activeHlsUrl)}`
+        : activeHlsUrl;
+
+      hls.loadSource(sourceUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
