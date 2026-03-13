@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Video, Music, Captions, FileText, Code, Lock, Upload, Loader2,
-  Plus, Trash2, CheckCircle2, AlertCircle, Zap, RefreshCw, Sparkles, Globe,
+  Plus, Trash2, CheckCircle2, AlertCircle, Zap, RefreshCw,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -119,10 +119,6 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const [activeTab, setActiveTab] = useState("basic");
   const [hlsJobId, setHlsJobId] = useState<string | null>(null);
   const [hlsConverting, setHlsConverting] = useState(false);
-  const [aiJobId, setAiJobId] = useState<string | null>(null);
-  const [aiProcessing, setAiProcessing] = useState(false);
-  const [aiProgress, setAiProgress] = useState("");
-  const [aiSelectedLangs, setAiSelectedLangs] = useState<string[]>(["hi", "ta"]);
   const [convertingAudio, setConvertingAudio] = useState(false);
 
   const videoUpload = useR2Upload("videos");
@@ -168,9 +164,6 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     setActiveTab("basic");
     setHlsJobId(null);
     setHlsConverting(false);
-    setAiJobId(null);
-    setAiProcessing(false);
-    setAiProgress("");
     setConvertingAudio(false);
   }, [open, editingLesson, defaultOrderIndex]);
 
@@ -196,67 +189,6 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     }, 3000);
     return () => clearInterval(poll);
   }, [hlsJobId, toast]);
-
-  useEffect(() => {
-    if (!aiJobId) return;
-    const poll = setInterval(async () => {
-      try {
-        const res = await apiRequest("GET", `/api/guru/r2/ai-status/${aiJobId}`);
-        const job = await res.json();
-        setAiProgress(job.progress || "");
-        if (job.status === "done" && job.result) {
-          setAiProcessing(false);
-          setAiJobId(null);
-          clearInterval(poll);
-          const { subtitleTracks = [], audioTracks = [] } = job.result;
-          setForm((f) => {
-            const existingSubCodes = new Set(f.subtitleTracks.map((t) => t.languageCode));
-            const existingAudCodes = new Set(f.audioTracks.map((t) => t.languageCode));
-            const newSubs = subtitleTracks.filter((t: any) => !existingSubCodes.has(t.languageCode));
-            const newAuds = audioTracks.filter((t: any) => !existingAudCodes.has(t.languageCode));
-            return {
-              ...f,
-              subtitleTracks: [...f.subtitleTracks, ...newSubs],
-              audioTracks: [...f.audioTracks, ...newAuds],
-            };
-          });
-          toast({
-            title: "AI Processing Complete!",
-            description: `Generated ${subtitleTracks.length} subtitle tracks${audioTracks.length > 0 ? ` and ${audioTracks.length} dubbed audio tracks` : ""}. Applied to lesson.`,
-          });
-        } else if (job.status === "failed") {
-          setAiProcessing(false);
-          setAiJobId(null);
-          clearInterval(poll);
-          toast({ title: "AI processing failed", description: job.error || "Please try again.", variant: "destructive" });
-        }
-      } catch { clearInterval(poll); }
-    }, 4000);
-    return () => clearInterval(poll);
-  }, [aiJobId, toast]);
-
-  const handleAiProcess = async () => {
-    if (!form.videoUrl) return;
-    setAiProcessing(true);
-    setAiProgress("Starting AI pipeline...");
-    try {
-      const res = await apiRequest("POST", "/api/guru/r2/ai-process", {
-        videoUrl: form.videoUrl,
-        languages: aiSelectedLangs,
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to start AI processing");
-      }
-      const { jobId } = await res.json();
-      setAiJobId(jobId);
-      toast({ title: "AI processing started", description: "Transcription, translation, and dubbing may take 3–10 minutes." });
-    } catch (err: any) {
-      setAiProcessing(false);
-      setAiProgress("");
-      toast({ title: "AI processing failed", description: err.message, variant: "destructive" });
-    }
-  };
 
   const createMutation = useMutation({
     mutationFn: async (data: LessonFull) => {
@@ -580,70 +512,6 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                   </div>
                 )}
 
-                {/* ── AI PROCESSING ── */}
-                {form.videoUrl && (
-                  <div className="border rounded-lg p-4 space-y-4 bg-purple-500/5 border-purple-500/20">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-purple-500" />
-                        <span className="text-sm font-semibold">AI Content Generator</span>
-                      </div>
-                      <Badge variant="outline" className="text-xs text-purple-600 border-purple-400/30">Powered by OpenAI</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Auto-generate timed subtitles via Whisper transcription, translate to selected languages, and optionally create AI voice dubbed audio tracks.
-                    </p>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5" />Target Languages
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {LANGUAGES.filter((l) => l.code !== "en").map((lang) => (
-                          <label key={lang.code} className="flex items-center gap-1.5 cursor-pointer">
-                            <Checkbox
-                              checked={aiSelectedLangs.includes(lang.code)}
-                              onCheckedChange={(c) =>
-                                setAiSelectedLangs((prev) =>
-                                  c ? [...prev, lang.code] : prev.filter((x) => x !== lang.code)
-                                )
-                              }
-                              disabled={aiProcessing}
-                              className="h-3.5 w-3.5"
-                            />
-                            <span className="text-xs">{lang.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground border-l-2 border-purple-400/40 pl-2">
-                      AI will generate timed subtitle files only. Upload your own dubbed audio tracks (WAV/MP3) in the Audio tab — WAV files are auto-converted to MP3.
-                    </p>
-
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleAiProcess}
-                      disabled={aiProcessing || aiSelectedLangs.length === 0}
-                      className="gap-2 bg-purple-600 hover:bg-purple-700 text-white"
-                      data-testid="button-ai-process"
-                    >
-                      {aiProcessing
-                        ? <><Loader2 className="w-4 h-4 animate-spin" />Processing…</>
-                        : <><Sparkles className="w-4 h-4" />Generate AI Subtitles & Dubbing</>}
-                    </Button>
-
-                    {aiProcessing && aiProgress && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 rounded-full bg-purple-500/20 overflow-hidden">
-                          <div className="h-full bg-purple-500 rounded-full animate-pulse w-full" />
-                        </div>
-                        <span className="text-xs text-purple-600 dark:text-purple-400 whitespace-nowrap">{aiProgress}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
               </TabsContent>
 
               {/* ── AUDIO ── */}
