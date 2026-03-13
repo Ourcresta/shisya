@@ -46,10 +46,132 @@ async function uploadFileToR2(localPath: string, objectKey: string, contentType:
   return `${PUBLIC_URL}/${objectKey}`;
 }
 
+// ── HLS conversion jobs ─────────────────────────────────────────────────────
 const hlsJobs = new Map<string, { status: string; hlsUrl?: string; error?: string; progress?: string }>();
 
+// ── AI processing jobs ──────────────────────────────────────────────────────
+const aiJobs = new Map<string, {
+  status: string;
+  progress: string;
+  result?: {
+    subtitleTracks: Array<{ languageCode: string; languageName: string; subtitleUrl: string }>;
+    audioTracks: Array<{ languageCode: string; languageName: string; audioUrl: string }>;
+    transcriptText: string;
+  };
+  error?: string;
+}>();
+
+// ── Language map ─────────────────────────────────────────────────────────────
+const LANG_NAMES: Record<string, string> = {
+  en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu",
+  kn: "Kannada", ml: "Malayalam", mr: "Marathi", bn: "Bengali",
+  gu: "Gujarati", pa: "Punjabi",
+};
+
+// ── VTT helpers ──────────────────────────────────────────────────────────────
+function formatVttTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const ms = Math.round((seconds % 1) * 1000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
+}
+
+function segmentsToVtt(segments: Array<{ start: number; end: number; text: string }>): string {
+  const lines = ["WEBVTT", ""];
+  segments.forEach((seg, i) => {
+    lines.push(String(i + 1));
+    lines.push(`${formatVttTime(seg.start)} --> ${formatVttTime(seg.end)}`);
+    lines.push(seg.text.trim());
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+// ── Translation via GPT-4.1-mini ─────────────────────────────────────────────
+async function translateSegments(
+  openai: any,
+  segments: Array<{ start: number; end: number; text: string }>,
+  targetLang: string,
+  langName: string
+): Promise<Array<{ start: number; end: number; text: string }>> {
+  const CHUNK = 60;
+  const allTranslated: string[] = [];
+
+  for (let i = 0; i < segments.length; i += CHUNK) {
+    const slice = segments.slice(i, i + CHUNK);
+    const texts = slice.map((s) => s.text);
+    const resp = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Translate the following ${texts.length} subtitle segments from English to ${langName}. Preserve the same number of items and keep them short (subtitle-friendly). Return ONLY a JSON object: {"t": ["translation1", "translation2", ...]}\n\nInput: ${JSON.stringify(texts)}`,
+        },
+      ],
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+    });
+
+    try {
+      const parsed = JSON.parse(resp.choices[0].message.content || "{}");
+      const arr = parsed.t || parsed.translations || parsed.segments || Object.values(parsed)[0];
+      if (Array.isArray(arr) && arr.length === texts.length) {
+        allTranslated.push(...arr.map(String));
+      } else {
+        allTranslated.push(...texts);
+      }
+    } catch {
+      allTranslated.push(...texts);
+    }
+  }
+
+  return segments.map((seg, i) => ({
+    start: seg.start,
+    end: seg.end,
+    text: allTranslated[i] ?? seg.text,
+  }));
+}
+
+// ── TTS dubbing via OpenAI TTS ────────────────────────────────────────────────
+async function generateTtsAudio(
+  openai: any,
+  text: string,
+  outputPath: string,
+  tmpDir: string
+): Promise<void> {
+  const CHUNK_SIZE = 3800;
+  const chunkPaths: string[] = [];
+
+  for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
+    const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+    const speech = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "nova",
+      input: chunk,
+      response_format: "mp3",
+    });
+    const buf = Buffer.from(await speech.arrayBuffer());
+    const chunkPath = path.join(tmpDir, `tts_${i}.mp3`);
+    fs.writeFileSync(chunkPath, buf);
+    chunkPaths.push(chunkPath);
+  }
+
+  if (chunkPaths.length === 0) {
+    throw new Error("No TTS chunks generated");
+  } else if (chunkPaths.length === 1) {
+    fs.copyFileSync(chunkPaths[0], outputPath);
+  } else {
+    const listPath = path.join(tmpDir, "tts_list.txt");
+    fs.writeFileSync(listPath, chunkPaths.map((p) => `file '${p}'`).join("\n"));
+    await execFileAsync("ffmpeg", ["-f", "concat", "-safe", "0", "-i", listPath, "-c", "copy", outputPath]);
+  }
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
 export const r2Router = Router();
 
+// Presigned URL for direct browser upload
 r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) => {
   if (!isR2Configured()) {
     return res.status(503).json({ error: "Cloudflare R2 is not configured." });
@@ -95,6 +217,7 @@ r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) =
   }
 });
 
+// HLS conversion (single-quality, stream-copy)
 r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Response) => {
   if (!isR2Configured()) {
     return res.status(503).json({ error: "Cloudflare R2 is not configured." });
@@ -157,6 +280,120 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
 
 r2Router.get("/hls-status/:jobId", requireGuruAuth, (req: Request, res: Response) => {
   const job = hlsJobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ error: "Job not found" });
+  res.json(job);
+});
+
+// ── AI Processing Pipeline ────────────────────────────────────────────────────
+// POST /api/guru/r2/ai-process
+// Generates: transcript → WebVTT subtitles → translations → AI dubbed audio
+r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response) => {
+  if (!isR2Configured()) {
+    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  }
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ error: "OpenAI API key is not configured." });
+  }
+
+  const { videoUrl, languages = ["hi", "ta"], generateDubbing = true } = req.body;
+  if (!videoUrl) return res.status(400).json({ error: "videoUrl is required." });
+
+  const jobId = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  aiJobs.set(jobId, { status: "processing", progress: "Starting AI pipeline..." });
+  res.json({ jobId });
+
+  (async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-"));
+    try {
+      const { default: OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const timestamp = Date.now();
+      const prefix = `ai/${timestamp}`;
+
+      // Step 1 — Download video & extract audio
+      aiJobs.set(jobId, { status: "processing", progress: "Downloading video from R2..." });
+      const inputPath = path.join(tmpDir, "input.mp4");
+      const audioPath = path.join(tmpDir, "audio.mp3");
+
+      const videoRes = await fetch(videoUrl);
+      if (!videoRes.ok) throw new Error(`Video download failed: ${videoRes.status}`);
+      fs.writeFileSync(inputPath, Buffer.from(await videoRes.arrayBuffer()));
+
+      aiJobs.set(jobId, { status: "processing", progress: "Extracting audio for transcription..." });
+      await execFileAsync("ffmpeg", [
+        "-i", inputPath,
+        "-vn",
+        "-acodec", "mp3",
+        "-ar", "16000",
+        "-ac", "1",
+        "-b:a", "64k",
+        audioPath,
+      ]);
+
+      // Step 2 — Whisper transcription
+      aiJobs.set(jobId, { status: "processing", progress: "Transcribing with OpenAI Whisper..." });
+      const transcription = await (openai.audio.transcriptions as any).create({
+        file: fs.createReadStream(audioPath),
+        model: "whisper-1",
+        response_format: "verbose_json",
+      });
+
+      type Segment = { start: number; end: number; text: string };
+      const segments: Segment[] = ((transcription as any).segments || []).map((s: any) => ({
+        start: Number(s.start),
+        end: Number(s.end),
+        text: String(s.text),
+      }));
+      const transcriptText: string = (transcription as any).text || segments.map((s) => s.text).join(" ");
+
+      const result: {
+        subtitleTracks: Array<{ languageCode: string; languageName: string; subtitleUrl: string }>;
+        audioTracks: Array<{ languageCode: string; languageName: string; audioUrl: string }>;
+        transcriptText: string;
+      } = { subtitleTracks: [], audioTracks: [], transcriptText };
+
+      // Step 3 — English WebVTT
+      aiJobs.set(jobId, { status: "processing", progress: "Generating English subtitles (WebVTT)..." });
+      const enVttPath = path.join(tmpDir, "sub_en.vtt");
+      fs.writeFileSync(enVttPath, segmentsToVtt(segments));
+      const enVttUrl = await uploadFileToR2(enVttPath, `${prefix}/sub_en.vtt`, "text/vtt");
+      result.subtitleTracks.push({ languageCode: "en", languageName: "English", subtitleUrl: enVttUrl });
+
+      // Step 4 & 5 — Translate + dub for each target language
+      for (const lang of languages as string[]) {
+        const langName = LANG_NAMES[lang] || lang;
+
+        aiJobs.set(jobId, { status: "processing", progress: `Translating subtitles to ${langName}...` });
+        const translatedSegs = await translateSegments(openai, segments, lang, langName);
+
+        const vttPath = path.join(tmpDir, `sub_${lang}.vtt`);
+        fs.writeFileSync(vttPath, segmentsToVtt(translatedSegs));
+        const vttUrl = await uploadFileToR2(vttPath, `${prefix}/sub_${lang}.vtt`, "text/vtt");
+        result.subtitleTracks.push({ languageCode: lang, languageName: langName, subtitleUrl: vttUrl });
+
+        if (generateDubbing) {
+          aiJobs.set(jobId, { status: "processing", progress: `Generating ${langName} voice dubbing...` });
+          const fullText = translatedSegs.map((s) => s.text).join(" ");
+          const dubPath = path.join(tmpDir, `audio_${lang}.mp3`);
+          await generateTtsAudio(openai, fullText, dubPath, tmpDir);
+          const dubUrl = await uploadFileToR2(dubPath, `${prefix}/audio_${lang}.mp3`, "audio/mpeg");
+          result.audioTracks.push({ languageCode: lang, languageName: langName, audioUrl: dubUrl });
+        }
+      }
+
+      aiJobs.set(jobId, { status: "done", progress: "AI processing complete!", result });
+      console.log(`[AI] Pipeline complete: ${jobId}`);
+    } catch (err: any) {
+      console.error("[AI] Pipeline error:", err);
+      aiJobs.set(jobId, { status: "failed", progress: "Processing failed", error: err.message });
+    } finally {
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+  })();
+});
+
+r2Router.get("/ai-status/:jobId", requireGuruAuth, (req: Request, res: Response) => {
+  const job = aiJobs.get(req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found" });
   res.json(job);
 });

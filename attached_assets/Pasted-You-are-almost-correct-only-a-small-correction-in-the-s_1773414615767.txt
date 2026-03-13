@@ -1,0 +1,166 @@
+You are **almost correct** 👍 — only a small correction in the subtitle format name.
+
+### Correct formats for HLS streaming
+
+```
+Video     → H264
+Audio     → AAC
+Subtitle  → VTT (WebVTT)
+```
+
+Not **VRT**, the correct one is **VTT**.
+
+---
+
+# Correct HLS Streaming Components
+
+### 1️⃣ Video
+
+Codec:
+
+```
+H264 (AVC)
+```
+
+Reason:
+
+* best browser support
+* works on mobile
+* HLS standard
+
+---
+
+### 2️⃣ Audio
+
+Codec:
+
+```
+AAC
+```
+
+Reason:
+
+* Apple HLS standard
+* good compression
+* supported everywhere
+
+---
+
+### 3️⃣ Subtitles
+
+Format:
+
+```
+WebVTT (.vtt)
+```
+
+Example:
+
+```
+subtitles_en.vtt
+subtitles_hi.vtt
+subtitles_ta.vtt
+```
+
+Used for:
+
+* captions
+* multiple languages
+* accessibility
+* AI generated subtitles
+
+---
+
+# Example HLS Folder
+
+For one lesson in **OurShiksha**
+
+```
+lesson1/
+│
+├── video.m3u8
+├── seg0.ts
+├── seg1.ts
+├── seg2.ts
+│
+├── subtitles_en.vtt
+├── subtitles_hi.vtt
+└── subtitles_ta.vtt
+```
+
+---
+
+# Example `.vtt` Subtitle File
+
+```
+WEBVTT
+
+00:00:01.000 --> 00:00:05.000
+Welcome to Algebra lesson.
+
+00:00:05.000 --> 00:00:08.000
+Today we will learn linear equations.
+```
+
+---
+
+# Example HLS Player with Subtitles
+
+```html
+<video controls width="800">
+  <source src="lesson.m3u8" type="application/x-mpegURL">
+  
+  <track
+    src="subtitles_en.vtt"
+    kind="subtitles"
+    srclang="en"
+    label="English"
+    default>
+</video>
+```
+
+---
+
+# Best Format for Your AI Learning Platform
+
+```
+Video → H264
+Audio → AAC
+Subtitles → WebVTT
+Streaming → HLS (.m3u8 + .ts)
+```
+
+This is exactly what platforms use:
+
+* Netflix
+* Udemy
+* Coursera
+* YouTube (HLS version)
+
+---
+
+# Bonus for AI Acharya Platform
+
+Each lesson could contain:
+
+```
+lesson1
+│
+├── video.m3u8
+├── seg0.ts
+├── seg1.ts
+│
+├── subtitles_en.vtt
+├── subtitles_hi.vtt
+│
+├── transcript.json
+└── audio.mp3
+```
+
+This allows:
+
+* subtitles
+* transcript search
+* AI tutor
+* audio learning mode
+

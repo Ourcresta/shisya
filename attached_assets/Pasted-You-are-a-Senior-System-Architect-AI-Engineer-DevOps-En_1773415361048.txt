@@ -1,0 +1,433 @@
+You are a **Senior System Architect, AI Engineer, DevOps Engineer, Backend Developer, and Video Streaming Engineer**.
+
+Design and build a **complete AI-powered video processing pipeline** for an EdTech platform called **OurShiksha / AI Acharya**.
+
+The platform must automatically process uploaded videos and generate:
+
+• Adaptive HLS streaming
+• AI transcripts
+• AI subtitles
+• AI translation
+• AI voice dubbing for multiple languages
+• Cloudflare R2 storage
+• CDN streaming
+
+The architecture must be **low cost, scalable, and production-ready**.
+
+---
+
+# System Goal
+
+When a teacher uploads a video:
+
+```
+Upload MP4
+    ↓
+Video processing
+    ↓
+HLS streaming generation
+    ↓
+AI transcript
+    ↓
+AI translation
+    ↓
+AI voice dubbing
+    ↓
+Subtitle generation
+    ↓
+Upload everything to Cloudflare R2
+    ↓
+Deliver via CDN to students
+```
+
+Students should be able to choose:
+
+• Video quality
+• Audio language
+• Subtitle language
+
+---
+
+# Technology Stack
+
+Backend
+
+Node.js + Express
+
+Video Processing
+
+FFmpeg
+
+Speech Recognition
+
+OpenAI Whisper
+
+Translation
+
+OpenAI / Claude / Gemini
+
+Text-to-Speech
+
+OpenAI TTS or ElevenLabs
+
+Streaming
+
+HLS (.m3u8 + .ts)
+
+Storage
+
+Cloudflare R2
+
+Video Player
+
+HLS.js
+
+Deployment
+
+Replit
+
+---
+
+# Full Processing Pipeline
+
+Teacher uploads video
+
+```
+lesson.mp4
+```
+
+Upload API
+
+```
+POST /upload-video
+```
+
+Backend stores video temporarily
+
+```
+/uploads/lesson.mp4
+```
+
+---
+
+# Step 1 — Generate Adaptive HLS Streaming
+
+Use FFmpeg to generate multiple video qualities.
+
+Qualities
+
+```
+1080p
+720p
+480p
+360p
+240p
+```
+
+Example FFmpeg command
+
+```
+ffmpeg -i lesson.mp4 \
+-map 0:v -map 0:a \
+-s:v:0 1920x1080 -b:v:0 5000k \
+-s:v:1 1280x720 -b:v:1 2800k \
+-s:v:2 854x480 -b:v:2 1400k \
+-s:v:3 640x360 -b:v:3 800k \
+-s:v:4 426x240 -b:v:4 400k \
+-c:v libx264 \
+-c:a aac \
+-f hls master.m3u8
+```
+
+This generates
+
+```
+master.m3u8
+1080p.m3u8
+720p.m3u8
+480p.m3u8
+360p.m3u8
+240p.m3u8
+
+segment0.ts
+segment1.ts
+segment2.ts
+```
+
+---
+
+# Step 2 — Extract Audio from Video
+
+Extract clean audio for AI processing.
+
+Example
+
+```
+ffmpeg -i lesson.mp4 -vn -acodec mp3 audio.mp3
+```
+
+Output
+
+```
+audio.mp3
+```
+
+---
+
+# Step 3 — Generate Transcript
+
+Use OpenAI Whisper to convert speech to text.
+
+Example output
+
+```
+transcript.json
+```
+
+Example
+
+```
+{
+  "00:01": "Welcome to algebra lesson",
+  "00:05": "Today we will learn equations"
+}
+```
+
+---
+
+# Step 4 — Translate Transcript
+
+Translate transcript into multiple languages.
+
+Languages
+
+```
+Hindi
+Tamil
+Telugu
+Spanish
+French
+Arabic
+```
+
+Example output
+
+```
+transcript_hi.json
+transcript_ta.json
+transcript_te.json
+```
+
+---
+
+# Step 5 — Generate Subtitles
+
+Convert transcripts to WebVTT subtitle files.
+
+Example files
+
+```
+sub_en.vtt
+sub_hi.vtt
+sub_ta.vtt
+sub_te.vtt
+```
+
+Example subtitle format
+
+```
+WEBVTT
+
+00:00:01.000 --> 00:00:05.000
+Welcome to Algebra lesson
+```
+
+---
+
+# Step 6 — AI Voice Dubbing
+
+Use AI text-to-speech to generate audio narration for translated text.
+
+Example tools
+
+```
+OpenAI TTS
+ElevenLabs
+Azure Speech
+```
+
+Generate voice files
+
+```
+audio_en.wav
+audio_hi.wav
+audio_ta.wav
+audio_te.wav
+```
+
+Convert to AAC
+
+```
+ffmpeg -i audio_hi.wav -c:a aac audio_hi.aac
+ffmpeg -i audio_ta.wav -c:a aac audio_ta.aac
+```
+
+---
+
+# Step 7 — Multi Language Audio in HLS
+
+Create separate audio tracks
+
+```
+audio_en.m3u8
+audio_hi.m3u8
+audio_ta.m3u8
+audio_te.m3u8
+```
+
+Attach to master playlist.
+
+Example master.m3u8
+
+```
+#EXTM3U
+
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="English",LANGUAGE="en",URI="audio_en.m3u8"
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Hindi",LANGUAGE="hi",URI="audio_hi.m3u8"
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Tamil",LANGUAGE="ta",URI="audio_ta.m3u8"
+
+#EXT-X-STREAM-INF:BANDWIDTH=800000,AUDIO="audio"
+video.m3u8
+```
+
+---
+
+# Step 8 — Upload Everything to Cloudflare R2
+
+Use S3 compatible API.
+
+Environment variables
+
+```
+R2_ACCOUNT_ID
+R2_ACCESS_KEY
+R2_SECRET_KEY
+R2_BUCKET_NAME
+```
+
+Upload all processed files.
+
+---
+
+# R2 Folder Structure
+
+```
+courses
+  └── subject
+       └── lesson
+            │
+            ├── master.m3u8
+            ├── 1080p.m3u8
+            ├── 720p.m3u8
+            ├── 480p.m3u8
+            │
+            ├── seg0.ts
+            ├── seg1.ts
+            │
+            ├── audio_en.aac
+            ├── audio_hi.aac
+            ├── audio_ta.aac
+            │
+            ├── sub_en.vtt
+            ├── sub_hi.vtt
+            ├── sub_ta.vtt
+            │
+            └── transcript.json
+```
+
+---
+
+# Step 9 — CDN Delivery
+
+Use Cloudflare CDN.
+
+Example streaming URL
+
+```
+https://cdn.ourshiksha.com/courses/math/algebra/lesson1/master.m3u8
+```
+
+---
+
+# Step 10 — Student Player
+
+Create a simple HLS player using HLS.js.
+
+The player should support
+
+• video quality switching
+• language selection
+• subtitle selection
+
+Example player
+
+```
+video player
+Audio:
+ English
+ Hindi
+ Tamil
+
+Subtitles:
+ English
+ Hindi
+ Tamil
+```
+
+---
+
+# Cost Optimization
+
+Use only low-cost infrastructure.
+
+Use
+
+Cloudflare R2
+Cloudflare CDN
+FFmpeg processing
+OpenAI APIs
+
+Target cost
+
+```
+less than $10/month initially
+```
+
+---
+
+# Deliverables
+
+Generate
+
+• complete backend code
+• upload API
+• video processing module
+• AI transcript module
+• translation module
+• AI voice dubbing module
+• R2 upload module
+• HLS video player page
+• environment configuration
+• deployment instructions
+
+---
+
+# Important
+
+Write clean modular code.
+
+Follow production architecture.
+
+Design the system so it can scale to **thousands of students and hundreds of courses**.
+
+Think like a **senior engineer building a modern AI-powered EdTech streaming platform**.

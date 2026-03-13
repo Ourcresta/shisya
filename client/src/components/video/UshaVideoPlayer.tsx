@@ -108,6 +108,33 @@ function resolveVideoUrl(url: string): string {
   return url;
 }
 
+// ── WebVTT parser ─────────────────────────────────────────────────────────────
+interface VttCue { start: number; end: number; text: string }
+
+function parseVttTime(s: string): number {
+  const p = s.trim().split(":");
+  if (p.length === 3) return +p[0] * 3600 + +p[1] * 60 + parseFloat(p[2]);
+  if (p.length === 2) return +p[0] * 60 + parseFloat(p[1]);
+  return NaN;
+}
+
+function parseVtt(raw: string): VttCue[] {
+  const cues: VttCue[] = [];
+  const blocks = raw.split(/\n\n+/);
+  for (const block of blocks) {
+    const lines = block.split("\n").filter(Boolean);
+    const ti = lines.findIndex((l) => l.includes("-->"));
+    if (ti === -1) continue;
+    const [s, e] = lines[ti].split("-->").map((x) => x.trim());
+    const text = lines.slice(ti + 1).join("\n").trim();
+    if (!s || !e || !text) continue;
+    const start = parseVttTime(s);
+    const end = parseVttTime(e);
+    if (!isNaN(start) && !isNaN(end)) cues.push({ start, end, text });
+  }
+  return cues;
+}
+
 export function UshaVideoPlayer({
   videoUrl,
   hlsUrl,
@@ -146,6 +173,8 @@ export function UshaVideoPlayer({
   const [selectedQuality, setSelectedQuality] = useState(-1);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverX, setHoverX] = useState(0);
+  const [subtitleCues, setSubtitleCues] = useState<VttCue[]>([]);
+  const [currentCue, setCurrentCue] = useState<string | null>(null);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -293,6 +322,36 @@ export function UshaVideoPlayer({
       }
     }
   }, [currentAudioTrack, isPlaying]);
+
+  // Load WebVTT file when subtitle selection changes
+  useEffect(() => {
+    if (!selectedSubtitle) {
+      setSubtitleCues([]);
+      setCurrentCue(null);
+      return;
+    }
+    const track = subtitleTracks.find((t) => t.languageCode === selectedSubtitle);
+    if (!track) {
+      setSubtitleCues([]);
+      setCurrentCue(null);
+      return;
+    }
+    const proxyUrl = `/api/video-proxy?url=${encodeURIComponent(track.subtitleUrl)}`;
+    fetch(proxyUrl)
+      .then((r) => r.text())
+      .then((text) => setSubtitleCues(parseVtt(text)))
+      .catch(() => setSubtitleCues([]));
+  }, [selectedSubtitle, subtitleTracks]);
+
+  // Track the active cue based on playback position
+  useEffect(() => {
+    if (!subtitleCues.length || !selectedSubtitle) {
+      setCurrentCue(null);
+      return;
+    }
+    const cue = subtitleCues.find((c) => currentTime >= c.start && currentTime <= c.end);
+    setCurrentCue(cue ? cue.text : null);
+  }, [currentTime, subtitleCues, selectedSubtitle]);
 
   useEffect(() => {
     const handleFsChange = () => {
@@ -504,6 +563,14 @@ export function UshaVideoPlayer({
       {title && isPlaying && (
         <div className={`vp-top-bar ${showControls ? "vp-top-bar-visible" : "vp-top-bar-hidden"}`}>
           <span className="vp-top-title" data-testid="text-top-title">{title}</span>
+        </div>
+      )}
+
+      {currentCue && (
+        <div className="vp-subtitle-overlay" data-testid="subtitle-overlay">
+          {currentCue.split("\n").map((line, i) => (
+            <span key={i} className="vp-subtitle-line">{line}</span>
+          ))}
         </div>
       )}
 
