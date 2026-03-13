@@ -14,10 +14,7 @@ import {
   SkipBack,
   SkipForward,
   Check,
-  Loader2,
-  MessageCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
@@ -48,6 +45,11 @@ export interface SubtitleTrack {
   subtitleUrl: string;
 }
 
+interface ChapterMarker {
+  time: number;
+  label: string;
+}
+
 interface UshaVideoPlayerProps {
   videoUrl: string;
   hlsUrl?: string | null;
@@ -55,6 +57,7 @@ interface UshaVideoPlayerProps {
   subtitleTracks?: SubtitleTrack[];
   poster?: string;
   title?: string;
+  chapters?: ChapterMarker[];
   onProgress?: (progress: number) => void;
   onComplete?: () => void;
   onPlayStateChange?: (isPlaying: boolean) => void;
@@ -112,6 +115,7 @@ export function UshaVideoPlayer({
   subtitleTracks = [],
   poster,
   title,
+  chapters,
   onProgress,
   onComplete,
   onPlayStateChange,
@@ -485,8 +489,13 @@ export function UshaVideoPlayer({
       )}
 
       {isBuffering && (
-        <div className="vp-buffering-overlay">
-          <Loader2 className="w-10 h-10 text-white animate-spin" />
+        <div className="vp-buffering-overlay" data-testid="buffering-indicator">
+          <div className="vp-buffering-rings">
+            <div className="vp-buffering-dot" />
+            <div className="vp-buffering-ring" />
+            <div className="vp-buffering-ring" />
+            <div className="vp-buffering-ring" />
+          </div>
         </div>
       )}
 
@@ -499,13 +508,24 @@ export function UshaVideoPlayer({
         </div>
       )}
 
-      <div className={`vp-controls-wrapper ${showControls ? "vp-controls-visible" : "vp-controls-hidden"}`}>
-        {title && isPlaying && (
-          <div className="vp-title-bar">
-            <span className="vp-title-text">{title}</span>
-          </div>
-        )}
+      {title && isPlaying && (
+        <div className={`vp-top-bar ${showControls ? "vp-top-bar-visible" : "vp-top-bar-hidden"}`}>
+          <span className="vp-top-title" data-testid="text-top-title">{title}</span>
+        </div>
+      )}
 
+      {(hlsUrl || (videoUrl && isHlsUrl(videoUrl))) && showControls && (
+        <div className="vp-hls-badge" data-testid="badge-hls">
+          {hlsLevels.length > 0 && selectedQuality >= 0
+            ? getQualityLabel(hlsLevels[selectedQuality]?.height || 0)
+            : hlsLevels.length > 0
+              ? "HD"
+              : "HLS"}
+          <span className="vp-hls-badge-dot" />
+        </div>
+      )}
+
+      <div className={`vp-controls-wrapper ${showControls ? "vp-controls-visible" : "vp-controls-hidden"}`}>
         <div
           ref={progressRef}
           className="vp-progress-container"
@@ -522,6 +542,18 @@ export function UshaVideoPlayer({
             <div className="vp-progress-buffered" style={{ width: `${buffered}%` }} />
             <div className="vp-progress-filled" style={{ width: `${progressPercent}%` }} />
             <div className="vp-progress-thumb" style={{ left: `${progressPercent}%` }} />
+            {chapters && duration > 0 && chapters.map((ch, i) => {
+              const pos = (ch.time / duration) * 100;
+              return pos >= 0 && pos <= 100 ? (
+                <div
+                  key={i}
+                  className="vp-chapter-dot"
+                  style={{ left: `${pos}%` }}
+                  title={ch.label}
+                  data-testid={`chapter-dot-${i}`}
+                />
+              ) : null;
+            })}
           </div>
         </div>
 
@@ -560,9 +592,15 @@ export function UshaVideoPlayer({
               </div>
             </div>
 
-            <span className="vp-time-display">
+            <span className="vp-time-display" data-testid="text-time-display">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
+
+            {audioTracks.length > 0 && (
+              <span className="vp-lang-pill" data-testid="pill-lang">
+                {AVAILABLE_LANGUAGES.find((l) => l.code === selectedAudioTrack)?.name || selectedAudioTrack}
+              </span>
+            )}
           </div>
 
           <div className="vp-controls-right">
@@ -765,13 +803,6 @@ export function UshaVideoPlayer({
           </div>
         </div>
       </div>
-
-      {audioTracks.length > 0 && showControls && (
-        <div className="vp-lang-badge">
-          <Languages className="w-3 h-3" />
-          {AVAILABLE_LANGUAGES.find((l) => l.code === selectedAudioTrack)?.name || "English"}
-        </div>
-      )}
     </div>
   );
 }
