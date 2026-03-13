@@ -1,0 +1,249 @@
+You are a **Senior System Architect, DevOps Engineer, Backend Developer, and Video Streaming Engineer**.
+
+Design and build a **low-cost scalable video streaming pipeline** for an AI learning platform called **OurShiksha / AI Acharya**.
+
+The goal is to stream educational videos efficiently using **Cloudflare R2, HLS streaming, and Cloudflare CDN** while keeping costs extremely low.
+
+Think like a **Netflix-style streaming engineer** but optimized for **startup budget and simplicity**.
+
+---
+
+# System Objective
+
+Build a pipeline:
+
+Upload MP4 → Convert to HLS → Store in Cloudflare R2 → Deliver via CDN → Play on web player
+
+The system must support:
+
+• thousands of students
+• low latency playback
+• adaptive streaming
+• low infrastructure cost
+• scalable architecture
+
+---
+
+# Architecture Overview
+
+Video Processing Pipeline
+
+Teacher Uploads Video (MP4)
+↓
+Backend Upload API
+↓
+FFmpeg Video Processor
+↓
+Convert MP4 → HLS (.m3u8 + .ts)
+↓
+Upload Segments to Cloudflare R2
+↓
+Cloudflare CDN
+↓
+Student Video Player (HLS.js)
+
+---
+
+# Technical Stack
+
+Backend
+Node.js / Express
+
+Video Processing
+FFmpeg
+
+Storage
+Cloudflare R2
+
+CDN
+Cloudflare CDN
+
+Frontend Player
+HLS.js
+
+Deployment
+Replit deployment environment
+
+---
+
+# Required Features
+
+1. Video Upload API
+
+Teachers should be able to upload MP4 videos.
+
+Endpoint
+
+POST /upload-video
+
+Functionality
+
+• Accept MP4 upload
+• Store temporarily
+• Send file to video processor
+
+---
+
+2. Video Processing
+
+Use FFmpeg to convert MP4 into HLS format.
+
+Generate
+
+.m3u8 playlist
+.ts video segments
+
+Example command
+
+ffmpeg -i input.mp4 
+-c:v libx264 
+-c:a aac 
+-hls_time 10 
+-hls_list_size 0 
+-f hls output.m3u8
+
+---
+
+3. Folder Structure in R2
+
+Bucket name
+
+ourshiksha-storage
+
+Structure
+
+courses/
+subject/
+lesson/
+video.m3u8
+segment0.ts
+segment1.ts
+segment2.ts
+
+---
+
+4. Upload Processed Files to R2
+
+Use Cloudflare R2 S3 compatible API.
+
+Environment variables
+
+R2_ACCOUNT_ID
+R2_ACCESS_KEY
+R2_SECRET_KEY
+R2_BUCKET_NAME
+
+Upload all HLS files.
+
+---
+
+5. CDN Delivery
+
+Use Cloudflare public bucket domain
+
+Example
+
+https://cdn.ourshiksha.com/courses/math/lesson1/video.m3u8
+
+Ensure all .ts segments are accessible.
+
+---
+
+6. Video Player
+
+Create a simple HTML player using HLS.js.
+
+Example
+
+video element
+
+Load .m3u8 playlist
+
+HLS.js should attach to video element and stream segments.
+
+---
+
+7. Security
+
+Add optional signed URLs to protect videos.
+
+Students should only access videos if authenticated.
+
+Example
+
+video.m3u8?token=securetoken
+
+---
+
+8. AI Learning Extensions (Future Ready)
+
+Prepare architecture to later support
+
+• subtitles
+• transcript files
+• AI tutor interactions
+• chapter markers
+• lesson metadata
+• audio extraction
+
+---
+
+# Cost Optimization Requirements
+
+This platform must minimize cost.
+
+Avoid expensive video platforms.
+
+Use
+
+Cloudflare R2 storage
+Cloudflare CDN caching
+FFmpeg processing
+
+Target cost
+
+less than $10 per month for early stage.
+
+---
+
+# Deliverables
+
+Generate code for
+
+Backend server
+Upload API
+Video processing module
+R2 uploader
+Simple frontend video player
+
+Include
+
+folder structure
+environment variables
+installation steps
+deployment instructions
+
+---
+
+# Expected Output
+
+Provide
+
+complete project structure
+Node.js server code
+FFmpeg processing logic
+R2 upload script
+example HLS player page
+deployment guide
+
+---
+
+# Important
+
+Write clean, modular, production-ready code.
+
+Explain each component clearly.
+
+Optimize for **scalability, low cost, and maintainability**.
+
+Think like a **senior engineer building a production video streaming system for an edtech startup**.
