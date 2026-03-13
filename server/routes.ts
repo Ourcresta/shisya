@@ -214,8 +214,14 @@ export async function registerRoutes(
         return new URL(ref, rawUrl).toString();
       };
 
-      const isPlaylistRef = (ref: string): boolean =>
-        ref.endsWith(".m3u8") || ref.endsWith(".m3u");
+      const isPlaylistRef = (ref: string): boolean => {
+        try {
+          const pathname = new URL(ref, rawUrl).pathname;
+          return pathname.endsWith(".m3u8") || pathname.endsWith(".m3u");
+        } catch {
+          return ref.endsWith(".m3u8") || ref.endsWith(".m3u");
+        }
+      };
 
       let nextLineIsVariant = false;
 
