@@ -18,6 +18,10 @@ function getS3Client(): S3Client {
       accessKeyId: ACCESS_KEY_ID,
       secretAccessKey: SECRET_ACCESS_KEY,
     },
+    // Disable automatic checksum calculation — R2 doesn't require it and
+    // the browser XHR upload cannot supply a matching checksum.
+    requestChecksumCalculation: "when_required",
+    responseChecksumValidation: "when_required",
   });
 }
 
@@ -53,7 +57,12 @@ r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) =
       ContentType: fileType,
     });
 
-    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 900 });
+    const uploadUrl = await getSignedUrl(client, command, {
+      expiresIn: 900,
+      // Do not hoist checksum headers into the query string — they confuse
+      // plain browser XHR PUT requests which cannot set them.
+      unhoistableHeaders: new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]),
+    });
     const publicUrl = `${PUBLIC_URL}/${objectKey}`;
 
     return res.json({ uploadUrl, publicUrl, objectKey });
