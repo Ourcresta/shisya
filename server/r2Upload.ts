@@ -133,39 +133,16 @@ async function translateSegments(
   }));
 }
 
-// ── TTS dubbing via OpenAI TTS ────────────────────────────────────────────────
-async function generateTtsAudio(
-  openai: any,
-  text: string,
-  outputPath: string,
-  tmpDir: string
-): Promise<void> {
-  const CHUNK_SIZE = 3800;
-  const chunkPaths: string[] = [];
-
-  for (let i = 0; i * CHUNK_SIZE < text.length; i++) {
-    const chunk = text.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-    const speech = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "nova",
-      input: chunk,
-      response_format: "mp3",
-    });
-    const buf = Buffer.from(await speech.arrayBuffer());
-    const chunkPath = path.join(tmpDir, `tts_${i}.mp3`);
-    fs.writeFileSync(chunkPath, buf);
-    chunkPaths.push(chunkPath);
-  }
-
-  if (chunkPaths.length === 0) {
-    throw new Error("No TTS chunks generated");
-  } else if (chunkPaths.length === 1) {
-    fs.copyFileSync(chunkPaths[0], outputPath);
-  } else {
-    const listPath = path.join(tmpDir, "tts_list.txt");
-    fs.writeFileSync(listPath, chunkPaths.map((p) => `file '${p}'`).join("\n"));
-    await execFileAsync("ffmpeg", ["-f", "concat", "-safe", "0", "-i", listPath, "-c", "copy", outputPath]);
-  }
+// ── WAV → MP3 conversion helper ───────────────────────────────────────────────
+async function convertAudioToMp3(inputPath: string, outputPath: string): Promise<void> {
+  await execFileAsync("ffmpeg", [
+    "-i", inputPath,
+    "-acodec", "mp3",
+    "-ab", "128k",
+    "-ar", "44100",
+    "-ac", "2",
+    outputPath,
+  ]);
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
@@ -295,7 +272,7 @@ r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response
     return res.status(503).json({ error: "OpenAI API key is not configured." });
   }
 
-  const { videoUrl, languages = ["hi", "ta"], generateDubbing = true } = req.body;
+  const { videoUrl, languages = ["hi", "ta"] } = req.body;
   if (!videoUrl) return res.status(400).json({ error: "videoUrl is required." });
 
   const jobId = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -359,26 +336,15 @@ r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response
       const enVttUrl = await uploadFileToR2(enVttPath, `${prefix}/sub_en.vtt`, "text/vtt");
       result.subtitleTracks.push({ languageCode: "en", languageName: "English", subtitleUrl: enVttUrl });
 
-      // Step 4 & 5 — Translate + dub for each target language
+      // Step 4 — Translate to each target language → generate per-language WebVTT
       for (const lang of languages as string[]) {
         const langName = LANG_NAMES[lang] || lang;
-
         aiJobs.set(jobId, { status: "processing", progress: `Translating subtitles to ${langName}...` });
         const translatedSegs = await translateSegments(openai, segments, lang, langName);
-
         const vttPath = path.join(tmpDir, `sub_${lang}.vtt`);
         fs.writeFileSync(vttPath, segmentsToVtt(translatedSegs));
         const vttUrl = await uploadFileToR2(vttPath, `${prefix}/sub_${lang}.vtt`, "text/vtt");
         result.subtitleTracks.push({ languageCode: lang, languageName: langName, subtitleUrl: vttUrl });
-
-        if (generateDubbing) {
-          aiJobs.set(jobId, { status: "processing", progress: `Generating ${langName} voice dubbing...` });
-          const fullText = translatedSegs.map((s) => s.text).join(" ");
-          const dubPath = path.join(tmpDir, `audio_${lang}.mp3`);
-          await generateTtsAudio(openai, fullText, dubPath, tmpDir);
-          const dubUrl = await uploadFileToR2(dubPath, `${prefix}/audio_${lang}.mp3`, "audio/mpeg");
-          result.audioTracks.push({ languageCode: lang, languageName: langName, audioUrl: dubUrl });
-        }
       }
 
       aiJobs.set(jobId, { status: "done", progress: "AI processing complete!", result });
@@ -396,4 +362,46 @@ r2Router.get("/ai-status/:jobId", requireGuruAuth, (req: Request, res: Response)
   const job = aiJobs.get(req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found" });
   res.json(job);
+});
+
+// ── WAV / Audio → MP3 server-side conversion ─────────────────────────────────
+// Accepts a URL to any uploaded audio file (WAV, FLAC, M4A, etc.),
+// converts it to 128k stereo MP3 via FFmpeg, stores on R2, returns mp3Url.
+r2Router.post("/convert-audio", requireGuruAuth, async (req: Request, res: Response) => {
+  if (!isR2Configured()) {
+    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  }
+  const { audioUrl } = req.body;
+  if (!audioUrl) return res.status(400).json({ error: "audioUrl is required." });
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "audioconv-"));
+  try {
+    // Download the source audio file
+    const response = await fetch(audioUrl);
+    if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+
+    const urlPath = new URL(audioUrl).pathname;
+    const ext = path.extname(urlPath) || ".wav";
+    const inputPath = path.join(tmpDir, `input${ext}`);
+    const outputPath = path.join(tmpDir, "output.mp3");
+
+    fs.writeFileSync(inputPath, Buffer.from(await response.arrayBuffer()));
+
+    // Convert to MP3 (128kbps, 44.1kHz stereo)
+    await convertAudioToMp3(inputPath, outputPath);
+
+    // Upload converted MP3 to R2 under the audio/ prefix
+    const timestamp = Date.now();
+    const baseName = path.basename(urlPath).replace(/\.[^.]+$/, "");
+    const mp3Key = `audio/${timestamp}-${baseName}.mp3`;
+    const mp3Url = await uploadFileToR2(outputPath, mp3Key, "audio/mpeg");
+
+    console.log(`[AudioConvert] ${ext} → MP3: ${mp3Url}`);
+    return res.json({ mp3Url });
+  } catch (err: any) {
+    console.error("[AudioConvert] Error:", err);
+    return res.status(500).json({ error: err.message || "Audio conversion failed." });
+  } finally {
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+  }
 });

@@ -123,7 +123,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiProgress, setAiProgress] = useState("");
   const [aiSelectedLangs, setAiSelectedLangs] = useState<string[]>(["hi", "ta"]);
-  const [aiGenerateDubbing, setAiGenerateDubbing] = useState(true);
+  const [convertingAudio, setConvertingAudio] = useState(false);
 
   const videoUpload = useR2Upload("videos");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -171,6 +171,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     setAiJobId(null);
     setAiProcessing(false);
     setAiProgress("");
+    setConvertingAudio(false);
   }, [open, editingLesson, defaultOrderIndex]);
 
   useEffect(() => {
@@ -242,7 +243,6 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
       const res = await apiRequest("POST", "/api/guru/r2/ai-process", {
         videoUrl: form.videoUrl,
         languages: aiSelectedLangs,
-        generateDubbing: aiGenerateDubbing,
       });
       if (!res.ok) {
         const err = await res.json();
@@ -321,19 +321,45 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
 
   const audioUpload = useR2Upload("audio");
   const handleAudioFile = async (file: File) => {
-    const url = await audioUpload.upload(file);
-    if (url) {
-      const lang = LANGUAGES.find((l) => l.code === pendingAudioLang);
-      setForm((f) => ({
-        ...f,
-        audioTracks: [...f.audioTracks, {
-          languageCode: pendingAudioLang,
-          languageName: lang?.name || pendingAudioLang,
-          audioUrl: url,
-        }],
-      }));
-      toast({ title: `Audio track added (${lang?.name || pendingAudioLang})` });
+    const rawUrl = await audioUpload.upload(file);
+    if (!rawUrl) return;
+
+    const isWav =
+      file.type === "audio/wav" ||
+      file.type === "audio/x-wav" ||
+      file.name.toLowerCase().endsWith(".wav");
+
+    let finalUrl = rawUrl;
+
+    if (isWav) {
+      setConvertingAudio(true);
+      try {
+        const res = await apiRequest("POST", "/api/guru/r2/convert-audio", { audioUrl: rawUrl });
+        if (res.ok) {
+          const { mp3Url } = await res.json();
+          finalUrl = mp3Url;
+          toast({ title: "WAV converted to MP3", description: "Audio track ready for playback." });
+        } else {
+          const err = await res.json();
+          toast({ title: "Conversion failed — using original WAV", description: err.error, variant: "destructive" });
+        }
+      } catch {
+        toast({ title: "Conversion failed — using original WAV", variant: "destructive" });
+      } finally {
+        setConvertingAudio(false);
+      }
     }
+
+    const lang = LANGUAGES.find((l) => l.code === pendingAudioLang);
+    setForm((f) => ({
+      ...f,
+      audioTracks: [...f.audioTracks, {
+        languageCode: pendingAudioLang,
+        languageName: lang?.name || pendingAudioLang,
+        audioUrl: finalUrl,
+      }],
+    }));
+    toast({ title: `Audio track added (${lang?.name || pendingAudioLang})` });
   };
 
   const subtitleUpload = useR2Upload("subtitles");
@@ -591,15 +617,9 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       </div>
                     </div>
 
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox
-                        checked={aiGenerateDubbing}
-                        onCheckedChange={(c) => setAiGenerateDubbing(!!c)}
-                        disabled={aiProcessing}
-                        className="h-3.5 w-3.5"
-                      />
-                      <span className="text-xs">Generate AI voice dubbing (audio tracks)</span>
-                    </label>
+                    <p className="text-xs text-muted-foreground border-l-2 border-purple-400/40 pl-2">
+                      AI will generate timed subtitle files only. Upload your own dubbed audio tracks (WAV/MP3) in the Audio tab — WAV files are auto-converted to MP3.
+                    </p>
 
                     <Button
                       type="button"
@@ -628,7 +648,9 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
 
               {/* ── AUDIO ── */}
               <TabsContent value="audio" className="space-y-4 mt-0">
-                <p className="text-sm text-muted-foreground">Add dubbed audio tracks in multiple languages. Students can switch language in the video player.</p>
+                <p className="text-sm text-muted-foreground">
+                  Upload dubbed audio tracks per language (MP3 or WAV). Students switch language in the player. WAV files are automatically converted to MP3.
+                </p>
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <Label>Language</Label>
@@ -639,16 +661,26 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="button" variant="outline" size="sm" disabled={audioUpload.uploading}
-                    onClick={() => audioInputRef.current?.click()} className="gap-1 shrink-0" data-testid="button-upload-audio">
-                    {audioUpload.uploading
-                      ? <><Loader2 className="w-4 h-4 animate-spin" />{audioUpload.progress > 0 ? `${audioUpload.progress}%` : "…"}</>
-                      : <><Upload className="w-4 h-4" />Upload Audio</>}
+                  <Button type="button" variant="outline" size="sm"
+                    disabled={audioUpload.uploading || convertingAudio}
+                    onClick={() => audioInputRef.current?.click()}
+                    className="gap-1 shrink-0" data-testid="button-upload-audio">
+                    {convertingAudio
+                      ? <><Loader2 className="w-4 h-4 animate-spin" />Converting WAV…</>
+                      : audioUpload.uploading
+                      ? <><Loader2 className="w-4 h-4 animate-spin" />{audioUpload.progress > 0 ? `${audioUpload.progress}%` : "Uploading…"}</>
+                      : <><Upload className="w-4 h-4" />Upload Audio (MP3 / WAV)</>}
                   </Button>
                 </div>
                 {audioUpload.uploading && audioUpload.progress > 0 && (
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <div className="h-full bg-primary transition-all" style={{ width: `${audioUpload.progress}%` }} />
+                  </div>
+                )}
+                {convertingAudio && (
+                  <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Converting WAV to MP3 — this takes a moment for large files…
                   </div>
                 )}
                 {form.audioTracks.length === 0
