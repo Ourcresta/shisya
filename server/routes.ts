@@ -621,7 +621,14 @@ export async function registerRoutes(
         .where(eq(lessonsTable.id, lessonIdNum))
         .limit(1);
       if (dbLesson) {
-        return res.json(dbLesson);
+        const safeJson = (v: any) => { try { return v ? JSON.parse(v) : null; } catch { return null; } };
+        return res.json({
+          ...dbLesson,
+          audioTracks: safeJson(dbLesson.audioTracks),
+          subtitleTracks: safeJson(dbLesson.subtitleTracks),
+          attachments: safeJson(dbLesson.attachments),
+          codeSnippets: safeJson(dbLesson.codeSnippets),
+        });
       }
 
       if (USE_MOCK_DATA) {

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -60,9 +59,8 @@ import {
   Video,
   Check,
   X,
-  Upload,
-  Loader2,
 } from "lucide-react";
+import { LessonEditorDialog } from "@/components/guru/LessonEditorDialog";
 
 interface Course {
   id: number;
@@ -97,6 +95,14 @@ interface Lesson {
   title: string;
   content: string | null;
   videoUrl: string | null;
+  hlsUrl: string | null;
+  hlsStatus: string | null;
+  audioTracks: any[] | null;
+  subtitleTracks: any[] | null;
+  attachments: any[] | null;
+  codeSnippets: any[] | null;
+  unlocksLabId: number | null;
+  unlocksProjectId: number | null;
   durationMinutes: number | null;
   orderIndex: number;
   isPreview: boolean;
@@ -117,17 +123,7 @@ interface ModuleForm {
   orderIndex: number;
 }
 
-interface LessonForm {
-  title: string;
-  content: string;
-  videoUrl: string;
-  durationMinutes: number;
-  orderIndex: number;
-  isPreview: boolean;
-}
-
 const defaultModuleForm: ModuleForm = { title: "", description: "", orderIndex: 0 };
-const defaultLessonForm: LessonForm = { title: "", content: "", videoUrl: "", durationMinutes: 0, orderIndex: 0, isPreview: false };
 
 export default function GuruCourseDetail() {
   const params = useParams();
@@ -142,53 +138,15 @@ export default function GuruCourseDetail() {
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<number | null>(null);
+  const [defaultOrderIndex, setDefaultOrderIndex] = useState(0);
   const [deleteTargetModule, setDeleteTargetModule] = useState<Module | null>(null);
   const [deleteTargetLesson, setDeleteTargetLesson] = useState<Lesson | null>(null);
   const [moduleForm, setModuleForm] = useState<ModuleForm>(defaultModuleForm);
-  const [lessonForm, setLessonForm] = useState<LessonForm>(defaultLessonForm);
 
   const [courseEditOpen, setCourseEditOpen] = useState(false);
   const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "" });
   const [editingTcUrl, setEditingTcUrl] = useState(false);
   const [tcUrlValue, setTcUrlValue] = useState("");
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const videoFileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleVideoUpload = async (file: File) => {
-    if (!file) return;
-    setIsUploading(true);
-    setUploadProgress(0);
-    try {
-      const presignRes = await apiRequest("POST", "/api/guru/r2/presign", {
-        fileName: file.name,
-        fileType: file.type,
-      });
-      const { uploadUrl, publicUrl } = await presignRes.json();
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
-        xhr.onerror = () => reject(new Error("Upload failed"));
-        xhr.send(file);
-      });
-
-      setLessonForm((prev) => ({ ...prev, videoUrl: publicUrl }));
-      toast({ title: "Video uploaded!", description: "The R2 URL has been filled in automatically." });
-    } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message || "Please try again.", variant: "destructive" });
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
-    }
-  };
 
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ["/api/guru/courses", courseId],
@@ -281,41 +239,6 @@ export default function GuruCourseDetail() {
     },
   });
 
-  const createLessonMutation = useMutation({
-    mutationFn: async (data: LessonForm & { moduleId: number }) => {
-      const res = await apiRequest("POST", "/api/guru/lessons", { ...data, courseId: parseInt(courseId!) });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/guru/courses", courseId, "modules"] });
-      setLessonDialogOpen(false);
-      setLessonForm(defaultLessonForm);
-      setEditingLesson(null);
-      setSelectedModuleId(null);
-      toast({ title: "Lesson created successfully" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to create lesson", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const updateLessonMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: LessonForm }) => {
-      const res = await apiRequest("PUT", `/api/guru/lessons/${id}`, data);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/guru/courses", courseId, "modules"] });
-      setLessonDialogOpen(false);
-      setEditingLesson(null);
-      setLessonForm(defaultLessonForm);
-      toast({ title: "Lesson updated successfully" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to update lesson", description: error.message, variant: "destructive" });
-    },
-  });
-
   const deleteLessonMutation = useMutation({
     mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/guru/lessons/${id}`);
@@ -357,21 +280,13 @@ export default function GuruCourseDetail() {
     setEditingLesson(null);
     setSelectedModuleId(moduleId);
     const mod = modulesData?.find((m) => m.id === moduleId);
-    setLessonForm({ ...defaultLessonForm, orderIndex: mod?.lessons?.length || 0 });
+    setDefaultOrderIndex(mod?.lessons?.length || 0);
     setLessonDialogOpen(true);
   };
 
   const openEditLesson = (lesson: Lesson) => {
     setEditingLesson(lesson);
     setSelectedModuleId(lesson.moduleId);
-    setLessonForm({
-      title: lesson.title,
-      content: lesson.content || "",
-      videoUrl: lesson.videoUrl || "",
-      durationMinutes: lesson.durationMinutes || 0,
-      orderIndex: lesson.orderIndex,
-      isPreview: lesson.isPreview,
-    });
     setLessonDialogOpen(true);
   };
 
@@ -387,14 +302,6 @@ export default function GuruCourseDetail() {
       updateModuleMutation.mutate({ id: editingModule.id, data: moduleForm });
     } else {
       createModuleMutation.mutate(moduleForm);
-    }
-  };
-
-  const handleLessonSubmit = () => {
-    if (editingLesson) {
-      updateLessonMutation.mutate({ id: editingLesson.id, data: lessonForm });
-    } else if (selectedModuleId) {
-      createLessonMutation.mutate({ ...lessonForm, moduleId: selectedModuleId });
     }
   };
 
@@ -951,137 +858,18 @@ export default function GuruCourseDetail() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={lessonDialogOpen} onOpenChange={setLessonDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle data-testid="text-lesson-dialog-title">
-              {editingLesson ? "Edit Lesson" : "Add Lesson"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingLesson ? "Update lesson details" : "Create a new lesson"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="lesson-title">Title *</Label>
-              <Input
-                id="lesson-title"
-                value={lessonForm.title}
-                onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                placeholder="Lesson title"
-                data-testid="input-lesson-title"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lesson-content">Content</Label>
-              <Textarea
-                id="lesson-content"
-                value={lessonForm.content}
-                onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-                placeholder="Lesson content (markdown supported)"
-                rows={5}
-                data-testid="input-lesson-content"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lesson-video-url">Video URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="lesson-video-url"
-                  value={lessonForm.videoUrl}
-                  onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
-                  placeholder="https://... or upload a video file →"
-                  data-testid="input-lesson-video-url"
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isUploading}
-                  onClick={() => videoFileInputRef.current?.click()}
-                  data-testid="button-upload-video"
-                  className="shrink-0 gap-1.5"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {uploadProgress > 0 ? `${uploadProgress}%` : "Uploading…"}
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4" />
-                      Upload to R2
-                    </>
-                  )}
-                </Button>
-                <input
-                  ref={videoFileInputRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleVideoUpload(file);
-                  }}
-                  data-testid="input-video-file"
-                />
-              </div>
-              {isUploading && uploadProgress > 0 && (
-                <div className="mt-1.5 h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-200"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="lesson-duration">Duration (minutes)</Label>
-                <Input
-                  id="lesson-duration"
-                  type="number"
-                  value={lessonForm.durationMinutes}
-                  onChange={(e) => setLessonForm({ ...lessonForm, durationMinutes: parseInt(e.target.value) || 0 })}
-                  data-testid="input-lesson-duration"
-                />
-              </div>
-              <div>
-                <Label htmlFor="lesson-order">Order Index</Label>
-                <Input
-                  id="lesson-order"
-                  type="number"
-                  value={lessonForm.orderIndex}
-                  onChange={(e) => setLessonForm({ ...lessonForm, orderIndex: parseInt(e.target.value) || 0 })}
-                  data-testid="input-lesson-order"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="lesson-is-preview"
-                checked={lessonForm.isPreview}
-                onCheckedChange={(c) => setLessonForm({ ...lessonForm, isPreview: !!c })}
-                data-testid="checkbox-lesson-preview"
-              />
-              <Label htmlFor="lesson-is-preview" className="cursor-pointer">Available as free preview</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLessonDialogOpen(false)} data-testid="button-cancel-lesson">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleLessonSubmit}
-              disabled={!lessonForm.title || createLessonMutation.isPending || updateLessonMutation.isPending}
-              data-testid="button-submit-lesson"
-            >
-              {(createLessonMutation.isPending || updateLessonMutation.isPending) ? "Saving..." : editingLesson ? "Save" : "Create"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <LessonEditorDialog
+        open={lessonDialogOpen}
+        onClose={() => {
+          setLessonDialogOpen(false);
+          setEditingLesson(null);
+          setSelectedModuleId(null);
+        }}
+        courseId={parseInt(courseId!)}
+        moduleId={selectedModuleId}
+        editingLesson={editingLesson}
+        defaultOrderIndex={defaultOrderIndex}
+      />
 
       <AlertDialog open={deleteModuleOpen} onOpenChange={setDeleteModuleOpen}>
         <AlertDialogContent>

@@ -16,6 +16,21 @@ export const guruRouter = Router();
 
 guruRouter.use(requireGuruAuth as any);
 
+function parseLessonJson(lesson: any) {
+  if (!lesson) return lesson;
+  const safeJson = (v: any) => {
+    if (!v) return null;
+    try { return typeof v === "string" ? JSON.parse(v) : v; } catch { return null; }
+  };
+  return {
+    ...lesson,
+    audioTracks: safeJson(lesson.audioTracks),
+    subtitleTracks: safeJson(lesson.subtitleTracks),
+    attachments: safeJson(lesson.attachments),
+    codeSnippets: safeJson(lesson.codeSnippets),
+  };
+}
+
 guruRouter.get("/dashboard/stats", async (req: Request, res: Response) => {
   try {
     const [courseCount] = await db.select({ count: count() }).from(courses);
@@ -170,12 +185,34 @@ guruRouter.get("/courses/:courseId/modules", async (req: Request, res: Response)
     const mods = await db.select().from(modules).where(eq(modules.courseId, courseId)).orderBy(modules.orderIndex);
     const result = await Promise.all(mods.map(async (mod) => {
       const modLessons = await db.select().from(lessons).where(eq(lessons.moduleId, mod.id)).orderBy(lessons.orderIndex);
-      return { ...mod, lessons: modLessons };
+      return { ...mod, lessons: modLessons.map(parseLessonJson) };
     }));
     res.json(result);
   } catch (error) {
     console.error("[Guru] Get modules error:", error);
     res.status(500).json({ error: "Failed to fetch modules" });
+  }
+});
+
+guruRouter.get("/courses/:courseId/labs", async (req: Request, res: Response) => {
+  try {
+    const courseId = parseInt(req.params.courseId);
+    const courseLabs = await db.select().from(labs).where(eq(labs.courseId, courseId)).orderBy(labs.orderIndex);
+    res.json(courseLabs);
+  } catch (error) {
+    console.error("[Guru] Get course labs error:", error);
+    res.status(500).json({ error: "Failed to fetch labs" });
+  }
+});
+
+guruRouter.get("/courses/:courseId/projects", async (req: Request, res: Response) => {
+  try {
+    const courseId = parseInt(req.params.courseId);
+    const courseProjects = await db.select().from(projects).where(eq(projects.courseId, courseId));
+    res.json(courseProjects);
+  } catch (error) {
+    console.error("[Guru] Get course projects error:", error);
+    res.status(500).json({ error: "Failed to fetch projects" });
   }
 });
 
@@ -220,10 +257,25 @@ guruRouter.delete("/modules/:id", async (req: Request, res: Response) => {
 
 guruRouter.post("/lessons", async (req: Request, res: Response) => {
   try {
-    const { moduleId, courseId, title, content, videoUrl, durationMinutes, orderIndex, isPreview } = req.body;
+    const {
+      moduleId, courseId, title, content, videoUrl, hlsUrl, hlsStatus,
+      audioTracks, subtitleTracks, attachments, codeSnippets,
+      unlocksLabId, unlocksProjectId,
+      durationMinutes, orderIndex, isPreview,
+    } = req.body;
     if (!moduleId || !courseId || !title) return res.status(400).json({ error: "Module ID, Course ID, and title are required" });
-    const [newLesson] = await db.insert(lessons).values({ moduleId, courseId, title, content, videoUrl, durationMinutes, orderIndex: orderIndex || 0, isPreview: isPreview || false }).returning();
-    res.json(newLesson);
+    const [newLesson] = await db.insert(lessons).values({
+      moduleId, courseId, title, content: content || null,
+      videoUrl: videoUrl || null, hlsUrl: hlsUrl || null, hlsStatus: hlsStatus || "none",
+      audioTracks: audioTracks ? JSON.stringify(audioTracks) : null,
+      subtitleTracks: subtitleTracks ? JSON.stringify(subtitleTracks) : null,
+      attachments: attachments ? JSON.stringify(attachments) : null,
+      codeSnippets: codeSnippets ? JSON.stringify(codeSnippets) : null,
+      unlocksLabId: unlocksLabId || null,
+      unlocksProjectId: unlocksProjectId || null,
+      durationMinutes, orderIndex: orderIndex || 0, isPreview: isPreview || false,
+    }).returning();
+    res.json(parseLessonJson(newLesson));
   } catch (error) {
     console.error("[Guru] Create lesson error:", error);
     res.status(500).json({ error: "Failed to create lesson" });
@@ -233,10 +285,25 @@ guruRouter.post("/lessons", async (req: Request, res: Response) => {
 guruRouter.put("/lessons/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const { title, content, videoUrl, durationMinutes, orderIndex, isPreview } = req.body;
-    const [updated] = await db.update(lessons).set({ title, content, videoUrl, durationMinutes, orderIndex, isPreview }).where(eq(lessons.id, id)).returning();
+    const {
+      title, content, videoUrl, hlsUrl, hlsStatus,
+      audioTracks, subtitleTracks, attachments, codeSnippets,
+      unlocksLabId, unlocksProjectId,
+      durationMinutes, orderIndex, isPreview,
+    } = req.body;
+    const [updated] = await db.update(lessons).set({
+      title, content: content || null,
+      videoUrl: videoUrl || null, hlsUrl: hlsUrl || null, hlsStatus: hlsStatus || "none",
+      audioTracks: audioTracks !== undefined ? (audioTracks ? JSON.stringify(audioTracks) : null) : undefined,
+      subtitleTracks: subtitleTracks !== undefined ? (subtitleTracks ? JSON.stringify(subtitleTracks) : null) : undefined,
+      attachments: attachments !== undefined ? (attachments ? JSON.stringify(attachments) : null) : undefined,
+      codeSnippets: codeSnippets !== undefined ? (codeSnippets ? JSON.stringify(codeSnippets) : null) : undefined,
+      unlocksLabId: unlocksLabId !== undefined ? (unlocksLabId || null) : undefined,
+      unlocksProjectId: unlocksProjectId !== undefined ? (unlocksProjectId || null) : undefined,
+      durationMinutes, orderIndex, isPreview,
+    }).where(eq(lessons.id, id)).returning();
     if (!updated) return res.status(404).json({ error: "Lesson not found" });
-    res.json(updated);
+    res.json(parseLessonJson(updated));
   } catch (error) {
     console.error("[Guru] Update lesson error:", error);
     res.status(500).json({ error: "Failed to update lesson" });
