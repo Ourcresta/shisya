@@ -86,6 +86,24 @@ function isHlsUrl(url: string): boolean {
   return url.includes(".m3u8") || url.includes("m3u8");
 }
 
+// Route R2 videos through the server proxy to bypass browser CORS restrictions.
+// Other URLs (HLS streams, TrainerCentral embeds, etc.) are passed through unchanged.
+function resolveVideoUrl(url: string): string {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url);
+    const isR2 =
+      parsed.hostname.endsWith("r2.dev") ||
+      parsed.hostname.endsWith("cloudflarestorage.com");
+    if (isR2) {
+      return `/api/video-proxy?url=${encodeURIComponent(url)}`;
+    }
+  } catch {
+    // Not a full URL — leave as-is
+  }
+  return url;
+}
+
 export function UshaVideoPlayer({
   videoUrl,
   audioTracks = [],
@@ -133,6 +151,9 @@ export function UshaVideoPlayer({
     const video = videoRef.current;
     if (!video || !videoUrl) return;
 
+    // Resolve the URL — R2 uploads are routed through the server proxy to avoid CORS
+    const resolvedUrl = resolveVideoUrl(videoUrl);
+
     if (isHlsUrl(videoUrl) && Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
@@ -142,7 +163,7 @@ export function UshaVideoPlayer({
       });
       hlsRef.current = hls;
 
-      hls.loadSource(videoUrl);
+      hls.loadSource(resolvedUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
@@ -174,9 +195,9 @@ export function UshaVideoPlayer({
         hlsRef.current = null;
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = videoUrl;
+      video.src = resolvedUrl;
     } else {
-      video.src = videoUrl;
+      video.src = resolvedUrl;
     }
   }, [videoUrl]);
 

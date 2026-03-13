@@ -126,6 +126,60 @@ export async function registerRoutes(
   // Cloudflare R2 video upload (must be before broad /api/guru mount)
   app.use("/api/guru/r2", r2Router);
 
+  // Video proxy — streams R2 (or any allowed) video through the server to avoid
+  // browser CORS restrictions. Supports HTTP Range requests for scrubbing.
+  const R2_PUBLIC_HOST = (process.env.CLOUDFLARE_R2_PUBLIC_URL || "").replace(/\/$/, "");
+  app.get("/api/video-proxy", async (req: any, res: any) => {
+    const rawUrl = req.query.url as string;
+    if (!rawUrl) return res.status(400).json({ error: "url query param is required" });
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(rawUrl);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL" });
+    }
+
+    // Only proxy from the configured R2 public domain for security
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com"];
+    const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
+    if (!isAllowed) {
+      return res.status(403).json({ error: "URL not allowed" });
+    }
+
+    try {
+      const headers: Record<string, string> = { "User-Agent": "OurShiksha/1.0" };
+      const range = req.headers["range"];
+      if (range) headers["Range"] = range;
+
+      const upstream = await fetch(rawUrl, { headers });
+
+      res.status(upstream.status);
+      const passHeaders = [
+        "content-type", "content-length", "content-range",
+        "accept-ranges", "last-modified", "etag",
+      ];
+      passHeaders.forEach((h) => {
+        const v = upstream.headers.get(h);
+        if (v) res.setHeader(h, v);
+      });
+      res.setHeader("Cache-Control", "public, max-age=3600");
+
+      if (!upstream.body) return res.end();
+      const reader = upstream.body.getReader();
+      const pump = async () => {
+        const { done, value } = await reader.read();
+        if (done) { res.end(); return; }
+        res.write(Buffer.from(value));
+        pump();
+      };
+      pump();
+    } catch (err) {
+      console.error("[VideoProxy] Error:", err);
+      res.status(502).json({ error: "Failed to proxy video" });
+    }
+  });
+
   // Guru Admin dashboard routes
   app.use("/api/guru", guruRouter);
   
