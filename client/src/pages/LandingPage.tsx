@@ -33,6 +33,7 @@ import {
   MessageCircle,
   Star,
   Quote,
+  Layers,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
@@ -635,6 +636,155 @@ function CoursePreviewSkeleton() {
   );
 }
 
+function ComboCourseSection() {
+  const { data: courses } = useQuery<Course[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  const comboGroups = (() => {
+    if (!courses) return [];
+    const groups: Record<string, Course[]> = {};
+    for (const c of courses) {
+      if (c.groupTitle) {
+        if (!groups[c.groupTitle]) groups[c.groupTitle] = [];
+        groups[c.groupTitle].push(c);
+      }
+    }
+    return Object.entries(groups)
+      .filter(([, items]) => items.length >= 2)
+      .map(([name, items]) => ({
+        name,
+        courses: items,
+        totalCredits: items.reduce((sum, c) => sum + (c.creditCost || 0), 0),
+      }));
+  })();
+
+  if (comboGroups.length === 0) return null;
+
+  return (
+    <section className="relative py-20 md:py-24 overflow-hidden">
+      <SectionGlow position="center" color={C.purple} />
+      <SectionGlow position="top-right" color={C.teal} />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="text-center mb-14">
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-4"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+            data-testid="text-combo-title"
+          >
+            Interested in our Combo Packs?
+          </h2>
+          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
+            Save more by enrolling in bundled course packs curated for your career path
+          </p>
+        </div>
+
+        <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible md:pb-0">
+          {comboGroups.map((group) => (
+            <GlassCard
+              key={group.name}
+              className="min-w-[300px] md:min-w-0 snap-start flex flex-col p-0 overflow-hidden"
+              data-testid={`card-combo-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
+            >
+              <div
+                className="p-5 pb-4 flex items-center gap-4"
+                style={{ borderBottom: `1px solid ${C.cardBorder}` }}
+              >
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,245,255,0.1))`,
+                    border: `1px solid rgba(124,58,237,0.3)`,
+                    boxShadow: "0 0 20px -5px rgba(124,58,237,0.25)",
+                  }}
+                >
+                  <Layers className="w-7 h-7" style={{ color: C.purple }} />
+                </div>
+                <div className="min-w-0">
+                  <h3
+                    className="text-base font-bold text-white leading-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {group.name}
+                  </h3>
+                  <p className="text-xs mt-0.5" style={{ color: C.textSecondary }}>
+                    {group.courses.length} courses bundled
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 flex-1">
+                <div className="grid grid-cols-2 gap-3">
+                  {group.courses.map((course) => (
+                    <div
+                      key={course.id}
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl transition-colors"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: `1px solid rgba(255,255,255,0.06)`,
+                      }}
+                      data-testid={`combo-course-chip-${course.id}`}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          background: "rgba(0,245,255,0.08)",
+                          border: "1px solid rgba(0,245,255,0.15)",
+                        }}
+                      >
+                        <BookOpen className="w-4 h-4" style={{ color: C.teal }} />
+                      </div>
+                      <span className="text-xs font-medium text-white leading-tight line-clamp-2">
+                        {course.title.replace(group.name, "").replace(/^[\s\-–—:]+/, "").trim() || course.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-5 pt-0 mt-auto space-y-3">
+                {group.totalCredits > 0 && (
+                  <div
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+                    style={{
+                      background: "rgba(124,58,237,0.08)",
+                      border: "1px solid rgba(124,58,237,0.15)",
+                      color: "#C4B5FD",
+                    }}
+                  >
+                    <Coins className="w-3.5 h-3.5" />
+                    <span>Total: <strong>{group.totalCredits} credits</strong> for the full pack</span>
+                  </div>
+                )}
+                <Link href="/courses" className="block">
+                  <button
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                    style={{
+                      background: `linear-gradient(135deg, ${C.purple}, #9333EA)`,
+                      color: "#FFFFFF",
+                      boxShadow: "0 4px 15px -4px rgba(124,58,237,0.4)",
+                    }}
+                    data-testid={`button-combo-view-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    View Courses
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CoursePreviewSection() {
   const { data: courses, isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -1111,6 +1261,7 @@ export default function LandingPage() {
         <RewardsSection />
         <AISection />
         <CoursePreviewSection />
+        <ComboCourseSection />
         <TestimonialsSection />
         <FAQSection />
         <CTASection />

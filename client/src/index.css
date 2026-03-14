@@ -2886,3 +2886,11 @@ html.dark body {
   0%, 100% { box-shadow: 0 0 0 0 #22d3ee40; }
   50%       { box-shadow: 0 0 0 14px #22d3ee00; }
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
