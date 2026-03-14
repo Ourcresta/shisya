@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Header } from "./Header";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -25,10 +25,10 @@ interface LayoutProps {
 }
 
 const quickLinks = [
-  { label: "Dashboard", href: "/shishya/dashboard", icon: LayoutDashboard, authRequired: true },
-  { label: "Browse Courses", href: "/courses", icon: BookOpen, authRequired: false },
-  { label: "My Certificates", href: "/shishya/certificates", icon: Award, authRequired: true },
-  { label: "Wallet", href: "/shishya/wallet", icon: Wallet, authRequired: true },
+  { label: "Dashboard", href: "/shishya/dashboard", icon: LayoutDashboard },
+  { label: "Browse Courses", href: "/courses", icon: BookOpen },
+  { label: "My Certificates", href: "/shishya/certificates", icon: Award },
+  { label: "Wallet", href: "/shishya/wallet", icon: Wallet },
 ];
 
 const resourceLinks = [
@@ -45,7 +45,6 @@ const legalLinks = [
 ];
 
 export function Layout({ children, fullWidth = false }: LayoutProps) {
-  const [location] = useLocation();
   const { user } = useAuth();
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -83,16 +82,14 @@ export function Layout({ children, fullWidth = false }: LayoutProps) {
                 </span>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Empowering learners with AI-driven courses, guided labs, and real-world projects.
+                Empowering learners with AI
               </p>
             </div>
 
             <div>
               <h4 className="text-sm font-semibold mb-3">Quick Links</h4>
               <ul className="space-y-2">
-                {quickLinks
-                  .filter((link) => !link.authRequired || user)
-                  .map((link) => (
+                {quickLinks.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
