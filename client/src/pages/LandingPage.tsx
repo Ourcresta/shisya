@@ -746,7 +746,7 @@ function ComboCourseSection() {
                       </div>
                       <div className="min-w-0">
                         <span className="text-xs font-medium text-white leading-tight line-clamp-2 block">
-                          {course.title.replace(group.name, "").replace(/^[\s\-–—:]+/, "").trim() || course.title}
+                          {course.title}
                         </span>
                         <LevelBadge level={course.level || "beginner"} className="mt-1 scale-90 origin-left" />
                       </div>
@@ -756,19 +756,17 @@ function ComboCourseSection() {
               </div>
 
               <div className="p-5 pt-0 mt-auto space-y-3">
-                {group.totalCredits > 0 && (
-                  <div
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
-                    style={{
-                      background: "rgba(124,58,237,0.08)",
-                      border: "1px solid rgba(124,58,237,0.15)",
-                      color: "#C4B5FD",
-                    }}
-                  >
-                    <Coins className="w-3.5 h-3.5" />
-                    <span>Total: <strong>{group.totalCredits} credits</strong> for the full pack</span>
-                  </div>
-                )}
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+                  style={{
+                    background: "rgba(124,58,237,0.08)",
+                    border: "1px solid rgba(124,58,237,0.15)",
+                    color: "#C4B5FD",
+                  }}
+                >
+                  <Coins className="w-3.5 h-3.5" />
+                  <span>Total: <strong>{group.totalCredits} credits</strong> for the full pack</span>
+                </div>
                 <Link href="/courses" className="block">
                   <button
                     className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
