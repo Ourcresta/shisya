@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   GraduationCap,
   Globe,
@@ -37,6 +40,21 @@ import {
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+const partnerFormSchema = z.object({
+  fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  partnerType: z.enum(["Educator", "Institution", "Industry Expert", "Affiliate"], {
+    required_error: "Please select a partner type",
+  }),
+  expertise: z.string().optional(),
+  linkedin: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  proposal: z.string().optional(),
+});
+
+type PartnerFormData = z.infer<typeof partnerFormSchema>;
 
 const C = {
   bgPrimary: "#0B1D3A",
@@ -190,35 +208,32 @@ function Footer() {
 function PartnerForm() {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    fullName: "", email: "", phone: "", country: "", partnerType: "",
-    expertise: "", linkedin: "", proposal: "",
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<PartnerFormData>({
+    resolver: zodResolver(partnerFormSchema),
+    defaultValues: {
+      fullName: "", email: "", phone: "", country: "", partnerType: undefined,
+      expertise: "", linkedin: "", proposal: "",
+    },
   });
 
-  const update = (field: string, value: string) => setForm((p) => ({ ...p, [field]: value }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.fullName || !form.email || !form.partnerType) {
-      toast({ title: "Missing fields", description: "Please fill in all required fields.", variant: "destructive" });
-      return;
-    }
+  const onSubmit = async (data: PartnerFormData) => {
     setSubmitting(true);
     try {
       const message = [
-        `Partner Type: ${form.partnerType}`,
-        `Phone: ${form.phone || "N/A"}`,
-        `Country: ${form.country || "N/A"}`,
-        `Experience: ${form.expertise || "N/A"}`,
-        `LinkedIn: ${form.linkedin || "N/A"}`,
-        `Proposal: ${form.proposal || "N/A"}`,
+        `Partner Type: ${data.partnerType}`,
+        `Phone: ${data.phone || "N/A"}`,
+        `Country: ${data.country || "N/A"}`,
+        `Experience: ${data.expertise || "N/A"}`,
+        `LinkedIn: ${data.linkedin || "N/A"}`,
+        `Proposal: ${data.proposal || "N/A"}`,
       ].join("\n");
       await apiRequest("POST", "/api/contact", {
-        name: form.fullName, email: form.email,
-        subject: `Partner Application - ${form.partnerType}`, message,
+        name: data.fullName, email: data.email,
+        subject: `Partner Application - ${data.partnerType}`, message,
       });
       toast({ title: "Application Submitted!", description: "We'll review your application and get back to you soon." });
-      setForm({ fullName: "", email: "", phone: "", country: "", partnerType: "", expertise: "", linkedin: "", proposal: "" });
+      reset();
     } catch {
       toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
@@ -231,56 +246,61 @@ function PartnerForm() {
     color: C.textPrimary, borderRadius: "8px", padding: "0.65rem 0.85rem",
     fontSize: "0.9rem", width: "100%", outline: "none",
   };
+  const errorInputStyle: React.CSSProperties = { ...inputStyle, borderColor: "#EF4444" };
   const labelStyle: React.CSSProperties = { color: C.textSecondary, fontSize: "0.82rem", fontWeight: 500, marginBottom: "0.35rem", display: "block" };
+  const errorStyle: React.CSSProperties = { color: "#EF4444", fontSize: "0.75rem", marginTop: "0.25rem" };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" data-testid="form-partner-apply">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="form-partner-apply">
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label style={labelStyle}>Full Name *</label>
-          <input style={inputStyle} value={form.fullName} onChange={(e) => update("fullName", e.target.value)}
+          <input style={errors.fullName ? errorInputStyle : inputStyle} {...register("fullName")}
             placeholder="Your full name" data-testid="input-fullname" />
+          {errors.fullName && <p style={errorStyle}>{errors.fullName.message}</p>}
         </div>
         <div>
           <label style={labelStyle}>Email *</label>
-          <input type="email" style={inputStyle} value={form.email} onChange={(e) => update("email", e.target.value)}
+          <input type="email" style={errors.email ? errorInputStyle : inputStyle} {...register("email")}
             placeholder="you@example.com" data-testid="input-email" />
+          {errors.email && <p style={errorStyle}>{errors.email.message}</p>}
         </div>
         <div>
           <label style={labelStyle}>Phone Number</label>
-          <input type="tel" style={inputStyle} value={form.phone} onChange={(e) => update("phone", e.target.value)}
+          <input type="tel" style={inputStyle} {...register("phone")}
             placeholder="+91 98765 43210" data-testid="input-phone" />
         </div>
         <div>
           <label style={labelStyle}>Country</label>
-          <input style={inputStyle} value={form.country} onChange={(e) => update("country", e.target.value)}
+          <input style={inputStyle} {...register("country")}
             placeholder="India" data-testid="input-country" />
         </div>
         <div className="md:col-span-2">
           <label style={labelStyle}>Partner Type *</label>
-          <select style={{ ...inputStyle, appearance: "none" as const }} value={form.partnerType}
-            onChange={(e) => update("partnerType", e.target.value)} data-testid="select-partner-type">
+          <select style={errors.partnerType ? { ...errorInputStyle, appearance: "none" as const } : { ...inputStyle, appearance: "none" as const }}
+            {...register("partnerType")} data-testid="select-partner-type">
             <option value="" style={{ background: C.bgSecondary }}>Select partner type</option>
             <option value="Educator" style={{ background: C.bgSecondary }}>Educator</option>
             <option value="Institution" style={{ background: C.bgSecondary }}>Institution</option>
             <option value="Industry Expert" style={{ background: C.bgSecondary }}>Industry Expert</option>
             <option value="Affiliate" style={{ background: C.bgSecondary }}>Affiliate</option>
           </select>
+          {errors.partnerType && <p style={errorStyle}>{errors.partnerType.message}</p>}
         </div>
         <div className="md:col-span-2">
           <label style={labelStyle}>Experience / Expertise</label>
-          <textarea style={{ ...inputStyle, minHeight: "80px", resize: "vertical" as const }} value={form.expertise}
-            onChange={(e) => update("expertise", e.target.value)}
+          <textarea style={{ ...inputStyle, minHeight: "80px", resize: "vertical" as const }} {...register("expertise")}
             placeholder="Describe your teaching or industry experience" data-testid="input-expertise" />
         </div>
         <div>
           <label style={labelStyle}>LinkedIn Profile</label>
-          <input type="url" style={inputStyle} value={form.linkedin} onChange={(e) => update("linkedin", e.target.value)}
+          <input type="url" style={errors.linkedin ? errorInputStyle : inputStyle} {...register("linkedin")}
             placeholder="https://linkedin.com/in/yourprofile" data-testid="input-linkedin" />
+          {errors.linkedin && <p style={errorStyle}>{errors.linkedin.message}</p>}
         </div>
         <div>
           <label style={labelStyle}>Course Idea / Proposal</label>
-          <input style={inputStyle} value={form.proposal} onChange={(e) => update("proposal", e.target.value)}
+          <textarea style={{ ...inputStyle, minHeight: "80px", resize: "vertical" as const }} {...register("proposal")}
             placeholder="Brief idea of what you'd like to teach" data-testid="input-proposal" />
         </div>
       </div>
