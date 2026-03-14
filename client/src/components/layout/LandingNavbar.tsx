@@ -146,11 +146,8 @@ export function LandingNavbar() {
                   <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-profile-login">
                     Login
                   </Link>
-                  <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-shishya">
-                    Sign up as Shishya
-                  </Link>
-                  <Link href="/signup?role=guru" className="auth-navbar-dropdown-item" data-testid="link-profile-signup-guru">
-                    Sign up as Guru
+                  <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-profile-signup">
+                    Sign up
                   </Link>
                 </>
               )}
