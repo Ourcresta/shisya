@@ -112,7 +112,7 @@ const partnerTypes = [
     color: "#10B981",
     bestFor: ["Software Engineers", "Data Scientists", "Designers", "Product Managers", "Entrepreneurs"],
     canDo: ["Career courses", "Industry masterclasses", "Project based learning", "Mentorship programs"],
-    revenue: null,
+    revenue: "Custom / program-based",
   },
   {
     icon: Users,
