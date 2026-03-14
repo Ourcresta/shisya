@@ -713,9 +713,13 @@ function ComboCourseSection() {
                   >
                     {group.name}
                   </h3>
-                  <p className="text-xs mt-0.5" style={{ color: C.textSecondary }}>
+                  <Badge
+                    variant="secondary"
+                    className="mt-1 text-[10px] px-2 py-0.5"
+                    style={{ background: "rgba(0,245,255,0.1)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}
+                  >
                     {group.courses.length} courses bundled
-                  </p>
+                  </Badge>
                 </div>
               </div>
 
@@ -740,9 +744,12 @@ function ComboCourseSection() {
                       >
                         <BookOpen className="w-4 h-4" style={{ color: C.teal }} />
                       </div>
-                      <span className="text-xs font-medium text-white leading-tight line-clamp-2">
-                        {course.title.replace(group.name, "").replace(/^[\s\-–—:]+/, "").trim() || course.title}
-                      </span>
+                      <div className="min-w-0">
+                        <span className="text-xs font-medium text-white leading-tight line-clamp-2 block">
+                          {course.title.replace(group.name, "").replace(/^[\s\-–—:]+/, "").trim() || course.title}
+                        </span>
+                        <LevelBadge level={course.level || "beginner"} className="mt-1 scale-90 origin-left" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -766,9 +773,9 @@ function ComboCourseSection() {
                   <button
                     className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
                     style={{
-                      background: `linear-gradient(135deg, ${C.purple}, #9333EA)`,
-                      color: "#FFFFFF",
-                      boxShadow: "0 4px 15px -4px rgba(124,58,237,0.4)",
+                      background: "transparent",
+                      color: C.teal,
+                      border: `1px solid rgba(0,245,255,0.3)`,
                     }}
                     data-testid={`button-combo-view-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
                   >
