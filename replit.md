@@ -1,7 +1,7 @@
 # OurShiksha Platform - SHISHYA + GURU
 
 ## Overview
-OurShiksha is a comprehensive e-learning platform featuring two integrated portals, SHISHYA (Student Portal) and GURU (Admin Control Panel), sharing a PostgreSQL database. The platform aims to provide a seamless learning experience for students and robust management tools for administrators. SHISHYA focuses on content consumption, progress tracking, and skill development, while GURU handles course, student, credit, and platform settings management.
+OurShiksha is an e-learning platform comprising SHISHYA (Student Portal) and GURU (Admin Control Panel), sharing a PostgreSQL database. Its core purpose is to deliver a seamless learning experience and robust administrative tools. SHISHYA focuses on content consumption, progress tracking, and skill development for students, while GURU manages courses, students, credits, and platform settings. The platform aims to innovate e-learning through AI-powered features, virtual internships, and comprehensive content delivery, targeting broad market potential in online education and skill development.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -11,59 +11,47 @@ Please ask before making any major architectural changes or introducing new exte
 I prefer an iterative development approach, focusing on one feature at a time.
 
 ## System Architecture
-The SHISHYA student portal is a React + Vite frontend with TypeScript, Tailwind CSS, and Shadcn UI, using TanStack React Query for data fetching. The backend is an Express.js application serving as a read-only proxy to the Admin Course Factory, managing session-based authentication with PostgreSQL and Drizzle ORM. The GURU admin portal provides full CRUD operations and integrates with Zoho TrainerCentral.
+The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, and Shadcn UI, utilizing TanStack React Query for data fetching. The backend is an Express.js application, primarily acting as a read-only proxy to the Admin Course Factory, managing session-based authentication with PostgreSQL and Drizzle ORM.
 
 **UI/UX Decisions:**
-- **Branding & Design System:** GraduationCap icon, Inter font for body, Space Grotesk for headings, leveraging Shadcn UI.
-- **Theming:** Multi-theme system with 6 color palettes and light/dark/system modes, persisted locally. **Theme is scoped to SHISHYA routes only** — public pages (Landing, Courses, Pricing, Our Udyog, Jobs) always use default light appearance regardless of user theme settings. The Appearance menu only shows in the Header when on SHISHYA routes. Udyog pages (Landing, Jobs, Assessment, Dashboard, Hub) have self-contained dark backgrounds independent of the theme system.
-- **Animations:** Framer Motion for micro-animations and transitions.
-- **Modularity & Responsiveness:** Reusable UI components and full mobile responsiveness.
-- **Loading States:** Skeleton loading for enhanced user experience.
-- **Navigation:** Adaptive header navigation based on authentication status.
+- **Branding:** Uses a GraduationCap icon, Inter font for body, Space Grotesk for headings, and Shadcn UI components.
+- **Theming:** Supports a multi-theme system with 6 color palettes and light/dark/system modes, persisted locally for SHISHYA routes. Public pages maintain a default light appearance.
+- **Animations:** Employs Framer Motion for micro-animations and transitions.
+- **Modularity & Responsiveness:** Features reusable UI components and full mobile responsiveness.
+- **Loading States:** Implements skeleton loading for improved user experience.
+- **Navigation:** Provides adaptive header navigation based on user authentication status.
 
 **Technical Implementations:**
-- **Authentication:** Secure signup/login with email/password, OTP verification (Resend), Bcrypt/SHA256 hashing, HTTP-only session cookies with PostgreSQL persistence.
-- **Progress Tracking:** Client-side tracking of lesson completion, project/test submissions, and certificates using LocalStorage.
-- **Content Systems:**
-    - **Test System:** Server-side scoring, one-time, timed attempts.
-    - **Certificate System:** Auto-generated, unique IDs, QR codes, client-side PDF generation.
-    - **Guided Labs:** Browser-based JS execution with sandboxing, output matching, code persistence.
-- **Profile & Portfolio:** Editable student profile and shareable public portfolio with verified badges, statistics, and skills.
-- **Usha AI Tutor:** Context-aware AI assistant (OpenAI's gpt-4.1-mini) for hints and guidance, with rate-limiting and conversation history in PostgreSQL. In-video AI tutor button (Usha face) in video player control bar; chat panel below video with STT (Web Speech API) and TTS (Speech Synthesis API). Usha receives `studentName` in context (passed from frontend via `user.name`), greets students by first name, and addresses them naturally in conversation. `UshaContext` and `ushaRequestSchema` include `studentName` field; `buildContextPrompt` injects it into the system prompt.
-- **In-App Video Player:** Custom HTML5/HLS video player (`UshaVideoPlayer.tsx`) with hls.js for adaptive bitrate streaming, quality switching, buffer indicator, keyboard shortcuts (Space/K=play, Arrow=seek, M=mute, F=fullscreen), and Usha AI button integrated in the control bar. `VideoUshaChat.tsx` renders below the video (not overlaying) with context-aware AI chat, quick suggestions, voice input (STT), and text-to-speech (TTS). **Voice Conversation Mode:** Prominent "Talk to Usha" toggle (PhoneCall icon) activates voice mode — large animated mic orb auto-sends speech when final, TTS auto-plays Usha's response, mic auto-reactivates for continuous conversation loop. Preferred female TTS voice (Google UK English Female / Samantha / Zira). Wired into `LearnView.tsx` — lessons with `videoUrl` show embedded player; lessons without fall back to TrainerCentral link. **Subtitle Rendering:** Custom WebVTT parser (parseVtt) fetches VTT via `/api/video-proxy`, parses cue timestamps, tracks current cue against `currentTime`, renders as a positioned overlay div (`vp-subtitle-overlay`) above the controls bar — no native `<track>` API used, works cross-browser with HLS.js. **Audio Dubbing:** Separate `<audio>` element synced to video playback, switchable via Languages dropdown; video is muted when a dubbed audio track is active.
-- **Credit-Based Enrollment:** 500 welcome credits, free/paid course differentiation, credit deduction on enrollment, dashboard display, and API for credit management.
-- **Credit Packs System:** DB-driven `credit_packs` table (id, name, price, points, bonusPercent, description, popular, isActive, orderIndex). Seeds 3 defaults on startup. Public `GET /api/credit-packs`, GURU CRUD at `/api/guru/credit-packs` (max 5 packs, min 1). `GuruPricing.tsx` has "Credit Packs" tab with full CreditPacksManager component. `Wallet.tsx` "Buy Credits" tab loads from DB dynamically; "Plans" tab shows theme-aware subscription plan cards. Razorpay payment routes use DB pack IDs (no hardcoded prices).
-- **Cloudflare R2 Video Upload & AI Pipeline:** `server/r2Upload.ts` handles:
-  - `POST /api/guru/r2/presign` — 15-min presigned upload URL for browser direct upload
-  - `POST /api/guru/r2/convert-hls` — async FFmpeg HLS conversion (stream-copy, 10s segments) with job polling
-  - `POST /api/guru/r2/ai-process` — full AI pipeline: FFmpeg audio extract → OpenAI Whisper transcription → English WebVTT generation → GPT-4.1-mini translation per language → WebVTT per language → all uploaded to R2. Returns `subtitleTracks[]` auto-applied to lesson form. (TTS voice dubbing removed; admins upload own WAV/MP3 via Audio tab.)
-  - `POST /api/guru/r2/convert-audio` — downloads audio from R2 URL, runs FFmpeg WAV→MP3 (128kbps 44.1kHz stereo), re-uploads MP3 to R2. Returns `{ mp3Url }`. Called automatically by the lesson editor when a WAV file is uploaded.
-  - `GET /api/guru/r2/ai-status/:jobId` — poll AI job progress (processing/done/failed)
-  - Secrets: `CLOUDFLARE_R2_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET_NAME`, `CLOUDFLARE_R2_PUBLIC_URL`
-- **AI Processing UI in GURU Lesson Editor (Video tab):** Purple "AI Content Generator" panel with language checkboxes (Hindi, Tamil, Telugu, Kannada, Malayalam, Marathi, Bengali, Gujarati, Punjabi), "Generate AI Subtitles" button (TTS dubbing removed — admins upload own WAV/MP3 per language), live progress bar + status text, auto-applies generated subtitleTracks to Subtitles tab when done. Audio tab has WAV auto-conversion: uploads WAV to R2, calls `/api/guru/r2/convert-audio` for server-side FFmpeg WAV→MP3, stores the MP3 URL; shows "Converting WAV…" state during conversion.
-- **Combo Packs Section (Landing Page):** Dynamic "Interested in our Combo Packs?" section groups courses by `groupTitle` field. Shows combo cards with bundled course chips, total credit cost, and "View Courses" CTA. Horizontal scroll on mobile, grid on desktop. Auto-hides if no groups with 2+ courses exist. Uses existing `/api/courses` data — no backend changes.
-- **Enhanced Dashboard:** 5-zone layout for welcome, learning snapshot, primary actions, pending actions, and achievements.
-- **Academic Marksheet System:** University-style marksheet with grades, CGPA, and PDF download, publicly verifiable.
-- **Analytics:** Recharts-powered skill radar, sub-skill bar chart, and performance score card.
-- **AI Privacy:** Generic platform references for AI content generation without brand name.
-- **GURU Admin Portal:** Full CRUD for courses, modules, lessons, tests, labs, projects, student and credit management, and Zoho TrainerCentral integration. GURU-created/AI-generated projects are stored in the local PostgreSQL `projects` table and are merged into SHISHYA's `/api/courses/:courseId/projects` and `/api/projects/:projectId` endpoints so students can view and submit them.
-- **Project Detail Smart Rendering:** `ProjectDetail.tsx` auto-detects project type: external API projects show the requirements badge format; local DB/AI-generated projects with JSON tasks show an expandable task accordion (with tools, numbered steps, checklist); plain text requirements show as paragraph. Also renders a "Tools & Resources" section from the `resources` field.
-- **OAuth Login:** Google OAuth and SSO (enterprise single sign-on) buttons on login page. OAuth routes in `server/oauth.ts`. Users table has `authProvider` and `authProviderId` fields.
-- **Udyog Virtual Internship System:** AI-powered virtual internship platform at `/shishya/udyog`. Features AI skill assessment (6 domains, 10 MCQ per domain), automatic internship assignment based on score (Beginner < 40 → Junior Intern, 40-75 → Project Associate, >75 → Lead Developer), intern dashboard with sidebar (Overview/Tasks/Submissions/AI Mentor/Certification/Portfolio), kanban-style task management, submission system, certificate generation. Portfolio tab provides full profile management (edit, photo upload, visibility toggle, skills, stats, portfolio strength meter, public link sharing) within the Udyog workspace. Backend routes in `server/udyogRoutes.ts`. Database tables: `udyog_internships`, `udyog_assignments`, `udyog_tasks`, `udyog_subtasks`, `udyog_submissions`, `udyog_certificates`, `udyog_skill_assessments`, `udyog_batches`, `udyog_batch_members`, `udyog_hr_users`, `udyog_jobs`, `udyog_applications`. Guru admin page at `/guru/internships` for CRUD management. Batch system: auto-creates batch of 5, assigns roles (Team Lead/Developer/QA) by skill score. HR Hiring Pipeline: job postings, AI candidate matching, application management. Public jobs page at `/shishya/udyog/jobs`. Guru admin jobs page at `/guru/jobs`. "Our Udyog" dropdown in navbar with Internship and Jobs links.
-- **Udyog AI Builder (Simplified Feature/Task/Steps structure):** `udyog_internships` has fields: `introduction`, `goal`, `projectStructure` (JSON — now stores `features[]` instead of old Initiative/Epic hierarchy), `finalIntegration`, `testing`, `deployment`, `liveProjectOutput`. `skillLevel` varchar(30) supports beginner/intermediate/advanced/mastery. AI Builder (`POST /admin/ai/generate-internship`) uses `gpt-4.1` at 12k max_tokens with `response_format: json_object`. Generates 3 features × 3 tasks per feature = 9 tasks, each with: `tools[]` (free tools like Vercel, Neon, Clerk, Resend, Railway), `process` (walkthrough), `steps[]` (5 numbered exact commands with expected outputs), `checklist[]` (4 verification items), `practice` (independent exercise). On creation, `handleAiCreateInternship` saves projectStructure as `{features:[]}`, then flattens features→tasks into kanban (each task's steps become subtasks). GURU preview shows collapsible Feature (teal/blue/purple) → Task (amber) tree with tool badges, numbered steps, checklist, and practice boxes. Student "My Project" tab (`renderProject()` in UdyogDashboard.tsx) renders the same structure with dark Udyog dark theme — feature palettes, tool chips, numbered step circles, green done-checklist, purple practice boxes. Legacy `initiatives[]` internships still render in a simplified read-only view. Closing sections (Final Integration, Testing, Deployment, Live Project Output) always use free tools (Vercel/Railway/Render/Neon). **"Mastery" skill level** everywhere: AI Builder dropdown, create/edit forms, levelGuide (12 weeks), roleMap (Principal Engineer).
-
-- **Site Pages CMS:** `site_pages` table (slug PK, title, content JSONB, updatedAt) stores editable content for marketing pages. Public API: `GET /api/pages/:slug`. GURU admin: `GET /api/guru/pages`, `GET /api/guru/pages/:slug`, `PUT /api/guru/pages/:slug`. Four seeded pages: ai-usha-mentor, become-guru, help-center, become-a-partner. Public pages: `/ai-usha-mentor`, `/become-guru`, `/help`, `/become-a-partner`. GURU admin page at `/guru/pages` with inline content editor. "Pages" entry in GuruLayout sidebar. "More" navbar dropdown links all wired to real routes including new "Become a Partner" item.
-
-**Key Principles:** Read-only content consumption for students, focus on published courses, graceful error handling, and clear separation of public/authenticated routes.
+- **Authentication:** Secure signup/login with email/password, OTP verification, Bcrypt/SHA256 hashing, and HTTP-only session cookies with PostgreSQL persistence.
+- **Progress Tracking:** Client-side tracking of lesson completion, project/test submissions, and certificates.
+- **Content Systems:** Includes a server-side scored Test System, auto-generated Certificate System with unique IDs and QR codes, and Guided Labs with browser-based JS execution and code persistence.
+- **Profile & Portfolio:** Editable student profiles and shareable public portfolios with verified badges and statistics.
+- **Usha AI Tutor:** A context-aware AI assistant (OpenAI's gpt-4.1-mini) for hints and guidance, featuring rate-limiting, conversation history, and in-video integration with STT and TTS capabilities.
+- **In-App Video Player:** A custom HTML5/HLS player with hls.js for adaptive streaming, keyboard shortcuts, subtitle rendering via a custom WebVTT parser, and integrated AI chat. Supports audio dubbing with synced separate audio tracks.
+- **Credit-Based Enrollment:** Manages course enrollment through a credit system, including welcome credits, free/paid course differentiation, and credit pack purchases.
+- **Credit Packs System:** Database-driven `credit_packs` for dynamic pricing and management of credit bundles.
+- **Cloudflare R2 Integration:** Handles video uploads, HLS conversion, and an AI pipeline for audio extraction, Whisper transcription, and GPT-4.1-mini translation to generate multi-language WebVTT subtitles.
+- **AI Processing UI in GURU:** Admin interface for generating AI content, including subtitles and managing audio conversions for lessons.
+- **Combo Packs Section:** Dynamic grouping of courses on the landing page for promotional bundling.
+- **Enhanced Dashboard:** A 5-zone layout providing a comprehensive overview for students.
+- **Academic Marksheet System:** University-style marksheet generation with grades, CGPA, and PDF download, offering public verifiability.
+- **Analytics:** Recharts-powered skill radar, sub-skill bar chart, and performance score cards.
+- **GURU Admin Portal:** Provides full CRUD operations for courses, modules, lessons, tests, labs, projects, student and credit management. Integrates with Zoho TrainerCentral.
+- **Project Detail Rendering:** Smart rendering of project details based on type (external API, local DB/AI-generated JSON tasks, plain text), including tools and resources.
+- **OAuth Login:** Supports Google OAuth and SSO for user authentication.
+- **Udyog Virtual Internship System:** An AI-powered virtual internship platform featuring AI skill assessment, automatic internship assignment, a kanban-style task management system, submission tracking, and certificate generation. Includes a comprehensive portfolio management system within the Udyog workspace.
+- **Udyog AI Builder:** Simplifies internship creation with a feature/task/steps structure, leveraging `gpt-4.1` for generating detailed tasks, tools, processes, steps, checklists, and practice exercises, supporting various skill levels including "Mastery."
+- **Site Pages CMS:** Stores editable content for marketing pages (`ai-usha-mentor`, `become-guru`, `help-center`, `become-a-partner`) with public API access and GURU admin inline editor.
+- **Auth Ecosystem Rotator:** A CSS 3D rotating component on the login page showcasing "Our Shiksha," "Usha AI," and "Our Udyog" with animations and interactive elements.
 
 ## External Dependencies
-- **AISiksha Admin Course Factory:** Primary backend data source for courses and content, authenticated via API key.
-- **Resend:** For sending email OTPs during user authentication.
-- **PostgreSQL:** Primary database for session storage and application data.
-- **Drizzle ORM:** Used for object-relational mapping with PostgreSQL.
-- **html2canvas & jsPDF:** Client-side libraries for generating PDF certificates.
-- **OpenAI:** Used for the Usha AI Tutor (gpt-4.1-mini model).
-- **Zoho TrainerCentral:** Integrated with the GURU admin portal for course/curriculum sync and auto student/course enrollment.
-- **hls.js:** HLS adaptive bitrate streaming for the in-app video player.
-- **Three.js / @react-three/fiber / @react-three/drei:** Available for 3D rendering. Previous ThreeCoin component replaced by CSS 3D ecosystem rotator.
-- **Auth Ecosystem Rotator:** CSS 3D rotating component at `client/src/auth/EcosystemRotator.tsx`. Shows 3 circular faces (Our Shiksha → Usha AI → Our Udyog) at 120° intervals, 12s rotation cycle with cubic-bezier easing, radial glow, breathing aura ring, gradient border ring, hover pause + scale, floating animation, responsive (260/220/180px), prefers-reduced-motion accessible. CSS in `index.css` under `.eco-rotator` BEM classes. Flow text "Learning → AI Guidance → Industry Placement" below. Udyog coin image: `image_1772016230351.png` (silver/navy shield emblem).
+- **AISiksha Admin Course Factory:** Primary backend for course and content data.
+- **Resend:** For sending email OTPs.
+- **PostgreSQL:** Main database for application data and session storage.
+- **Drizzle ORM:** ORM for PostgreSQL interactions.
+- **html2canvas & jsPDF:** Client-side PDF certificate generation.
+- **OpenAI:** Powers the Usha AI Tutor (gpt-4.1-mini).
+- **Zoho TrainerCentral:** Integrated with GURU for course and student synchronization.
+- **hls.js:** Used for HLS adaptive bitrate streaming in the video player.
+- **Cloudflare R2:** Object storage for video and AI-generated assets.
+- **Three.js / @react-three/fiber / @react-three/drei:** Libraries available for 3D rendering (currently used for CSS 3D ecosystem rotator).
