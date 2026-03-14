@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, serial, boolean, timestamp, varchar, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, varchar, integer, real, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
@@ -1568,4 +1568,54 @@ export interface StudentProgressSummary {
 export interface UshaTurn {
   role: "user" | "assistant";
   content: string;
+}
+
+// ============ SITE PAGES (GURU-editable marketing pages) ============
+export const sitePages = pgTable("site_pages", {
+  slug: varchar("slug", { length: 100 }).primaryKey(),
+  title: text("title").notNull(),
+  content: jsonb("content").notNull().default({}),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertSitePageSchema = createInsertSchema(sitePages);
+export type InsertSitePage = z.infer<typeof insertSitePageSchema>;
+export type SitePage = typeof sitePages.$inferSelect;
+
+export interface TitleDescriptionItem {
+  title: string;
+  description: string;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface AiUshaMentorContent {
+  heroHeading?: string;
+  heroSubtext?: string;
+  features?: TitleDescriptionItem[];
+  ctaText?: string;
+}
+
+export interface BecomeGuruContent {
+  heroHeading?: string;
+  heroSubtext?: string;
+  benefits?: TitleDescriptionItem[];
+  ctaText?: string;
+}
+
+export interface HelpCenterContent {
+  heroHeading?: string;
+  heroSubtext?: string;
+  faq?: FaqItem[];
+  ctaText?: string;
+}
+
+export interface BecomeAPartnerContent {
+  heroHeading?: string;
+  heroSubtext?: string;
+  partnerTypes?: TitleDescriptionItem[];
+  ctaText?: string;
 }

@@ -1,0 +1,165 @@
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { Handshake, Sparkles, School, Building2, BookOpen, Cpu, GraduationCap, type LucideIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Header } from "@/components/layout/Header";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { SitePage, BecomeAPartnerContent, TitleDescriptionItem } from "@shared/schema";
+
+const iconMap: Record<string, LucideIcon> = {
+  "Academic Institutions": School,
+  "Corporate Training": Building2,
+  "Content Partners": BookOpen,
+  "Technology Partners": Cpu,
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+function Footer() {
+  return (
+    <footer className="border-t py-8 bg-background">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+              <GraduationCap className="w-4 h-4" />
+            </div>
+            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>OurShiksha</span>
+          </div>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+            <Link href="/about" className="hover:text-foreground transition-colors" data-testid="link-about">About</Link>
+            <Link href="/contact" className="hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
+          </nav>
+          <p className="text-sm text-muted-foreground">OurShiksha {new Date().getFullYear()}</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function BecomeAPartner() {
+  const { data: page, isLoading } = useQuery<SitePage>({
+    queryKey: ["/api/pages", "become-a-partner"],
+    queryFn: () => fetch("/api/pages/become-a-partner").then(r => r.json()),
+  });
+
+  const content = (page?.content || {}) as BecomeAPartnerContent;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <main className="flex-1 max-w-4xl mx-auto px-4 py-16 w-full">
+          <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+          <Skeleton className="h-6 w-1/2 mx-auto mb-8" />
+          <div className="grid md:grid-cols-2 gap-6">
+            {[1,2,3,4].map(i => <Skeleton key={i} className="h-40" />)}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const partnerTypes: TitleDescriptionItem[] = content.partnerTypes || [];
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <section className="relative overflow-hidden py-16 md:py-24">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+          <div className="max-w-4xl mx-auto px-4 md:px-8 relative">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Badge variant="secondary" className="mb-4 gap-1.5 px-4 py-1.5">
+                <Handshake className="w-4 h-4" />
+                Partnerships
+              </Badge>
+              <h1
+                className="text-4xl md:text-5xl font-bold tracking-tight mb-6"
+                style={{ fontFamily: "var(--font-display)" }}
+                data-testid="text-hero-heading"
+              >
+                {content.heroHeading || "Partner with OurShiksha"}
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto" data-testid="text-hero-subtext">
+                {content.heroSubtext || "Join hands with us to transform education."}
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16 bg-muted/30">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <motion.h2
+              className="text-2xl md:text-3xl font-bold text-center mb-12"
+              style={{ fontFamily: "var(--font-display)" }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              Partnership Models
+            </motion.h2>
+            <motion.div
+              className="grid md:grid-cols-2 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {partnerTypes.map((partner: TitleDescriptionItem, index: number) => {
+                const Icon = iconMap[partner.title] || Handshake;
+                return (
+                  <motion.div key={index} variants={itemVariants}>
+                    <Card className="h-full" data-testid={`card-partner-${index}`}>
+                      <CardContent className="p-6">
+                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                          <Icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="font-semibold mb-2">{partner.title}</h3>
+                        <p className="text-sm text-muted-foreground">{partner.description}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16">
+          <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
+                Ready to Partner?
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Get in touch to discuss how we can work together.
+              </p>
+              <Link href="/contact">
+                <Button size="lg" className="gap-2" data-testid="button-cta">
+                  <Sparkles className="w-5 h-5" />
+                  {content.ctaText || "Get in Touch"}
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+}

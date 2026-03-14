@@ -66,6 +66,11 @@ import UdyogAssessment from "@/pages/UdyogAssessment";
 import UdyogDashboard from "@/pages/UdyogDashboard";
 import UdyogJobs from "@/pages/UdyogJobs";
 import UdyogHub from "@/pages/UdyogHub";
+import AiUshaMentor from "@/pages/AiUshaMentor";
+import BecomeGuru from "@/pages/BecomeGuru";
+import HelpCenter from "@/pages/HelpCenter";
+import BecomeAPartner from "@/pages/BecomeAPartner";
+import GuruPages from "@/pages/GuruPages";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -220,6 +225,10 @@ function Router() {
       <Route path="/profile/:username" component={PublicProfilePage} />
       <Route path="/portfolio/:username" component={PublicProfilePage} />
       <Route path="/neon-portfolio/:username" component={PublicNeonPortfolio} />
+      <Route path="/ai-usha-mentor" component={AiUshaMentor} />
+      <Route path="/become-guru" component={BecomeGuru} />
+      <Route path="/help" component={HelpCenter} />
+      <Route path="/become-a-partner" component={BecomeAPartner} />
       <Route path="/shishya/udyog" component={UdyogLanding} />
       <Route path="/shishya/udyog/jobs" component={UdyogJobs} />
       
@@ -236,6 +245,7 @@ function Router() {
       <Route path="/guru/pricing" component={() => <GuruPage component={GuruPricing} />} />
       <Route path="/guru/internships" component={() => <GuruPage component={GuruInternships} />} />
       <Route path="/guru/jobs" component={() => <GuruPage component={GuruJobs} />} />
+      <Route path="/guru/pages" component={() => <GuruPage component={GuruPages} />} />
       <Route path="/guru/settings" component={() => <GuruPage component={GuruSettings} />} />
       
       {/* Shishya Portal - Login Required */}

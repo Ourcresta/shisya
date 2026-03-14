@@ -5,7 +5,7 @@ import {
   shishyaUsers, shishyaCourseEnrollments, shishyaUserCredits,
   shishyaUserProfiles, shishyaUserProgress, shishyaUserTestAttempts,
   shishyaUserProjectSubmissions, shishyaUserCertificates, shishyaCreditTransactions,
-  pricingPlans, creditPacks,
+  pricingPlans, creditPacks, sitePages,
 } from "@shared/schema";
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
@@ -1148,5 +1148,47 @@ guruRouter.delete("/credit-packs/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[Guru] Error deleting credit pack:", error);
     res.status(500).json({ error: "Failed to delete credit pack" });
+  }
+});
+
+// ============ SITE PAGES MANAGEMENT ============
+
+guruRouter.get("/pages", async (req: Request, res: Response) => {
+  try {
+    const pages = await db.select().from(sitePages).orderBy(asc(sitePages.slug));
+    res.json(pages);
+  } catch (error) {
+    console.error("[Guru] Error fetching pages:", error);
+    res.status(500).json({ error: "Failed to fetch pages" });
+  }
+});
+
+guruRouter.get("/pages/:slug", async (req: Request, res: Response) => {
+  try {
+    const [page] = await db.select().from(sitePages).where(eq(sitePages.slug, req.params.slug));
+    if (!page) return res.status(404).json({ error: "Page not found" });
+    res.json(page);
+  } catch (error) {
+    console.error("[Guru] Error fetching page:", error);
+    res.status(500).json({ error: "Failed to fetch page" });
+  }
+});
+
+guruRouter.put("/pages/:slug", async (req: Request, res: Response) => {
+  try {
+    const { title, content } = req.body;
+    if (!title) return res.status(400).json({ error: "Title is required" });
+    const [result] = await db
+      .insert(sitePages)
+      .values({ slug: req.params.slug, title, content: content || {}, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: sitePages.slug,
+        set: { title, content: content || {}, updatedAt: new Date() },
+      })
+      .returning();
+    res.json(result);
+  } catch (error) {
+    console.error("[Guru] Error updating page:", error);
+    res.status(500).json({ error: "Failed to update page" });
   }
 });

@@ -15,12 +15,13 @@ const udyogDropdownItems = [
 ];
 
 const moreDropdownItems = [
-  { label: "About Our Shiksha", href: "#" },
-  { label: "AI Usha Mentor", href: "#" },
-  { label: "Certifications", href: "#" },
-  { label: "Become a Guru", href: "#" },
-  { label: "Help Center", href: "#" },
-  { label: "Contact Us", href: "#" },
+  { label: "About Our Shiksha", href: "/about" },
+  { label: "AI Usha Mentor", href: "/ai-usha-mentor" },
+  { label: "Certifications", href: "/shishya/certificates" },
+  { label: "Become a Guru", href: "/become-guru" },
+  { label: "Help Center", href: "/help" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "Become a Partner", href: "/become-a-partner" },
 ];
 
 export function LandingNavbar() {

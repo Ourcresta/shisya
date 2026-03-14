@@ -17,7 +17,7 @@ import { r2Router } from "./r2Upload";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks } from "@shared/schema";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages } from "@shared/schema";
 import { eq, like, or, and, desc as descOrder, sql, count, asc } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
@@ -93,6 +93,83 @@ export async function registerRoutes(
       }
     } catch (e) {
       console.error("[CreditPacks] Seed error:", e);
+    }
+  })();
+
+  // Seed default site_pages if table is empty
+  (async () => {
+    try {
+      const defaultPages = [
+        {
+          slug: "ai-usha-mentor",
+          title: "AI Usha Mentor",
+          content: {
+            heroHeading: "Meet Usha — Your AI Learning Companion",
+            heroSubtext: "Usha uses Socratic questioning to guide your understanding, never giving direct answers but always helping you discover the solution yourself.",
+            features: [
+              { title: "Socratic Method", description: "Usha asks the right questions to help you think critically and arrive at answers on your own." },
+              { title: "24/7 Availability", description: "Get guidance anytime, anywhere. Usha is always ready to help you learn." },
+              { title: "Personalized Guidance", description: "Usha adapts to your learning pace and style for a truly customized experience." },
+              { title: "Context-Aware", description: "Usha understands your current lesson, lab, or test and provides relevant guidance." }
+            ],
+            ctaText: "Start Learning with Usha"
+          },
+        },
+        {
+          slug: "become-guru",
+          title: "Become a Guru",
+          content: {
+            heroHeading: "Become a Guru on OurShiksha",
+            heroSubtext: "Share your expertise, build courses, and impact thousands of learners across India. Join our growing community of educators.",
+            benefits: [
+              { title: "Reach Thousands", description: "Access our growing community of motivated learners eager to upskill." },
+              { title: "Earn Revenue", description: "Set your own pricing and earn from every enrollment in your courses." },
+              { title: "AI-Powered Tools", description: "Use our AI-assisted course builder to create engaging content faster." },
+              { title: "Full Analytics", description: "Track student progress, completion rates, and feedback in real-time." }
+            ],
+            ctaText: "Apply to Become a Guru"
+          },
+        },
+        {
+          slug: "help-center",
+          title: "Help Center",
+          content: {
+            heroHeading: "How Can We Help You?",
+            heroSubtext: "Find answers to common questions and get the support you need to succeed on OurShiksha.",
+            faq: [
+              { question: "How do I enroll in a course?", answer: "Browse our course catalog, select a course, and click 'Enroll'. You'll need sufficient learning credits in your wallet." },
+              { question: "What are learning credits?", answer: "Credits are our in-app currency. You can purchase credit packs from the Pricing page and use them to access courses, tests, and certificates." },
+              { question: "How do certificates work?", answer: "Complete all course modules, pass the final test, and submit your project to earn a verified certificate with QR code validation." },
+              { question: "Can I get a refund?", answer: "Credits are non-refundable once used. Unused credit packs can be refunded within 7 days of purchase." },
+              { question: "How do I contact support?", answer: "Use the Contact Us page or email us directly. We typically respond within 24 hours." }
+            ],
+            ctaText: "Contact Support"
+          },
+        },
+        {
+          slug: "become-a-partner",
+          title: "Become a Partner",
+          content: {
+            heroHeading: "Partner with OurShiksha",
+            heroSubtext: "Join hands with us to transform education. Whether you're an institution, corporation, or edtech company, there's a partnership model for you.",
+            partnerTypes: [
+              { title: "Academic Institutions", description: "Integrate OurShiksha into your curriculum and give students access to industry-ready skills and verified certifications." },
+              { title: "Corporate Training", description: "Upskill your workforce with customized learning paths, labs, and assessments tailored to your industry." },
+              { title: "Content Partners", description: "Contribute courses and content to our platform and reach thousands of learners across India." },
+              { title: "Technology Partners", description: "Integrate your tools and platforms with OurShiksha to enhance the learning experience." }
+            ],
+            ctaText: "Get in Touch"
+          },
+        },
+      ];
+      let seeded = 0;
+      for (const page of defaultPages) {
+        const [inserted] = await db.insert(sitePages).values(page).onConflictDoNothing().returning();
+        if (inserted) seeded++;
+      }
+      if (seeded > 0) console.log(`[SitePages] Seeded ${seeded} default pages`);
+    } catch (e) {
+      console.error("[SitePages] Seed error:", e);
     }
   })();
 
@@ -292,6 +369,18 @@ export async function registerRoutes(
     } catch (error) {
       console.error("[CreditPacks] Error fetching packs:", error);
       res.status(500).json({ error: "Failed to fetch credit packs" });
+    }
+  });
+
+  // ============ PUBLIC SITE PAGES ROUTE ============
+  app.get("/api/pages/:slug", async (req, res) => {
+    try {
+      const [page] = await db.select().from(sitePages).where(eq(sitePages.slug, req.params.slug));
+      if (!page) return res.status(404).json({ error: "Page not found" });
+      res.json(page);
+    } catch (error) {
+      console.error("[SitePages] Error fetching page:", error);
+      res.status(500).json({ error: "Failed to fetch page" });
     }
   });
 
