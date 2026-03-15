@@ -35,6 +35,8 @@ import {
   Quote,
   Layers,
   Trophy,
+  Building2,
+  Handshake,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
@@ -70,6 +72,8 @@ const features = [
   { icon: ClipboardCheck, title: "Skill Assessments", description: "Validate your knowledge" },
   { icon: Award, title: "Verified Certificates", description: "Prove your skills" },
   { icon: Briefcase, title: "Career Portfolio", description: "Showcase your work" },
+  { icon: Building2, title: "Guaranteed Internship", description: "Real-world work experience" },
+  { icon: Handshake, title: "Job Assistance", description: "Placement support & referrals" },
 ];
 
 const rewardsFlow = [
@@ -461,7 +465,7 @@ function JourneySection() {
 }
 
 function FeaturesSection() {
-  const iconColors = [C.teal, C.purple, C.success, C.warning, C.teal, C.purple];
+  const iconColors = [C.teal, C.purple, C.success, C.warning, C.teal, C.purple, C.success, C.warning];
 
   return (
     <section className="relative py-20 md:py-24 overflow-hidden">
@@ -486,7 +490,7 @@ function FeaturesSection() {
             Everything you need to master new skills and advance your career
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {
             const accent = iconColors[index % iconColors.length];
             return (
