@@ -170,6 +170,7 @@ guruRouter.delete("/courses/:id", async (req: Request, res: Response) => {
     await db.delete(labs).where(eq(labs.courseId, id));
     await db.delete(tests).where(eq(tests.courseId, id));
     await db.delete(projects).where(eq(projects.courseId, id));
+    await db.delete(courseGroupItems).where(eq(courseGroupItems.courseId, id));
     await db.delete(courses).where(eq(courses.id, id));
     res.json({ success: true });
   } catch (error) {
