@@ -118,6 +118,7 @@ interface GroupForm {
   level: string;
   groupType: string;
   thumbnailUrl: string;
+  youtubeUrl: string;
   price: number;
   courseIds: number[];
 }
@@ -142,6 +143,7 @@ const defaultGroupForm: GroupForm = {
   level: "beginner",
   groupType: "track",
   thumbnailUrl: "",
+  youtubeUrl: "",
   price: 0,
   courseIds: [],
 };
@@ -367,6 +369,7 @@ export default function GuruCourses() {
       level: group.level,
       groupType: (group as any).groupType || "track",
       thumbnailUrl: (group as any).thumbnailUrl || "",
+      youtubeUrl: (group as any).youtubeUrl || "",
       price: (group as any).price ?? 0,
       courseIds: group.courses.map(c => c.id),
     });
@@ -1165,23 +1168,55 @@ function GroupFormFields({
           id="group-thumbnail"
           value={form.thumbnailUrl}
           onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
-          placeholder="https://example.com/image.jpg"
+          placeholder="https://example.com/image.jpg (.jpg, .png, .webp, .avif)"
           data-testid="input-group-thumbnail"
         />
         {form.thumbnailUrl && (
-          <div className="mt-2 relative rounded-lg overflow-hidden border aspect-video max-h-40">
+          <div className="mt-2 relative rounded-lg overflow-hidden border aspect-video max-h-40 bg-muted">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">Loading preview…</span>
+            </div>
             <img
               src={form.thumbnailUrl}
               alt="Thumbnail preview"
-              className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              className="relative w-full h-full object-cover z-10"
+              onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = "1"; }}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                img.style.display = "none";
+              }}
+              style={{ opacity: 0, transition: "opacity 0.3s" }}
               data-testid="img-group-thumbnail-preview"
             />
-            <div className="absolute inset-0 bg-muted flex items-center justify-center -z-10">
-              <span className="text-xs text-muted-foreground">Image preview</span>
-            </div>
           </div>
         )}
+      </div>
+
+      <div>
+        <Label htmlFor="group-youtube">Preview Video URL (YouTube)</Label>
+        <Input
+          id="group-youtube"
+          value={form.youtubeUrl}
+          onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })}
+          placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+          data-testid="input-group-youtube"
+        />
+        {form.youtubeUrl && (() => {
+          const match = form.youtubeUrl.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+          if (!match) return <p className="text-xs text-muted-foreground mt-1">Paste a YouTube watch URL or share link</p>;
+          return (
+            <div className="mt-2 rounded-lg overflow-hidden border aspect-video max-h-48">
+              <iframe
+                src={`https://www.youtube.com/embed/${match[1]}`}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="YouTube preview"
+                data-testid="iframe-group-youtube-preview"
+              />
+            </div>
+          );
+        })()}
       </div>
 
       <div className="space-y-2">

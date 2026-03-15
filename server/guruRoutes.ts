@@ -1264,7 +1264,7 @@ guruRouter.get("/course-groups/:id", async (req: Request, res: Response) => {
 
 guruRouter.post("/course-groups", async (req: Request, res: Response) => {
   try {
-    const { name, description, level, groupType, thumbnailUrl, price, courseIds } = req.body;
+    const { name, description, level, groupType, thumbnailUrl, youtubeUrl, price, courseIds } = req.body;
     if (!name) return res.status(400).json({ error: "Group name is required" });
 
     const [newGroup] = await db.insert(courseGroups).values({
@@ -1273,6 +1273,7 @@ guruRouter.post("/course-groups", async (req: Request, res: Response) => {
       level: level || "beginner",
       groupType: groupType || "track",
       thumbnailUrl: thumbnailUrl || null,
+      youtubeUrl: youtubeUrl || null,
       price: price != null ? parseInt(price) : 0,
       status: "draft",
     }).returning();
@@ -1297,7 +1298,7 @@ guruRouter.post("/course-groups", async (req: Request, res: Response) => {
 guruRouter.put("/course-groups/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const { name, description, level, groupType, thumbnailUrl, price, courseIds } = req.body;
+    const { name, description, level, groupType, thumbnailUrl, youtubeUrl, price, courseIds } = req.body;
 
     const [updated] = await db.update(courseGroups).set({
       name,
@@ -1305,6 +1306,7 @@ guruRouter.put("/course-groups/:id", async (req: Request, res: Response) => {
       level: level || "beginner",
       groupType: groupType || "track",
       thumbnailUrl: thumbnailUrl || null,
+      youtubeUrl: youtubeUrl || null,
       price: price != null ? parseInt(price) : 0,
       updatedAt: new Date(),
     }).where(eq(courseGroups.id, id)).returning();

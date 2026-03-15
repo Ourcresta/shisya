@@ -505,14 +505,16 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
                   ))}
                   {group.courseCount > 3 && <p className="text-gray-600 pl-5">+{group.courseCount - 3} more courses</p>}
                 </div>
-                <button
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"
-                  style={{ background: type === "track" ? "rgba(0,245,255,0.1)" : "rgba(124,58,237,0.12)", color: type === "track" ? "#00F5FF" : "#A78BFA", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}` }}
-                  data-testid={`button-view-${type}-${group.id}`}
-                >
-                  View {type === "track" ? "Track" : "Program"}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <Link href={`/group/${group.id}`} className="block">
+                  <button
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                    style={{ background: type === "track" ? "rgba(0,245,255,0.1)" : "rgba(124,58,237,0.12)", color: type === "track" ? "#00F5FF" : "#A78BFA", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}` }}
+                    data-testid={`button-view-${type}-${group.id}`}
+                  >
+                    View {type === "track" ? "Track" : "Program"}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
               </div>
             </div>
           </div>

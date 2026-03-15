@@ -1629,6 +1629,7 @@ export const courseGroups = pgTable("course_groups", {
   level: varchar("level", { length: 20 }).notNull().default("beginner"),
   groupType: varchar("group_type", { length: 20 }).notNull().default("track"),
   thumbnailUrl: text("thumbnail_url"),
+  youtubeUrl: text("youtube_url"),
   price: integer("price").default(0),
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

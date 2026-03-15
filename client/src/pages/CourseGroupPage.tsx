@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, BookOpen, Clock, Layers, Trophy, Coins,
-  ChevronRight, Search, Star, Users
+  ChevronRight, Search, Users, Star, Globe, Infinity,
+  Play, CheckCircle2, Lock, Zap
 } from "lucide-react";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { LevelBadge } from "@/components/ui/level-badge";
@@ -12,7 +13,7 @@ import type { Course } from "@shared/schema";
 
 const C = {
   bgPrimary: "#0B1D3A",
-  cardBg: "rgba(255,255,255,0.05)",
+  bgCard: "rgba(255,255,255,0.04)",
   cardBorder: "rgba(255,255,255,0.08)",
   teal: "#00F5FF",
   purple: "#7C3AED",
@@ -27,6 +28,7 @@ interface GroupDetail {
   level: string;
   groupType: string;
   thumbnailUrl: string | null;
+  youtubeUrl: string | null;
   price: number;
   aggregatedSkills: string;
   courses: Course[];
@@ -34,31 +36,34 @@ interface GroupDetail {
 
 const LEVELS = ["all", "beginner", "intermediate", "advanced"];
 
+function getYoutubeEmbed(url: string): string | null {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1` : null;
+}
+
 const staggerContainer = {
   initial: {},
-  animate: { transition: { staggerChildren: 0.07 } },
+  animate: { transition: { staggerChildren: 0.06 } },
 };
-
 const staggerItem = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 18 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
 function CourseCard({ course }: { course: Course }) {
-  const isTrack = course.isFree || !course.creditCost;
-
   return (
     <motion.div variants={staggerItem}>
       <div
         className="rounded-2xl overflow-hidden flex flex-col h-full group transition-all duration-300 hover:-translate-y-1"
         style={{
-          background: C.cardBg,
+          background: C.bgCard,
           border: `1px solid ${C.cardBorder}`,
           boxShadow: "0 4px 24px -6px rgba(0,0,0,0.3)",
         }}
         data-testid={`card-group-course-${course.id}`}
       >
-        <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-[rgba(0,245,255,0.05)] to-[rgba(124,58,237,0.05)]">
+        <div className="relative aspect-video overflow-hidden">
           {course.thumbnailUrl ? (
             <img
               src={course.thumbnailUrl}
@@ -66,7 +71,10 @@ function CourseCard({ course }: { course: Course }) {
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.05), rgba(124,58,237,0.05))" }}
+            >
               <div
                 className="w-14 h-14 rounded-xl flex items-center justify-center"
                 style={{ background: "rgba(0,245,255,0.1)", border: "1px solid rgba(0,245,255,0.2)" }}
@@ -77,14 +85,10 @@ function CourseCard({ course }: { course: Course }) {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
           <div className="absolute top-3 right-3">
-            {course.isFree || !course.creditCost ? (
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>
-                FREE
-              </span>
+            {!course.creditCost || course.creditCost === 0 ? (
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>FREE</span>
             ) : (
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>
-                {course.creditCost} Credits
-              </span>
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>{course.creditCost} Credits</span>
             )}
           </div>
         </div>
@@ -108,8 +112,9 @@ function CourseCard({ course }: { course: Course }) {
               </span>
             )}
             {course.language && (
-              <span className="px-2 py-0.5 rounded-full text-xs capitalize" style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}>
-                {course.language}
+              <span className="flex items-center gap-1 text-xs text-gray-400">
+                <Globe className="w-3.5 h-3.5" />
+                {course.language.toUpperCase()}
               </span>
             )}
           </div>
@@ -133,11 +138,7 @@ function CourseCard({ course }: { course: Course }) {
             <Link href={`/courses/${course.id}`}>
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                style={{
-                  background: "rgba(0,245,255,0.08)",
-                  color: C.teal,
-                  border: "1px solid rgba(0,245,255,0.2)",
-                }}
+                style={{ background: "rgba(0,245,255,0.08)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}
                 data-testid={`button-start-course-${course.id}`}
               >
                 View Course
@@ -163,6 +164,8 @@ export default function CourseGroupPage() {
   });
 
   const isTrack = group?.groupType === "track";
+  const accentColor = isTrack ? C.teal : "#A78BFA";
+  const embedUrl = group?.youtubeUrl ? getYoutubeEmbed(group.youtubeUrl) : null;
 
   const filteredCourses = (group?.courses || []).filter(c => {
     const matchLevel = levelFilter === "all" || c.level === levelFilter;
@@ -174,15 +177,20 @@ export default function CourseGroupPage() {
     return (
       <div className="min-h-screen" style={{ background: C.bgPrimary }}>
         <LandingNavbar />
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 rounded-xl w-64" style={{ background: "rgba(255,255,255,0.07)" }} />
-            <div className="h-48 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)" }} />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-72 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)" }} />
-              ))}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 animate-pulse space-y-6">
+          <div className="h-8 rounded-xl w-64" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="h-10 rounded-xl w-3/4" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="h-20 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }} />
+              <div className="h-12 rounded-xl w-1/2" style={{ background: "rgba(255,255,255,0.06)" }} />
             </div>
+            <div className="aspect-video rounded-2xl" style={{ background: "rgba(255,255,255,0.04)" }} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-72 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)" }} />
+            ))}
           </div>
         </div>
       </div>
@@ -191,17 +199,29 @@ export default function CourseGroupPage() {
 
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: C.bgPrimary }}>
+      <div className="min-h-screen flex flex-col" style={{ background: C.bgPrimary }}>
         <LandingNavbar />
-        <div className="text-center">
-          <p className="text-gray-400">Group not found.</p>
-          <Link href="/courses" className="mt-4 inline-block text-teal-400 hover:underline">
-            Back to Courses
-          </Link>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-400 mb-4">Group not found.</p>
+            <Link href="/courses">
+              <button className="px-6 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "rgba(0,245,255,0.1)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}>
+                Back to Courses
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
+
+  const totalDurationMinutes = group.courses.reduce((sum, c) => {
+    if (!c.duration) return sum;
+    const match = c.duration.match(/(\d+)/);
+    return sum + (match ? parseInt(match[1]) : 0);
+  }, 0);
+
+  const skillsList = group.aggregatedSkills ? group.aggregatedSkills.split(",").map(s => s.trim()).filter(Boolean) : [];
 
   return (
     <div className="min-h-screen" style={{ background: C.bgPrimary }}>
@@ -209,26 +229,26 @@ export default function CourseGroupPage() {
 
       <div className="pt-20">
         <div
-          className="relative py-16 md:py-20 overflow-hidden"
-          style={{ background: "linear-gradient(180deg, rgba(11,29,58,0) 0%, rgba(11,29,58,1) 100%)" }}
+          className="relative overflow-hidden"
+          style={{ background: "linear-gradient(180deg, rgba(11,29,58,0.95) 0%, rgba(11,29,58,1) 100%)" }}
         >
           {group.thumbnailUrl && (
             <div
-              className="absolute inset-0 opacity-15"
+              className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage: `url(${group.thumbnailUrl})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                filter: "blur(20px)",
+                filter: "blur(30px)",
               }}
             />
           )}
           <div
-            className="absolute inset-0 opacity-30"
-            style={{ background: isTrack ? "radial-gradient(ellipse at 30% 50%, rgba(0,245,255,0.12), transparent 70%)" : "radial-gradient(ellipse at 70% 50%, rgba(124,58,237,0.15), transparent 70%)" }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: isTrack ? "radial-gradient(ellipse at 20% 50%, rgba(0,245,255,0.06), transparent 60%)" : "radial-gradient(ellipse at 80% 50%, rgba(124,58,237,0.08), transparent 60%)" }}
           />
 
-          <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16 relative z-10">
             <Link href="/courses">
               <button className="flex items-center gap-2 text-sm mb-8 transition-colors hover:text-white" style={{ color: C.textSecondary }} data-testid="button-back-to-catalog">
                 <ArrowLeft className="w-4 h-4" />
@@ -236,39 +256,24 @@ export default function CourseGroupPage() {
               </button>
             </Link>
 
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center"
-                style={{
-                  background: isTrack ? "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(6,182,212,0.08))" : "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(139,92,246,0.1))",
-                  border: isTrack ? "1px solid rgba(0,245,255,0.25)" : "1px solid rgba(124,58,237,0.3)",
-                }}
-              >
-                {group.thumbnailUrl ? (
-                  <img src={group.thumbnailUrl} alt={group.name} className="w-full h-full object-cover" />
-                ) : (
-                  isTrack
-                    ? <Layers className="w-12 h-12 md:w-16 md:h-16" style={{ color: C.teal }} />
-                    : <Trophy className="w-12 h-12 md:w-16 md:h-16" style={{ color: "#A78BFA" }} />
-                )}
-              </div>
-
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-3 mb-3">
+            <div className="grid lg:grid-cols-[1fr_480px] gap-10 items-center">
+              <div className="space-y-6">
+                <div className="flex flex-wrap items-center gap-3">
                   <span
-                    className="px-3 py-1 rounded-full text-xs font-semibold capitalize"
-                    style={{ background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)", color: isTrack ? C.teal : "#A78BFA", border: isTrack ? "1px solid rgba(0,245,255,0.25)" : "1px solid rgba(124,58,237,0.3)" }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                    style={{ background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)", color: accentColor, border: `1px solid ${isTrack ? "rgba(0,245,255,0.25)" : "rgba(124,58,237,0.3)"}` }}
                     data-testid="badge-group-type"
                   >
-                    {isTrack ? "🛤 Track" : "🎓 Program"}
+                    {isTrack ? <Layers className="w-3.5 h-3.5" /> : <Trophy className="w-3.5 h-3.5" />}
+                    {isTrack ? "Learning Track" : "Program"}
                   </span>
-                  <span className="capitalize px-3 py-1 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.07)", color: C.textSecondary }}>
+                  <span className="px-3 py-1 rounded-full text-xs capitalize" style={{ background: "rgba(255,255,255,0.07)", color: C.textSecondary }}>
                     {group.level}
                   </span>
                 </div>
 
                 <h1
-                  className="text-3xl md:text-4xl font-bold text-white mb-3"
+                  className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight"
                   style={{ fontFamily: "var(--font-display)" }}
                   data-testid="text-group-name"
                 >
@@ -276,84 +281,200 @@ export default function CourseGroupPage() {
                 </h1>
 
                 {group.description && (
-                  <p className="text-lg mb-4" style={{ color: C.textSecondary }}>{group.description}</p>
+                  <p className="text-lg leading-relaxed" style={{ color: C.textSecondary }}>{group.description}</p>
                 )}
 
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <span className="flex items-center gap-2" style={{ color: C.textSecondary }}>
-                    <BookOpen className="w-4 h-4" style={{ color: C.teal }} />
+                <div className="flex flex-wrap items-center gap-5 text-sm">
+                  <div className="flex items-center gap-2" style={{ color: C.textSecondary }}>
+                    <BookOpen className="w-4 h-4" style={{ color: accentColor }} />
                     <strong className="text-white">{group.courses.length}</strong> Courses
-                  </span>
-                  {group.price > 0 ? (
-                    <span className="flex items-center gap-2" style={{ color: C.textSecondary }}>
-                      <Coins className="w-4 h-4" style={{ color: "#F59E0B" }} />
-                      <strong className="text-white">{group.price}</strong> Credits for full pack
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2" style={{ color: "#10B981" }}>
-                      <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                      Free Access
-                    </span>
+                  </div>
+                  {totalDurationMinutes > 0 && (
+                    <div className="flex items-center gap-2" style={{ color: C.textSecondary }}>
+                      <Clock className="w-4 h-4" style={{ color: accentColor }} />
+                      <strong className="text-white">{totalDurationMinutes}+ hrs</strong> Content
+                    </div>
                   )}
+                  <div className="flex items-center gap-2" style={{ color: C.textSecondary }}>
+                    <Infinity className="w-4 h-4" style={{ color: accentColor }} />
+                    <strong className="text-white">Lifetime</strong> Access
+                  </div>
+                  <div className="flex items-center gap-2" style={{ color: C.textSecondary }}>
+                    <Zap className="w-4 h-4" style={{ color: accentColor }} />
+                    <strong className="text-white">Self Paced</strong>
+                  </div>
+                </div>
+
+                {skillsList.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider mb-2.5" style={{ color: C.textSecondary }}>Skills You'll Gain</p>
+                    <div className="flex flex-wrap gap-2">
+                      {skillsList.slice(0, 8).map((s, i) => (
+                        <span key={i} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs" style={{ background: "rgba(0,245,255,0.07)", color: "#67E8F9", border: "1px solid rgba(0,245,255,0.14)" }}>
+                          <CheckCircle2 className="w-3 h-3 shrink-0" />
+                          {s}
+                        </span>
+                      ))}
+                      {skillsList.length > 8 && (
+                        <span className="px-3 py-1 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}>
+                          +{skillsList.length - 8} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {group.price > 0 ? (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium" style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.2)" }}>
+                      <Coins className="w-4 h-4" />
+                      {group.price} Credits for full pack
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium" style={{ background: "rgba(16,185,129,0.1)", color: "#10B981", border: "1px solid rgba(16,185,129,0.2)" }}>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Free Access
+                    </div>
+                  )}
+                  <Link href="/courses">
+                    <button
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
+                      style={{
+                        background: isTrack ? `linear-gradient(135deg, rgba(0,245,255,0.9), rgba(6,182,212,0.85))` : `linear-gradient(135deg, rgba(124,58,237,0.9), rgba(139,92,246,0.85))`,
+                        color: "#fff",
+                        boxShadow: isTrack ? "0 4px 20px -4px rgba(0,245,255,0.35)" : "0 4px 20px -4px rgba(124,58,237,0.4)",
+                      }}
+                      data-testid="button-start-learning"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      Start Learning
+                    </button>
+                  </Link>
                 </div>
               </div>
-            </div>
 
-            {group.aggregatedSkills && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                <span className="text-xs mr-1" style={{ color: C.textSecondary }}>Skills you'll gain:</span>
-                {group.aggregatedSkills.split(",").map((s, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-full text-xs" style={{ background: "rgba(0,245,255,0.08)", color: "#67E8F9", border: "1px solid rgba(0,245,255,0.15)" }}>
-                    {s.trim()}
-                  </span>
-                ))}
+              <div className="w-full">
+                {embedUrl ? (
+                  <div
+                    className="rounded-2xl overflow-hidden shadow-2xl"
+                    style={{ border: "1px solid rgba(255,255,255,0.1)", boxShadow: isTrack ? "0 20px 60px -12px rgba(0,245,255,0.2)" : "0 20px 60px -12px rgba(124,58,237,0.25)" }}
+                    data-testid="container-youtube-embed"
+                  >
+                    <div className="aspect-video">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        title={`${group.name} preview`}
+                        data-testid="iframe-youtube-embed"
+                      />
+                    </div>
+                    <div className="p-4 flex items-center gap-3" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: isTrack ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.18)" }}>
+                        {isTrack ? <Layers className="w-4 h-4" style={{ color: C.teal }} /> : <Trophy className="w-4 h-4" style={{ color: "#A78BFA" }} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">{group.name} Preview</p>
+                        <p className="text-xs" style={{ color: C.textSecondary }}>Watch on YouTube</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : group.thumbnailUrl ? (
+                  <div
+                    className="rounded-2xl overflow-hidden aspect-video"
+                    style={{ border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 20px 60px -12px rgba(0,0,0,0.5)" }}
+                  >
+                    <img src={group.thumbnailUrl} alt={group.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div
+                    className="rounded-2xl aspect-video flex flex-col items-center justify-center gap-4"
+                    style={{
+                      background: isTrack ? "linear-gradient(135deg, rgba(0,245,255,0.06), rgba(6,182,212,0.03))" : "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.05))",
+                      border: `1px solid ${isTrack ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.2)"}`,
+                    }}
+                  >
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: isTrack ? "rgba(0,245,255,0.1)" : "rgba(124,58,237,0.15)" }}>
+                      {isTrack ? <Layers className="w-10 h-10" style={{ color: C.teal }} /> : <Trophy className="w-10 h-10" style={{ color: "#A78BFA" }} />}
+                    </div>
+                    <p className="text-sm" style={{ color: C.textSecondary }}>No preview video available</p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div
-              className="flex items-center gap-2 flex-1 rounded-xl px-4 py-2.5"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
-            >
-              <Search className="w-4 h-4 shrink-0" style={{ color: C.textSecondary }} />
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="bg-transparent text-sm text-white placeholder-gray-500 outline-none w-full"
-                data-testid="input-search-courses"
-              />
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              {LEVELS.map(lvl => (
-                <button
-                  key={lvl}
-                  onClick={() => setLevelFilter(lvl)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all"
-                  style={levelFilter === lvl
-                    ? { background: isTrack ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.18)", color: isTrack ? C.teal : "#A78BFA", border: isTrack ? "1px solid rgba(0,245,255,0.3)" : "1px solid rgba(124,58,237,0.35)" }
-                    : { background: "rgba(255,255,255,0.05)", color: C.textSecondary, border: "1px solid rgba(255,255,255,0.08)" }
-                  }
-                  data-testid={`filter-level-${lvl}`}
-                >
-                  {lvl === "all" ? "All Levels" : lvl}
-                </button>
+        <div
+          className="border-y"
+          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+        >
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {[
+                { label: "Courses Included", value: `${group.courses.length}`, icon: BookOpen },
+                { label: "Total Content", value: totalDurationMinutes > 0 ? `${totalDurationMinutes}+ Hrs` : "—", icon: Clock },
+                { label: "Access Type", value: "Lifetime", icon: Infinity },
+                { label: "Learning Style", value: "Self Paced", icon: Zap },
+              ].map((stat, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5">
+                  <stat.icon className="w-5 h-5 mb-1" style={{ color: accentColor }} />
+                  <p className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{stat.value}</p>
+                  <p className="text-xs" style={{ color: C.textSecondary }}>{stat.label}</p>
+                </div>
               ))}
             </div>
           </div>
+        </div>
 
-          <div className="mb-4 text-sm" style={{ color: C.textSecondary }}>
-            Showing <span className="text-white font-medium">{filteredCourses.length}</span> of <span className="text-white font-medium">{group.courses.length}</span> courses
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 pb-20">
+          <div className="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center justify-between">
+            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+              Courses in this {isTrack ? "Track" : "Program"}
+              <span className="ml-2 text-base font-normal" style={{ color: C.textSecondary }}>({filteredCourses.length})</span>
+            </h2>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div
+                className="flex items-center gap-2 rounded-xl px-4 py-2.5 flex-1 sm:w-60"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
+              >
+                <Search className="w-4 h-4 shrink-0" style={{ color: C.textSecondary }} />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="bg-transparent text-sm text-white placeholder-gray-500 outline-none w-full"
+                  data-testid="input-search-courses"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                {LEVELS.map(lvl => (
+                  <button
+                    key={lvl}
+                    onClick={() => setLevelFilter(lvl)}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all whitespace-nowrap"
+                    style={levelFilter === lvl
+                      ? { background: isTrack ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.18)", color: accentColor, border: `1px solid ${isTrack ? "rgba(0,245,255,0.3)" : "rgba(124,58,237,0.35)"}` }
+                      : { background: "rgba(255,255,255,0.05)", color: C.textSecondary, border: "1px solid rgba(255,255,255,0.08)" }
+                    }
+                    data-testid={`filter-level-${lvl}`}
+                  >
+                    {lvl === "all" ? "All" : lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {filteredCourses.length === 0 ? (
-            <div className="text-center py-20">
-              <p style={{ color: C.textSecondary }}>No courses match your filters.</p>
+            <div className="text-center py-20 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <BookOpen className="w-10 h-10 mx-auto mb-3" style={{ color: C.textSecondary }} />
+              <p className="text-white font-medium mb-1">No courses match your search</p>
+              <p className="text-sm" style={{ color: C.textSecondary }}>Try adjusting your filters or search term</p>
             </div>
           ) : (
             <motion.div
