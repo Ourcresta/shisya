@@ -217,17 +217,15 @@ export default function CourseOverview() {
                   <Target className="w-5 h-5 text-primary" />
                   Skills You Will Gain
                 </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" data-testid="container-skills">
+                <div className="flex flex-wrap gap-2" data-testid="container-skills">
                   {skillsList.map((skill: string) => (
-                    <div
+                    <span
                       key={skill}
-                      className="flex items-center gap-2.5 p-3 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-muted/40 hover:bg-muted/70 transition-colors"
                     >
-                      <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-sm font-medium truncate">{skill}</span>
-                    </div>
+                      <CheckCircle2 className="w-3 h-3 text-primary shrink-0" />
+                      {skill}
+                    </span>
                   ))}
                 </div>
               </div>
