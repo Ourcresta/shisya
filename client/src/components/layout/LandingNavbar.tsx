@@ -24,9 +24,19 @@ const moreDropdownItems = [
   { label: "Become a Partner", href: "/become-a-partner" },
 ];
 
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function LandingNavbar() {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
+
+  const displayName = user?.fullName ? toTitleCase(user.fullName) : null;
 
   const initials = user?.fullName
     ? user.fullName.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
@@ -117,7 +127,7 @@ export function LandingNavbar() {
                     </span>
                     <div className="landing-nav-user-details">
                       <span className="landing-nav-user-name" data-testid="text-user-name">
-                        {user.fullName || "Student"}
+                        {displayName || "Student"}
                       </span>
                       <span className="landing-nav-user-email" data-testid="text-user-email">
                         {user.email}
