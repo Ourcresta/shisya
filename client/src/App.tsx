@@ -27,6 +27,7 @@ import GuruInternships from "@/pages/GuruInternships";
 import GuruJobs from "@/pages/GuruJobs";
 import LandingPage from "@/pages/LandingPage";
 import CourseCatalog from "@/pages/CourseCatalog";
+import CourseGroupPage from "@/pages/CourseGroupPage";
 import CourseOverview from "@/pages/CourseOverview";
 import Dashboard from "@/pages/Dashboard";
 import LearnView from "@/pages/LearnView";
@@ -216,6 +217,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/courses" component={CourseCatalog} />
       <Route path="/courses/:courseId" component={CourseOverview} />
+      <Route path="/group/:id" component={CourseGroupPage} />
       <Route path="/verify/:certificateId" component={CertificateVerify} />
       <Route path="/verify/marksheet/:marksheetId" component={MarksheetVerify} />
       <Route path="/verify/marksheet/code/:code" component={MarksheetVerify} />

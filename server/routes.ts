@@ -635,6 +635,26 @@ export async function registerRoutes(
     }
   });
 
+  // GET /api/course-groups/:id - Public single group detail
+  app.get("/api/course-groups/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [group] = await db.select().from(courseGroups).where(eq(courseGroups.id, id)).limit(1);
+      if (!group) return res.status(404).json({ error: "Group not found" });
+      const items = await db.select().from(courseGroupItems).where(eq(courseGroupItems.groupId, id));
+      const allCourses = await db.select().from(coursesTable);
+      const courseMap = new Map(allCourses.map(c => [c.id, c]));
+      const memberCourses = items.sort((a, b) => a.orderIndex - b.orderIndex)
+        .map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
+      const allSkills = memberCourses.flatMap(c => (c.skills || "").split(",").map((s: string) => s.trim()).filter(Boolean));
+      const uniqueSkills = Array.from(new Set(allSkills));
+      res.json({ ...group, courses: memberCourses, aggregatedSkills: uniqueSkills.join(",") });
+    } catch (error) {
+      console.error("[Public] Get course group error:", error);
+      res.status(500).json({ error: "Failed to fetch course group" });
+    }
+  });
+
   // GET /api/courses/:courseId - Fetch single course with full content
   // SHISHYA RULE: WHERE status = 'published' AND is_active = true
   app.get("/api/courses/:courseId", async (req, res) => {

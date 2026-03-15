@@ -34,6 +34,7 @@ import {
   Star,
   Quote,
   Layers,
+  Trophy,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
@@ -636,154 +637,219 @@ function CoursePreviewSkeleton() {
   );
 }
 
-function ComboCourseSection() {
-  const { data: courses } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
+interface CourseGroupLanding {
+  id: number;
+  name: string;
+  description: string | null;
+  level: string;
+  groupType: string;
+  thumbnailUrl: string | null;
+  price: number;
+  courseCount: number;
+  aggregatedSkills: string;
+  courses: Course[];
+}
+
+function CourseGroupsMarquee() {
+  const { data: groups, isLoading } = useQuery<CourseGroupLanding[]>({
+    queryKey: ["/api/course-groups"],
   });
 
-  const comboGroups = (() => {
-    if (!courses) return [];
-    const groups: Record<string, Course[]> = {};
-    for (const c of courses) {
-      if (c.groupTitle) {
-        if (!groups[c.groupTitle]) groups[c.groupTitle] = [];
-        groups[c.groupTitle].push(c);
-      }
-    }
-    return Object.entries(groups)
-      .filter(([, items]) => items.length >= 2)
-      .map(([name, items]) => ({
-        name,
-        courses: items,
-        totalCredits: items.reduce((sum, c) => sum + (c.creditCost || 0), 0),
-      }));
-  })();
+  if (isLoading || !groups || groups.length === 0) return null;
 
-  if (comboGroups.length === 0) return null;
+  const items = groups.length < 4 ? [...groups, ...groups, ...groups] : [...groups, ...groups];
+  const durationSec = items.length * 6;
 
   return (
     <section className="relative py-20 md:py-24 overflow-hidden">
       <SectionGlow position="center" color={C.purple} />
       <SectionGlow position="top-right" color={C.teal} />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
-          <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
-            style={{
-              fontFamily: "var(--font-display)",
-              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            data-testid="text-combo-title"
-          >
-            Interested in our Combo Packs?
-          </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Save more by enrolling in bundled course packs curated for your career path
-          </p>
+      <style>{`
+        @keyframes marquee-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee-scroll ${durationSec}s linear infinite;
+          will-change: transform;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      <div className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
+          <div className="text-center">
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-4"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              data-testid="text-combo-title"
+            >
+              Explore Our Learning Tracks & Programs
+            </h2>
+            <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
+              Curated bundles of courses designed to take you from beginner to job-ready
+            </p>
+          </div>
         </div>
 
-        <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible md:pb-0">
-          {comboGroups.map((group) => (
-            <GlassCard
-              key={group.name}
-              className="min-w-[300px] md:min-w-0 snap-start flex flex-col p-0 overflow-hidden"
-              data-testid={`card-combo-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
-            >
-              <div
-                className="p-5 pb-4 flex items-center gap-4"
-                style={{ borderBottom: `1px solid ${C.cardBorder}` }}
-              >
+        <div
+          className="relative overflow-hidden"
+          style={{
+            maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          }}
+        >
+          <div className="marquee-track flex gap-5 py-4" style={{ width: "max-content" }}>
+            {items.map((group, idx) => {
+              const isTrack = group.groupType === "track";
+              return (
                 <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                  key={`${group.id}-${idx}`}
+                  className="w-[300px] md:w-[340px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
                   style={{
-                    background: `linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,245,255,0.1))`,
-                    border: `1px solid rgba(124,58,237,0.3)`,
-                    boxShadow: "0 0 20px -5px rgba(124,58,237,0.25)",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: "0 8px 32px -8px rgba(0,0,0,0.4)",
                   }}
+                  data-testid={`card-group-${group.id}-${idx}`}
                 >
-                  <Layers className="w-7 h-7" style={{ color: C.purple }} />
-                </div>
-                <div className="min-w-0">
-                  <h3
-                    className="text-base font-bold text-white leading-tight"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {group.name}
-                  </h3>
-                  <Badge
-                    variant="secondary"
-                    className="mt-1 text-[10px] px-2 py-0.5"
-                    style={{ background: "rgba(0,245,255,0.1)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}
-                  >
-                    {group.courses.length} courses bundled
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="p-5 flex-1">
-                <div className="grid grid-cols-2 gap-3">
-                  {group.courses.map((course) => (
-                    <div
-                      key={course.id}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl transition-colors"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: `1px solid rgba(255,255,255,0.06)`,
-                      }}
-                      data-testid={`combo-course-chip-${course.id}`}
-                    >
+                  <div className="relative aspect-video overflow-hidden">
+                    {group.thumbnailUrl ? (
+                      <img
+                        src={group.thumbnailUrl}
+                        alt={group.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
                       <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        className="absolute inset-0 flex items-center justify-center"
                         style={{
-                          background: "rgba(0,245,255,0.08)",
-                          border: "1px solid rgba(0,245,255,0.15)",
+                          background: isTrack
+                            ? "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(6,182,212,0.04))"
+                            : "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))",
                         }}
                       >
-                        <BookOpen className="w-4 h-4" style={{ color: C.teal }} />
+                        <div
+                          className="w-14 h-14 rounded-full flex items-center justify-center"
+                          style={{
+                            background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)",
+                            border: `1px solid ${isTrack ? "rgba(0,245,255,0.22)" : "rgba(124,58,237,0.28)"}`,
+                          }}
+                        >
+                          {isTrack
+                            ? <Layers className="w-7 h-7" style={{ color: C.teal }} />
+                            : <Trophy className="w-7 h-7" style={{ color: "#A78BFA" }} />
+                          }
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <span className="text-xs font-medium text-white leading-tight line-clamp-2 block">
-                          {course.title}
-                        </span>
-                        <LevelBadge level={course.level || "beginner"} className="mt-1 scale-90 origin-left" />
-                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080F1E]/70 via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <span
+                        className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                        style={{
+                          background: isTrack ? "rgba(0,245,255,0.82)" : "rgba(124,58,237,0.85)",
+                          color: "#fff",
+                          backdropFilter: "blur(8px)",
+                        }}
+                      >
+                        {isTrack ? "🛤 Track" : "🎓 Program"}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="absolute top-3 right-3">
+                      {group.price > 0 ? (
+                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>
+                          {group.price} Credits
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>
+                          FREE
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="p-5 pt-0 mt-auto space-y-3">
-                <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
-                  style={{
-                    background: "rgba(124,58,237,0.08)",
-                    border: "1px solid rgba(124,58,237,0.15)",
-                    color: "#C4B5FD",
-                  }}
-                >
-                  <Coins className="w-3.5 h-3.5" />
-                  <span>Total: <strong>{group.totalCredits} credits</strong> for the full pack</span>
+                  <div className="p-4 flex flex-col gap-3 flex-1">
+                    <div>
+                      <h3 className="text-white font-semibold text-base leading-snug line-clamp-1" style={{ fontFamily: "var(--font-display)" }}>
+                        {group.name}
+                      </h3>
+                      {group.description && (
+                        <p className="text-xs mt-1 line-clamp-2" style={{ color: C.textSecondary }}>{group.description}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs" style={{ color: C.textSecondary }}>
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        {group.courseCount} courses
+                      </span>
+                      <span className="capitalize px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        {group.level}
+                      </span>
+                    </div>
+
+                    {group.courses.length > 0 && (
+                      <div className="flex flex-col gap-1.5">
+                        {group.courses.slice(0, 3).map((c, i) => (
+                          <div key={c.id} className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
+                            <span
+                              className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold"
+                              style={{ background: "rgba(0,245,255,0.1)", color: C.teal }}
+                            >
+                              {i + 1}
+                            </span>
+                            <span className="truncate">{c.title}</span>
+                          </div>
+                        ))}
+                        {group.courseCount > 3 && (
+                          <span className="text-xs pl-6" style={{ color: "rgba(148,163,184,0.5)" }}>+{group.courseCount - 3} more</span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-auto pt-1">
+                      <Link href={`/group/${group.id}`}>
+                        <button
+                          className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                          style={{
+                            background: isTrack ? "rgba(0,245,255,0.08)" : "rgba(124,58,237,0.1)",
+                            color: isTrack ? C.teal : "#A78BFA",
+                            border: `1px solid ${isTrack ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}`,
+                          }}
+                          data-testid={`button-view-group-${group.id}`}
+                        >
+                          View Courses
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <Link href="/courses" className="block">
-                  <button
-                    className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
-                    style={{
-                      background: "transparent",
-                      color: C.teal,
-                      border: `1px solid rgba(0,245,255,0.3)`,
-                    }}
-                    data-testid={`button-combo-view-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    View Courses
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-              </div>
-            </GlassCard>
-          ))}
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 text-center">
+          <Link href="/courses?tab=track">
+            <button
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
+              style={{ background: "rgba(255,255,255,0.05)", color: C.textSecondary, border: "1px solid rgba(255,255,255,0.08)" }}
+              data-testid="button-view-all-groups"
+            >
+              See all Tracks & Programs
+              <ArrowRight className="w-4 h-4 inline ml-2" />
+            </button>
+          </Link>
         </div>
       </div>
     </section>
@@ -1266,7 +1332,7 @@ export default function LandingPage() {
         <RewardsSection />
         <AISection />
         <CoursePreviewSection />
-        <ComboCourseSection />
+        <CourseGroupsMarquee />
         <TestimonialsSection />
         <FAQSection />
         <CTASection />
