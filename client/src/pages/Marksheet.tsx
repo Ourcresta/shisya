@@ -357,7 +357,7 @@ export default function Marksheet() {
                       <span className="font-medium text-slate-800">Marksheet ID:</span> <span className="font-mono">{marksheetId}</span>
                     </p>
                     <p className="text-slate-600">
-                      <span className="font-medium text-slate-800">Student:</span> {user?.email?.split('@')[0] || 'Student'}
+                      <span className="font-medium text-slate-800">Student:</span> {profile?.fullName ? profile.fullName.toLowerCase().split(" ").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : (user?.fullName || user?.email?.split('@')[0] || 'Student')}
                     </p>
                     <p className="text-slate-600">
                       <span className="font-medium text-slate-800">Email:</span> {user?.email || 'N/A'}

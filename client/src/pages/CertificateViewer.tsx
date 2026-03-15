@@ -6,9 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import CertificatePreview from "@/components/certificate/CertificatePreview";
 import { getCertificate, initializeMockCertificates } from "@/lib/certificates";
+import { getProfile } from "@/lib/profile";
 import type { Certificate } from "@shared/schema";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+
+function toTitleCase(str: string): string {
+  return str.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
 
 export default function CertificateViewer() {
   const { certificateId } = useParams<{ certificateId: string }>();
@@ -20,9 +25,14 @@ export default function CertificateViewer() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    initializeMockCertificates("Demo Student");
+    const profile = getProfile();
+    const profileName = profile?.fullName ? toTitleCase(profile.fullName) : null;
+    initializeMockCertificates(profileName || "Demo Student");
     if (certificateId) {
       const cert = getCertificate(certificateId);
+      if (cert && profileName) {
+        cert.studentName = profileName;
+      }
       setCertificate(cert);
     }
     setLoading(false);

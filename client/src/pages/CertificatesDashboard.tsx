@@ -6,14 +6,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CertificateCard from "@/components/certificate/CertificateCard";
 import { getAllCertificates, initializeMockCertificates } from "@/lib/certificates";
+import { getProfile } from "@/lib/profile";
 import type { Certificate } from "@shared/schema";
+
+function toTitleCase(str: string): string {
+  return str.toLowerCase().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
 
 export default function CertificatesDashboard() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   useEffect(() => {
-    initializeMockCertificates("Demo Student");
-    setCertificates(getAllCertificates());
+    const profile = getProfile();
+    const profileName = profile?.fullName ? toTitleCase(profile.fullName) : null;
+    initializeMockCertificates(profileName || "Demo Student");
+    const certs = getAllCertificates().map(cert =>
+      profileName ? { ...cert, studentName: profileName } : cert
+    );
+    setCertificates(certs);
   }, []);
 
   return (
