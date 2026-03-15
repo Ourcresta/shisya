@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { LevelBadge } from "@/components/ui/level-badge";
+import { GroupEnrollmentModal } from "@/components/GroupEnrollmentModal";
 import type { Course } from "@shared/schema";
 
 const C = {
@@ -52,6 +53,8 @@ const staggerItem = {
 };
 
 function CourseCard({ course }: { course: Course }) {
+  const [, navigate] = useLocation();
+
   return (
     <motion.div variants={staggerItem}>
       <div
@@ -135,16 +138,15 @@ function CourseCard({ course }: { course: Course }) {
           )}
 
           <div className="mt-auto pt-2">
-            <Link href={`/courses/${course.id}`}>
-              <button
-                className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                style={{ background: "rgba(0,245,255,0.08)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}
-                data-testid={`button-start-course-${course.id}`}
-              >
-                View Course
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </Link>
+            <button
+              onClick={() => navigate(`/courses/${course.id}`)}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              style={{ background: "rgba(0,245,255,0.08)", color: C.teal, border: "1px solid rgba(0,245,255,0.2)" }}
+              data-testid={`button-view-course-${course.id}`}
+            >
+              View Course
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -156,6 +158,7 @@ export default function CourseGroupPage() {
   const { id } = useParams<{ id: string }>();
   const [levelFilter, setLevelFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [enrollOpen, setEnrollOpen] = useState(false);
 
   const { data: group, isLoading } = useQuery<GroupDetail>({
     queryKey: ["/api/course-groups", id],
@@ -336,20 +339,19 @@ export default function CourseGroupPage() {
                       Free Access
                     </div>
                   )}
-                  <Link href="/courses">
-                    <button
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
-                      style={{
-                        background: isTrack ? `linear-gradient(135deg, rgba(0,245,255,0.9), rgba(6,182,212,0.85))` : `linear-gradient(135deg, rgba(124,58,237,0.9), rgba(139,92,246,0.85))`,
-                        color: "#fff",
-                        boxShadow: isTrack ? "0 4px 20px -4px rgba(0,245,255,0.35)" : "0 4px 20px -4px rgba(124,58,237,0.4)",
-                      }}
-                      data-testid="button-start-learning"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      Start Learning
-                    </button>
-                  </Link>
+                  <button
+                    onClick={() => setEnrollOpen(true)}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
+                    style={{
+                      background: isTrack ? `linear-gradient(135deg, rgba(0,245,255,0.9), rgba(6,182,212,0.85))` : `linear-gradient(135deg, rgba(124,58,237,0.9), rgba(139,92,246,0.85))`,
+                      color: "#fff",
+                      boxShadow: isTrack ? "0 4px 20px -4px rgba(0,245,255,0.35)" : "0 4px 20px -4px rgba(124,58,237,0.4)",
+                    }}
+                    data-testid="button-start-learning"
+                  >
+                    <Play className="w-4 h-4 fill-white" />
+                    Start Learning
+                  </button>
                 </div>
               </div>
 
@@ -491,6 +493,13 @@ export default function CourseGroupPage() {
           )}
         </div>
       </div>
+
+      <GroupEnrollmentModal
+        group={group}
+        open={enrollOpen}
+        onOpenChange={setEnrollOpen}
+        onEnrollmentSuccess={() => {}}
+      />
     </div>
   );
 }
