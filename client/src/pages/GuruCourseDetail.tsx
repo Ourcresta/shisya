@@ -144,7 +144,7 @@ export default function GuruCourseDetail() {
   const [moduleForm, setModuleForm] = useState<ModuleForm>(defaultModuleForm);
 
   const [courseEditOpen, setCourseEditOpen] = useState(false);
-  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "" });
+  const [courseForm, setCourseForm] = useState({ title: "", description: "", level: "beginner", thumbnailUrl: "", language: "", groupTitle: "", skills: "" });
   const [editingTcUrl, setEditingTcUrl] = useState(false);
   const [tcUrlValue, setTcUrlValue] = useState("");
 
@@ -292,7 +292,7 @@ export default function GuruCourseDetail() {
 
   const openEditCourse = () => {
     if (course) {
-      setCourseForm({ title: course.title, description: course.description || "", level: course.level, thumbnailUrl: course.thumbnailUrl || "", language: course.language || "", groupTitle: course.groupTitle || "" });
+      setCourseForm({ title: course.title, description: course.description || "", level: course.level, thumbnailUrl: course.thumbnailUrl || "", language: course.language || "", groupTitle: course.groupTitle || "", skills: course.skills || "" });
       setCourseEditOpen(true);
     }
   };
@@ -694,6 +694,19 @@ export default function GuruCourseDetail() {
                 rows={3}
                 data-testid="input-edit-course-description"
               />
+            </div>
+            <div>
+              <Label htmlFor="edit-course-skills">Skills You Will Gain</Label>
+              <Input
+                id="edit-course-skills"
+                value={courseForm.skills}
+                onChange={(e) => setCourseForm({ ...courseForm, skills: e.target.value })}
+                placeholder="e.g. HTML5, CSS3, JavaScript, Responsive Design"
+                data-testid="input-edit-course-skills"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Comma-separated list of skills students will learn.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
