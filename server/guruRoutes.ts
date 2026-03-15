@@ -1209,7 +1209,7 @@ guruRouter.get("/course-groups", async (req: Request, res: Response) => {
       const memberCourses = groupItems.map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
       const allSkills = memberCourses
         .flatMap(c => (c.skills || "").split(",").map(s => s.trim()).filter(Boolean));
-      const uniqueSkills = [...new Set(allSkills)];
+      const uniqueSkills = Array.from(new Set(allSkills));
       const totalMinutes = memberCourses.reduce((sum, c) => {
         if (!c.duration) return sum;
         const match = c.duration.match(/(\d+)/);
@@ -1242,7 +1242,7 @@ guruRouter.get("/course-groups/:id", async (req: Request, res: Response) => {
     const memberCourses = items.map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
     const allSkills = memberCourses
       .flatMap(c => (c.skills || "").split(",").map(s => s.trim()).filter(Boolean));
-    const uniqueSkills = [...new Set(allSkills)];
+    const uniqueSkills = Array.from(new Set(allSkills));
     const totalMinutes = memberCourses.reduce((sum, c) => {
       if (!c.duration) return sum;
       const match = c.duration.match(/(\d+)/);

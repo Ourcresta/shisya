@@ -305,7 +305,7 @@ export default function GuruCourses() {
   const autoSkills = useMemo(() => {
     const all = selectedCourseObjects
       .flatMap(c => (c.skills || "").split(",").map(s => s.trim()).filter(Boolean));
-    return [...new Set(all)];
+    return Array.from(new Set(all));
   }, [selectedCourseObjects]);
 
   const autoDuration = useMemo(() => {
