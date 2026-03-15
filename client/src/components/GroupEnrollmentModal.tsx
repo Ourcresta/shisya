@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -167,9 +168,9 @@ export function GroupEnrollmentModal({
               <DialogTitle className="text-white text-base font-semibold leading-snug" data-testid="text-group-modal-title">
                 Enroll in {isTrack ? "Track" : "Program"}
               </DialogTitle>
-              <p className="text-sm mt-0.5 truncate" style={{ color: C.textSecondary }} data-testid="text-group-modal-name">
+              <DialogDescription className="text-sm mt-0.5 truncate" style={{ color: C.textSecondary }} data-testid="text-group-modal-name">
                 {group.name}
-              </p>
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>

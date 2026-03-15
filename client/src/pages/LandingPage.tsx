@@ -861,59 +861,174 @@ function CoursePreviewSection() {
     queryKey: ["/api/courses"],
   });
 
-  const previewCourses = courses?.slice(0, 3) || [];
+  if (isLoading) {
+    return (
+      <section className="relative py-20 md:py-24 overflow-hidden">
+        <SectionGlow position="center" color={C.teal} />
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="text-center mb-14">
+            <div className="h-8 w-56 rounded-xl mx-auto mb-4 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
+            <div className="h-4 w-80 rounded mx-auto animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+          </div>
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="w-[220px] shrink-0 h-64 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!courses || courses.length === 0) return null;
+
+  const items = courses.length < 5
+    ? [...courses, ...courses, ...courses]
+    : courses.length < 8
+    ? [...courses, ...courses]
+    : [...courses, ...courses];
+
+  const durationSec = Math.max(25, items.length * 4);
 
   return (
     <section className="relative py-20 md:py-24 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
-          <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
-            style={{
-              fontFamily: "var(--font-display)",
-              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            data-testid="text-preview-title"
-          >
-            Featured Courses
-          </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Start your learning journey with our carefully crafted courses
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-          {isLoading ? (
-            Array.from({ length: 3 }).map((_, i) => <CoursePreviewSkeleton key={i} />)
-          ) : previewCourses.length > 0 ? (
-            previewCourses.map((course) => <CoursePreviewCard key={course.id} course={course} />)
-          ) : (
-            <div className="col-span-full text-center py-12" style={{ color: C.textSecondary }}>
-              No courses available yet. Check back soon!
-            </div>
-          )}
-        </div>
-        {previewCourses.length > 0 && (
+      <style>{`
+        @keyframes marquee-ltr {
+          0%   { transform: translateX(-50%); }
+          100% { transform: translateX(0%); }
+        }
+        .marquee-ltr-track {
+          animation: marquee-ltr ${durationSec}s linear infinite;
+          will-change: transform;
+        }
+        .marquee-ltr-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      <div className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
           <div className="text-center">
-            <Link href="/courses">
-              <button
-                className="px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 mx-auto hover:scale-[1.02]"
-                style={{
-                  background: "transparent",
-                  color: C.teal,
-                  border: `1px solid rgba(0,245,255,0.3)`,
-                }}
-                data-testid="button-view-all-courses"
-              >
-                View All Courses
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </Link>
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-4"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              data-testid="text-preview-title"
+            >
+              Featured Courses
+            </h2>
+            <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
+              Start your learning journey with our carefully crafted courses
+            </p>
           </div>
-        )}
+        </div>
+
+        <div
+          className="relative overflow-hidden"
+          style={{
+            maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+          }}
+        >
+          <div className="marquee-ltr-track flex gap-4 py-4" style={{ width: "max-content" }}>
+            {items.map((course, idx) => {
+              const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
+              return (
+                <Link key={`${course.id}-${idx}`} href={`/courses/${course.id}`}>
+                  <div
+                    className="w-[220px] shrink-0 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "0 4px 20px -6px rgba(0,0,0,0.4)",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.25)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px -6px rgba(0,0,0,0.4)";
+                    }}
+                    data-testid={`card-featured-course-${course.id}-${idx}`}
+                  >
+                    <div className="relative overflow-hidden" style={{ height: "120px" }}>
+                      {course.thumbnailUrl ? (
+                        <img
+                          src={course.thumbnailUrl}
+                          alt={course.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                          style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.06))" }}
+                        >
+                          <BookOpen className="w-8 h-8" style={{ color: "rgba(0,245,255,0.5)" }} />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/50 via-transparent to-transparent" />
+                      <div className="absolute top-2 right-2">
+                        {isFree ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>FREE</span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>{course.creditCost} cr</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-3 flex flex-col gap-2 flex-1">
+                      <h3
+                        className="text-xs font-semibold leading-snug line-clamp-2 text-white"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {course.title}
+                      </h3>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
+                        {course.language && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full uppercase" style={{ background: "rgba(255,255,255,0.06)", color: C.textSecondary }}>
+                            {course.language}
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className="mt-auto pt-1.5 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
+                        style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
+                      >
+                        View Course
+                        <ChevronRight className="w-3 h-3" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 text-center">
+          <Link href="/courses">
+            <button
+              className="px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 mx-auto hover:scale-[1.02]"
+              style={{
+                background: "transparent",
+                color: C.teal,
+                border: `1px solid rgba(0,245,255,0.3)`,
+              }}
+              data-testid="button-view-all-courses"
+            >
+              View All Courses
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </Link>
+        </div>
       </div>
     </section>
   );
