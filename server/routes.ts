@@ -17,7 +17,7 @@ import { r2Router } from "./r2Upload";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages } from "@shared/schema";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages, courseGroups, courseGroupItems } from "@shared/schema";
 import { eq, like, or, and, desc as descOrder, sql, count, asc } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
@@ -600,6 +600,38 @@ export async function registerRoutes(
       console.error("Error fetching courses:", error);
       const publishedCourses = mockCourses.filter(c => c.status === "published");
       return res.json(publishedCourses);
+    }
+  });
+
+  // GET /api/course-groups - Public listing of all course groups with member courses
+  app.get("/api/course-groups", async (req, res) => {
+    try {
+      const groups = await db.select().from(courseGroups).orderBy(descOrder(courseGroups.createdAt));
+      const items = await db.select().from(courseGroupItems);
+      const allCourses = await db.select().from(coursesTable);
+      const courseMap = new Map(allCourses.map(c => [c.id, c]));
+      const result = groups.map(g => {
+        const groupItems = items.filter(i => i.groupId === g.id).sort((a, b) => a.orderIndex - b.orderIndex);
+        const memberCourses = groupItems.map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
+        const allSkills = memberCourses.flatMap(c => (c.skills || "").split(",").map((s: string) => s.trim()).filter(Boolean));
+        const uniqueSkills = Array.from(new Set(allSkills));
+        const totalMinutes = memberCourses.reduce((sum, c) => {
+          if (!c.duration) return sum;
+          const match = c.duration.match(/(\d+)/);
+          return sum + (match ? parseInt(match[1]) : 0);
+        }, 0);
+        return {
+          ...g,
+          courseCount: memberCourses.length,
+          courses: memberCourses,
+          aggregatedSkills: uniqueSkills.join(","),
+          totalDuration: totalMinutes > 0 ? `${totalMinutes} hours` : null,
+        };
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("[Public] Get course groups error:", error);
+      res.status(500).json({ error: "Failed to fetch course groups" });
     }
   });
 

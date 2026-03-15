@@ -116,6 +116,9 @@ interface GroupForm {
   name: string;
   description: string;
   level: string;
+  groupType: string;
+  thumbnailUrl: string;
+  price: number;
   courseIds: number[];
 }
 
@@ -137,6 +140,9 @@ const defaultGroupForm: GroupForm = {
   name: "",
   description: "",
   level: "beginner",
+  groupType: "track",
+  thumbnailUrl: "",
+  price: 0,
   courseIds: [],
 };
 
@@ -359,6 +365,9 @@ export default function GuruCourses() {
       name: group.name,
       description: group.description || "",
       level: group.level,
+      groupType: (group as any).groupType || "track",
+      thumbnailUrl: (group as any).thumbnailUrl || "",
+      price: (group as any).price ?? 0,
       courseIds: group.courses.map(c => c.id),
     });
     setCoursePickerSearch("");
@@ -1073,16 +1082,42 @@ function GroupFormFields({
 }) {
   return (
     <div className="space-y-5">
-      <div>
-        <Label htmlFor="group-name">Group Name *</Label>
-        <Input
-          id="group-name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          placeholder="e.g. Web Development"
-          data-testid="input-group-name"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2 md:col-span-1">
+          <Label htmlFor="group-name">Group Name *</Label>
+          <Input
+            id="group-name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="e.g. Web Development"
+            data-testid="input-group-name"
+          />
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <Label>Group Type *</Label>
+          <div className="flex gap-2 mt-1.5">
+            {(["track", "program"] as const).map(type => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setForm({ ...form, groupType: type })}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-all capitalize ${
+                  form.groupType === type
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background border-input hover:bg-muted"
+                }`}
+                data-testid={`button-group-type-${type}`}
+              >
+                {type === "track" ? "🛤 Track" : "🎓 Program"}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {form.groupType === "track" ? "A Track groups related courses (e.g. Web Development)" : "A Program is a comprehensive learning path (e.g. Full Stack Developer)"}
+          </p>
+        </div>
       </div>
+
       <div>
         <Label htmlFor="group-description">Description</Label>
         <Textarea
@@ -1094,19 +1129,59 @@ function GroupFormFields({
           data-testid="input-group-description"
         />
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Skill Level</Label>
+          <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
+            <SelectTrigger data-testid="select-group-level">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="mastery">Mastery</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="group-price">Price (Credits)</Label>
+          <Input
+            id="group-price"
+            type="number"
+            min={0}
+            value={form.price}
+            onChange={(e) => setForm({ ...form, price: parseInt(e.target.value) || 0 })}
+            placeholder="0 = Free"
+            data-testid="input-group-price"
+          />
+        </div>
+      </div>
+
       <div>
-        <Label>Skill Level</Label>
-        <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
-          <SelectTrigger data-testid="select-group-level">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beginner">Beginner</SelectItem>
-            <SelectItem value="intermediate">Intermediate</SelectItem>
-            <SelectItem value="advanced">Advanced</SelectItem>
-            <SelectItem value="mastery">Mastery</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label htmlFor="group-thumbnail">Thumbnail Image URL</Label>
+        <Input
+          id="group-thumbnail"
+          value={form.thumbnailUrl}
+          onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
+          placeholder="https://example.com/image.jpg"
+          data-testid="input-group-thumbnail"
+        />
+        {form.thumbnailUrl && (
+          <div className="mt-2 relative rounded-lg overflow-hidden border aspect-video max-h-40">
+            <img
+              src={form.thumbnailUrl}
+              alt="Thumbnail preview"
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              data-testid="img-group-thumbnail-preview"
+            />
+            <div className="absolute inset-0 bg-muted flex items-center justify-center -z-10">
+              <span className="text-xs text-muted-foreground">Image preview</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

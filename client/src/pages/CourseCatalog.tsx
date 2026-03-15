@@ -6,7 +6,7 @@ import {
   Search, BookOpen, GraduationCap, X, Mic, ChevronRight,
   Clock, Globe, Coins, Lock, Play, ArrowRight, Star,
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
-  Sparkles, Filter, UserPlus, LogIn
+  Sparkles, Filter, UserPlus, LogIn, Layers, Trophy
 } from "lucide-react";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import type { Course } from "@shared/schema";
+
+type CatalogTab = "course" | "track" | "program";
+
+interface CourseGroupData {
+  id: number;
+  name: string;
+  description: string | null;
+  level: string;
+  groupType: string;
+  thumbnailUrl: string | null;
+  price: number | null;
+  aggregatedSkills: string;
+  totalDuration: string | null;
+  courseCount: number;
+  courses: Course[];
+  createdAt: string;
+}
 
 type LevelFilter = "all" | "beginner" | "intermediate" | "advanced" | "masters";
 type PricingFilter = "all" | "free" | "paid";
@@ -358,13 +375,165 @@ function PremiumSkeleton() {
   );
 }
 
+function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData[]; type: CatalogTab; isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", height: 320 }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}>
+          {type === "track" ? <Layers className="w-10 h-10" style={{ color: "#00F5FF" }} /> : <Trophy className="w-10 h-10" style={{ color: "#00F5FF" }} />}
+        </div>
+        <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+          No {type === "track" ? "Tracks" : "Programs"} yet
+        </h3>
+        <p className="text-gray-400 max-w-sm">
+          {type === "track"
+            ? "Tracks bundle related courses into a learning path. Check back soon!"
+            : "Programs are comprehensive learning journeys. Check back soon!"}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+      data-testid={`grid-${type}s`}
+    >
+      {groups.map(group => (
+        <motion.div key={group.id} variants={staggerItem} data-testid={`card-${type}-${group.id}`}>
+          <div
+            className="rounded-2xl overflow-hidden flex flex-col h-full group transition-all duration-300 hover:-translate-y-1"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 4px 24px -6px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div className="relative aspect-video overflow-hidden">
+              {group.thumbnailUrl ? (
+                <img
+                  src={group.thumbnailUrl}
+                  alt={group.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: type === "track" ? "linear-gradient(135deg, rgba(0,245,255,0.1), rgba(6,182,212,0.06))" : "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(139,92,246,0.08))" }}
+                >
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: type === "track" ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.18)", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.25)" : "rgba(124,58,237,0.3)"}` }}>
+                    {type === "track" ? <Layers className="w-8 h-8" style={{ color: "#00F5FF" }} /> : <Trophy className="w-8 h-8" style={{ color: "#A78BFA" }} />}
+                  </div>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/80 via-transparent to-transparent" />
+              <div className="absolute top-3 left-3">
+                <span className="px-2.5 py-1 rounded-full text-xs font-semibold capitalize" style={{ background: type === "track" ? "rgba(0,245,255,0.85)" : "rgba(124,58,237,0.85)", color: "#fff", backdropFilter: "blur(8px)" }}>
+                  {type === "track" ? "🛤 Track" : "🎓 Program"}
+                </span>
+              </div>
+              {group.price !== null && group.price !== undefined && group.price > 0 ? (
+                <div className="absolute top-3 right-3">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>
+                    {group.price} Credits
+                  </span>
+                </div>
+              ) : (
+                <div className="absolute top-3 right-3">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>
+                    FREE
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col flex-1 p-5 gap-3">
+              <div>
+                <h3 className="text-white font-semibold text-lg leading-snug mb-1" style={{ fontFamily: "var(--font-display)" }}>{group.name}</h3>
+                {group.description && <p className="text-gray-400 text-sm line-clamp-2">{group.description}</p>}
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  {group.courseCount} course{group.courseCount !== 1 ? "s" : ""}
+                </span>
+                {group.totalDuration && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {group.totalDuration}
+                  </span>
+                )}
+                <span className="capitalize px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}>{group.level}</span>
+              </div>
+
+              {group.aggregatedSkills && (
+                <div className="flex flex-wrap gap-1">
+                  {group.aggregatedSkills.split(",").slice(0, 4).map((s, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(0,245,255,0.08)", color: "#67E8F9", border: "1px solid rgba(0,245,255,0.15)" }}>
+                      {s.trim()}
+                    </span>
+                  ))}
+                  {group.aggregatedSkills.split(",").length > 4 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}>
+                      +{group.aggregatedSkills.split(",").length - 4} more
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-auto pt-2">
+                <div className="text-xs text-gray-500 mb-3">
+                  {group.courses.slice(0, 3).map((c, i) => (
+                    <div key={c.id} className="flex items-center gap-1.5 mb-1">
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ background: "rgba(0,245,255,0.12)", color: "#00F5FF" }}>{i + 1}</span>
+                      <span className="truncate">{c.title}</span>
+                    </div>
+                  ))}
+                  {group.courseCount > 3 && <p className="text-gray-600 pl-5">+{group.courseCount - 3} more courses</p>}
+                </div>
+                <button
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"
+                  style={{ background: type === "track" ? "rgba(0,245,255,0.1)" : "rgba(124,58,237,0.12)", color: type === "track" ? "#00F5FF" : "#A78BFA", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}` }}
+                  data-testid={`button-view-${type}-${group.id}`}
+                >
+                  View {type === "track" ? "Track" : "Program"}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
 export default function CourseCatalog() {
   const { data: courses, isLoading, error } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
+  const { data: courseGroups, isLoading: groupsLoading } = useQuery<CourseGroupData[]>({
+    queryKey: ["/api/course-groups"],
+  });
+
   const { user } = useAuth();
 
+  const [catalogTab, setCatalogTab] = useState<CatalogTab>("course");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
   const [selectedPricing, setSelectedPricing] = useState<PricingFilter>("all");
@@ -715,7 +884,38 @@ export default function CourseCatalog() {
             </motion.div>
           </div>
 
-          {!isLoading && !error && courses && courses.length > 0 && (
+          <motion.div
+            className="px-4 md:px-8 pb-5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+          >
+            <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
+              {([
+                { id: "course" as CatalogTab, label: "Course", icon: BookOpen },
+                { id: "track" as CatalogTab, label: "Track", icon: Layers },
+                { id: "program" as CatalogTab, label: "Program", icon: Trophy },
+              ]).map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setCatalogTab(tab.id)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all"
+                  style={{
+                    background: catalogTab === tab.id ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.04)",
+                    color: catalogTab === tab.id ? "#00F5FF" : "#9ca3af",
+                    border: catalogTab === tab.id ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
+                    boxShadow: catalogTab === tab.id ? "0 0 14px rgba(0,245,255,0.18)" : "none",
+                  }}
+                  data-testid={`tab-catalog-${tab.id}`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
             <motion.div
               className="px-4 md:px-8 pb-6"
               initial={{ opacity: 0, y: 10 }}
@@ -756,7 +956,7 @@ export default function CourseCatalog() {
 
           <div className="px-4 md:px-8 pb-16 max-w-[1400px] mx-auto">
             <div className="flex gap-8">
-              {!isLoading && !error && courses && courses.length > 0 && (
+              {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
                 <aside
                   className="hidden lg:block w-64 shrink-0"
                 >
@@ -786,7 +986,15 @@ export default function CourseCatalog() {
               )}
 
               <div className="flex-1 min-w-0">
-                {!isLoading && !error && courses && courses.length > 0 && (
+                {(catalogTab === "track" || catalogTab === "program") && (
+                  <GroupCatalogGrid
+                    groups={(courseGroups || []).filter(g => g.groupType === catalogTab)}
+                    type={catalogTab}
+                    isLoading={groupsLoading}
+                  />
+                )}
+
+                {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
                   <div className="flex items-center justify-between mb-6">
                     <p className="text-sm text-gray-400" data-testid="text-total-courses">
                       Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""}
@@ -816,7 +1024,7 @@ export default function CourseCatalog() {
                   </div>
                 )}
 
-                {isLoading ? (
+                {catalogTab !== "course" ? null : isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" data-testid="skeleton-courses">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <PremiumSkeleton key={i} />
@@ -891,7 +1099,7 @@ export default function CourseCatalog() {
                   </motion.div>
                 )}
 
-                {!user && !isLoading && courses && courses.length > 0 && (
+                {catalogTab === "course" && !user && !isLoading && courses && courses.length > 0 && (
                   <motion.div
                     className="mt-12"
                     initial={{ opacity: 0, y: 20 }}
