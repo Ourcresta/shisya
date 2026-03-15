@@ -208,6 +208,32 @@ export default function CourseOverview() {
             </div>
           </div>
 
+          {/* ── Skills You Will Gain ── */}
+          {skillsList.length > 0 && (
+            <>
+              <Separator />
+              <div data-testid="section-skills">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)" }}>
+                  <Target className="w-5 h-5 text-primary" />
+                  Skills You Will Gain
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" data-testid="container-skills">
+                  {skillsList.map((skill: string) => (
+                    <div
+                      key={skill}
+                      className="flex items-center gap-2.5 p-3 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors"
+                    >
+                      <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium truncate">{skill}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           {/* ── Course Curriculum ── */}
           {hasCurriculum && (
             <>
@@ -460,25 +486,6 @@ export default function CourseOverview() {
                 </div>
               </div>
             </>
-          )}
-
-          {/* ── Skills You Will Gain ── */}
-          {skillsList.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Target className="w-5 h-5 text-primary" />
-                  Skills You Will Gain
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2" data-testid="container-skills">
-                  {skillsList.map((skill: string) => (
-                    <SkillTag key={skill} skill={skill} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           )}
 
           {/* ── Certificate Requirements ── */}
