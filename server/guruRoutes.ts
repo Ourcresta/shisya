@@ -6,6 +6,7 @@ import {
   shishyaUserProfiles, shishyaUserProgress, shishyaUserTestAttempts,
   shishyaUserProjectSubmissions, shishyaUserCertificates, shishyaCreditTransactions,
   pricingPlans, creditPacks, sitePages,
+  courseGroups, courseGroupItems,
 } from "@shared/schema";
 import { eq, count, sql, desc, and, ilike, asc } from "drizzle-orm";
 import { requireGuruAuth, GuruAuthenticatedRequest } from "./guruAuth";
@@ -1190,5 +1191,186 @@ guruRouter.put("/pages/:slug", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[Guru] Error updating page:", error);
     res.status(500).json({ error: "Failed to update page" });
+  }
+});
+
+// ============ COURSE GROUPS CRUD ============
+
+guruRouter.get("/course-groups", async (req: Request, res: Response) => {
+  try {
+    const groups = await db.select().from(courseGroups).orderBy(desc(courseGroups.createdAt));
+    const items = await db.select().from(courseGroupItems).orderBy(courseGroupItems.orderIndex);
+    const allCourses = await db.select().from(courses);
+    const courseMap = new Map(allCourses.map(c => [c.id, c]));
+
+    const result = groups.map(g => {
+      const groupItems = items.filter(i => i.groupId === g.id);
+      const memberCourses = groupItems.map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
+      const allSkills = memberCourses
+        .flatMap(c => (c.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+      const uniqueSkills = [...new Set(allSkills)];
+      const totalMinutes = memberCourses.reduce((sum, c) => {
+        if (!c.duration) return sum;
+        const match = c.duration.match(/(\d+)/);
+        return sum + (match ? parseInt(match[1]) : 0);
+      }, 0);
+      return {
+        ...g,
+        courseCount: memberCourses.length,
+        courses: memberCourses.map((c, idx) => ({ ...c, orderIndex: groupItems[idx]?.orderIndex ?? idx })),
+        aggregatedSkills: uniqueSkills.join(","),
+        totalDuration: totalMinutes > 0 ? `${totalMinutes} hours` : null,
+      };
+    });
+    res.json(result);
+  } catch (error) {
+    console.error("[Guru] List course groups error:", error);
+    res.status(500).json({ error: "Failed to fetch course groups" });
+  }
+});
+
+guruRouter.get("/course-groups/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [group] = await db.select().from(courseGroups).where(eq(courseGroups.id, id));
+    if (!group) return res.status(404).json({ error: "Group not found" });
+
+    const items = await db.select().from(courseGroupItems).where(eq(courseGroupItems.groupId, id)).orderBy(courseGroupItems.orderIndex);
+    const allCourses = await db.select().from(courses);
+    const courseMap = new Map(allCourses.map(c => [c.id, c]));
+    const memberCourses = items.map(i => courseMap.get(i.courseId)).filter(Boolean) as typeof allCourses;
+    const allSkills = memberCourses
+      .flatMap(c => (c.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+    const uniqueSkills = [...new Set(allSkills)];
+    const totalMinutes = memberCourses.reduce((sum, c) => {
+      if (!c.duration) return sum;
+      const match = c.duration.match(/(\d+)/);
+      return sum + (match ? parseInt(match[1]) : 0);
+    }, 0);
+
+    res.json({
+      ...group,
+      courseCount: memberCourses.length,
+      courses: memberCourses.map((c, idx) => ({ ...c, orderIndex: items[idx]?.orderIndex ?? idx })),
+      aggregatedSkills: uniqueSkills.join(","),
+      totalDuration: totalMinutes > 0 ? `${totalMinutes} hours` : null,
+    });
+  } catch (error) {
+    console.error("[Guru] Get course group error:", error);
+    res.status(500).json({ error: "Failed to fetch course group" });
+  }
+});
+
+guruRouter.post("/course-groups", async (req: Request, res: Response) => {
+  try {
+    const { name, description, level, thumbnailUrl, courseIds } = req.body;
+    if (!name) return res.status(400).json({ error: "Group name is required" });
+
+    const [newGroup] = await db.insert(courseGroups).values({
+      name,
+      description: description || null,
+      level: level || "beginner",
+      thumbnailUrl: thumbnailUrl || null,
+      status: "draft",
+    }).returning();
+
+    if (courseIds && Array.isArray(courseIds) && courseIds.length > 0) {
+      await db.insert(courseGroupItems).values(
+        courseIds.map((cId: number, idx: number) => ({
+          groupId: newGroup.id,
+          courseId: cId,
+          orderIndex: idx,
+        }))
+      );
+    }
+
+    res.json(newGroup);
+  } catch (error) {
+    console.error("[Guru] Create course group error:", error);
+    res.status(500).json({ error: "Failed to create course group" });
+  }
+});
+
+guruRouter.put("/course-groups/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, description, level, thumbnailUrl, courseIds } = req.body;
+
+    const [updated] = await db.update(courseGroups).set({
+      name,
+      description: description || null,
+      level: level || "beginner",
+      thumbnailUrl: thumbnailUrl || null,
+      updatedAt: new Date(),
+    }).where(eq(courseGroups.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Group not found" });
+
+    if (courseIds && Array.isArray(courseIds)) {
+      await db.delete(courseGroupItems).where(eq(courseGroupItems.groupId, id));
+      if (courseIds.length > 0) {
+        await db.insert(courseGroupItems).values(
+          courseIds.map((cId: number, idx: number) => ({
+            groupId: id,
+            courseId: cId,
+            orderIndex: idx,
+          }))
+        );
+      }
+    }
+
+    res.json(updated);
+  } catch (error) {
+    console.error("[Guru] Update course group error:", error);
+    res.status(500).json({ error: "Failed to update course group" });
+  }
+});
+
+guruRouter.delete("/course-groups/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(courseGroupItems).where(eq(courseGroupItems.groupId, id));
+    await db.delete(courseGroups).where(eq(courseGroups.id, id));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Guru] Delete course group error:", error);
+    res.status(500).json({ error: "Failed to delete course group" });
+  }
+});
+
+guruRouter.post("/course-groups/:id/courses", async (req: Request, res: Response) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const { courseId } = req.body;
+    if (!courseId) return res.status(400).json({ error: "Course ID is required" });
+
+    const existing = await db.select().from(courseGroupItems).where(
+      and(eq(courseGroupItems.groupId, groupId), eq(courseGroupItems.courseId, courseId))
+    );
+    if (existing.length > 0) return res.status(400).json({ error: "Course already in group" });
+
+    const items = await db.select().from(courseGroupItems).where(eq(courseGroupItems.groupId, groupId));
+    const [newItem] = await db.insert(courseGroupItems).values({
+      groupId,
+      courseId,
+      orderIndex: items.length,
+    }).returning();
+    res.json(newItem);
+  } catch (error) {
+    console.error("[Guru] Add course to group error:", error);
+    res.status(500).json({ error: "Failed to add course to group" });
+  }
+});
+
+guruRouter.delete("/course-groups/:id/courses/:courseId", async (req: Request, res: Response) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const courseId = parseInt(req.params.courseId);
+    await db.delete(courseGroupItems).where(
+      and(eq(courseGroupItems.groupId, groupId), eq(courseGroupItems.courseId, courseId))
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Guru] Remove course from group error:", error);
+    res.status(500).json({ error: "Failed to remove course from group" });
   }
 });

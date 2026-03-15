@@ -37,6 +37,7 @@ The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, an
 - **Academic Marksheet System:** University-style marksheet generation with grades, CGPA, and PDF download, offering public verifiability.
 - **Analytics:** Recharts-powered skill radar, sub-skill bar chart, and performance score cards.
 - **GURU Admin Portal:** Provides full CRUD operations for courses, modules, lessons, tests, labs, projects, student and credit management. Integrates with Zoho TrainerCentral.
+- **Course Groups (Bundle Builder):** Allows GURU admins to bundle multiple micro-courses into named groups (e.g. "Web Development" = HTML + CSS + JavaScript). Features a tabbed UI (All Courses / Group Courses), searchable course picker, auto-calculated duration, and auto-aggregated skills. Backed by `course_groups` and `course_group_items` DB tables.
 - **Project Detail Rendering:** Smart rendering of project details based on type (external API, local DB/AI-generated JSON tasks, plain text), including tools and resources.
 - **OAuth Login:** Supports Google OAuth and SSO for user authentication.
 - **Udyog Virtual Internship System:** An AI-powered virtual internship platform featuring AI skill assessment, automatic internship assignment, a kanban-style task management system, submission tracking, and certificate generation. Includes a comprehensive portfolio management system within the Udyog workspace.

@@ -1619,3 +1619,31 @@ export interface BecomeAPartnerContent {
   partnerTypes?: TitleDescriptionItem[];
   ctaText?: string;
 }
+
+// ============ COURSE GROUPS (Bundle multiple micro-courses) ============
+
+export const courseGroups = pgTable("course_groups", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  level: varchar("level", { length: 20 }).notNull().default("beginner"),
+  thumbnailUrl: text("thumbnail_url"),
+  status: varchar("status", { length: 20 }).notNull().default("draft"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const courseGroupItems = pgTable("course_group_items", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull().references(() => courseGroups.id),
+  courseId: integer("course_id").notNull().references(() => courses.id),
+  orderIndex: integer("order_index").notNull().default(0),
+});
+
+export const insertCourseGroupSchema = createInsertSchema(courseGroups).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCourseGroup = z.infer<typeof insertCourseGroupSchema>;
+export type CourseGroup = typeof courseGroups.$inferSelect;
+
+export const insertCourseGroupItemSchema = createInsertSchema(courseGroupItems).omit({ id: true });
+export type InsertCourseGroupItem = z.infer<typeof insertCourseGroupItemSchema>;
+export type CourseGroupItem = typeof courseGroupItems.$inferSelect;
