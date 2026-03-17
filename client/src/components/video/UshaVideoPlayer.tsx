@@ -8,6 +8,7 @@ import {
   Volume1,
   Maximize,
   Minimize,
+  PictureInPicture2,
   Settings,
   Languages,
   Captions,
@@ -90,22 +91,22 @@ function isHlsUrl(url: string): boolean {
   return url.includes(".m3u8") || url.includes("m3u8");
 }
 
-// Route R2 videos through the server proxy to bypass browser CORS restrictions.
-// Other URLs (HLS streams, TrainerCentral embeds, etc.) are passed through unchanged.
+// Hostnames that must be proxied through the server to avoid CORS restrictions.
+const PROXIED_HOSTS = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
+
+function needsProxy(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return PROXIED_HOSTS.some((h) => hostname.endsWith(h));
+  } catch {
+    return false;
+  }
+}
+
+// Route R2/CDN videos through the server proxy to bypass browser CORS restrictions.
 function resolveVideoUrl(url: string): string {
   if (!url) return url;
-  try {
-    const parsed = new URL(url);
-    const isR2 =
-      parsed.hostname.endsWith("r2.dev") ||
-      parsed.hostname.endsWith("cloudflarestorage.com");
-    if (isR2) {
-      return `/api/video-proxy?url=${encodeURIComponent(url)}`;
-    }
-  } catch {
-    // Not a full URL — leave as-is
-  }
-  return url;
+  return needsProxy(url) ? `/api/video-proxy?url=${encodeURIComponent(url)}` : url;
 }
 
 // ── WebVTT parser ─────────────────────────────────────────────────────────────
@@ -157,17 +158,22 @@ export function UshaVideoPlayer({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState<number>(() => {
+    try { const s = localStorage.getItem("vp-volume"); return s !== null ? Math.max(0, Math.min(1, parseFloat(s))) : 1; } catch { return 1; }
+  });
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPiP, setIsPiP] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [selectedAudioTrack, setSelectedAudioTrack] = useState<string>(
     audioTracks[0]?.languageCode || "en"
   );
   const [selectedSubtitle, setSelectedSubtitle] = useState<string | null>(null);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(() => {
+    try { const s = localStorage.getItem("vp-speed"); return s !== null ? parseFloat(s) : 1; } catch { return 1; }
+  });
   const [isBuffering, setIsBuffering] = useState(false);
   const [hlsLevels, setHlsLevels] = useState<{ height: number; bitrate: number }[]>([]);
   const [selectedQuality, setSelectedQuality] = useState(-1);
@@ -177,6 +183,7 @@ export function UshaVideoPlayer({
   const [currentCue, setCurrentCue] = useState<string | null>(null);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastTapRef = useRef<{ time: number; x: number }>({ time: 0, x: 0 });
 
   const currentAudioTrack = audioTracks.find(
     (t) => t.languageCode === selectedAudioTrack
@@ -191,9 +198,6 @@ export function UshaVideoPlayer({
     const activeMp4Url = videoUrl && !isHlsUrl(videoUrl) ? videoUrl : null;
 
     if (activeHlsUrl && Hls.isSupported()) {
-      const isR2Url = (u: string) =>
-        u.includes("r2.dev") || u.includes("cloudflarestorage.com");
-
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
@@ -202,7 +206,7 @@ export function UshaVideoPlayer({
       });
       hlsRef.current = hls;
 
-      const sourceUrl = isR2Url(activeHlsUrl)
+      const sourceUrl = needsProxy(activeHlsUrl)
         ? `/api/hls-proxy?url=${encodeURIComponent(activeHlsUrl)}`
         : activeHlsUrl;
 
@@ -310,6 +314,8 @@ export function UshaVideoPlayer({
     };
     // After any seek completes (user scrub, skip, or HLS internal seek), snap audio to video
     const handleSeeked = () => syncAudioWithVideo(true);
+    const handlePiPEnter = () => setIsPiP(true);
+    const handlePiPLeave = () => setIsPiP(false);
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -317,6 +323,8 @@ export function UshaVideoPlayer({
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
     video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("enterpictureinpicture", handlePiPEnter);
+    video.addEventListener("leavepictureinpicture", handlePiPLeave);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -325,22 +333,36 @@ export function UshaVideoPlayer({
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
       video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("enterpictureinpicture", handlePiPEnter);
+      video.removeEventListener("leavepictureinpicture", handlePiPLeave);
     };
   }, [duration, onProgress, onComplete, onPlayStateChange, syncAudioWithVideo]);
 
+  // Apply persisted volume/speed whenever the video element is ready
   useEffect(() => {
-    if (audioRef.current && currentAudioTrack) {
-      const wasPlaying = isPlaying;
-      const currentVideoTime = videoRef.current?.currentTime || 0;
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume;
+    video.playbackRate = playbackSpeed;
+  }, [volume, playbackSpeed]);
 
-      audioRef.current.src = currentAudioTrack.audioUrl;
-      audioRef.current.currentTime = currentVideoTime;
-
-      if (wasPlaying) {
-        audioRef.current.play().catch(console.error);
-      }
+  // When the active dubbed audio track changes, swap the audio src and resume from
+  // the current video position. We read play state directly from the video element
+  // so this effect does NOT re-run on every play/pause toggle.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentAudioTrack) return;
+    const currentVideoTime = videoRef.current?.currentTime || 0;
+    const videoIsPlaying = videoRef.current ? !videoRef.current.paused : false;
+    audio.pause();
+    audio.src = currentAudioTrack.audioUrl;
+    audio.playbackRate = playbackSpeed;
+    audio.currentTime = currentVideoTime;
+    if (videoIsPlaying) {
+      audio.play().catch(console.error);
     }
-  }, [currentAudioTrack, isPlaying]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAudioTrack]);
 
   // Load WebVTT file when subtitle selection changes
   useEffect(() => {
@@ -412,6 +434,7 @@ export function UshaVideoPlayer({
   const handleVolumeChange = useCallback((value: number[]) => {
     const newVolume = value[0];
     setVolume(newVolume);
+    try { localStorage.setItem("vp-volume", String(newVolume)); } catch {}
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
@@ -482,6 +505,7 @@ export function UshaVideoPlayer({
 
   const handlePlaybackSpeedChange = useCallback((speed: number) => {
     setPlaybackSpeed(speed);
+    try { localStorage.setItem("vp-speed", String(speed)); } catch {}
     if (videoRef.current) {
       videoRef.current.playbackRate = speed;
     }
@@ -489,6 +513,54 @@ export function UshaVideoPlayer({
       audioRef.current.playbackRate = speed;
     }
   }, []);
+
+  const togglePiP = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (document.pictureInPictureEnabled) {
+        await video.requestPictureInPicture();
+      }
+    } catch { /* PiP not available on this device */ }
+  }, []);
+
+  // Double-click on the video area toggles fullscreen
+  const handleVideoDoubleClick = useCallback(() => {
+    if (!containerRef.current) return;
+    if (!isFullscreen) {
+      containerRef.current.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  }, [isFullscreen]);
+
+  // Touch support: single tap = show/hide controls, double-tap left/right = seek ±10s
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const now = Date.now();
+    const touch = e.touches[0];
+    const timeSinceLastTap = now - lastTapRef.current.time;
+    if (timeSinceLastTap < 280 && timeSinceLastTap > 0) {
+      e.preventDefault();
+      const containerWidth = containerRef.current?.offsetWidth ?? 1;
+      const isLeftSide = touch.clientX < containerWidth / 2;
+      if (isLeftSide) {
+        skip(-10);
+      } else {
+        skip(10);
+      }
+    } else {
+      setShowControls((prev) => {
+        if (!prev) {
+          if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+          controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 3000);
+        }
+        return !prev;
+      });
+    }
+    lastTapRef.current = { time: now, x: touch.clientX };
+  }, [skip]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -515,9 +587,13 @@ export function UshaVideoPlayer({
           e.preventDefault();
           toggleFullscreen();
           break;
+        case "p":
+          e.preventDefault();
+          togglePiP();
+          break;
       }
     },
-    [togglePlay, skip, toggleMute, toggleFullscreen]
+    [togglePlay, skip, toggleMute, toggleFullscreen, togglePiP]
   );
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -537,6 +613,7 @@ export function UshaVideoPlayer({
       onMouseMove={handleMouseMove}
       onMouseLeave={() => { isPlaying && setShowControls(false); setHoverTime(null); }}
       onKeyDown={handleKeyDown}
+      onTouchStart={handleTouchStart}
       tabIndex={0}
       data-testid="video-player"
     >
@@ -547,6 +624,7 @@ export function UshaVideoPlayer({
         muted={!!currentAudioTrack || isMuted}
         playsInline
         onClick={togglePlay}
+        onDoubleClick={handleVideoDoubleClick}
         data-testid="video-element"
       />
 
@@ -876,7 +954,18 @@ export function UshaVideoPlayer({
               </button>
             )}
 
-            <button className="vp-ctrl-btn" onClick={toggleFullscreen} data-testid="button-fullscreen">
+            {typeof document !== "undefined" && (document as Document & { pictureInPictureEnabled?: boolean }).pictureInPictureEnabled && (
+              <button
+                className={`vp-ctrl-btn ${isPiP ? "vp-ctrl-btn-active" : ""}`}
+                onClick={togglePiP}
+                title="Picture in Picture (P)"
+                data-testid="button-pip"
+              >
+                <PictureInPicture2 className="w-5 h-5" />
+              </button>
+            )}
+
+            <button className="vp-ctrl-btn" onClick={toggleFullscreen} title="Fullscreen (F)" data-testid="button-fullscreen">
               {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
             </button>
           </div>
