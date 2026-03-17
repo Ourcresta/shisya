@@ -233,6 +233,16 @@ export function UshaVideoPlayer({
         }
       });
 
+      // Force-sync dubbed audio every time HLS transitions to a new segment.
+      // Without this, the audio can drift at segment boundaries and cause
+      // the last few words of one segment to overlap with the first words
+      // of the next segment.
+      hls.on(Hls.Events.FRAG_CHANGED, () => {
+        if (audioRef.current?.src && videoRef.current) {
+          audioRef.current.currentTime = videoRef.current.currentTime;
+        }
+      });
+
       return () => {
         hls.destroy();
         hlsRef.current = null;
@@ -253,12 +263,13 @@ export function UshaVideoPlayer({
     }
   }, []);
 
-  const syncAudioWithVideo = useCallback(() => {
-    if (videoRef.current && audioRef.current) {
+  const syncAudioWithVideo = useCallback((force = false) => {
+    if (videoRef.current && audioRef.current && audioRef.current.src) {
       const timeDiff = Math.abs(
         videoRef.current.currentTime - audioRef.current.currentTime
       );
-      if (timeDiff > 0.1) {
+      // Force-sync on segment boundaries (zero tolerance) or when drift exceeds 0.05s
+      if (force || timeDiff > 0.05) {
         audioRef.current.currentTime = videoRef.current.currentTime;
       }
     }
@@ -292,13 +303,20 @@ export function UshaVideoPlayer({
     };
 
     const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => setIsBuffering(false);
+    const handlePlaying = () => {
+      setIsBuffering(false);
+      // Re-sync audio whenever the video resumes after a stall/buffer
+      syncAudioWithVideo(true);
+    };
+    // After any seek completes (user scrub, skip, or HLS internal seek), snap audio to video
+    const handleSeeked = () => syncAudioWithVideo(true);
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
+    video.addEventListener("seeked", handleSeeked);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -306,6 +324,7 @@ export function UshaVideoPlayer({
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("seeked", handleSeeked);
     };
   }, [duration, onProgress, onComplete, onPlayStateChange, syncAudioWithVideo]);
 
