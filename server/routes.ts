@@ -217,8 +217,8 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid URL" });
     }
 
-    // Only proxy from the configured R2 public domain for security
-    const allowedHosts = ["r2.dev", "cloudflarestorage.com"];
+    // Only proxy from configured video delivery domains for security
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
     const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });
@@ -270,7 +270,7 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid URL" });
     }
 
-    const allowedHosts = ["r2.dev", "cloudflarestorage.com"];
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
     const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });

@@ -54,5 +54,6 @@ The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, an
 - **OpenAI:** Powers the Usha AI Tutor (gpt-4.1-mini).
 - **Zoho TrainerCentral:** Integrated with GURU for course and student synchronization.
 - **hls.js:** Used for HLS adaptive bitrate streaming in the video player.
-- **Cloudflare R2:** Object storage for video and AI-generated assets.
+- **Cloudflare R2:** Object storage for video and AI-generated assets (upload target; credentials via `CLOUDFLARE_R2_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET_NAME`, `CLOUDFLARE_R2_PUBLIC_URL`).
+- **Bunny CDN:** CDN pull-zone for video delivery. Set `BUNNY_CDN_URL` to your Pull Zone hostname (e.g. `https://yourzone.b-cdn.net`). When set, all video delivery URLs use Bunny CDN instead of R2 directly; R2 remains the upload target. The video/HLS proxy allowlist includes `b-cdn.net` alongside R2 domains.
 - **Three.js / @react-three/fiber / @react-three/drei:** Libraries available for 3D rendering (currently used for CSS 3D ecosystem rotator).

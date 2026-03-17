@@ -15,7 +15,10 @@ const ACCOUNT_ID = process.env.CLOUDFLARE_R2_ACCOUNT_ID || "";
 const ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
 const SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
 const BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "";
-const PUBLIC_URL = (process.env.CLOUDFLARE_R2_PUBLIC_URL || "").replace(/\/$/, "");
+// BUNNY_CDN_URL takes priority over CLOUDFLARE_R2_PUBLIC_URL for video delivery.
+// Set it to your Bunny Pull Zone hostname (e.g. https://yourzone.b-cdn.net).
+// R2 credentials and upload API remain unchanged — only the public-facing URL changes.
+const PUBLIC_URL = (process.env.BUNNY_CDN_URL || process.env.CLOUDFLARE_R2_PUBLIC_URL || "").replace(/\/$/, "");
 
 function getS3Client(): S3Client {
   return new S3Client({
