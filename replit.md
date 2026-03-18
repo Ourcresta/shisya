@@ -44,6 +44,7 @@ The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, an
 - **Udyog AI Builder:** Simplifies internship creation with a feature/task/steps structure, leveraging `gpt-4.1` for generating detailed tasks, tools, processes, steps, checklists, and practice exercises, supporting various skill levels including "Mastery."
 - **Site Pages CMS:** Stores editable content for marketing pages (`ai-usha-mentor`, `become-guru`, `help-center`, `become-a-partner`) with public API access and GURU admin inline editor.
 - **Auth Ecosystem Rotator:** A CSS 3D rotating component on the login page showcasing "Our Shiksha," "Usha AI," and "Our Udyog" with animations and interactive elements.
+- **Usha AI 3-Layer Knowledge System:** Upgraded Usha AI pipeline: Layer 1 = Answer Book (curated Q&A DB lookup with token-overlap scoring), Layer 2 = RAG (lesson/lab content fetched from DB for context enrichment), Layer 3 = LLM call (Groq `llama-3.3-70b-versatile` primary → OpenAI `gpt-4o-mini` fallback). Answer Book entries return `type: "knowledge"` shown as amber "Knowledge" badge in chat. GURU admin can manage the Answer Book at `/guru/usha-knowledge` (CRUD with course-specific or global scope, tags for precision matching).
 
 ## External Dependencies
 - **AISiksha Admin Course Factory:** Primary backend for course and content data.
@@ -51,7 +52,8 @@ The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, an
 - **PostgreSQL:** Main database for application data and session storage.
 - **Drizzle ORM:** ORM for PostgreSQL interactions.
 - **html2canvas & jsPDF:** Client-side PDF certificate generation.
-- **OpenAI:** Powers the Usha AI Tutor (gpt-4.1-mini).
+- **OpenAI:** Powers the Usha AI Tutor (gpt-4o-mini) as fallback LLM.
+- **Groq:** Primary LLM for Usha AI Tutor (llama-3.3-70b-versatile via `groq-sdk`). Falls back to OpenAI if unavailable. Requires `GROQ_API_KEY` secret.
 - **Zoho TrainerCentral:** Integrated with GURU for course and student synchronization.
 - **hls.js:** Used for HLS adaptive bitrate streaming in the video player.
 - **Cloudflare R2:** Object storage for video and AI-generated assets (upload target; credentials via `CLOUDFLARE_R2_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET_NAME`, `CLOUDFLARE_R2_PUBLIC_URL`).
