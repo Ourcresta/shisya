@@ -486,6 +486,24 @@ export const shishyaMarksheetVerifications = pgTable("shishya_marksheet_verifica
   verifiedAt: timestamp("verified_at").defaultNow().notNull(),
 });
 
+// ============ USHA ANSWER BOOK TABLE ============
+
+// Answer Book - curated Q&A pairs for Layer 1 knowledge retrieval
+export const ushaAnswerBook = pgTable("usha_answer_book", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id"),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  tags: text("tags"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertUshaAnswerBookSchema = createInsertSchema(ushaAnswerBook).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertUshaAnswerBook = z.infer<typeof insertUshaAnswerBookSchema>;
+export type UshaAnswerBook = typeof ushaAnswerBook.$inferSelect;
+
 // ============ SHISHYA AI TUTOR TABLES ============
 
 // Shishya Usha conversations table
@@ -1446,7 +1464,7 @@ export interface AuthUser {
 }
 
 // Usha AI Tutor constants
-export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "clarification", "encouragement", "warning"] as const;
+export const USHA_RESPONSE_TYPES = ["explanation", "hint", "guidance", "clarification", "encouragement", "warning", "knowledge"] as const;
 export type UshaResponseType = typeof USHA_RESPONSE_TYPES[number];
 
 export const USHA_HELP_LEVELS = ["minimal", "moderate", "detailed"] as const;

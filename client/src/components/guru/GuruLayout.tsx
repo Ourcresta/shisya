@@ -13,6 +13,7 @@ import {
   CreditCard,
   Briefcase,
   FileText,
+  BookMarked,
 } from "lucide-react";
 import {
   Sidebar,
@@ -44,6 +45,7 @@ const menuItems = [
   { title: "Jobs", url: "/guru/jobs", icon: Briefcase },
   { title: "Pricing", url: "/guru/pricing", icon: CreditCard },
   { title: "Pages", url: "/guru/pages", icon: FileText },
+  { title: "Usha Knowledge", url: "/guru/usha-knowledge", icon: BookMarked },
   { title: "Settings", url: "/guru/settings", icon: Settings },
 ];
 

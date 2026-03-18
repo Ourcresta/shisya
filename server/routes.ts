@@ -7,7 +7,7 @@ import { guruAuthRouter } from "./guruAuth";
 import { oauthRouter } from "./oauth";
 import { udyogRouter } from "./udyogRoutes";
 import { seedGuruAdmin } from "./seedGuru";
-import { registerUshaRoutes } from "./usha";
+import { registerUshaRoutes, registerUshaAnswerBookRoutes } from "./usha";
 import { creditsRouter } from "./credits";
 import { razorpayRouter } from "./razorpayPayments";
 import { notificationsRouter } from "./notifications";
@@ -1230,6 +1230,7 @@ export async function registerRoutes(
 
   // ============ USHA AI TUTOR ROUTES ============
   registerUshaRoutes(app);
+  registerUshaAnswerBookRoutes(app);
 
   // ============ AI MOTIVATION ENGINE ROUTES ============
   registerMotivationRoutes(app);

@@ -1,9 +1,11 @@
 import type { Express, Response } from "express";
 import OpenAI from "openai";
+import Groq from "groq-sdk";
 import { db } from "./db";
 import { 
   ushaConversations, 
   ushaMessages, 
+  ushaAnswerBook,
   ushaRequestSchema, 
   type UshaResponse, 
   type UshaResponseType,
@@ -11,14 +13,20 @@ import {
   type UshaContext,
   type StudentProgressSummary,
   type UshaTurn,
-  type SupportedLanguage
+  type SupportedLanguage,
+  courses,
+  lessons,
+  labs,
 } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, isNull } from "drizzle-orm";
 import { requireAuth, type AuthenticatedRequest } from "./auth";
+import { requireGuruAuth, type GuruAuthenticatedRequest } from "./guruAuth";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS_PER_MINUTE = 10;
@@ -623,6 +631,211 @@ function getMisuseResponse(isRepeated: boolean, helpLevel: UshaHelpLevel): UshaA
   };
 }
 
+// ============ 3-LAYER KNOWLEDGE SYSTEM ============
+
+// Layer 1: Answer Book - exact/fuzzy match against curated Q&A pairs
+async function searchAnswerBook(question: string, courseId?: number): Promise<string | null> {
+  try {
+    const normalizedQ = question.toLowerCase().trim();
+    
+    // Pull candidates - global or course-specific
+    const candidates = await db
+      .select()
+      .from(ushaAnswerBook)
+      .where(
+        and(
+          eq(ushaAnswerBook.isActive, true),
+          courseId
+            ? or(isNull(ushaAnswerBook.courseId), eq(ushaAnswerBook.courseId, courseId))
+            : isNull(ushaAnswerBook.courseId)
+        )
+      );
+
+    if (candidates.length === 0) return null;
+
+    // Simple token overlap scoring
+    const questionTokens = new Set(normalizedQ.split(/\s+/).filter(t => t.length > 2));
+    let bestScore = 0;
+    let bestAnswer: string | null = null;
+
+    for (const entry of candidates) {
+      const entryQ = entry.question.toLowerCase();
+      const entryTokens = entryQ.split(/\s+/).filter(t => t.length > 2);
+      const matched = entryTokens.filter(t => questionTokens.has(t)).length;
+      const score = matched / Math.max(questionTokens.size, entryTokens.length, 1);
+
+      // Also check tag overlap
+      let tagBonus = 0;
+      if (entry.tags) {
+        const tags = entry.tags.split(",").map(t => t.trim().toLowerCase());
+        const tagMatched = tags.filter(tag => normalizedQ.includes(tag)).length;
+        tagBonus = tagMatched * 0.15;
+      }
+
+      const totalScore = score + tagBonus;
+      if (totalScore > bestScore && totalScore >= 0.45) {
+        bestScore = totalScore;
+        bestAnswer = entry.answer;
+      }
+    }
+
+    return bestAnswer;
+  } catch (err) {
+    console.error("[Usha Layer 1] Answer book error:", err);
+    return null;
+  }
+}
+
+// Layer 2: RAG - fetch relevant lesson/lab content from DB for context enrichment
+async function fetchRagContext(context: UshaContext): Promise<string | null> {
+  try {
+    const parts: string[] = [];
+
+    if (context.lessonId) {
+      const lesson = await db.query.lessons.findFirst({
+        where: eq(lessons.id, context.lessonId),
+      });
+      if (lesson?.content) {
+        parts.push(`LESSON CONTENT:\n${lesson.content.slice(0, 1200)}`);
+      }
+    }
+
+    if (context.labId) {
+      const lab = await db.query.labs.findFirst({
+        where: eq(labs.id, context.labId),
+      });
+      if (lab) {
+        if (lab.instructions) parts.push(`LAB INSTRUCTIONS:\n${lab.instructions.slice(0, 800)}`);
+        if (lab.starterCode) parts.push(`STARTER CODE:\n\`\`\`${lab.language}\n${lab.starterCode.slice(0, 600)}\n\`\`\``);
+        if (lab.expectedOutput) parts.push(`EXPECTED OUTPUT:\n${lab.expectedOutput.slice(0, 300)}`);
+      }
+    }
+
+    if (context.courseId && !context.lessonId && !context.labId) {
+      const course = await db.query.courses.findFirst({
+        where: eq(courses.id, context.courseId),
+      });
+      if (course?.description) {
+        parts.push(`COURSE OVERVIEW:\n${course.description.slice(0, 600)}`);
+      }
+    }
+
+    return parts.length > 0 ? `\n\n=== RETRIEVED KNOWLEDGE (RAG) ===\n${parts.join("\n\n")}\n=== END RAG ===` : null;
+  } catch (err) {
+    console.error("[Usha Layer 2] RAG error:", err);
+    return null;
+  }
+}
+
+// Layer 3: LLM call - try Groq first, fall back to OpenAI
+async function callLlm(
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>
+): Promise<string> {
+  if (groq) {
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages,
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+      return completion.choices[0]?.message?.content || "";
+    } catch (err: any) {
+      console.warn("[Usha Layer 3] Groq failed, falling back to OpenAI:", err?.message);
+    }
+  }
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages,
+    max_tokens: 500,
+    temperature: 0.7,
+  });
+  return completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
+}
+
+// ============ GURU ANSWER BOOK CRUD ROUTES ============
+
+export function registerUshaAnswerBookRoutes(app: Express): void {
+  // List answer book entries
+  app.get("/api/guru/usha/answer-book", requireGuruAuth, async (_req: GuruAuthenticatedRequest, res: Response) => {
+    try {
+      const entries = await db
+        .select()
+        .from(ushaAnswerBook)
+        .orderBy(desc(ushaAnswerBook.createdAt));
+      res.json(entries);
+    } catch (err) {
+      console.error("[GURU] Answer book list error:", err);
+      res.status(500).json({ error: "Failed to fetch answer book" });
+    }
+  });
+
+  // Create entry
+  app.post("/api/guru/usha/answer-book", requireGuruAuth, async (req: GuruAuthenticatedRequest, res: Response) => {
+    try {
+      const { question, answer, tags, courseId, isActive } = req.body;
+      if (!question?.trim() || !answer?.trim()) {
+        return res.status(400).json({ error: "Question and answer are required" });
+      }
+      const [entry] = await db
+        .insert(ushaAnswerBook)
+        .values({
+          question: question.trim(),
+          answer: answer.trim(),
+          tags: tags?.trim() || null,
+          courseId: courseId ? parseInt(courseId) : null,
+          isActive: isActive !== false,
+        })
+        .returning();
+      res.status(201).json(entry);
+    } catch (err) {
+      console.error("[GURU] Answer book create error:", err);
+      res.status(500).json({ error: "Failed to create entry" });
+    }
+  });
+
+  // Update entry
+  app.put("/api/guru/usha/answer-book/:id", requireGuruAuth, async (req: GuruAuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { question, answer, tags, courseId, isActive } = req.body;
+      if (!question?.trim() || !answer?.trim()) {
+        return res.status(400).json({ error: "Question and answer are required" });
+      }
+      const [updated] = await db
+        .update(ushaAnswerBook)
+        .set({
+          question: question.trim(),
+          answer: answer.trim(),
+          tags: tags?.trim() || null,
+          courseId: courseId ? parseInt(courseId) : null,
+          isActive: isActive !== false,
+          updatedAt: new Date(),
+        })
+        .where(eq(ushaAnswerBook.id, id))
+        .returning();
+      if (!updated) return res.status(404).json({ error: "Entry not found" });
+      res.json(updated);
+    } catch (err) {
+      console.error("[GURU] Answer book update error:", err);
+      res.status(500).json({ error: "Failed to update entry" });
+    }
+  });
+
+  // Delete entry
+  app.delete("/api/guru/usha/answer-book/:id", requireGuruAuth, async (req: GuruAuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db.delete(ushaAnswerBook).where(eq(ushaAnswerBook.id, id));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[GURU] Answer book delete error:", err);
+      res.status(500).json({ error: "Failed to delete entry" });
+    }
+  });
+}
+
 export function registerUshaRoutes(app: Express): void {
   app.post("/api/usha/ask", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -681,17 +894,31 @@ export function registerUshaRoutes(app: Express): void {
         return res.json(warningResponse);
       }
 
+      // === LAYER 1: Answer Book lookup ===
+      const answerBookHit = await searchAnswerBook(message, courseId || undefined);
+      if (answerBookHit) {
+        const knowledgeResponse = {
+          answer: answerBookHit,
+          type: "knowledge" as UshaResponseType,
+          helpLevel,
+        };
+        await saveConversation(userId, courseId || 0, pageType, message, knowledgeResponse);
+        const knowledgeWithMeta = {
+          ...knowledgeResponse,
+          remaining: rateCheck.remaining,
+          nearLimit: rateCheck.nearLimit,
+        };
+        return res.json(knowledgeWithMeta);
+      }
+
+      // === LAYER 2: RAG context enrichment ===
+      const ragContext = await fetchRagContext(ushaContext);
       const contextPrompt = buildContextPrompt(ushaContext, helpLevel, language, learningState);
-      const messages = buildConversationMessages(undefined, contextPrompt, message);
+      const enrichedContextPrompt = ragContext ? contextPrompt + ragContext : contextPrompt;
+      const messages = buildConversationMessages(undefined, enrichedContextPrompt, message);
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages,
-        max_tokens: 500,
-        temperature: 0.7,
-      });
-
-      const answer = completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
+      // === LAYER 3: LLM call (Groq primary → OpenAI fallback) ===
+      const answer = await callLlm(messages);
       const responseType = determineResponseType(message, answer);
 
       const response = {

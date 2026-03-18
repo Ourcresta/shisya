@@ -85,7 +85,7 @@ interface UshaChatPanelProps {
   onClose: () => void;
 }
 
-function getResponseTypeBadge(type: UshaResponseType): { label: string; variant: "default" | "secondary" | "outline" | "destructive" } {
+function getResponseTypeBadge(type: UshaResponseType): { label: string; variant: "default" | "secondary" | "outline" | "destructive"; className?: string } {
   switch (type) {
     case "explanation":
       return { label: "Explanation", variant: "secondary" };
@@ -95,6 +95,8 @@ function getResponseTypeBadge(type: UshaResponseType): { label: string; variant:
       return { label: "Guidance", variant: "secondary" };
     case "warning":
       return { label: "Notice", variant: "destructive" };
+    case "knowledge":
+      return { label: "Knowledge", variant: "default", className: "bg-amber-500/90 text-white border-0" };
     default:
       return { label: "Response", variant: "secondary" };
   }
@@ -395,7 +397,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
                       <div className="flex items-center gap-2 mb-1">
                         <Badge 
                           variant={getResponseTypeBadge(message.type).variant}
-                          className="text-xs"
+                          className={`text-xs ${getResponseTypeBadge(message.type).className || ""}`}
                           data-testid={`badge-response-type-${index}`}
                         >
                           {getResponseTypeBadge(message.type).label}
