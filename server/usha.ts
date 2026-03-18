@@ -1,7 +1,9 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 import Groq from "groq-sdk";
+import Anthropic from "@anthropic-ai/sdk";
 import { Readable } from "stream";
+import http from "http";
 import { db } from "./db";
 import { 
   ushaConversations, 
@@ -28,6 +30,9 @@ const openai = new OpenAI({
 });
 
 const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+
+const EDGE_TTS_URL = "http://127.0.0.1:8008/tts";
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS_PER_MINUTE = 10;
@@ -728,10 +733,11 @@ async function fetchRagContext(context: UshaContext): Promise<string | null> {
   }
 }
 
-// Layer 3: LLM call - try Groq first, fall back to OpenAI
+// Layer 3: LLM cascade — Groq → Claude Haiku → OpenAI
 async function callLlm(
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>
 ): Promise<string> {
+  // Tier 1: Groq (fastest — llama-3.1-8b-instant)
   if (groq) {
     try {
       const completion = await groq.chat.completions.create({
@@ -746,10 +752,44 @@ async function callLlm(
         return answer;
       }
     } catch (err: any) {
-      console.warn("[Usha Layer 3] Groq failed, falling back to OpenAI:", err?.message);
+      console.warn("[Usha Layer 3] Groq failed, trying Claude Haiku:", err?.message);
     }
   }
 
+  // Tier 2: Claude Haiku (quality mid-tier)
+  if (anthropic) {
+    try {
+      // Claude API uses a different message structure — extract system messages separately
+      const systemParts = messages.filter(m => m.role === "system").map(m => m.content);
+      const chatMessages = messages.filter(m => m.role !== "system") as Array<{
+        role: "user" | "assistant";
+        content: string;
+      }>;
+
+      const systemPrompt = systemParts.join("\n\n");
+
+      const claudeResp = await anthropic.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 500,
+        system: systemPrompt,
+        messages: chatMessages.length > 0 ? chatMessages : [{ role: "user", content: "Hello" }],
+      });
+
+      const answer = claudeResp.content
+        .filter(b => b.type === "text")
+        .map(b => (b as { type: "text"; text: string }).text)
+        .join("");
+
+      if (answer) {
+        console.log("[Usha Layer 3] Provider: Anthropic (claude-haiku-4-5)");
+        return answer;
+      }
+    } catch (err: any) {
+      console.warn("[Usha Layer 3] Claude Haiku failed, falling back to OpenAI:", err?.message);
+    }
+  }
+
+  // Tier 3: OpenAI (fallback — gpt-4o-mini)
   console.log("[Usha Layer 3] Provider: OpenAI (gpt-4o-mini)");
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -758,6 +798,51 @@ async function callLlm(
     temperature: 0.7,
   });
   return completion.choices[0]?.message?.content || "I apologize, but I could not generate a response. Please try rephrasing your question.";
+}
+
+// Proxy a TTS request to the Edge TTS Python sidecar (port 8008)
+async function callEdgeTts(text: string, voice: string): Promise<Buffer | null> {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({ text, voice });
+    const options = {
+      hostname: "127.0.0.1",
+      port: 8008,
+      path: "/tts",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+      },
+      timeout: 15000,
+    };
+
+    const req = http.request(options, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk: Buffer) => chunks.push(chunk));
+      res.on("end", () => {
+        if (res.statusCode === 200) {
+          resolve(Buffer.concat(chunks));
+        } else {
+          console.warn(`[Usha EdgeTTS] Sidecar returned ${res.statusCode}`);
+          resolve(null);
+        }
+      });
+    });
+
+    req.on("error", (err) => {
+      console.warn("[Usha EdgeTTS] Sidecar unreachable:", err.message);
+      resolve(null);
+    });
+
+    req.on("timeout", () => {
+      req.destroy();
+      console.warn("[Usha EdgeTTS] Sidecar timeout");
+      resolve(null);
+    });
+
+    req.write(body);
+    req.end();
+  });
 }
 
 // ============ GURU ANSWER BOOK CRUD ROUTES ============
@@ -1031,26 +1116,45 @@ export function registerUshaRoutes(app: Express): void {
     }
   });
 
-  // ============ TEXT-TO-SPEECH (OpenAI TTS) ============
-  // Returns audio/mpeg stream for the given text
-  // quality: "standard" (tts-1) | "hd" (tts-1-hd)
+  // ============ TEXT-TO-SPEECH ============
+  // engine: "openai" (default) | "coqui" (Edge TTS sidecar)
+  // voice: for openai = nova/alloy/echo/fable/onyx/shimmer; for coqui = usha/aria/jenny/sonia/neerja
+  // quality: "standard" | "hd" (openai only)
   app.post("/api/usha/tts", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { text, voice = "nova", quality = "standard" } = req.body as {
+      const { text, voice = "nova", quality = "standard", engine = "openai" } = req.body as {
         text: string;
         voice?: string;
         quality?: "standard" | "hd";
+        engine?: "openai" | "coqui";
       };
 
       if (!text || typeof text !== "string" || text.trim().length === 0) {
         return res.status(400).json({ error: "Text is required" });
       }
 
-      // Truncate to 4096 chars (OpenAI TTS limit)
       const safeText = text.slice(0, 4000);
-      const model = quality === "hd" ? "tts-1-hd" : "tts-1";
 
-      // Valid voices: alloy, echo, fable, onyx, nova, shimmer
+      // === Coqui / Edge TTS sidecar ===
+      if (engine === "coqui") {
+        const coquiVoice = voice || "usha";
+        console.log(`[Usha TTS] Edge/Coqui voice=${coquiVoice} chars=${safeText.length}`);
+        const audioBuffer = await callEdgeTts(safeText, coquiVoice);
+        if (audioBuffer && audioBuffer.length > 0) {
+          res.set({
+            "Content-Type": "audio/mpeg",
+            "Content-Length": audioBuffer.length.toString(),
+            "Cache-Control": "no-cache",
+            "X-TTS-Engine": "edge-tts",
+          });
+          return res.send(audioBuffer);
+        }
+        // Fallback to OpenAI if sidecar is down
+        console.warn("[Usha TTS] Edge TTS sidecar unavailable, falling back to OpenAI");
+      }
+
+      // === OpenAI TTS ===
+      const model = quality === "hd" ? "tts-1-hd" : "tts-1";
       const validVoices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"];
       const safeVoice = validVoices.includes(voice) ? voice : "nova";
 
@@ -1068,11 +1172,45 @@ export function registerUshaRoutes(app: Express): void {
         "Content-Type": "audio/mpeg",
         "Content-Length": audioBuffer.length.toString(),
         "Cache-Control": "no-cache",
+        "X-TTS-Engine": "openai",
       });
       res.send(audioBuffer);
     } catch (error: any) {
-      console.error("[Usha TTS] OpenAI error:", error?.message);
+      console.error("[Usha TTS] error:", error?.message);
       res.status(500).json({ error: "Text-to-speech failed. Please try again." });
+    }
+  });
+
+  // ============ TTS VOICE LIST (for Coqui/Edge TTS) ============
+  app.get("/api/usha/tts/voices", requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const result = await new Promise<Record<string, unknown> | null>((resolve) => {
+        const options = {
+          hostname: "127.0.0.1",
+          port: 8008,
+          path: "/voices",
+          method: "GET",
+          timeout: 5000,
+        };
+        const req = http.request(options, (r) => {
+          const chunks: Buffer[] = [];
+          r.on("data", (c: Buffer) => chunks.push(c));
+          r.on("end", () => {
+            try { resolve(JSON.parse(Buffer.concat(chunks).toString())); }
+            catch { resolve(null); }
+          });
+        });
+        req.on("error", () => resolve(null));
+        req.on("timeout", () => { req.destroy(); resolve(null); });
+        req.end();
+      });
+
+      if (result) {
+        return res.json({ ...result, sidecarStatus: "online" });
+      }
+      res.json({ sidecarStatus: "offline", voices: [] });
+    } catch (err) {
+      res.json({ sidecarStatus: "offline", voices: [] });
     }
   });
 }

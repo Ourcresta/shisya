@@ -101,8 +101,8 @@ function getBestVoice(): SpeechSynthesisVoice | null {
   return anyEn || voices[0] || null;
 }
 
-// TTS mode: "browser" = Web Speech API, "openai" = OpenAI TTS API (nova voice)
-type TtsMode = "browser" | "openai";
+// TTS mode: "browser" = Web Speech API, "openai" = OpenAI Nova TTS, "coqui" = Edge TTS sidecar (Indian voice)
+type TtsMode = "browser" | "openai" | "coqui";
 
 export function VideoUshaChat({
   courseId,
@@ -200,35 +200,29 @@ export function VideoUshaChat({
     isSpeakingRef.current = false;
   }, [hasSpeechSynthesis]);
 
-  // OpenAI TTS: POST text → receive audio blob → play
-  const speakWithOpenAI = useCallback(async (text: string, onDone?: () => void) => {
+  // Shared helper: POST to /api/usha/tts with given params and play the returned audio blob
+  const speakWithApi = useCallback(async (
+    text: string,
+    params: Record<string, string>,
+    onDone?: () => void
+  ) => {
     try {
       setIsSpeaking(true);
       isSpeakingRef.current = true;
       const safeText = stripHtml(text).slice(0, 1200);
-      const res = await apiRequest("POST", "/api/usha/tts", {
-        text: safeText,
-        voice: "nova",
-        quality: "standard",
-      });
+      const res = await apiRequest("POST", "/api/usha/tts", { text: safeText, ...params });
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       openAiAudioRef.current = audio;
-      audio.onended = () => {
+      const cleanup = () => {
         setIsSpeaking(false);
         isSpeakingRef.current = false;
         URL.revokeObjectURL(url);
         openAiAudioRef.current = null;
-        onDone?.();
       };
-      audio.onerror = () => {
-        setIsSpeaking(false);
-        isSpeakingRef.current = false;
-        URL.revokeObjectURL(url);
-        openAiAudioRef.current = null;
-        onDone?.();
-      };
+      audio.onended = () => { cleanup(); onDone?.(); };
+      audio.onerror = () => { cleanup(); onDone?.(); };
       await audio.play();
     } catch {
       setIsSpeaking(false);
@@ -236,6 +230,16 @@ export function VideoUshaChat({
       onDone?.();
     }
   }, []);
+
+  // OpenAI TTS (nova voice)
+  const speakWithOpenAI = useCallback((text: string, onDone?: () => void) => {
+    speakWithApi(text, { voice: "nova", quality: "standard", engine: "openai" }, onDone);
+  }, [speakWithApi]);
+
+  // Coqui / Edge TTS (Indian English — Usha voice)
+  const speakWithCoqui = useCallback((text: string, onDone?: () => void) => {
+    speakWithApi(text, { voice: "usha", engine: "coqui" }, onDone);
+  }, [speakWithApi]);
 
   // Browser TTS
   const speakWithBrowser = useCallback((text: string, onDone?: () => void) => {
@@ -262,14 +266,16 @@ export function VideoUshaChat({
     window.speechSynthesis.speak(utterance);
   }, [hasSpeechSynthesis]);
 
-  // Hybrid TTS: routes to openai or browser based on current mode
+  // Hybrid TTS: routes to openai, coqui, or browser based on current mode
   const speakText = useCallback((text: string, onDone?: () => void) => {
     if (ttsModeRef.current === "openai") {
       speakWithOpenAI(text, onDone);
+    } else if (ttsModeRef.current === "coqui") {
+      speakWithCoqui(text, onDone);
     } else {
       speakWithBrowser(text, onDone);
     }
-  }, [speakWithOpenAI, speakWithBrowser]);
+  }, [speakWithOpenAI, speakWithCoqui, speakWithBrowser]);
 
   // Whisper STT: record audio via MediaRecorder → POST to /api/usha/stt
   const startWhisperRecording = useCallback(async () => {
@@ -508,17 +514,32 @@ export function VideoUshaChat({
         <div className="vuc-header-info">
           <div className="vuc-header-name">Usha AI Tutor</div>
           <div className="vuc-header-status" style={{ color: isSpeaking ? "#22d3ee" : isListening ? "#4ade80" : undefined }}>
-            {isSpeaking ? `Speaking… (${ttsMode === "openai" ? "AI voice" : "browser"})` : isListening ? (isWhisperRecording ? "Recording for Whisper…" : "Listening…") : voiceMode ? "Voice Mode" : "Online"}
+            {isSpeaking
+            ? `Speaking… (${ttsMode === "openai" ? "OpenAI" : ttsMode === "coqui" ? "Coqui" : "browser"})`
+            : isListening
+            ? (isWhisperRecording ? "Recording for Whisper…" : "Listening…")
+            : voiceMode ? "Voice Mode" : "Online"
+          }
           </div>
         </div>
 
-        {/* TTS mode toggle button */}
+        {/* TTS mode toggle button — cycles: browser → openai → coqui → browser */}
         <button
           className="vuc-tts-btn"
-          onClick={() => setTtsMode((m) => m === "browser" ? "openai" : "browser")}
-          title={ttsMode === "browser" ? "Switch to AI voice (OpenAI Nova)" : "Switch to browser voice"}
+          onClick={() => setTtsMode((m) =>
+            m === "browser" ? "openai" : m === "openai" ? "coqui" : "browser"
+          )}
+          title={
+            ttsMode === "browser"
+              ? "Switch to OpenAI Nova voice"
+              : ttsMode === "openai"
+              ? "Switch to Coqui (Indian English) voice"
+              : "Switch to browser voice"
+          }
           data-testid="button-tts-mode"
-          style={{ color: ttsMode === "openai" ? "#22d3ee" : undefined }}
+          style={{
+            color: ttsMode === "openai" ? "#22d3ee" : ttsMode === "coqui" ? "#a78bfa" : undefined,
+          }}
         >
           <Sparkles className="w-3.5 h-3.5" />
         </button>
@@ -546,11 +567,20 @@ export function VideoUshaChat({
         </button>
       </div>
 
-      {/* TTS mode banner when OpenAI is active */}
-      {ttsMode === "openai" && (
-        <div className="px-3 py-1 text-xs text-cyan-400 bg-cyan-950/30 border-b border-cyan-500/10 flex items-center gap-1.5">
+      {/* TTS mode banner */}
+      {ttsMode !== "browser" && (
+        <div
+          className="px-3 py-1 text-xs border-b flex items-center gap-1.5"
+          style={
+            ttsMode === "coqui"
+              ? { color: "#a78bfa", background: "rgba(124,58,237,0.08)", borderColor: "rgba(167,139,250,0.15)" }
+              : { color: "#22d3ee", background: "rgba(6,182,212,0.08)", borderColor: "rgba(6,182,212,0.1)" }
+          }
+        >
           <Sparkles className="w-3 h-3" />
-          AI voice active — OpenAI Nova TTS
+          {ttsMode === "coqui"
+            ? "Coqui voice active — Indian English (Neerja)"
+            : "AI voice active — OpenAI Nova TTS"}
         </div>
       )}
 
