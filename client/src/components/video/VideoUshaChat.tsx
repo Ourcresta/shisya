@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Mic, MicOff, Volume2, VolumeX, Loader2, PhoneCall, PhoneOff } from "lucide-react";
+import { X, Send, Mic, MicOff, Volume2, VolumeX, Loader2, PhoneCall, PhoneOff, Sparkles } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
@@ -101,6 +101,9 @@ function getBestVoice(): SpeechSynthesisVoice | null {
   return anyEn || voices[0] || null;
 }
 
+// TTS mode: "browser" = Web Speech API, "openai" = OpenAI TTS API (nova voice)
+type TtsMode = "browser" | "openai";
+
 export function VideoUshaChat({
   courseId,
   lessonId,
@@ -118,26 +121,30 @@ export function VideoUshaChat({
   const [voiceMode, setVoiceMode] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [interimText, setInterimText] = useState("");
+  const [ttsMode, setTtsMode] = useState<TtsMode>("browser");
+  const [isWhisperRecording, setIsWhisperRecording] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const voiceModeRef = useRef(false);
   const isSpeakingRef = useRef(false);
+  const ttsModeRef = useRef<TtsMode>("browser");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const openAiAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const hasSpeechRecognition = typeof window !== "undefined" &&
     ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
   const hasSpeechSynthesis = typeof window !== "undefined" && "speechSynthesis" in window;
+  const hasMediaRecorder = typeof window !== "undefined" && "MediaRecorder" in window;
 
   const firstName = user?.name?.split(" ")[0] || "";
 
-  useEffect(() => {
-    voiceModeRef.current = voiceMode;
-  }, [voiceMode]);
-
-  useEffect(() => {
-    isSpeakingRef.current = isSpeaking;
-  }, [isSpeaking]);
+  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+  useEffect(() => { ttsModeRef.current = ttsMode; }, [ttsMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -170,23 +177,69 @@ export function VideoUshaChat({
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try { mediaRecorderRef.current.stop(); } catch {}
+    }
+    mediaRecorderRef.current = null;
+    audioChunksRef.current = [];
     setIsListening(false);
+    setIsWhisperRecording(false);
     setInterimText("");
   }, []);
 
   const stopSpeaking = useCallback(() => {
+    if (openAiAudioRef.current) {
+      openAiAudioRef.current.pause();
+      openAiAudioRef.current.src = "";
+      openAiAudioRef.current = null;
+    }
     if (hasSpeechSynthesis) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
     }
+    setIsSpeaking(false);
+    isSpeakingRef.current = false;
   }, [hasSpeechSynthesis]);
 
-  const speakText = useCallback((text: string, onDone?: () => void) => {
-    if (!hasSpeechSynthesis) {
+  // OpenAI TTS: POST text → receive audio blob → play
+  const speakWithOpenAI = useCallback(async (text: string, onDone?: () => void) => {
+    try {
+      setIsSpeaking(true);
+      isSpeakingRef.current = true;
+      const safeText = stripHtml(text).slice(0, 1200);
+      const res = await apiRequest("POST", "/api/usha/tts", {
+        text: safeText,
+        voice: "nova",
+        quality: "standard",
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      openAiAudioRef.current = audio;
+      audio.onended = () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        URL.revokeObjectURL(url);
+        openAiAudioRef.current = null;
+        onDone?.();
+      };
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        URL.revokeObjectURL(url);
+        openAiAudioRef.current = null;
+        onDone?.();
+      };
+      await audio.play();
+    } catch {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
       onDone?.();
-      return;
     }
+  }, []);
+
+  // Browser TTS
+  const speakWithBrowser = useCallback((text: string, onDone?: () => void) => {
+    if (!hasSpeechSynthesis) { onDone?.(); return; }
     window.speechSynthesis.cancel();
     const plainText = stripHtml(text).slice(0, 600);
     const utterance = new SpeechSynthesisUtterance(plainText);
@@ -204,20 +257,86 @@ export function VideoUshaChat({
     }
 
     utterance.onstart = () => { setIsSpeaking(true); isSpeakingRef.current = true; };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-      onDone?.();
-    };
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-      onDone?.();
-    };
+    utterance.onend = () => { setIsSpeaking(false); isSpeakingRef.current = false; onDone?.(); };
+    utterance.onerror = () => { setIsSpeaking(false); isSpeakingRef.current = false; onDone?.(); };
     window.speechSynthesis.speak(utterance);
   }, [hasSpeechSynthesis]);
 
-  const startListening = useCallback(() => {
+  // Hybrid TTS: routes to openai or browser based on current mode
+  const speakText = useCallback((text: string, onDone?: () => void) => {
+    if (ttsModeRef.current === "openai") {
+      speakWithOpenAI(text, onDone);
+    } else {
+      speakWithBrowser(text, onDone);
+    }
+  }, [speakWithOpenAI, speakWithBrowser]);
+
+  // Whisper STT: record audio via MediaRecorder → POST to /api/usha/stt
+  const startWhisperRecording = useCallback(async () => {
+    if (!hasMediaRecorder || isListening) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4"
+        : "audio/ogg";
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        audioChunksRef.current = [];
+        setIsWhisperRecording(false);
+        setIsListening(false);
+        setInterimText("Transcribing…");
+
+        try {
+          const res = await fetch("/api/usha/stt", {
+            method: "POST",
+            headers: { "Content-Type": mimeType },
+            body: audioBlob,
+            credentials: "include",
+          });
+          const data = await res.json();
+          const transcript = data.transcript?.trim() || "";
+          setInterimText("");
+          if (transcript) {
+            setInput(transcript);
+            if (voiceModeRef.current) {
+              sendMessageInternalRef.current?.(transcript);
+            }
+          } else {
+            setInterimText("");
+          }
+        } catch {
+          setInterimText("");
+        }
+      };
+
+      recorder.start();
+      setIsListening(true);
+      setIsWhisperRecording(true);
+    } catch {
+      setIsListening(false);
+    }
+  }, [hasMediaRecorder, isListening]);
+
+  const stopWhisperRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+  }, []);
+
+  // Browser STT (Web Speech API)
+  const startBrowserSTT = useCallback(() => {
     if (!hasSpeechRecognition || isListening) return;
     const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionClass();
@@ -238,7 +357,7 @@ export function VideoUshaChat({
         setIsListening(false);
         setInterimText("");
         if (voiceModeRef.current && transcript.trim()) {
-          sendMessageInternal(transcript.trim());
+          sendMessageInternalRef.current?.(transcript.trim());
         }
       }
     };
@@ -251,13 +370,26 @@ export function VideoUshaChat({
     setIsListening(true);
   }, [hasSpeechRecognition, isListening]);
 
+  // Hybrid STT: uses browser if available, else Whisper
+  const startListening = useCallback(() => {
+    if (hasSpeechRecognition) {
+      startBrowserSTT();
+    } else if (hasMediaRecorder) {
+      startWhisperRecording();
+    }
+  }, [hasSpeechRecognition, hasMediaRecorder, startBrowserSTT, startWhisperRecording]);
+
   const toggleListening = useCallback(() => {
     if (isListening) {
-      stopListening();
+      if (isWhisperRecording) stopWhisperRecording();
+      else stopListening();
     } else {
       startListening();
     }
-  }, [isListening, startListening, stopListening]);
+  }, [isListening, isWhisperRecording, stopWhisperRecording, stopListening, startListening]);
+
+  // sendMessageInternal needs a stable ref for use inside callbacks
+  const sendMessageInternalRef = useRef<((text: string) => void) | null>(null);
 
   const sendMessageInternal = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -303,7 +435,7 @@ export function VideoUshaChat({
       if (voiceModeRef.current) {
         speakText(aiContent, () => {
           if (voiceModeRef.current) {
-            setTimeout(() => startListening(), 600);
+            setTimeout(() => startListening(), 400);
           }
         });
       }
@@ -324,6 +456,11 @@ export function VideoUshaChat({
       setIsLoading(false);
     }
   }, [isLoading, courseId, lessonId, lessonTitle, courseTitle, objectives, user, speakText, startListening]);
+
+  // Keep ref in sync
+  useEffect(() => {
+    sendMessageInternalRef.current = sendMessageInternal;
+  }, [sendMessageInternal]);
 
   const sendMessage = useCallback((text: string) => {
     sendMessageInternal(text);
@@ -351,6 +488,8 @@ export function VideoUshaChat({
     setTimeout(() => inputRef.current?.focus(), 100);
   }, [stopListening, stopSpeaking]);
 
+  const canListen = hasSpeechRecognition || hasMediaRecorder;
+
   if (!isOpen) return null;
 
   return (
@@ -369,12 +508,23 @@ export function VideoUshaChat({
         <div className="vuc-header-info">
           <div className="vuc-header-name">Usha AI Tutor</div>
           <div className="vuc-header-status" style={{ color: isSpeaking ? "#22d3ee" : isListening ? "#4ade80" : undefined }}>
-            {isSpeaking ? "Speaking…" : isListening ? "Listening…" : voiceMode ? "Voice Mode" : "Online"}
+            {isSpeaking ? `Speaking… (${ttsMode === "openai" ? "AI voice" : "browser"})` : isListening ? (isWhisperRecording ? "Recording for Whisper…" : "Listening…") : voiceMode ? "Voice Mode" : "Online"}
           </div>
         </div>
 
+        {/* TTS mode toggle button */}
+        <button
+          className="vuc-tts-btn"
+          onClick={() => setTtsMode((m) => m === "browser" ? "openai" : "browser")}
+          title={ttsMode === "browser" ? "Switch to AI voice (OpenAI Nova)" : "Switch to browser voice"}
+          data-testid="button-tts-mode"
+          style={{ color: ttsMode === "openai" ? "#22d3ee" : undefined }}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+        </button>
+
         {/* Voice Mode toggle */}
-        {hasSpeechRecognition && (
+        {canListen && (
           <button
             className="vuc-tts-btn"
             onClick={voiceMode ? exitVoiceMode : enterVoiceMode}
@@ -387,7 +537,7 @@ export function VideoUshaChat({
         )}
 
         <button
-          className="vp-ctrl-btn"
+          className="vuc-tts-btn"
           onClick={() => { stopSpeaking(); stopListening(); onClose(); }}
           style={{ color: "hsl(var(--muted-foreground))", width: 28, height: 28 }}
           data-testid="button-close-chat"
@@ -395,6 +545,14 @@ export function VideoUshaChat({
           <X className="w-4 h-4" />
         </button>
       </div>
+
+      {/* TTS mode banner when OpenAI is active */}
+      {ttsMode === "openai" && (
+        <div className="px-3 py-1 text-xs text-cyan-400 bg-cyan-950/30 border-b border-cyan-500/10 flex items-center gap-1.5">
+          <Sparkles className="w-3 h-3" />
+          AI voice active — OpenAI Nova TTS
+        </div>
+      )}
 
       {/* Messages */}
       <div className="vuc-messages hide-scrollbar" data-testid="chat-messages">
@@ -484,11 +642,14 @@ export function VideoUshaChat({
             className={`vuc-voice-orb ${isListening ? "vuc-voice-orb-listening" : isSpeaking ? "vuc-voice-orb-speaking" : ""}`}
             onClick={() => {
               if (isSpeaking) { stopSpeaking(); setTimeout(() => startListening(), 200); }
-              else if (isListening) { stopListening(); }
+              else if (isListening) {
+                if (isWhisperRecording) stopWhisperRecording();
+                else stopListening();
+              }
               else { startListening(); }
             }}
             data-testid="button-voice-orb"
-            title={isListening ? "Tap to stop" : isSpeaking ? "Tap to interrupt" : "Tap to speak"}
+            title={isListening ? (isWhisperRecording ? "Tap to send recording" : "Tap to stop") : isSpeaking ? "Tap to interrupt" : "Tap to speak"}
           >
             {isLoading ? (
               <Loader2 className="w-8 h-8 animate-spin text-cyan-300" />
@@ -502,11 +663,19 @@ export function VideoUshaChat({
           </button>
 
           <p className="text-xs text-center text-muted-foreground min-h-[16px]">
-            {isLoading ? "Usha is thinking…" : isSpeaking ? "Usha is speaking — tap to interrupt" : isListening ? (interimText || "Listening… speak now") : "Tap the mic to speak"}
+            {isLoading ? "Usha is thinking…"
+              : isSpeaking ? "Usha is speaking — tap to interrupt"
+              : isListening ? (isWhisperRecording ? (interimText || "Recording… tap orb to send") : (interimText || "Listening… speak now"))
+              : "Tap the mic to speak"}
           </p>
 
-          {interimText && (
+          {interimText && interimText !== "Transcribing…" && (
             <p className="text-xs text-center text-cyan-300/80 italic max-w-[220px] line-clamp-2">"{interimText}"</p>
+          )}
+          {interimText === "Transcribing…" && (
+            <p className="text-xs text-center text-cyan-300/60 italic flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin" /> Transcribing with Whisper…
+            </p>
           )}
 
           <button
@@ -520,11 +689,11 @@ export function VideoUshaChat({
       ) : (
         /* Text Input */
         <div className="vuc-input-area">
-          {hasSpeechRecognition && (
+          {canListen && (
             <button
               className={`vuc-mic-btn ${isListening ? "vuc-mic-btn-active" : ""}`}
               onClick={toggleListening}
-              title={isListening ? "Stop listening" : "Speak your question"}
+              title={isListening ? (isWhisperRecording ? "Stop recording (send to Whisper)" : "Stop listening") : "Speak your question"}
               data-testid="button-mic"
             >
               {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -534,7 +703,15 @@ export function VideoUshaChat({
             ref={inputRef}
             type="text"
             className="vuc-input"
-            placeholder={isListening ? `Listening${interimText ? `: ${interimText}` : "…"}` : "Ask Usha anything…"}
+            placeholder={
+              isListening
+                ? isWhisperRecording
+                  ? "Recording… tap mic to send"
+                  : `Listening${interimText ? `: ${interimText}` : "…"}`
+                : interimText === "Transcribing…"
+                ? "Transcribing with Whisper…"
+                : "Ask Usha anything…"
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

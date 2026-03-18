@@ -1,6 +1,7 @@
-import type { Express, Response } from "express";
+import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 import Groq from "groq-sdk";
+import { Readable } from "stream";
 import { db } from "./db";
 import { 
   ushaConversations, 
@@ -981,6 +982,97 @@ export function registerUshaRoutes(app: Express): void {
     } catch (error) {
       console.error("Usha history error:", error);
       res.status(500).json({ error: "Failed to fetch conversation history" });
+    }
+  });
+
+  // ============ SPEECH-TO-TEXT (Whisper) ============
+  // Accepts raw audio blob in body with Content-Type audio/* or application/octet-stream
+  // Uses OpenAI Whisper API for transcription
+  app.post("/api/usha/stt", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk: Buffer) => chunks.push(chunk));
+      await new Promise<void>((resolve, reject) => {
+        req.on("end", resolve);
+        req.on("error", reject);
+      });
+
+      const audioBuffer = Buffer.concat(chunks);
+      if (audioBuffer.length === 0) {
+        return res.status(400).json({ error: "No audio data received" });
+      }
+
+      // Determine mime type from header, default to webm
+      const contentType = req.headers["content-type"] || "audio/webm";
+      const ext = contentType.includes("mp4") ? "mp4"
+        : contentType.includes("ogg") ? "ogg"
+        : contentType.includes("wav") ? "wav"
+        : contentType.includes("mp3") || contentType.includes("mpeg") ? "mp3"
+        : "webm";
+
+      // Build a File-like object for OpenAI SDK
+      const audioFile = new File([audioBuffer], `audio.${ext}`, { type: contentType });
+
+      console.log(`[Usha STT] Whisper transcribing ${(audioBuffer.length / 1024).toFixed(1)}KB ${ext} audio`);
+
+      const transcription = await openai.audio.transcriptions.create({
+        model: "whisper-1",
+        file: audioFile,
+        language: "en",
+      });
+
+      const transcript = transcription.text?.trim() || "";
+      console.log(`[Usha STT] Whisper transcript: "${transcript.slice(0, 80)}"`);
+
+      res.json({ transcript });
+    } catch (error: any) {
+      console.error("[Usha STT] Whisper error:", error?.message);
+      res.status(500).json({ error: "Speech recognition failed. Please try again." });
+    }
+  });
+
+  // ============ TEXT-TO-SPEECH (OpenAI TTS) ============
+  // Returns audio/mpeg stream for the given text
+  // quality: "standard" (tts-1) | "hd" (tts-1-hd)
+  app.post("/api/usha/tts", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { text, voice = "nova", quality = "standard" } = req.body as {
+        text: string;
+        voice?: string;
+        quality?: "standard" | "hd";
+      };
+
+      if (!text || typeof text !== "string" || text.trim().length === 0) {
+        return res.status(400).json({ error: "Text is required" });
+      }
+
+      // Truncate to 4096 chars (OpenAI TTS limit)
+      const safeText = text.slice(0, 4000);
+      const model = quality === "hd" ? "tts-1-hd" : "tts-1";
+
+      // Valid voices: alloy, echo, fable, onyx, nova, shimmer
+      const validVoices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"];
+      const safeVoice = validVoices.includes(voice) ? voice : "nova";
+
+      console.log(`[Usha TTS] OpenAI ${model} voice=${safeVoice} chars=${safeText.length}`);
+
+      const ttsResponse = await openai.audio.speech.create({
+        model,
+        voice: safeVoice as "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer",
+        input: safeText,
+        response_format: "mp3",
+      });
+
+      const audioBuffer = Buffer.from(await ttsResponse.arrayBuffer());
+      res.set({
+        "Content-Type": "audio/mpeg",
+        "Content-Length": audioBuffer.length.toString(),
+        "Cache-Control": "no-cache",
+      });
+      res.send(audioBuffer);
+    } catch (error: any) {
+      console.error("[Usha TTS] OpenAI error:", error?.message);
+      res.status(500).json({ error: "Text-to-speech failed. Please try again." });
     }
   });
 }
