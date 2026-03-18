@@ -411,7 +411,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
                     )}
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     {message.role === "assistant" && message.type === "knowledge" && (
-                      <p className="text-xs mt-1.5 font-medium text-amber-500 dark:text-amber-400" data-testid={`badge-knowledge-${index}`}>
+                      <p className="text-xs mt-1.5 font-medium text-cyan-600 dark:text-cyan-400" data-testid={`badge-knowledge-${index}`}>
                         ✦ From Usha's Knowledge
                       </p>
                     )}

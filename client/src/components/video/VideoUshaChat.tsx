@@ -438,7 +438,7 @@ export function VideoUshaChat({
                   )}
                 </div>
                 {msg.type === "knowledge" && (
-                  <p className="text-xs font-medium text-amber-400" data-testid={`badge-knowledge-${msg.id}`}>
+                  <p className="text-xs font-medium text-cyan-400" data-testid={`badge-knowledge-${msg.id}`}>
                     ✦ From Usha's Knowledge
                   </p>
                 )}
