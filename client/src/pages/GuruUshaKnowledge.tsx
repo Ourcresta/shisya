@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +22,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface AnswerBookEntry {
   id: number;
@@ -164,7 +172,7 @@ export default function GuruUshaKnowledge() {
             Usha Knowledge Base
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage curated Q&A pairs for Usha's Layer 1 knowledge retrieval (Answer Book).
+            Manage curated Q&amp;A pairs for Usha's Layer 1 knowledge retrieval (Answer Book).
             Entries here are matched first before any AI call is made.
           </p>
         </div>
@@ -185,9 +193,9 @@ export default function GuruUshaKnowledge() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+            <Skeleton key={i} className="h-12 w-full rounded-lg" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -200,67 +208,87 @@ export default function GuruUshaKnowledge() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((entry) => (
-            <Card key={entry.id} className={!entry.isActive ? "opacity-50" : ""} data-testid={`card-entry-${entry.id}`}>
-              <CardContent className="py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      {entry.courseId ? (
-                        <Badge variant="outline" className="text-xs flex items-center gap-1">
-                          <BookOpen className="w-3 h-3" />
-                          {courseMap.get(entry.courseId) || `Course #${entry.courseId}`}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                          <Globe className="w-3 h-3" />
-                          Global
-                        </Badge>
-                      )}
-                      {!entry.isActive && <Badge variant="destructive" className="text-xs">Inactive</Badge>}
-                      {entry.tags && entry.tags.split(",").map((tag) => (
+        <div className="rounded-lg border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[30%]">Question</TableHead>
+                <TableHead className="w-[35%]">Answer</TableHead>
+                <TableHead>Scope</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((entry) => (
+                <TableRow key={entry.id} data-testid={`row-entry-${entry.id}`} className={!entry.isActive ? "opacity-50" : ""}>
+                  <TableCell className="font-medium text-sm align-top py-3">
+                    <p className="line-clamp-2" data-testid={`text-question-${entry.id}`}>{entry.question}</p>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground align-top py-3">
+                    <p className="line-clamp-2" data-testid={`text-answer-${entry.id}`}>{entry.answer}</p>
+                  </TableCell>
+                  <TableCell className="align-top py-3">
+                    {entry.courseId ? (
+                      <Badge variant="outline" className="text-xs flex items-center gap-1 w-fit">
+                        <BookOpen className="w-3 h-3" />
+                        {courseMap.get(entry.courseId) || `#${entry.courseId}`}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs flex items-center gap-1 w-fit">
+                        <Globe className="w-3 h-3" />
+                        Global
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="align-top py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {entry.tags ? entry.tags.split(",").map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs text-amber-600 border-amber-300">
                           {tag.trim()}
                         </Badge>
-                      ))}
+                      )) : <span className="text-muted-foreground text-xs">—</span>}
                     </div>
-                    <p className="font-medium text-sm mb-1" data-testid={`text-question-${entry.id}`}>
-                      Q: {entry.question}
-                    </p>
-                    <p className="text-sm text-muted-foreground line-clamp-2" data-testid={`text-answer-${entry.id}`}>
-                      A: {entry.answer}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => openEdit(entry)}
-                      data-testid={`button-edit-${entry.id}`}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setDeleteId(entry.id)}
-                      className="text-destructive hover:text-destructive"
-                      data-testid={`button-delete-${entry.id}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </TableCell>
+                  <TableCell className="align-top py-3">
+                    {entry.isActive
+                      ? <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-0 text-xs">Active</Badge>
+                      : <Badge variant="destructive" className="text-xs">Inactive</Badge>
+                    }
+                  </TableCell>
+                  <TableCell className="text-right align-top py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => openEdit(entry)}
+                        data-testid={`button-edit-${entry.id}`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteId(entry.id)}
+                        data-testid={`button-delete-${entry.id}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setDialogOpen(false); setEditing(null); setForm(emptyEntry); } }}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Entry" : "Add Knowledge Entry"}</DialogTitle>
           </DialogHeader>
@@ -272,23 +300,28 @@ export default function GuruUshaKnowledge() {
                 placeholder="What is a variable in programming?"
                 value={form.question}
                 onChange={(e) => setForm((f) => ({ ...f, question: e.target.value }))}
-                className="min-h-16"
+                className="min-h-[60px] resize-y"
                 data-testid="input-entry-question"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="answer">Answer *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="answer">Answer * <span className="text-xs font-normal text-muted-foreground">(Markdown supported)</span></Label>
+              </div>
               <Textarea
                 id="answer"
-                placeholder="A variable is a named container for storing data values..."
+                placeholder={"A variable is a named container for storing data values.\n\nIn JavaScript you declare with:\n- `let` for block-scoped mutable variables\n- `const` for constants\n- `var` (legacy) for function-scoped variables\n\n**Example:** `let name = 'Usha';`"}
                 value={form.answer}
                 onChange={(e) => setForm((f) => ({ ...f, answer: e.target.value }))}
-                className="min-h-24"
+                className="min-h-[160px] resize-y font-mono text-sm leading-relaxed"
                 data-testid="input-entry-answer"
               />
+              <p className="text-xs text-muted-foreground">
+                Use **bold**, *italic*, `code`, and bullet lists for richer answers. These will render in the student chat.
+              </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Label htmlFor="tags">Tags <span className="text-xs font-normal text-muted-foreground">(comma-separated)</span></Label>
               <Input
                 id="tags"
                 placeholder="variable, javascript, programming basics"
@@ -296,31 +329,36 @@ export default function GuruUshaKnowledge() {
                 onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
                 data-testid="input-entry-tags"
               />
-              <p className="text-xs text-muted-foreground">Tags improve matching precision</p>
+              <p className="text-xs text-muted-foreground">Tags improve matching precision when students ask related questions.</p>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="course">Course (optional — leave blank for global)</Label>
-              <select
-                id="course"
-                value={form.courseId}
-                onChange={(e) => setForm((f) => ({ ...f, courseId: e.target.value }))}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
-                data-testid="select-entry-course"
-              >
-                <option value="">Global (all courses)</option>
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                id="isActive"
-                checked={form.isActive}
-                onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
-                data-testid="switch-entry-active"
-              />
-              <Label htmlFor="isActive">Active</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="course">Course <span className="text-xs font-normal text-muted-foreground">(leave blank for global)</span></Label>
+                <select
+                  id="course"
+                  value={form.courseId}
+                  onChange={(e) => setForm((f) => ({ ...f, courseId: e.target.value }))}
+                  className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                  data-testid="select-entry-course"
+                >
+                  <option value="">Global (all courses)</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>{c.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <div className="flex items-center gap-3 pt-2">
+                  <Switch
+                    id="isActive"
+                    checked={form.isActive}
+                    onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
+                    data-testid="switch-entry-active"
+                  />
+                  <Label htmlFor="isActive" className="font-normal">{form.isActive ? "Active" : "Inactive"}</Label>
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>

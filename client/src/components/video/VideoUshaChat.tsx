@@ -10,6 +10,7 @@ interface ChatMessage {
   role: "user" | "ai";
   content: string;
   timestamp: number;
+  type?: string;
 }
 
 interface VideoUshaChatProps {
@@ -295,6 +296,7 @@ export function VideoUshaChat({
         role: "ai",
         content: aiContent,
         timestamp: Date.now(),
+        type: data.type,
       };
       setMessages((prev) => [...prev, aiMsg]);
 
@@ -418,20 +420,27 @@ export function VideoUshaChat({
         {messages.map((msg) => (
           <div key={msg.id} className={`vuc-msg ${msg.role === "user" ? "vuc-msg-user" : "vuc-msg-ai"}`}>
             {msg.role === "ai" ? (
-              <div className="flex items-start gap-1">
-                <div
-                  className="prose prose-sm dark:prose-invert flex-1"
-                  dangerouslySetInnerHTML={{ __html: simpleMarkdown(msg.content) }}
-                />
-                {hasSpeechSynthesis && (
-                  <button
-                    className="vuc-tts-btn flex-shrink-0 mt-0.5"
-                    onClick={() => speakText(msg.content)}
-                    title="Read aloud"
-                    data-testid={`button-speak-${msg.id}`}
-                  >
-                    <Volume2 className="w-3.5 h-3.5" />
-                  </button>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-start gap-1">
+                  <div
+                    className="prose prose-sm dark:prose-invert flex-1"
+                    dangerouslySetInnerHTML={{ __html: simpleMarkdown(msg.content) }}
+                  />
+                  {hasSpeechSynthesis && (
+                    <button
+                      className="vuc-tts-btn flex-shrink-0 mt-0.5"
+                      onClick={() => speakText(msg.content)}
+                      title="Read aloud"
+                      data-testid={`button-speak-${msg.id}`}
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                {msg.type === "knowledge" && (
+                  <p className="text-xs font-medium text-amber-400" data-testid={`badge-knowledge-${msg.id}`}>
+                    ✦ From Usha's Knowledge
+                  </p>
                 )}
               </div>
             ) : (

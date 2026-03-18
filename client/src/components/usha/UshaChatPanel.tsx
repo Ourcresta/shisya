@@ -393,7 +393,7 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
                     }`}
                     data-testid={`message-${message.role}-${index}`}
                   >
-                    {message.role === "assistant" && message.type && (
+                    {message.role === "assistant" && message.type && message.type !== "knowledge" && (
                       <div className="flex items-center gap-2 mb-1">
                         <Badge 
                           variant={getResponseTypeBadge(message.type).variant}
@@ -410,6 +410,11 @@ export function UshaChatPanel({ context, onClose }: UshaChatPanelProps) {
                       </div>
                     )}
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "assistant" && message.type === "knowledge" && (
+                      <p className="text-xs mt-1.5 font-medium text-amber-500 dark:text-amber-400" data-testid={`badge-knowledge-${index}`}>
+                        ✦ From Usha's Knowledge
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

@@ -734,17 +734,22 @@ async function callLlm(
   if (groq) {
     try {
       const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages,
         max_tokens: 500,
         temperature: 0.7,
       });
-      return completion.choices[0]?.message?.content || "";
+      const answer = completion.choices[0]?.message?.content || "";
+      if (answer) {
+        console.log("[Usha Layer 3] Provider: Groq (llama-3.1-8b-instant)");
+        return answer;
+      }
     } catch (err: any) {
       console.warn("[Usha Layer 3] Groq failed, falling back to OpenAI:", err?.message);
     }
   }
 
+  console.log("[Usha Layer 3] Provider: OpenAI (gpt-4o-mini)");
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages,
