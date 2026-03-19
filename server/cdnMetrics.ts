@@ -110,7 +110,7 @@ export async function setCdnMode(mode: "cloudflare" | "bunny", reason?: string):
       .onConflictDoUpdate({
         target: platformConfig.key,
         set: {
-          value: sql`CONCAT(${logEntry}, E'\n', LEFT(${platformConfig.value}, 2000))`,
+          value: sql`CONCAT(${logEntry}::text, E'\n'::text, LEFT(${platformConfig.value}::text, 2000))`,
           updatedAt: now,
         },
       });
