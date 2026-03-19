@@ -119,6 +119,9 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const [activeTab, setActiveTab] = useState("basic");
   const [hlsJobId, setHlsJobId] = useState<string | null>(null);
   const [hlsConverting, setHlsConverting] = useState(false);
+  const [abrJobId, setAbrJobId] = useState<string | null>(null);
+  const [abrConverting, setAbrConverting] = useState(false);
+  const [abrProgress, setAbrProgress] = useState("");
   const [convertingAudio, setConvertingAudio] = useState(false);
 
   const videoUpload = useR2Upload("videos");
@@ -164,6 +167,9 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     setActiveTab("basic");
     setHlsJobId(null);
     setHlsConverting(false);
+    setAbrJobId(null);
+    setAbrConverting(false);
+    setAbrProgress("");
     setConvertingAudio(false);
   }, [open, editingLesson, defaultOrderIndex]);
 
@@ -189,6 +195,37 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     }, 3000);
     return () => clearInterval(poll);
   }, [hlsJobId, toast]);
+
+  // ── ABR polling ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!abrJobId) return;
+    const poll = setInterval(async () => {
+      try {
+        const res = await apiRequest("GET", `/api/guru/r2/abr-status/${abrJobId}`);
+        const job = await res.json();
+        if (job.progress) setAbrProgress(job.progress);
+        if (job.status === "done" && job.hlsUrl) {
+          setForm((f) => ({ ...f, hlsUrl: job.hlsUrl, hlsStatus: "ready" }));
+          setAbrConverting(false);
+          setAbrJobId(null);
+          setAbrProgress("");
+          const renditions = job.renditions?.join(", ") || "";
+          toast({
+            title: "ABR encoding complete!",
+            description: `Multi-bitrate stream ready: ${renditions}. hls.js will now auto-select quality based on the viewer's connection.`,
+          });
+          clearInterval(poll);
+        } else if (job.status === "failed") {
+          setAbrConverting(false);
+          setAbrJobId(null);
+          setAbrProgress("");
+          toast({ title: "ABR encoding failed", description: job.error || "Please try again.", variant: "destructive" });
+          clearInterval(poll);
+        }
+      } catch { clearInterval(poll); }
+    }, 4000);
+    return () => clearInterval(poll);
+  }, [abrJobId, toast]);
 
   const createMutation = useMutation({
     mutationFn: async (data: LessonFull) => {
@@ -248,6 +285,25 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     } catch (err: any) {
       setHlsConverting(false);
       toast({ title: "Conversion failed", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleConvertAbr = async () => {
+    if (!form.videoUrl) return;
+    setAbrConverting(true);
+    setAbrProgress("Starting ABR encoding job…");
+    try {
+      const res = await apiRequest("POST", "/api/guru/r2/convert-hls-abr", { videoUrl: form.videoUrl });
+      const { jobId } = await res.json();
+      setAbrJobId(jobId);
+      toast({
+        title: "ABR encoding started",
+        description: "Encoding 360p → 480p → 720p → 1080p in one pass. This takes 3–8 min. The HLS URL will auto-update.",
+      });
+    } catch (err: any) {
+      setAbrConverting(false);
+      setAbrProgress("");
+      toast({ title: "ABR encoding failed to start", description: err.message, variant: "destructive" });
     }
   };
 
@@ -487,26 +543,45 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       </div>
                     )}
                     {!form.hlsUrl && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-xs text-muted-foreground">
-                          Convert your MP4 to HLS for adaptive bitrate streaming, better buffering, and quality switching.
+                          Choose a conversion mode. <strong>ABR (Recommended)</strong> creates a full quality ladder so hls.js automatically picks the best quality for each viewer's connection. Standard HLS is a single-quality stream-copy.
                         </p>
-                        <Button type="button" size="sm" onClick={handleConvertHls}
-                          disabled={hlsConverting || !form.videoUrl} className="gap-2" data-testid="button-convert-hls">
-                          {hlsConverting
-                            ? <><Loader2 className="w-4 h-4 animate-spin" />Converting…</>
-                            : <><Zap className="w-4 h-4" />Convert to HLS</>}
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button type="button" size="sm" onClick={handleConvertAbr}
+                            disabled={abrConverting || hlsConverting || !form.videoUrl}
+                            className="gap-2 bg-violet-600 hover:bg-violet-700 text-white" data-testid="button-convert-abr">
+                            {abrConverting
+                              ? <><Loader2 className="w-4 h-4 animate-spin" />Encoding…</>
+                              : <><Zap className="w-4 h-4" />Convert ABR (360p–1080p)</>}
+                          </Button>
+                          <Button type="button" size="sm" variant="outline" onClick={handleConvertHls}
+                            disabled={hlsConverting || abrConverting || !form.videoUrl} className="gap-2" data-testid="button-convert-hls">
+                            {hlsConverting
+                              ? <><Loader2 className="w-4 h-4 animate-spin" />Converting…</>
+                              : <><Video className="w-4 h-4" />Standard HLS</>}
+                          </Button>
+                        </div>
+                        {abrConverting && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-violet-600 dark:text-violet-400 font-medium">
+                              {abrProgress || "Encoding…"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Single-pass multi-bitrate encode — 3–8 minutes. The HLS URL will auto-populate when done.
+                            </p>
+                          </div>
+                        )}
                         {hlsConverting && (
                           <p className="text-xs text-amber-600 dark:text-amber-400">
-                            Downloading, converting, and uploading segments — this takes 1–3 minutes.
+                            Stream-copy conversion in progress — 1–3 minutes.
                           </p>
                         )}
                       </div>
                     )}
                     {form.hlsUrl && (
                       <Button type="button" variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, hlsUrl: "", hlsStatus: "pending" }))} className="text-xs">
-                        Re-convert
+                        Re-encode
                       </Button>
                     )}
                   </div>

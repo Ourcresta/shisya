@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { videoMetrics, videoViewerDays, platformConfig } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
+import * as crypto from "crypto";
 
 // ── CDN Configuration ─────────────────────────────────────────────────────────
 // Two-phase CDN delivery:
@@ -151,4 +152,63 @@ export function startCdnEvaluator(): void {
   evaluateCdnThresholds();
   setInterval(evaluateCdnThresholds, 60 * 60 * 1000);
   console.log("[CDN] Hourly threshold evaluator started (Cloudflare → Bunny auto-switch)");
+}
+
+// ── Bunny CDN Token Authentication ────────────────────────────────────────────
+// The "CDN rule": all protected content must be accessed via time-limited
+// signed tokens so URLs cannot be hotlinked, shared, or scraped.
+//
+// Bunny CDN signing algorithm (SHA-256 / Base64Url):
+//   hash_input  = TOKEN_AUTH_KEY + "/" + path + expiry_unix_seconds
+//   token       = base64url(sha256_binary(hash_input))
+//   signed_url  = https://zone.b-cdn.net/path?token=TOKEN&expires=EXPIRY
+//
+// The signed URL is generated per-request by the server proxy at request time,
+// so tokens are always fresh and clients never see raw unsigned CDN URLs.
+
+const BUNNY_TOKEN_AUTH_KEY = process.env.BUNNY_TOKEN_AUTH_KEY || "";
+
+function isBunnyUrl(rawUrl: string): boolean {
+  try {
+    const { hostname } = new URL(rawUrl);
+    return hostname.endsWith(".b-cdn.net");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Signs a Bunny CDN URL with a time-limited token.
+ * Returns the original URL unchanged if BUNNY_TOKEN_AUTH_KEY is not set or
+ * the URL is not a Bunny CDN URL.
+ *
+ * @param rawUrl       Full Bunny CDN URL (e.g. https://zone.b-cdn.net/video/seg000.ts)
+ * @param expiresInSec Token TTL in seconds. Default 3600 (1 hour).
+ */
+export function signBunnyUrl(rawUrl: string, expiresInSec = 3600): string {
+  if (!BUNNY_TOKEN_AUTH_KEY || !isBunnyUrl(rawUrl)) return rawUrl;
+
+  try {
+    const parsed = new URL(rawUrl);
+    // Bunny hashes only the path, not the query string
+    const urlPath = parsed.pathname;
+    const expiry = Math.floor(Date.now() / 1000) + expiresInSec;
+
+    // hash_input = key + path + expiry  (Bunny's documented algorithm)
+    const hashInput = BUNNY_TOKEN_AUTH_KEY + urlPath + expiry;
+    const hashBinary = crypto.createHash("sha256").update(hashInput).digest();
+    const token = hashBinary
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+
+    // Preserve any existing query params, then append token + expires
+    const signed = new URL(rawUrl);
+    signed.searchParams.set("token", token);
+    signed.searchParams.set("expires", String(expiry));
+    return signed.toString();
+  } catch {
+    return rawUrl;
+  }
 }

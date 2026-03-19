@@ -92,7 +92,7 @@ function isHlsUrl(url: string): boolean {
 }
 
 // Hostnames that must be proxied through the server to avoid CORS restrictions.
-const PROXIED_HOSTS = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
+const PROXIED_HOSTS = ["r2.dev", "cloudflarestorage.com", "b-cdn.net", "backblazeb2.com"];
 
 function needsProxy(url: string): boolean {
   try {

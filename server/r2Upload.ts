@@ -86,6 +86,26 @@ async function uploadFileToStorage(localPath: string, objectKey: string, content
 // ── HLS conversion jobs ─────────────────────────────────────────────────────
 const hlsJobs = new Map<string, { status: string; hlsUrl?: string; error?: string; progress?: string }>();
 
+// ── ABR quality ladder ────────────────────────────────────────────────────────
+// Industry-standard Netflix-inspired 4-rung ladder.
+// videoBitrate in kbps, audioBitrate in kbps.
+// BANDWIDTH in master.m3u8 = video + audio + ~5% overhead.
+const ABR_LADDER = [
+  { name: "360p",  height: 360,  videoBitrate: 800,  audioBitrate: 96,  bandwidth: 942000,  codecs: "avc1.4d401e,mp4a.40.2" },
+  { name: "480p",  height: 480,  videoBitrate: 1400, audioBitrate: 128, bandwidth: 1606000, codecs: "avc1.4d401f,mp4a.40.2" },
+  { name: "720p",  height: 720,  videoBitrate: 2800, audioBitrate: 128, bandwidth: 3072000, codecs: "avc1.640020,mp4a.40.2" },
+  { name: "1080p", height: 1080, videoBitrate: 5000, audioBitrate: 192, bandwidth: 5448000, codecs: "avc1.640028,mp4a.40.2" },
+] as const;
+
+// ── ABR jobs ──────────────────────────────────────────────────────────────────
+const abrJobs = new Map<string, {
+  status: string;
+  hlsUrl?: string;
+  error?: string;
+  progress?: string;
+  renditions?: string[];
+}>();
+
 // ── AI processing jobs ──────────────────────────────────────────────────────
 const aiJobs = new Map<string, {
   status: string;
@@ -295,6 +315,157 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
 
 r2Router.get("/hls-status/:jobId", requireGuruAuth, (req: Request, res: Response) => {
   const job = hlsJobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ error: "Job not found" });
+  res.json(job);
+});
+
+// ── Multi-Bitrate HLS (ABR) Conversion ───────────────────────────────────────
+// POST /api/guru/r2/convert-hls-abr
+// Encodes a source video into a 4-rung quality ladder (360p/480p/720p/1080p)
+// using a single ffmpeg pass with filter_complex. Produces a proper HLS master
+// playlist with BANDWIDTH + RESOLUTION + CODECS so hls.js can do true ABR.
+r2Router.post("/convert-hls-abr", requireGuruAuth, async (req: Request, res: Response) => {
+  if (!isStorageConfigured()) {
+    return res.status(503).json({ error: "Storage is not configured." });
+  }
+  const { videoUrl } = req.body;
+  if (!videoUrl) return res.status(400).json({ error: "videoUrl is required." });
+
+  const jobId = `abr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  abrJobs.set(jobId, { status: "processing", progress: "Queued..." });
+  res.json({ jobId });
+
+  (async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "abr-"));
+    try {
+      // ── 1. Download source video ─────────────────────────────────────────
+      abrJobs.set(jobId, { status: "processing", progress: "Downloading source video..." });
+      const inputPath = path.join(tmpDir, "input.mp4");
+      const videoRes = await fetch(videoUrl);
+      if (!videoRes.ok) throw new Error(`Download failed: ${videoRes.status}`);
+      fs.writeFileSync(inputPath, Buffer.from(await videoRes.arrayBuffer()));
+
+      // ── 2. Probe source resolution with ffprobe ───────────────────────────
+      abrJobs.set(jobId, { status: "processing", progress: "Detecting source resolution..." });
+      let sourceHeight = 1080;
+      let sourceWidth = 1920;
+      try {
+        const probe = await execFileAsync("ffprobe", [
+          "-v", "error",
+          "-select_streams", "v:0",
+          "-show_entries", "stream=width,height",
+          "-of", "json",
+          inputPath,
+        ]);
+        const probeData = JSON.parse(probe.stdout);
+        const stream = probeData?.streams?.[0];
+        if (stream?.height) { sourceHeight = stream.height; sourceWidth = stream.width; }
+      } catch { /* use defaults */ }
+
+      // ── 3. Filter ladder — never upscale beyond source ────────────────────
+      const activeRungs = [...ABR_LADDER].filter((r) => r.height <= sourceHeight);
+      // Always include the lowest rung for very poor connections
+      if (activeRungs.length === 0) activeRungs.push(ABR_LADDER[0]);
+
+      // ── 4. Build filter_complex graph ─────────────────────────────────────
+      // Splits the video once and scales to each target height independently.
+      const n = activeRungs.length;
+      const splitOutputs = activeRungs.map((_, i) => `[v${i}]`).join("");
+      const filterGraph =
+        `[0:v]split=${n}${splitOutputs};` +
+        activeRungs.map((r, i) => `[v${i}]scale=-2:${r.height}[s${i}]`).join(";");
+
+      // ── 5. Build ffmpeg args (one decode pass, n encode passes) ───────────
+      // Create output sub-dirs for each rung
+      for (const r of activeRungs) {
+        fs.mkdirSync(path.join(tmpDir, r.name), { recursive: true });
+      }
+
+      const ffmpegArgs: string[] = [
+        "-i", inputPath,
+        "-filter_complex", filterGraph,
+      ];
+
+      activeRungs.forEach((r, i) => {
+        ffmpegArgs.push(
+          "-map", `[s${i}]`,
+          "-map", "0:a?",
+          `-c:v:${i}`, "libx264",
+          `-preset:v:${i}`, "fast",
+          `-crf:v:${i}`, "23",
+          `-maxrate:v:${i}`, `${Math.round(r.videoBitrate * 1.07)}k`,
+          `-bufsize:v:${i}`, `${r.videoBitrate * 2}k`,
+          `-g:v:${i}`, "48",
+          `-keyint_min:v:${i}`, "48",
+          `-sc_threshold:v:${i}`, "0",
+          `-c:a:${i}`, "aac",
+          `-b:a:${i}`, `${r.audioBitrate}k`,
+          `-ar:a:${i}`, "48000",
+          `-hls_time:v:${i}`, "6",
+          `-hls_playlist_type:v:${i}`, "vod",
+          `-hls_list_size:v:${i}`, "0",
+          `-hls_segment_filename:v:${i}`, path.join(tmpDir, r.name, "seg%03d.ts"),
+          path.join(tmpDir, r.name, "playlist.m3u8"),
+        );
+      });
+
+      abrJobs.set(jobId, {
+        status: "processing",
+        progress: `Encoding ${activeRungs.map((r) => r.name).join(", ")} in one pass…`,
+      });
+      await execFileAsync("ffmpeg", ffmpegArgs);
+
+      // ── 6. Upload all rendition segments + playlists to storage ──────────
+      const timestamp = Date.now();
+      const prefix = `hls-abr/${timestamp}`;
+
+      abrJobs.set(jobId, { status: "processing", progress: "Uploading segments to storage..." });
+      for (const r of activeRungs) {
+        const rungDir = path.join(tmpDir, r.name);
+        const files = fs.readdirSync(rungDir);
+        for (const file of files) {
+          const ext = path.extname(file);
+          const contentType = ext === ".m3u8" ? "application/vnd.apple.mpegurl" : "video/mp2t";
+          await uploadFileToStorage(
+            path.join(rungDir, file),
+            `${prefix}/${r.name}/${file}`,
+            contentType,
+          );
+        }
+      }
+
+      // ── 7. Build and upload HLS master playlist ───────────────────────────
+      // The master playlist lists each variant stream with BANDWIDTH, RESOLUTION,
+      // and CODECS. hls.js reads this and picks the right rung dynamically.
+      const masterLines = ["#EXTM3U", "#EXT-X-VERSION:3", ""];
+      for (const r of activeRungs) {
+        // Calculate actual width from source aspect ratio
+        const aspectW = Math.round((sourceWidth / sourceHeight) * r.height);
+        const evenW = aspectW % 2 === 0 ? aspectW : aspectW + 1;
+        masterLines.push(
+          `#EXT-X-STREAM-INF:BANDWIDTH=${r.bandwidth},RESOLUTION=${evenW}x${r.height},CODECS="${r.codecs}",NAME="${r.name}"`,
+          `${r.name}/playlist.m3u8`,
+          "",
+        );
+      }
+      const masterM3u8Path = path.join(tmpDir, "master.m3u8");
+      fs.writeFileSync(masterM3u8Path, masterLines.join("\n"));
+      const masterUrl = await uploadFileToStorage(masterM3u8Path, `${prefix}/master.m3u8`, "application/vnd.apple.mpegurl");
+
+      const renditionNames = activeRungs.map((r) => r.name);
+      abrJobs.set(jobId, { status: "done", hlsUrl: masterUrl, renditions: renditionNames, progress: "Complete" });
+      console.log(`[ABR] Encoding complete: ${masterUrl} (renditions: ${renditionNames.join(", ")})`);
+    } catch (err: any) {
+      console.error("[ABR] Encoding error:", err);
+      abrJobs.set(jobId, { status: "failed", error: err.message, progress: "Failed" });
+    } finally {
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    }
+  })();
+});
+
+r2Router.get("/abr-status/:jobId", requireGuruAuth, (req: Request, res: Response) => {
+  const job = abrJobs.get(req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found" });
   res.json(job);
 });

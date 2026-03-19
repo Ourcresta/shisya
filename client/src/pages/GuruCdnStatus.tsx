@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Cloud, Zap, Users, AlertTriangle, CheckCircle2, RefreshCw, Settings2 } from "lucide-react";
+import { Cloud, Zap, Users, AlertTriangle, CheckCircle2, RefreshCw, Settings2, ShieldCheck, ShieldAlert } from "lucide-react";
 
 interface CdnStatusData {
   mode: "cloudflare" | "bunny";
@@ -26,6 +26,7 @@ interface CdnStatusData {
   switchLog: string;
   b2CloudflareUrl: string | null;
   bunnyCdnUrl: string | null;
+  tokenAuthConfigured: boolean;
 }
 
 export default function GuruCdnStatus() {
@@ -69,6 +70,7 @@ export default function GuruCdnStatus() {
   const isCloudflare = data?.mode === "cloudflare";
   const cloudflareConfigured = !!data?.b2CloudflareUrl;
   const bunnyConfigured = !!data?.bunnyCdnUrl;
+  const tokenAuthConfigured = !!data?.tokenAuthConfigured;
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -126,6 +128,12 @@ export default function GuruCdnStatus() {
             <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-md border ${bunnyConfigured ? "border-green-200 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400" : "border-muted text-muted-foreground"}`}>
               {bunnyConfigured ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
               BUNNY_CDN_URL {bunnyConfigured ? "configured" : "not set"}
+            </div>
+            <div className={`col-span-2 flex items-center gap-2 text-xs px-3 py-2 rounded-md border ${tokenAuthConfigured ? "border-green-200 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400" : "border-amber-200 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400"}`}>
+              {tokenAuthConfigured ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+              <span>
+                Token Auth (BUNNY_TOKEN_AUTH_KEY): <strong>{tokenAuthConfigured ? "active — all Bunny URLs are signed with 1-hour expiry" : "not set — set this key in Replit Secrets to prevent hotlinking"}</strong>
+              </span>
             </div>
           </div>
         </CardContent>

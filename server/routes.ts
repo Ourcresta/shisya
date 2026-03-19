@@ -14,7 +14,7 @@ import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { guruRouter } from "./guruRoutes";
 import { r2Router } from "./r2Upload";
-import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetrics, getCdnMode, setCdnMode, getCdnSwitchLog, getActiveCdnBaseUrl } from "./cdnMetrics";
+import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetrics, getCdnMode, setCdnMode, getCdnSwitchLog, getActiveCdnBaseUrl, signBunnyUrl } from "./cdnMetrics";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
@@ -258,6 +258,7 @@ export async function registerRoutes(
         switchLog: log,
         b2CloudflareUrl: process.env.B2_CLOUDFLARE_URL || null,
         bunnyCdnUrl: process.env.BUNNY_CDN_URL || null,
+        tokenAuthConfigured: !!process.env.BUNNY_TOKEN_AUTH_KEY,
       });
     } catch (err: any) {
       console.error("[CDN] Status error:", err);
@@ -307,7 +308,10 @@ export async function registerRoutes(
       const range = req.headers["range"];
       if (range) headers["Range"] = range;
 
-      const upstream = await fetch(rawUrl, { headers });
+      // Sign the URL if it's a Bunny CDN URL and token auth is configured.
+      // This is the CDN rule: signed, time-limited tokens on ALL Bunny requests.
+      const fetchUrl = signBunnyUrl(rawUrl);
+      const upstream = await fetch(fetchUrl, { headers });
 
       res.status(upstream.status);
       const passHeaders = [
@@ -355,7 +359,9 @@ export async function registerRoutes(
     }
 
     try {
-      const upstream = await fetch(rawUrl, {
+      // Sign the manifest URL if it's a Bunny CDN URL (CDN rule: time-limited tokens).
+      const fetchUrl = signBunnyUrl(rawUrl);
+      const upstream = await fetch(fetchUrl, {
         headers: { "User-Agent": "OurShiksha/1.0" },
       });
       if (!upstream.ok) {
