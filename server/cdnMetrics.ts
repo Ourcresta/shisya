@@ -58,9 +58,15 @@ export async function recordPlayStart(userId: string): Promise<void> {
 export async function recordBufferingEvent(): Promise<void> {
   const today = todayString();
   await ensureTodayMetricsRow();
+  // Increment both bufferingEvents and playSessions per task spec:
+  // each buffering occurrence is also counted as a play attempt, which
+  // affects the buffering-rate threshold calculation for CDN auto-switch.
   await db
     .update(videoMetrics)
-    .set({ bufferingEvents: sql`${videoMetrics.bufferingEvents} + 1` })
+    .set({
+      bufferingEvents: sql`${videoMetrics.bufferingEvents} + 1`,
+      playSessions: sql`${videoMetrics.playSessions} + 1`,
+    })
     .where(eq(videoMetrics.date, today));
 }
 

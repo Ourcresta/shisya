@@ -38,15 +38,28 @@ function getActiveBucketName(): string {
   return isB2Configured() ? B2_BUCKET_NAME : R2_BUCKET_NAME;
 }
 
-// The public CDN base URL for new uploads.
-// Priority: B2_CLOUDFLARE_URL (Phase 1, free) → BUNNY_CDN_URL (Phase 2, scale)
-//           → CLOUDFLARE_R2_PUBLIC_URL (legacy R2 fallback)
-const PUBLIC_URL = (
-  process.env.B2_CLOUDFLARE_URL ||
-  process.env.BUNNY_CDN_URL ||
-  process.env.CLOUDFLARE_R2_PUBLIC_URL ||
-  ""
-).replace(/\/$/, "");
+// ── DB-driven active CDN base URL ────────────────────────────────────────────
+// Called async at upload time so that a GURU manual override (cloudflare ↔ bunny)
+// is immediately reflected in all newly generated public URLs — no server restart
+// and no stored-URL backfill needed.
+async function getActivePublicBaseUrl(): Promise<string> {
+  try {
+    // Lazy import avoids circular-dependency risk; cdnMetrics → db only, safe.
+    const { getCdnMode } = await import("./cdnMetrics");
+    const mode = await getCdnMode();
+    if (mode === "bunny" && process.env.BUNNY_CDN_URL) {
+      return process.env.BUNNY_CDN_URL.replace(/\/$/, "");
+    }
+  } catch {
+    // If DB is unavailable, fall through to env-var priority order
+  }
+  return (
+    process.env.B2_CLOUDFLARE_URL ||
+    process.env.BUNNY_CDN_URL ||
+    process.env.CLOUDFLARE_R2_PUBLIC_URL ||
+    ""
+  ).replace(/\/$/, "");
+}
 
 function getStorageClient(): S3Client {
   if (isB2Configured()) {
@@ -80,7 +93,8 @@ async function uploadFileToStorage(localPath: string, objectKey: string, content
     Body: fileBuffer,
     ContentType: contentType,
   }));
-  return `${PUBLIC_URL}/${objectKey}`;
+  const baseUrl = await getActivePublicBaseUrl();
+  return `${baseUrl}/${objectKey}`;
 }
 
 // ── HLS conversion jobs ─────────────────────────────────────────────────────
@@ -244,7 +258,8 @@ r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) =
       signedUrlOptions.unhoistableHeaders = new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]);
     }
     const uploadUrl = await getSignedUrl(client, command, signedUrlOptions);
-    const publicUrl = `${PUBLIC_URL}/${objectKey}`;
+    const baseUrl = await getActivePublicBaseUrl();
+    const publicUrl = `${baseUrl}/${objectKey}`;
     return res.json({ uploadUrl, publicUrl, objectKey });
   } catch (err: any) {
     console.error("B2 presign error:", err);
@@ -301,7 +316,8 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
         await uploadFileToStorage(localFile, `${hlsPrefix}/${file}`, contentType);
       }
 
-      const hlsPublicUrl = `${PUBLIC_URL}/${hlsPrefix}/playlist.m3u8`;
+      const hlsBaseUrl = await getActivePublicBaseUrl();
+      const hlsPublicUrl = `${hlsBaseUrl}/${hlsPrefix}/playlist.m3u8`;
       hlsJobs.set(jobId, { status: "done", hlsUrl: hlsPublicUrl });
       console.log(`[HLS] Conversion complete: ${hlsPublicUrl}`);
     } catch (err: any) {
