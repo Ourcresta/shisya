@@ -155,6 +155,8 @@ export function UshaVideoPlayer({
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const hasReportedPlayRef = useRef(false);
+  const lastBufferReportRef = useRef(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -222,6 +224,13 @@ export function UshaVideoPlayer({
       });
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (!data.fatal && data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          const now = Date.now();
+          if (now - lastBufferReportRef.current > 30000) {
+            lastBufferReportRef.current = now;
+            fetch("/api/metrics/buffering", { method: "POST" }).catch(() => {});
+          }
+        }
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -309,8 +318,11 @@ export function UshaVideoPlayer({
     const handleWaiting = () => setIsBuffering(true);
     const handlePlaying = () => {
       setIsBuffering(false);
-      // Re-sync audio whenever the video resumes after a stall/buffer
       syncAudioWithVideo(true);
+      if (!hasReportedPlayRef.current) {
+        hasReportedPlayRef.current = true;
+        fetch("/api/metrics/play-start", { method: "POST" }).catch(() => {});
+      }
     };
     // After any seek completes (user scrub, skip, or HLS internal seek), snap audio to video
     const handleSeeked = () => syncAudioWithVideo(true);

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, serial, boolean, timestamp, varchar, integer, real, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, varchar, integer, real, jsonb, date, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
@@ -1668,3 +1668,35 @@ export type CourseGroup = typeof courseGroups.$inferSelect;
 export const insertCourseGroupItemSchema = createInsertSchema(courseGroupItems).omit({ id: true });
 export type InsertCourseGroupItem = z.infer<typeof insertCourseGroupItemSchema>;
 export type CourseGroupItem = typeof courseGroupItems.$inferSelect;
+
+// ============ VIDEO METRICS & CDN CONFIG TABLES ============
+
+// Daily aggregated video metrics — one row per calendar date
+export const videoMetrics = pgTable("video_metrics", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  uniqueViewers: integer("unique_viewers").notNull().default(0),
+  playSessions: integer("play_sessions").notNull().default(0),
+  bufferingEvents: integer("buffering_events").notNull().default(0),
+});
+
+// Per-user per-day play tracking — ensures unique viewer count is de-duplicated
+export const videoViewerDays = pgTable("video_viewer_days", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  viewDate: date("view_date").notNull(),
+}, (t) => ({
+  uniq: unique("video_viewer_days_user_date_uniq").on(t.userId, t.viewDate),
+}));
+
+// Platform-wide key-value configuration store (cdn_mode, etc.)
+export const platformConfig = pgTable("platform_config", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type VideoMetrics = typeof videoMetrics.$inferSelect;
+export type VideoViewerDay = typeof videoViewerDays.$inferSelect;
+export type PlatformConfig = typeof platformConfig.$inferSelect;

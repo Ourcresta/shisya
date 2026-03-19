@@ -14,6 +14,7 @@ import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { guruRouter } from "./guruRoutes";
 import { r2Router } from "./r2Upload";
+import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetrics, getCdnMode, setCdnMode, getCdnSwitchLog, getActiveCdnBaseUrl } from "./cdnMetrics";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
@@ -200,8 +201,85 @@ export async function registerRoutes(
     }
   });
   
-  // Cloudflare R2 video upload (must be before broad /api/guru mount)
+  // B2 Storage video upload (must be before broad /api/guru mount)
   app.use("/api/guru/r2", r2Router);
+
+  // ── Video Metrics endpoints ─────────────────────────────────────────────────
+  // POST /api/metrics/play-start — called by video player on first play
+  app.post("/api/metrics/play-start", async (req: any, res: any) => {
+    try {
+      // Extract userId from session cookie (same mechanism as requireAuth)
+      let userId = "anonymous";
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        try {
+          const { db: db2 } = await import("./db");
+          const { shishyaSessions } = await import("@shared/schema");
+          const { eq: eq2 } = await import("drizzle-orm");
+          const sessions = await db2.select().from(shishyaSessions).where(eq2(shishyaSessions.id, sessionId)).limit(1);
+          if (sessions.length > 0 && new Date(sessions[0].expiresAt) > new Date()) {
+            userId = sessions[0].userId;
+          }
+        } catch {}
+      }
+      await recordPlayStart(userId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[Metrics] play-start error:", err);
+      res.json({ ok: false });
+    }
+  });
+
+  // POST /api/metrics/buffering — called by video player on HLS network stall
+  app.post("/api/metrics/buffering", async (_req: any, res: any) => {
+    try {
+      await recordBufferingEvent();
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[Metrics] buffering error:", err);
+      res.json({ ok: false });
+    }
+  });
+
+  // ── GURU CDN Status API ─────────────────────────────────────────────────────
+  app.get("/api/guru/cdn-status", async (_req: any, res: any) => {
+    try {
+      const [metrics, mode, log] = await Promise.all([
+        getTodayMetrics(),
+        getCdnMode(),
+        getCdnSwitchLog(),
+      ]);
+      const activeUrl = getActiveCdnBaseUrl(mode);
+      res.json({
+        mode,
+        activeUrl,
+        metrics,
+        thresholds: { viewers: 100, bufferingPct: 5 },
+        switchLog: log,
+        b2CloudflareUrl: process.env.B2_CLOUDFLARE_URL || null,
+        bunnyCdnUrl: process.env.BUNNY_CDN_URL || null,
+      });
+    } catch (err: any) {
+      console.error("[CDN] Status error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/guru/cdn-override", async (req: any, res: any) => {
+    const { mode } = req.body;
+    if (mode !== "cloudflare" && mode !== "bunny") {
+      return res.status(400).json({ error: "mode must be 'cloudflare' or 'bunny'" });
+    }
+    try {
+      await setCdnMode(mode, "Manual override via GURU admin");
+      res.json({ ok: true, mode });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Start hourly CDN threshold evaluator (auto Cloudflare → Bunny switch)
+  startCdnEvaluator();
 
   // Video proxy — streams R2 (or any allowed) video through the server to avoid
   // browser CORS restrictions. Supports HTTP Range requests for scrubbing.
@@ -218,7 +296,7 @@ export async function registerRoutes(
     }
 
     // Only proxy from configured video delivery domains for security
-    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net", "backblazeb2.com"];
     const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });
@@ -270,7 +348,7 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid URL" });
     }
 
-    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net"];
+    const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net", "backblazeb2.com"];
     const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });

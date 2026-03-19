@@ -11,37 +11,71 @@ import * as os from "os";
 
 const execFileAsync = promisify(execFile);
 
-const ACCOUNT_ID = process.env.CLOUDFLARE_R2_ACCOUNT_ID || "";
-const ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
-const SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
-const BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "";
-// BUNNY_CDN_URL takes priority over CLOUDFLARE_R2_PUBLIC_URL for video delivery.
-// Set it to your Bunny Pull Zone hostname (e.g. https://yourzone.b-cdn.net).
-// R2 credentials and upload API remain unchanged — only the public-facing URL changes.
-const PUBLIC_URL = (process.env.BUNNY_CDN_URL || process.env.CLOUDFLARE_R2_PUBLIC_URL || "").replace(/\/$/, "");
+// ── Storage backend: Backblaze B2 (primary) or Cloudflare R2 (fallback) ──────
+const B2_KEY_ID = process.env.B2_KEY_ID || "";
+const B2_APPLICATION_KEY = process.env.B2_APPLICATION_KEY || "";
+const B2_BUCKET_NAME = process.env.B2_BUCKET_NAME || "";
+const B2_ENDPOINT = process.env.B2_ENDPOINT || "";
 
-function getS3Client(): S3Client {
+const R2_ACCOUNT_ID = process.env.CLOUDFLARE_R2_ACCOUNT_ID || "";
+const R2_ACCESS_KEY_ID = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "";
+const R2_SECRET_ACCESS_KEY = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "";
+const R2_BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || "";
+
+function isB2Configured(): boolean {
+  return !!(B2_KEY_ID && B2_APPLICATION_KEY && B2_BUCKET_NAME && B2_ENDPOINT);
+}
+
+function isR2Configured(): boolean {
+  return !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME);
+}
+
+function isStorageConfigured(): boolean {
+  return isB2Configured() || isR2Configured();
+}
+
+function getActiveBucketName(): string {
+  return isB2Configured() ? B2_BUCKET_NAME : R2_BUCKET_NAME;
+}
+
+// The public CDN base URL for new uploads.
+// Priority: B2_CLOUDFLARE_URL (Phase 1, free) → BUNNY_CDN_URL (Phase 2, scale)
+//           → CLOUDFLARE_R2_PUBLIC_URL (legacy R2 fallback)
+const PUBLIC_URL = (
+  process.env.B2_CLOUDFLARE_URL ||
+  process.env.BUNNY_CDN_URL ||
+  process.env.CLOUDFLARE_R2_PUBLIC_URL ||
+  ""
+).replace(/\/$/, "");
+
+function getStorageClient(): S3Client {
+  if (isB2Configured()) {
+    return new S3Client({
+      region: "auto",
+      endpoint: B2_ENDPOINT,
+      credentials: {
+        accessKeyId: B2_KEY_ID,
+        secretAccessKey: B2_APPLICATION_KEY,
+      },
+    });
+  }
   return new S3Client({
     region: "auto",
-    endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: ACCESS_KEY_ID,
-      secretAccessKey: SECRET_ACCESS_KEY,
+      accessKeyId: R2_ACCESS_KEY_ID,
+      secretAccessKey: R2_SECRET_ACCESS_KEY,
     },
     requestChecksumCalculation: "when_required",
     responseChecksumValidation: "when_required",
   });
 }
 
-function isR2Configured(): boolean {
-  return !!(ACCOUNT_ID && ACCESS_KEY_ID && SECRET_ACCESS_KEY && BUCKET_NAME && PUBLIC_URL);
-}
-
-async function uploadFileToR2(localPath: string, objectKey: string, contentType: string): Promise<string> {
-  const client = getS3Client();
+async function uploadFileToStorage(localPath: string, objectKey: string, contentType: string): Promise<string> {
+  const client = getStorageClient();
   const fileBuffer = fs.readFileSync(localPath);
   await client.send(new PutObjectCommand({
-    Bucket: BUCKET_NAME,
+    Bucket: getActiveBucketName(),
     Key: objectKey,
     Body: fileBuffer,
     ContentType: contentType,
@@ -153,8 +187,8 @@ export const r2Router = Router();
 
 // Presigned URL for direct browser upload
 r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) => {
-  if (!isR2Configured()) {
-    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  if (!isStorageConfigured()) {
+    return res.status(503).json({ error: "B2 Storage is not configured." });
   }
   const { fileName, fileType, folder = "videos" } = req.body;
   if (!fileName || !fileType) {
@@ -179,28 +213,29 @@ r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) =
   const objectKey = `${folder}/${timestamp}-${safeName}`;
 
   try {
-    const client = getS3Client();
+    const client = getStorageClient();
     const command = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
+      Bucket: getActiveBucketName(),
       Key: objectKey,
       ContentType: fileType,
     });
-    const uploadUrl = await getSignedUrl(client, command, {
-      expiresIn: 900,
-      unhoistableHeaders: new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]),
-    });
+    const signedUrlOptions: Parameters<typeof getSignedUrl>[2] = { expiresIn: 900 };
+    if (!isB2Configured()) {
+      signedUrlOptions.unhoistableHeaders = new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]);
+    }
+    const uploadUrl = await getSignedUrl(client, command, signedUrlOptions);
     const publicUrl = `${PUBLIC_URL}/${objectKey}`;
     return res.json({ uploadUrl, publicUrl, objectKey });
   } catch (err: any) {
-    console.error("R2 presign error:", err);
+    console.error("B2 presign error:", err);
     return res.status(500).json({ error: "Failed to generate upload URL." });
   }
 });
 
 // HLS conversion (single-quality, stream-copy)
 r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Response) => {
-  if (!isR2Configured()) {
-    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  if (!isStorageConfigured()) {
+    return res.status(503).json({ error: "B2 Storage is not configured." });
   }
   const { videoUrl } = req.body;
   if (!videoUrl) return res.status(400).json({ error: "videoUrl is required." });
@@ -217,7 +252,7 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
     const hlsPrefix = `hls/${timestamp}`;
 
     try {
-      hlsJobs.set(jobId, { status: "processing", progress: "Downloading video from R2..." });
+      hlsJobs.set(jobId, { status: "processing", progress: "Downloading video from B2..." });
       const response = await fetch(videoUrl);
       if (!response.ok) throw new Error(`Download failed: ${response.status}`);
       const buffer = Buffer.from(await response.arrayBuffer());
@@ -235,7 +270,7 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
         outputM3u8,
       ]);
 
-      hlsJobs.set(jobId, { status: "processing", progress: "Uploading HLS segments to R2..." });
+      hlsJobs.set(jobId, { status: "processing", progress: "Uploading HLS segments to B2..." });
       const files = fs.readdirSync(tmpDir).filter((f) => f !== "input.mp4");
       for (const file of files) {
         const localFile = path.join(tmpDir, file);
@@ -243,7 +278,7 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
         const isTs = file.endsWith(".ts");
         if (!isM3u8 && !isTs) continue;
         const contentType = isM3u8 ? "application/vnd.apple.mpegurl" : "video/mp2t";
-        await uploadFileToR2(localFile, `${hlsPrefix}/${file}`, contentType);
+        await uploadFileToStorage(localFile, `${hlsPrefix}/${file}`, contentType);
       }
 
       const hlsPublicUrl = `${PUBLIC_URL}/${hlsPrefix}/playlist.m3u8`;
@@ -268,8 +303,8 @@ r2Router.get("/hls-status/:jobId", requireGuruAuth, (req: Request, res: Response
 // POST /api/guru/r2/ai-process
 // Generates: transcript → WebVTT subtitles → translations → AI dubbed audio
 r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response) => {
-  if (!isR2Configured()) {
-    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  if (!isStorageConfigured()) {
+    return res.status(503).json({ error: "B2 Storage is not configured." });
   }
   if (!process.env.OPENAI_API_KEY) {
     return res.status(503).json({ error: "OpenAI API key is not configured." });
@@ -291,7 +326,7 @@ r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response
       const prefix = `ai/${timestamp}`;
 
       // Step 1 — Download video & extract audio
-      aiJobs.set(jobId, { status: "processing", progress: "Downloading video from R2..." });
+      aiJobs.set(jobId, { status: "processing", progress: "Downloading video from B2..." });
       const inputPath = path.join(tmpDir, "input.mp4");
       const audioPath = path.join(tmpDir, "audio.mp3");
 
@@ -336,7 +371,7 @@ r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response
       aiJobs.set(jobId, { status: "processing", progress: "Generating English subtitles (WebVTT)..." });
       const enVttPath = path.join(tmpDir, "sub_en.vtt");
       fs.writeFileSync(enVttPath, segmentsToVtt(segments));
-      const enVttUrl = await uploadFileToR2(enVttPath, `${prefix}/sub_en.vtt`, "text/vtt");
+      const enVttUrl = await uploadFileToStorage(enVttPath, `${prefix}/sub_en.vtt`, "text/vtt");
       result.subtitleTracks.push({ languageCode: "en", languageName: "English", subtitleUrl: enVttUrl });
 
       // Step 4 — Translate to each target language → generate per-language WebVTT
@@ -346,7 +381,7 @@ r2Router.post("/ai-process", requireGuruAuth, async (req: Request, res: Response
         const translatedSegs = await translateSegments(openai, segments, lang, langName);
         const vttPath = path.join(tmpDir, `sub_${lang}.vtt`);
         fs.writeFileSync(vttPath, segmentsToVtt(translatedSegs));
-        const vttUrl = await uploadFileToR2(vttPath, `${prefix}/sub_${lang}.vtt`, "text/vtt");
+        const vttUrl = await uploadFileToStorage(vttPath, `${prefix}/sub_${lang}.vtt`, "text/vtt");
         result.subtitleTracks.push({ languageCode: lang, languageName: langName, subtitleUrl: vttUrl });
       }
 
@@ -369,10 +404,10 @@ r2Router.get("/ai-status/:jobId", requireGuruAuth, (req: Request, res: Response)
 
 // ── WAV / Audio → MP3 server-side conversion ─────────────────────────────────
 // Accepts a URL to any uploaded audio file (WAV, FLAC, M4A, etc.),
-// converts it to 128k stereo MP3 via FFmpeg, stores on R2, returns mp3Url.
+// converts it to 128k stereo MP3 via FFmpeg, stores on B2, returns mp3Url.
 r2Router.post("/convert-audio", requireGuruAuth, async (req: Request, res: Response) => {
-  if (!isR2Configured()) {
-    return res.status(503).json({ error: "Cloudflare R2 is not configured." });
+  if (!isStorageConfigured()) {
+    return res.status(503).json({ error: "B2 Storage is not configured." });
   }
   const { audioUrl } = req.body;
   if (!audioUrl) return res.status(400).json({ error: "audioUrl is required." });
@@ -393,11 +428,11 @@ r2Router.post("/convert-audio", requireGuruAuth, async (req: Request, res: Respo
     // Convert to MP3 (128kbps, 44.1kHz stereo)
     await convertAudioToMp3(inputPath, outputPath);
 
-    // Upload converted MP3 to R2 under the audio/ prefix
+    // Upload converted MP3 to B2 under the audio/ prefix
     const timestamp = Date.now();
     const baseName = path.basename(urlPath).replace(/\.[^.]+$/, "");
     const mp3Key = `audio/${timestamp}-${baseName}.mp3`;
-    const mp3Url = await uploadFileToR2(outputPath, mp3Key, "audio/mpeg");
+    const mp3Url = await uploadFileToStorage(outputPath, mp3Key, "audio/mpeg");
 
     console.log(`[AudioConvert] ${ext} → MP3: ${mp3Url}`);
     return res.json({ mp3Url });

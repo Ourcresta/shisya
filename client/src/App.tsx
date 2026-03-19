@@ -73,6 +73,7 @@ import HelpCenter from "@/pages/HelpCenter";
 import BecomeAPartner from "@/pages/BecomeAPartner";
 import GuruPages from "@/pages/GuruPages";
 import GuruUshaKnowledge from "@/pages/GuruUshaKnowledge";
+import GuruCdnStatus from "@/pages/GuruCdnStatus";
 
 function ProtectedDashboard() {
   return <ProtectedRoute><Dashboard /></ProtectedRoute>;
@@ -250,6 +251,7 @@ function Router() {
       <Route path="/guru/jobs" component={() => <GuruPage component={GuruJobs} />} />
       <Route path="/guru/pages" component={() => <GuruPage component={GuruPages} />} />
       <Route path="/guru/usha-knowledge" component={() => <GuruPage component={GuruUshaKnowledge} />} />
+      <Route path="/guru/cdn-status" component={() => <GuruPage component={GuruCdnStatus} />} />
       <Route path="/guru/settings" component={() => <GuruPage component={GuruSettings} />} />
       
       {/* Shishya Portal - Login Required */}
