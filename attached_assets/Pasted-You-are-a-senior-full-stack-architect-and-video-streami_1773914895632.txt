@@ -1,0 +1,120 @@
+You are a senior full-stack architect and video streaming engineer.
+
+I am building a scalable, low-cost video learning platform (like Netflix / Udemy) with 3,000 videos (30 mins each, 720p). I want an optimized architecture using Backblaze B2 + Bunny CDN + HLS streaming.
+
+Your task is to design and implement a complete working system with clean, production-ready code.
+
+---
+
+## 🎯 SYSTEM GOAL
+
+* Store videos cheaply
+* Stream videos globally with low buffering
+* Minimize bandwidth cost
+* Support scaling from 100 → 10,000 users
+
+---
+
+## 🧠 ARCHITECTURE (STRICT)
+
+* Storage: Backblaze B2 (store HLS files)
+* CDN: Bunny CDN (pull zone connected to B2)
+* Streaming format: HLS (.m3u8 + .ts segments)
+* Frontend: React (or simple HTML if needed)
+* Backend: Node.js (Express)
+
+IMPORTANT:
+
+* Do NOT use Cloudflare for video delivery
+* Cloudflare can be used only for website security (optional)
+
+---
+
+## 📦 VIDEO PIPELINE
+
+1. Upload MP4 video
+2. Convert to HLS using FFmpeg
+3. Store output in Backblaze B2
+
+Generate FFmpeg command for:
+
+* 720p optimized compression
+* HLS playlist (.m3u8)
+* segmented .ts files
+* reduced size (~300MB per video)
+
+---
+
+## 🌐 CDN INTEGRATION
+
+* Explain how to connect Bunny CDN pull zone to Backblaze B2
+* Show URL structure:
+  https://yourcdn.b-cdn.net/videos/{videoId}/playlist.m3u8
+
+---
+
+## 🎬 VIDEO PLAYER
+
+Build a frontend player using:
+
+* Video.js OR HLS.js
+
+Features:
+
+* Adaptive streaming
+* Play/pause
+* Quality auto-adjust
+* Mobile responsive
+
+---
+
+## 🔐 SECURITY (IMPORTANT)
+
+Implement:
+
+* Token-based video access (signed URLs or expiring links)
+* Prevent direct file download
+* Only logged-in users can stream
+
+---
+
+## 💰 COST OPTIMIZATION
+
+Design system to:
+
+* Minimize bandwidth usage
+* Cache popular videos via CDN
+* Reduce video size without losing much quality
+
+---
+
+## 📊 SCALABILITY
+
+Explain how system scales:
+
+* 100 users
+* 1,000 users
+* 10,000 users
+
+---
+
+## 📁 OUTPUT REQUIRED
+
+1. Backend code (Node.js)
+2. Frontend video player
+3. FFmpeg commands
+4. Folder structure for videos
+5. Step-by-step deployment guide
+6. Example API endpoints:
+
+   * /videos
+   * /stream/:id
+
+---
+
+## 🎯 FINAL INSTRUCTION
+
+Think like a senior Netflix-level architect.
+Focus on simplicity, low cost, and performance.
+Avoid over-engineering.
+Make everything easy to copy, paste, and run.
