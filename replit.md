@@ -10,6 +10,12 @@ I like the use of functional components and hooks in React.
 Please ask before making any major architectural changes or introducing new external dependencies.
 I prefer an iterative development approach, focusing on one feature at a time.
 
+## Performance Optimizations
+- **Route-level code splitting:** All 59 pages are lazy-loaded via `React.lazy()` + `Suspense` in `client/src/App.tsx`. Initial JS bundle loads only the landing page chunk; other pages download on demand.
+- **Server-side course cache:** `/api/courses` (previously 274–291ms per request) is cached in memory for 5 minutes (`_coursesCache` in `server/routes.ts`). Warm requests now resolve in **~1ms**. Call `invalidateCoursesCache()` from GURU routes after course publish/update.
+- **N+1 query fix:** `GET /api/modules/:courseId` previously issued one SQL query per module to fetch lessons. Now uses a single `inArray(lessonsTable.moduleId, moduleIds)` batch query, reducing DB round trips from N+1 to 2.
+- **DB indexes:** Added secondary indexes to all high-frequency foreign keys: `modules.course_id`, `lessons.module_id`, `lessons.course_id`, `shishya_user_progress (user_id, course_id)`, `shishya_course_enrollments (user_id, course_id)`, `shishya_sessions.user_id`. Applied via `db:push`.
+
 ## System Architecture
 The platform is built with a React + Vite frontend, TypeScript, Tailwind CSS, and Shadcn UI, utilizing TanStack React Query for data fetching. The backend is an Express.js application, primarily acting as a read-only proxy to the Admin Course Factory, managing session-based authentication with PostgreSQL and Drizzle ORM.
 

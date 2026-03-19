@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, text, serial, boolean, timestamp, varchar, integer, real, jsonb, date, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, varchar, integer, real, jsonb, date, unique, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 // ============ DATABASE TABLES (Drizzle ORM) ============
@@ -47,7 +47,9 @@ export const modules = pgTable("modules", {
   description: text("description"),
   orderIndex: integer("order_index").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("modules_course_id_idx").on(t.courseId),
+]);
 
 // Lessons table - individual learning units
 export const lessons = pgTable("lessons", {
@@ -70,7 +72,10 @@ export const lessons = pgTable("lessons", {
   orderIndex: integer("order_index").notNull().default(0),
   isPreview: boolean("is_preview").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("lessons_module_id_idx").on(t.moduleId),
+  index("lessons_course_id_idx").on(t.courseId),
+]);
 
 // Tests table - assessments/quizzes for courses
 export const tests = pgTable("tests", {
@@ -159,7 +164,9 @@ export const shishyaSessions = pgTable("shishya_sessions", {
   userId: varchar("user_id", { length: 36 }).notNull().references(() => shishyaUsers.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
-});
+}, (t) => [
+  index("sessions_user_id_idx").on(t.userId),
+]);
 
 // ============ SHISHYA PROFILE TABLES ============
 
@@ -189,7 +196,11 @@ export const shishyaUserProgress = pgTable("shishya_user_progress", {
   courseId: integer("course_id").notNull(),
   lessonId: integer("lesson_id").notNull(),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("user_progress_user_id_idx").on(t.userId),
+  index("user_progress_course_id_idx").on(t.courseId),
+  index("user_progress_user_course_idx").on(t.userId, t.courseId),
+]);
 
 // Shishya User lab progress table
 export const shishyaUserLabProgress = pgTable("shishya_user_lab_progress", {
@@ -247,7 +258,10 @@ export const shishyaCourseEnrollments = pgTable("shishya_course_enrollments", {
   courseId: integer("course_id").notNull(),
   creditsPaid: integer("credits_paid").notNull().default(0),
   enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("enrollments_user_id_idx").on(t.userId),
+  index("enrollments_course_id_idx").on(t.courseId),
+]);
 
 // ============ SHISHYA CREDITS & WALLET TABLES ============
 

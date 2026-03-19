@@ -19,7 +19,7 @@ import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
 import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages, courseGroups, courseGroupItems } from "@shared/schema";
-import { eq, like, or, and, desc as descOrder, sql, count, asc } from "drizzle-orm";
+import { eq, like, or, and, desc as descOrder, sql, count, asc, inArray } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
 // AISiksha Admin Course Factory configuration
@@ -28,6 +28,17 @@ const AISIKSHA_API_KEY = process.env.AISIKSHA_API_KEY || "";
 
 // Check if we should use mock data (when admin backend is not available)
 const USE_MOCK_DATA = !AISIKSHA_ADMIN_URL || !AISIKSHA_API_KEY;
+
+// ── In-memory cache for /api/courses (avoids hitting external API on every request) ──
+// TTL: 5 minutes — short enough to pick up new published courses promptly.
+// Cleared automatically by invalidateCoursesCache() when GURU publishes/updates a course.
+interface CoursesCache { data: any[]; expiresAt: number; }
+let _coursesCache: CoursesCache | null = null;
+const COURSES_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+export function invalidateCoursesCache() {
+  _coursesCache = null;
+}
 
 // Helper function to fetch from AISiksha Admin API
 async function fetchFromAdmin(endpoint: string): Promise<Response> {
@@ -627,8 +638,14 @@ export async function registerRoutes(
   
   // GET /api/courses - Fetch only published and active courses
   // SHISHYA RULE: WHERE status = 'published' AND is_active = true
+  // Cached in memory for COURSES_CACHE_TTL_MS to avoid hitting external API on every request.
   app.get("/api/courses", async (req, res) => {
     try {
+      // Serve from cache when available and not expired
+      if (_coursesCache && Date.now() < _coursesCache.expiresAt) {
+        return res.json(_coursesCache.data);
+      }
+
       let externalCourses: any[] = [];
 
       if (USE_MOCK_DATA) {
@@ -639,7 +656,7 @@ export async function registerRoutes(
           if (response.ok) {
             const data = await response.json();
             const courses = data.courses || data;
-            externalCourses = Array.isArray(courses) 
+            externalCourses = Array.isArray(courses)
               ? courses.filter((c: any) => c.status === "published" && c.isActive !== false)
               : [];
           }
@@ -666,6 +683,7 @@ export async function registerRoutes(
         }
       }
 
+      // Single aggregate query instead of per-course queries
       let projectCounts: Record<number, number> = {};
       try {
         const counts = await db.select({
@@ -682,7 +700,9 @@ export async function registerRoutes(
         projectCount: projectCounts[c.id] || 0,
       }));
 
-      console.log(`[Courses] Serving ${enrichedCourses.length} courses (${externalCourses.length} external + ${dbCourses.length} from DB)`);
+      // Populate cache
+      _coursesCache = { data: enrichedCourses, expiresAt: Date.now() + COURSES_CACHE_TTL_MS };
+      console.log(`[Courses] Serving ${enrichedCourses.length} courses (${externalCourses.length} external + ${dbCourses.length} from DB) — cached for 5 min`);
       res.json(enrichedCourses);
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -830,14 +850,20 @@ export async function registerRoutes(
         .orderBy(modulesTable.orderIndex);
 
       if (dbModules.length > 0) {
-        const modulesWithLessons = await Promise.all(
-          dbModules.map(async (mod) => {
-            const dbLessons = await db.select().from(lessonsTable)
-              .where(eq(lessonsTable.moduleId, mod.id))
-              .orderBy(lessonsTable.orderIndex);
-            return { ...mod, lessons: dbLessons };
-          })
-        );
+        // Batch-fetch all lessons for all modules in ONE query (eliminates N+1)
+        const moduleIds = dbModules.map(m => m.id);
+        const allLessons = await db.select().from(lessonsTable)
+          .where(inArray(lessonsTable.moduleId, moduleIds))
+          .orderBy(lessonsTable.orderIndex);
+        const lessonsByModule = allLessons.reduce((acc, l) => {
+          if (!acc[l.moduleId]) acc[l.moduleId] = [];
+          acc[l.moduleId].push(l);
+          return acc;
+        }, {} as Record<number, typeof allLessons>);
+        const modulesWithLessons = dbModules.map(mod => ({
+          ...mod,
+          lessons: lessonsByModule[mod.id] || [],
+        }));
         return res.json(modulesWithLessons);
       }
 
