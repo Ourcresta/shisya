@@ -123,6 +123,58 @@ export function getActiveCdnBaseUrl(mode: "cloudflare" | "bunny"): string {
   return BUNNY_CDN_URL;
 }
 
+/**
+ * Given a video URL (which may point to Cloudflare CDN or Bunny CDN), rewrites
+ * the hostname to match the currently active CDN mode stored in the database.
+ *
+ * This is the core of the auto-switch: when the DB flips from "cloudflare" to
+ * "bunny", all proxy requests immediately start fetching from the Bunny hostname
+ * instead — without any DB URL updates needed.
+ *
+ * Only rewrites URLs whose hostname matches one of the configured CDN hostnames.
+ * B2 direct URLs, R2 URLs, and other origins are left unchanged.
+ */
+export async function rewriteUrlToActiveCdn(rawUrl: string): Promise<string> {
+  const cfBase = B2_CLOUDFLARE_URL;
+  const bunnyBase = BUNNY_CDN_URL;
+
+  // If neither CDN is configured there's nothing to rewrite
+  if (!cfBase && !bunnyBase) return rawUrl;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return rawUrl;
+  }
+
+  // Check if URL uses one of our known CDN hostnames
+  const knownCdnOrigins: string[] = [];
+  if (cfBase) {
+    try { knownCdnOrigins.push(new URL(cfBase).origin); } catch {}
+  }
+  if (bunnyBase) {
+    try { knownCdnOrigins.push(new URL(bunnyBase).origin); } catch {}
+  }
+
+  const isKnownCdnUrl = knownCdnOrigins.some((o) => o === parsed.origin);
+  if (!isKnownCdnUrl) return rawUrl; // Not a CDN URL — leave it alone
+
+  // Determine the active CDN base URL from DB
+  const currentMode = await getCdnMode();
+  const activeBase = getActiveCdnBaseUrl(currentMode);
+  if (!activeBase) return rawUrl;
+
+  try {
+    const activeOrigin = new URL(activeBase).origin;
+    // Rewrite: keep path + query, replace origin with active CDN origin
+    const rewritten = new URL(parsed.pathname + parsed.search + parsed.hash, activeOrigin);
+    return rewritten.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
 // ── Hourly evaluator ──────────────────────────────────────────────────────────
 
 export async function evaluateCdnThresholds(): Promise<void> {

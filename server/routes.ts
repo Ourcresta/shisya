@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { mockCourses, mockModules, mockLessons, mockAINotes, getAllLessons, mockProjects, getAllProjects, mockTests, getAllTests } from "./mockData";
 import { mockLabs, getCourseLabs, getLab, getAllLabs } from "./mockLabs";
-import { authRouter } from "./auth";
-import { guruAuthRouter } from "./guruAuth";
+import { authRouter, requireAuth, optionalAuth } from "./auth";
+import { guruAuthRouter, requireGuruAuth } from "./guruAuth";
 import { oauthRouter } from "./oauth";
 import { udyogRouter } from "./udyogRoutes";
 import { seedGuruAdmin } from "./seedGuru";
@@ -14,7 +14,7 @@ import { notificationsRouter } from "./notifications";
 import { registerMotivationRoutes } from "./motivationRoutes";
 import { guruRouter } from "./guruRoutes";
 import { r2Router } from "./r2Upload";
-import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetrics, getCdnMode, setCdnMode, getCdnSwitchLog, getActiveCdnBaseUrl, signBunnyUrl } from "./cdnMetrics";
+import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetrics, getCdnMode, setCdnMode, getCdnSwitchLog, getActiveCdnBaseUrl, signBunnyUrl, rewriteUrlToActiveCdn } from "./cdnMetrics";
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
@@ -205,23 +205,11 @@ export async function registerRoutes(
   app.use("/api/guru/r2", r2Router);
 
   // ── Video Metrics endpoints ─────────────────────────────────────────────────
-  // POST /api/metrics/play-start — called by video player on first play
-  app.post("/api/metrics/play-start", async (req: any, res: any) => {
+  // POST /api/metrics/play-start — called by video player on first play (auth required)
+  // Uses requireAuth so req.user.id is the correct, verified user identity.
+  app.post("/api/metrics/play-start", requireAuth, async (req: any, res: any) => {
     try {
-      // Extract userId from session cookie (same mechanism as requireAuth)
-      let userId = "anonymous";
-      const sessionId = req.cookies?.sessionId;
-      if (sessionId) {
-        try {
-          const { db: db2 } = await import("./db");
-          const { shishyaSessions } = await import("@shared/schema");
-          const { eq: eq2 } = await import("drizzle-orm");
-          const sessions = await db2.select().from(shishyaSessions).where(eq2(shishyaSessions.id, sessionId)).limit(1);
-          if (sessions.length > 0 && new Date(sessions[0].expiresAt) > new Date()) {
-            userId = sessions[0].userId;
-          }
-        } catch {}
-      }
+      const userId = req.user?.id ?? "anonymous";
       await recordPlayStart(userId);
       res.json({ ok: true });
     } catch (err) {
@@ -230,8 +218,8 @@ export async function registerRoutes(
     }
   });
 
-  // POST /api/metrics/buffering — called by video player on HLS network stall
-  app.post("/api/metrics/buffering", async (_req: any, res: any) => {
+  // POST /api/metrics/buffering — called by video player on HLS network stall (auth required)
+  app.post("/api/metrics/buffering", requireAuth, async (_req: any, res: any) => {
     try {
       await recordBufferingEvent();
       res.json({ ok: true });
@@ -242,7 +230,7 @@ export async function registerRoutes(
   });
 
   // ── GURU CDN Status API ─────────────────────────────────────────────────────
-  app.get("/api/guru/cdn-status", async (_req: any, res: any) => {
+  app.get("/api/guru/cdn-status", requireGuruAuth, async (_req: any, res: any) => {
     try {
       const [metrics, mode, log] = await Promise.all([
         getTodayMetrics(),
@@ -266,7 +254,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/guru/cdn-override", async (req: any, res: any) => {
+  app.post("/api/guru/cdn-override", requireGuruAuth, async (req: any, res: any) => {
     const { mode } = req.body;
     if (mode !== "cloudflare" && mode !== "bunny") {
       return res.status(400).json({ error: "mode must be 'cloudflare' or 'bunny'" });
@@ -296,9 +284,14 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid URL" });
     }
 
-    // Only proxy from configured video delivery domains for security
+    // Only proxy from configured video delivery domains for security.
+    // Include configured CDN hostnames so custom Cloudflare CDN domains pass the allowlist.
     const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net", "backblazeb2.com"];
-    const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
+    const cfBase = process.env.B2_CLOUDFLARE_URL;
+    const bunnyBase = process.env.BUNNY_CDN_URL;
+    if (cfBase) { try { allowedHosts.push(new URL(cfBase).hostname); } catch {} }
+    if (bunnyBase) { try { allowedHosts.push(new URL(bunnyBase).hostname); } catch {} }
+    const isAllowed = allowedHosts.some((h) => targetUrl.hostname === h || targetUrl.hostname.endsWith("." + h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });
     }
@@ -308,9 +301,12 @@ export async function registerRoutes(
       const range = req.headers["range"];
       if (range) headers["Range"] = range;
 
-      // Sign the URL if it's a Bunny CDN URL and token auth is configured.
-      // This is the CDN rule: signed, time-limited tokens on ALL Bunny requests.
-      const fetchUrl = signBunnyUrl(rawUrl);
+      // 1. Rewrite CDN hostname to match the active mode stored in DB.
+      //    When the auto-switch flips from Cloudflare → Bunny (or back), every
+      //    subsequent proxy request immediately uses the new CDN origin.
+      const modeRewritten = await rewriteUrlToActiveCdn(rawUrl);
+      // 2. Sign if the resulting URL is a Bunny CDN URL (CDN rule: time-limited tokens).
+      const fetchUrl = signBunnyUrl(modeRewritten);
       const upstream = await fetch(fetchUrl, { headers });
 
       res.status(upstream.status);
@@ -352,15 +348,23 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid URL" });
     }
 
+    // Build the allowed host list dynamically — include configured CDN hostnames
+    // so custom Cloudflare CDN domains pass the allowlist even before rewriting.
     const allowedHosts = ["r2.dev", "cloudflarestorage.com", "b-cdn.net", "backblazeb2.com"];
-    const isAllowed = allowedHosts.some((h) => targetUrl.hostname.endsWith(h));
+    const cfUrl = process.env.B2_CLOUDFLARE_URL;
+    const bunnyUrl = process.env.BUNNY_CDN_URL;
+    if (cfUrl) { try { allowedHosts.push(new URL(cfUrl).hostname); } catch {} }
+    if (bunnyUrl) { try { allowedHosts.push(new URL(bunnyUrl).hostname); } catch {} }
+    const isAllowed = allowedHosts.some((h) => targetUrl.hostname === h || targetUrl.hostname.endsWith("." + h));
     if (!isAllowed) {
       return res.status(403).json({ error: "URL not allowed" });
     }
 
     try {
-      // Sign the manifest URL if it's a Bunny CDN URL (CDN rule: time-limited tokens).
-      const fetchUrl = signBunnyUrl(rawUrl);
+      // 1. Rewrite CDN hostname to match the active mode stored in DB (auto-switch).
+      const modeRewritten = await rewriteUrlToActiveCdn(rawUrl);
+      // 2. Sign if the resulting URL is a Bunny CDN URL (CDN rule: time-limited tokens).
+      const fetchUrl = signBunnyUrl(modeRewritten);
       const upstream = await fetch(fetchUrl, {
         headers: { "User-Agent": "OurShiksha/1.0" },
       });
@@ -1373,9 +1377,6 @@ export async function registerRoutes(
     };
     return Math.floor((baseCoins[classification] || 0) * (cgpa / 10));
   }
-
-  // Import auth middleware
-  const { requireAuth } = await import("./auth");
 
   // ============ TRAINERCENTRAL VERIFICATION ROUTES ============
 
