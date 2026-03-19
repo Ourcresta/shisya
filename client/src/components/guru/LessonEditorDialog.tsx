@@ -122,6 +122,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const [abrJobId, setAbrJobId] = useState<string | null>(null);
   const [abrConverting, setAbrConverting] = useState(false);
   const [abrProgress, setAbrProgress] = useState("");
+  const [hlsProgress, setHlsProgress] = useState("");
   const [convertingAudio, setConvertingAudio] = useState(false);
 
   const videoUpload = useR2Upload("videos");
@@ -170,6 +171,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     setAbrJobId(null);
     setAbrConverting(false);
     setAbrProgress("");
+    setHlsProgress("");
     setConvertingAudio(false);
   }, [open, editingLesson, defaultOrderIndex]);
 
@@ -179,16 +181,23 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
       try {
         const res = await apiRequest("GET", `/api/guru/r2/hls-status/${hlsJobId}`);
         const job = await res.json();
+        if (job.progress) setHlsProgress(job.progress);
         if (job.status === "done" && job.hlsUrl) {
           setForm((f) => ({ ...f, hlsUrl: job.hlsUrl, hlsStatus: "ready" }));
           setHlsConverting(false);
           setHlsJobId(null);
-          toast({ title: "HLS conversion complete!", description: "The HLS stream URL has been set." });
+          setHlsProgress("");
+          const variants = job.renditions?.join(" / ") || "720p / 480p / 360p";
+          toast({
+            title: "Multi-bitrate HLS ready!",
+            description: `Variants: ${variants}. hls.js will auto-select quality based on the viewer's connection speed.`,
+          });
           clearInterval(poll);
         } else if (job.status === "failed") {
           setHlsConverting(false);
           setHlsJobId(null);
-          toast({ title: "HLS conversion failed", description: job.error || "Please try again.", variant: "destructive" });
+          setHlsProgress("");
+          toast({ title: "HLS encoding failed", description: job.error || "Please try again.", variant: "destructive" });
           clearInterval(poll);
         }
       } catch { clearInterval(poll); }
@@ -277,14 +286,19 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const handleConvertHls = async () => {
     if (!form.videoUrl) return;
     setHlsConverting(true);
+    setHlsProgress("Queued…");
     try {
       const res = await apiRequest("POST", "/api/guru/r2/convert-hls", { videoUrl: form.videoUrl });
       const { jobId } = await res.json();
       setHlsJobId(jobId);
-      toast({ title: "HLS conversion started", description: "This may take 1-3 minutes. The URL will be set automatically." });
+      toast({
+        title: "Multi-bitrate HLS encoding started",
+        description: "Encoding 720p → 480p → 360p. Takes 3–6 minutes. The HLS URL will auto-update when done.",
+      });
     } catch (err: any) {
       setHlsConverting(false);
-      toast({ title: "Conversion failed", description: err.message, variant: "destructive" });
+      setHlsProgress("");
+      toast({ title: "Encoding failed to start", description: err.message, variant: "destructive" });
     }
   };
 
@@ -545,7 +559,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                     {!form.hlsUrl && (
                       <div className="space-y-3">
                         <p className="text-xs text-muted-foreground">
-                          Choose a conversion mode. <strong>ABR (Recommended)</strong> creates a full quality ladder so hls.js automatically picks the best quality for each viewer's connection. Standard HLS is a single-quality stream-copy.
+                          Choose a conversion mode. <strong>ABR (Recommended)</strong> encodes a 4-rung ladder (360p → 1080p) in a single pass — best for 1080p sources. <strong>Multi-bitrate HLS</strong> encodes 720p / 480p / 360p sequentially, ideal for 720p source content and shows per-variant encoding progress.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Button type="button" size="sm" onClick={handleConvertAbr}
@@ -558,8 +572,8 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                           <Button type="button" size="sm" variant="outline" onClick={handleConvertHls}
                             disabled={hlsConverting || abrConverting || !form.videoUrl} className="gap-2" data-testid="button-convert-hls">
                             {hlsConverting
-                              ? <><Loader2 className="w-4 h-4 animate-spin" />Converting…</>
-                              : <><Video className="w-4 h-4" />Standard HLS</>}
+                              ? <><Loader2 className="w-4 h-4 animate-spin" />Encoding…</>
+                              : <><Video className="w-4 h-4" />Multi-bitrate HLS (720p/480p/360p)</>}
                           </Button>
                         </div>
                         {abrConverting && (
@@ -573,9 +587,14 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                           </div>
                         )}
                         {hlsConverting && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            Stream-copy conversion in progress — 1–3 minutes.
-                          </p>
+                          <div className="space-y-1">
+                            <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
+                              {hlsProgress || "Encoding…"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Encoding 720p → 480p → 360p sequentially — 3–6 minutes. The HLS URL will auto-populate when done.
+                            </p>
+                          </div>
                         )}
                       </div>
                     )}

@@ -98,7 +98,15 @@ async function uploadFileToStorage(localPath: string, objectKey: string, content
 }
 
 // ── HLS conversion jobs ─────────────────────────────────────────────────────
-const hlsJobs = new Map<string, { status: string; hlsUrl?: string; error?: string; progress?: string }>();
+const hlsJobs = new Map<string, { status: string; hlsUrl?: string; error?: string; progress?: string; renditions?: string[] }>();
+
+// ── Standard multi-bitrate HLS quality ladder (3 rungs, no 1080p) ───────────
+// 720p is the typical ceiling for OurShiksha source content.
+const HLS_LADDER = [
+  { name: "720p", height: 720, videoBitrate: 2500, audioBitrate: 128, bandwidth: 2800000, codecs: "avc1.4d401f,mp4a.40.2" },
+  { name: "480p", height: 480, videoBitrate: 1000, audioBitrate: 96,  bandwidth: 1150000, codecs: "avc1.4d401e,mp4a.40.2" },
+  { name: "360p", height: 360, videoBitrate: 600,  audioBitrate: 64,  bandwidth: 720000,  codecs: "avc1.4d401e,mp4a.40.2" },
+];
 
 // ── ABR quality ladder ────────────────────────────────────────────────────────
 // Industry-standard Netflix-inspired 4-rung ladder.
@@ -267,7 +275,10 @@ r2Router.post("/presign", requireGuruAuth, async (req: Request, res: Response) =
   }
 });
 
-// HLS conversion (single-quality, stream-copy)
+// ── Multi-bitrate HLS conversion (3-rung: 720p / 480p / 360p) ──────────────
+// Replaces the old stream-copy pipeline. Encodes each variant sequentially so
+// progress messages are granular ("Encoding 720p (1/3)…"), then uploads all
+// segment files and a proper master.m3u8 that hls.js uses for true ABR.
 r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Response) => {
   if (!isStorageConfigured()) {
     return res.status(503).json({ error: "B2 Storage is not configured." });
@@ -276,52 +287,104 @@ r2Router.post("/convert-hls", requireGuruAuth, async (req: Request, res: Respons
   if (!videoUrl) return res.status(400).json({ error: "videoUrl is required." });
 
   const jobId = `hls_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  hlsJobs.set(jobId, { status: "processing", progress: "Downloading video..." });
+  hlsJobs.set(jobId, { status: "processing", progress: "Queued…" });
   res.json({ jobId });
 
   (async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "hls-"));
-    const inputPath = path.join(tmpDir, "input.mp4");
-    const outputM3u8 = path.join(tmpDir, "playlist.m3u8");
-    const timestamp = Date.now();
-    const hlsPrefix = `hls/${timestamp}`;
-
     try {
-      hlsJobs.set(jobId, { status: "processing", progress: "Downloading video from B2..." });
+      // ── 1. Download source video ─────────────────────────────────────────
+      hlsJobs.set(jobId, { status: "processing", progress: "Downloading source video…" });
+      const inputPath = path.join(tmpDir, "input.mp4");
       const response = await fetch(videoUrl);
       if (!response.ok) throw new Error(`Download failed: ${response.status}`);
-      const buffer = Buffer.from(await response.arrayBuffer());
-      fs.writeFileSync(inputPath, buffer);
+      fs.writeFileSync(inputPath, Buffer.from(await response.arrayBuffer()));
 
-      hlsJobs.set(jobId, { status: "processing", progress: "Converting to HLS with ffmpeg..." });
-      await execFileAsync("ffmpeg", [
-        "-i", inputPath,
-        "-codec:", "copy",
-        "-start_number", "0",
-        "-hls_time", "10",
-        "-hls_list_size", "0",
-        "-hls_segment_filename", path.join(tmpDir, "segment%03d.ts"),
-        "-f", "hls",
-        outputM3u8,
-      ]);
+      // ── 2. Probe source resolution — skip rungs that would upscale ───────
+      let sourceHeight = 720;
+      let sourceWidth = 1280;
+      try {
+        const probe = await execFileAsync("ffprobe", [
+          "-v", "error", "-select_streams", "v:0",
+          "-show_entries", "stream=width,height",
+          "-of", "json", inputPath,
+        ]);
+        const stream = JSON.parse(probe.stdout)?.streams?.[0];
+        if (stream?.height) { sourceHeight = stream.height; sourceWidth = stream.width; }
+      } catch { /* use defaults */ }
 
-      hlsJobs.set(jobId, { status: "processing", progress: "Uploading HLS segments to B2..." });
-      const files = fs.readdirSync(tmpDir).filter((f) => f !== "input.mp4");
-      for (const file of files) {
-        const localFile = path.join(tmpDir, file);
-        const isM3u8 = file.endsWith(".m3u8");
-        const isTs = file.endsWith(".ts");
-        if (!isM3u8 && !isTs) continue;
-        const contentType = isM3u8 ? "application/vnd.apple.mpegurl" : "video/mp2t";
-        await uploadFileToStorage(localFile, `${hlsPrefix}/${file}`, contentType);
+      const activeRungs = HLS_LADDER.filter((r) => r.height <= sourceHeight);
+      if (activeRungs.length === 0) activeRungs.push(HLS_LADDER[HLS_LADDER.length - 1]);
+
+      // ── 3. Encode each rung sequentially (clear per-variant progress) ────
+      const timestamp = Date.now();
+      const hlsPrefix = `hls/${timestamp}`;
+
+      for (let i = 0; i < activeRungs.length; i++) {
+        const r = activeRungs[i];
+        hlsJobs.set(jobId, {
+          status: "processing",
+          progress: `Encoding ${r.name} (${i + 1}/${activeRungs.length})…`,
+        });
+
+        const rungDir = path.join(tmpDir, r.name);
+        fs.mkdirSync(rungDir, { recursive: true });
+
+        await execFileAsync("ffmpeg", [
+          "-i", inputPath,
+          "-vf", `scale=-2:${r.height}`,
+          "-c:v", "libx264",
+          "-preset", "fast",
+          "-b:v", `${r.videoBitrate}k`,
+          "-maxrate", `${Math.round(r.videoBitrate * 1.07)}k`,
+          "-bufsize", `${r.videoBitrate * 2}k`,
+          "-g", "48", "-keyint_min", "48", "-sc_threshold", "0",
+          "-c:a", "aac",
+          "-b:a", `${r.audioBitrate}k`,
+          "-ar", "48000",
+          "-hls_time", "6",
+          "-hls_list_size", "0",
+          "-hls_segment_filename", path.join(rungDir, "seg%03d.ts"),
+          "-f", "hls",
+          path.join(rungDir, "playlist.m3u8"),
+        ]);
       }
 
-      const hlsBaseUrl = await getActivePublicBaseUrl();
-      const hlsPublicUrl = `${hlsBaseUrl}/${hlsPrefix}/playlist.m3u8`;
-      hlsJobs.set(jobId, { status: "done", hlsUrl: hlsPublicUrl });
-      console.log(`[HLS] Conversion complete: ${hlsPublicUrl}`);
+      // ── 4. Upload all rendition segments + playlists to storage ──────────
+      hlsJobs.set(jobId, { status: "processing", progress: "Uploading segments to storage…" });
+      for (const r of activeRungs) {
+        const rungDir = path.join(tmpDir, r.name);
+        for (const file of fs.readdirSync(rungDir)) {
+          const ext = path.extname(file);
+          const contentType = ext === ".m3u8" ? "application/vnd.apple.mpegurl" : "video/mp2t";
+          await uploadFileToStorage(
+            path.join(rungDir, file),
+            `${hlsPrefix}/${r.name}/${file}`,
+            contentType,
+          );
+        }
+      }
+
+      // ── 5. Build and upload master playlist ──────────────────────────────
+      const masterLines = ["#EXTM3U", "#EXT-X-VERSION:3", ""];
+      for (const r of activeRungs) {
+        const aspectW = Math.round((sourceWidth / sourceHeight) * r.height);
+        const evenW = aspectW % 2 === 0 ? aspectW : aspectW + 1;
+        masterLines.push(
+          `#EXT-X-STREAM-INF:BANDWIDTH=${r.bandwidth},RESOLUTION=${evenW}x${r.height},CODECS="${r.codecs}",NAME="${r.name}"`,
+          `${r.name}/playlist.m3u8`,
+          "",
+        );
+      }
+      const masterPath = path.join(tmpDir, "master.m3u8");
+      fs.writeFileSync(masterPath, masterLines.join("\n"));
+      const masterUrl = await uploadFileToStorage(masterPath, `${hlsPrefix}/master.m3u8`, "application/vnd.apple.mpegurl");
+
+      const renditionNames = activeRungs.map((r) => r.name);
+      hlsJobs.set(jobId, { status: "done", hlsUrl: masterUrl, renditions: renditionNames, progress: "Complete" });
+      console.log(`[HLS] Multi-bitrate complete: ${masterUrl} (${renditionNames.join(", ")})`);
     } catch (err: any) {
-      console.error("[HLS] Conversion error:", err);
+      console.error("[HLS] Encoding error:", err);
       hlsJobs.set(jobId, { status: "failed", error: err.message });
     } finally {
       try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
