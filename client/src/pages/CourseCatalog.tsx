@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Search, BookOpen, GraduationCap, X, Mic, ChevronRight,
+  Search, BookOpen, X, Mic, ChevronRight,
   Clock, Globe, Coins, Lock, Play, ArrowRight, Star,
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
   Sparkles, Filter, UserPlus, LogIn, Layers, Trophy
@@ -804,86 +804,35 @@ export default function CourseCatalog() {
         </div>
 
         <div className="relative z-10">
-          <div className="pt-8 pb-10 px-4 md:px-8">
-            <motion.div
-              className="max-w-3xl mx-auto text-center space-y-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            >
-              <div className="flex items-center justify-center gap-3">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(124,58,237,0.1))",
-                    border: "1px solid rgba(0,245,255,0.25)",
-                    boxShadow: "0 0 20px rgba(0,245,255,0.15)",
-                  }}
-                >
-                  <GraduationCap className="w-7 h-7" style={{ color: "#00F5FF" }} />
-                </div>
-              </div>
-
-              <div>
-                <h1
-                  className="text-4xl md:text-5xl font-bold"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    background: "linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #00F5FF 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                  data-testid="text-page-title"
-                >
-                  Course Catalog
-                </h1>
-                <p className="text-gray-400 text-lg mt-3 max-w-xl mx-auto">
-                  Search skills, tools, and careers. Find the right learning path for your goals.
-                </p>
-              </div>
-
-              {!isLoading && !error && courses && courses.length > 0 && (
-                <div className="flex items-center justify-center gap-4 md:gap-6 text-sm text-gray-400 flex-wrap">
-                  <div className="flex items-center gap-1.5" data-testid="stat-total-courses">
-                    <BookOpen className="w-4 h-4" style={{ color: "#00F5FF" }} />
-                    <span>{courses.length} Course{courses.length !== 1 ? "s" : ""}</span>
-                  </div>
-                  {levelCounts.beginner > 0 && <div data-testid="stat-beginner-count">{levelCounts.beginner} Beginner</div>}
-                  {levelCounts.intermediate > 0 && <div data-testid="stat-intermediate-count">{levelCounts.intermediate} Intermediate</div>}
-                  {levelCounts.advanced > 0 && <div data-testid="stat-advanced-count">{levelCounts.advanced} Advanced</div>}
-                  {levelCounts.masters > 0 && <div data-testid="stat-masters-count">{levelCounts.masters} Masters</div>}
-                </div>
-              )}
-
-              <div className="relative max-w-2xl mx-auto">
-                <div
-                  className="absolute -inset-1 rounded-2xl opacity-50 blur-sm"
-                  style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
+          <div className="pt-4 pb-4 px-4 md:px-8">
+            <div className="relative max-w-sm">
+              <div
+                className="absolute -inset-1 rounded-2xl opacity-40 blur-sm"
+                style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
+              />
+              <div
+                className="relative flex items-center rounded-xl overflow-hidden"
+                style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
+              >
+                <Search className="w-4 h-4 text-gray-400 ml-3 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search skills, tools, careers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 bg-transparent px-3 py-3 text-white placeholder:text-gray-500 outline-none text-sm"
+                  data-testid="input-search-courses"
                 />
-                <div
-                  className="relative flex items-center rounded-xl overflow-hidden"
-                  style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
+                <button
+                  className="p-2 mr-1 rounded-lg transition-colors"
+                  style={{ color: "#6b7280" }}
+                  title="Voice search (coming soon)"
+                  data-testid="button-voice-search"
                 >
-                  <Search className="w-5 h-5 text-gray-400 ml-4 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Search skills, tools, careers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent px-4 py-4 text-white placeholder:text-gray-500 outline-none text-base"
-                    data-testid="input-search-courses"
-                  />
-                  <button
-                    className="p-3 mr-1 rounded-lg transition-colors"
-                    style={{ color: "#6b7280" }}
-                    title="Voice search (coming soon)"
-                    data-testid="button-voice-search"
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
-                </div>
+                  <Mic className="w-4 h-4" />
+                </button>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <motion.div
