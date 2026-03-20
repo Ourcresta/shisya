@@ -946,9 +946,9 @@ export default function CourseCatalog() {
                 )}
 
                 {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
-                  <div className="flex justify-end mb-6">
+                  <div className="lg:hidden flex justify-end mb-6">
                     <button
-                      className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: "rgba(255,255,255,0.05)",
                         color: "#9ca3af",
