@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCredits } from "@/contexts/CreditContext";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 import type { Course } from "@shared/schema";
+import catalogIllustration from "@assets/catalog-illustration.png";
 
 type CatalogTab = "course" | "track" | "program";
 
@@ -772,6 +773,14 @@ export default function CourseCatalog() {
                     {tab.label}
                   </button>
                 ))}
+              </div>
+
+              <div className="hidden md:block shrink-0 ml-auto">
+                <img
+                  src={catalogIllustration}
+                  alt="Learning illustration"
+                  className="h-16 w-auto object-contain drop-shadow-lg"
+                />
               </div>
             </div>
           </div>
