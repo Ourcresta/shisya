@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   Search, BookOpen, X, Mic, ChevronRight,
-  Clock, Globe, Coins, Lock, Play, ArrowRight, Star,
+  Clock, Coins, Lock, Play, ArrowRight, Star,
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
   Sparkles, Filter, UserPlus, LogIn, Layers, Trophy
 } from "lucide-react";
@@ -39,16 +39,6 @@ type LevelFilter = "all" | "beginner" | "intermediate" | "advanced" | "masters";
 type PricingFilter = "all" | "free" | "paid";
 type SortOption = "default" | "title-asc" | "title-desc" | "price-low" | "price-high" | "newest";
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", kn: "Kannada",
-  ml: "Malayalam", mr: "Marathi", bn: "Bengali", gu: "Gujarati", pa: "Punjabi",
-  ur: "Urdu", es: "Spanish", fr: "French", de: "German", ja: "Japanese",
-  zh: "Chinese", ko: "Korean", ar: "Arabic", pt: "Portuguese", ru: "Russian",
-};
-
-function getLanguageLabel(code: string): string {
-  return LANGUAGE_LABELS[code.toLowerCase()] || code.toUpperCase();
-}
 
 const CATEGORIES = [
   { id: "all", label: "All Courses" },
@@ -165,27 +155,6 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
           </div>
         )}
 
-        {languageVariants && languageVariants.length > 1 && (
-          <div className="absolute bottom-3 left-3 flex flex-wrap gap-1">
-            {languageVariants.map((v) => (
-              <button
-                key={v.id}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedLang(v.language || "en"); }}
-                className="px-2 py-0.5 rounded-full text-xs font-medium transition-all"
-                style={{
-                  background: v.id === course.id ? "rgba(0,245,255,0.85)" : "rgba(255,255,255,0.15)",
-                  color: "#fff",
-                  backdropFilter: "blur(8px)",
-                  border: v.id === course.id ? "1px solid rgba(0,245,255,0.6)" : "1px solid rgba(255,255,255,0.1)",
-                }}
-                data-testid={`badge-lang-variant-${v.language}-${v.id}`}
-              >
-                <Globe className="w-3 h-3 mr-1 inline" />
-                {getLanguageLabel(v.language || "en")}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="flex flex-col flex-1 p-4 gap-3">
@@ -231,16 +200,6 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {course.language && (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af", border: "1px solid rgba(255,255,255,0.08)" }}
-              data-testid={`badge-language-${course.id}`}
-            >
-              <Globe className="w-3 h-3" />
-              {getLanguageLabel(course.language)}
-            </span>
-          )}
           {course.testRequired && (
             <span
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
@@ -540,7 +499,6 @@ export default function CourseCatalog() {
   const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
   const [selectedPricing, setSelectedPricing] = useState<PricingFilter>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const pillsRef = useRef<HTMLDivElement>(null);
@@ -550,13 +508,6 @@ export default function CourseCatalog() {
     const cats = new Set<string>();
     courses.forEach((c) => { if (c.category) cats.add(c.category); });
     return Array.from(cats).sort();
-  }, [courses]);
-
-  const languages = useMemo(() => {
-    if (!courses) return [];
-    const langs = new Set<string>();
-    courses.forEach((c) => { if (c.language) langs.add(c.language); });
-    return Array.from(langs).sort();
   }, [courses]);
 
   const filteredCourses = useMemo(() => {
@@ -577,9 +528,8 @@ export default function CourseCatalog() {
         (selectedPricing === "free" && (course.isFree || (course.creditCost ?? 0) === 0)) ||
         (selectedPricing === "paid" && !course.isFree && (course.creditCost ?? 0) > 0);
       const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-      const matchesLanguage = selectedLanguage === "all" || course.language === selectedLanguage;
 
-      return matchesSearch && matchesLevel && matchesPricing && matchesCategory && matchesLanguage;
+      return matchesSearch && matchesLevel && matchesPricing && matchesCategory;
     });
 
     switch (sortBy) {
@@ -591,7 +541,7 @@ export default function CourseCatalog() {
     }
 
     return filtered;
-  }, [courses, searchTerm, selectedLevel, selectedPricing, selectedCategory, selectedLanguage, sortBy]);
+  }, [courses, searchTerm, selectedLevel, selectedPricing, selectedCategory, sortBy]);
 
   const groupedCourses = useMemo(() => {
     const groups = new Map<string, Course[]>();
@@ -623,14 +573,13 @@ export default function CourseCatalog() {
 
   const hasActiveFilters =
     selectedLevel !== "all" || selectedPricing !== "all" ||
-    selectedCategory !== "all" || selectedLanguage !== "all" || searchTerm !== "";
+    selectedCategory !== "all" || searchTerm !== "";
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedLevel("all");
     setSelectedPricing("all");
     setSelectedCategory("all");
-    setSelectedLanguage("all");
     setSortBy("default");
   };
 
@@ -644,7 +593,7 @@ export default function CourseCatalog() {
     };
   }, [courses]);
 
-  const activeFilterCount = [selectedLevel, selectedPricing, selectedLanguage].filter(f => f !== "all").length +
+  const activeFilterCount = [selectedLevel, selectedPricing].filter(f => f !== "all").length +
     (searchTerm ? 1 : 0);
 
   const filterSidebarContent = (
@@ -704,40 +653,6 @@ export default function CourseCatalog() {
         </div>
       </div>
 
-      {languages.length > 1 && (
-        <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Language</h4>
-          <div className="space-y-1.5">
-            <button
-              onClick={() => setSelectedLanguage("all")}
-              className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
-              style={{
-                background: selectedLanguage === "all" ? "rgba(0,245,255,0.12)" : "transparent",
-                color: selectedLanguage === "all" ? "#00F5FF" : "#9ca3af",
-                border: selectedLanguage === "all" ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
-              }}
-              data-testid="filter-language-all"
-            >
-              All Languages
-            </button>
-            {languages.map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setSelectedLanguage(lang)}
-                className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
-                style={{
-                  background: selectedLanguage === lang ? "rgba(0,245,255,0.12)" : "transparent",
-                  color: selectedLanguage === lang ? "#00F5FF" : "#9ca3af",
-                  border: selectedLanguage === lang ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
-                }}
-                data-testid={`filter-language-${lang}`}
-              >
-                {getLanguageLabel(lang)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div>
         <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Sort By</h4>
