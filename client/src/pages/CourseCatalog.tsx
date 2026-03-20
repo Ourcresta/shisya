@@ -805,66 +805,61 @@ export default function CourseCatalog() {
 
         <div className="relative z-10">
           <div className="pt-4 pb-4 px-4 md:px-8">
-            <div className="relative max-w-sm">
-              <div
-                className="absolute -inset-1 rounded-2xl opacity-40 blur-sm"
-                style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
-              />
-              <div
-                className="relative flex items-center rounded-xl overflow-hidden"
-                style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
-              >
-                <Search className="w-4 h-4 text-gray-400 ml-3 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search skills, tools, careers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-transparent px-3 py-3 text-white placeholder:text-gray-500 outline-none text-sm"
-                  data-testid="input-search-courses"
+            <div className="flex items-center gap-3">
+              <div className="relative max-w-sm w-full">
+                <div
+                  className="absolute -inset-1 rounded-2xl opacity-40 blur-sm"
+                  style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
                 />
-                <button
-                  className="p-2 mr-1 rounded-lg transition-colors"
-                  style={{ color: "#6b7280" }}
-                  title="Voice search (coming soon)"
-                  data-testid="button-voice-search"
+                <div
+                  className="relative flex items-center rounded-xl overflow-hidden"
+                  style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
                 >
-                  <Mic className="w-4 h-4" />
-                </button>
+                  <Search className="w-4 h-4 text-gray-400 ml-3 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search skills, tools, careers..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 bg-transparent px-3 py-3 text-white placeholder:text-gray-500 outline-none text-sm"
+                    data-testid="input-search-courses"
+                  />
+                  <button
+                    className="p-2 mr-1 rounded-lg transition-colors"
+                    style={{ color: "#6b7280" }}
+                    title="Voice search (coming soon)"
+                    data-testid="button-voice-search"
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {([
+                  { id: "course" as CatalogTab, label: "Course", icon: BookOpen },
+                  { id: "track" as CatalogTab, label: "Track", icon: Layers },
+                  { id: "program" as CatalogTab, label: "Program", icon: Trophy },
+                ]).map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setCatalogTab(tab.id)}
+                    className="flex items-center gap-1.5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
+                    style={{
+                      background: catalogTab === tab.id ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.04)",
+                      color: catalogTab === tab.id ? "#00F5FF" : "#9ca3af",
+                      border: catalogTab === tab.id ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
+                      boxShadow: catalogTab === tab.id ? "0 0 14px rgba(0,245,255,0.18)" : "none",
+                    }}
+                    data-testid={`tab-catalog-${tab.id}`}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-
-          <motion.div
-            className="px-4 md:px-8 pb-5"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-          >
-            <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
-              {([
-                { id: "course" as CatalogTab, label: "Course", icon: BookOpen },
-                { id: "track" as CatalogTab, label: "Track", icon: Layers },
-                { id: "program" as CatalogTab, label: "Program", icon: Trophy },
-              ]).map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setCatalogTab(tab.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all"
-                  style={{
-                    background: catalogTab === tab.id ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.04)",
-                    color: catalogTab === tab.id ? "#00F5FF" : "#9ca3af",
-                    border: catalogTab === tab.id ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: catalogTab === tab.id ? "0 0 14px rgba(0,245,255,0.18)" : "none",
-                  }}
-                  data-testid={`tab-catalog-${tab.id}`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </motion.div>
 
           {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
             <motion.div
