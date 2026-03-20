@@ -914,7 +914,7 @@ export default function CourseCatalog() {
                       backdropFilter: "blur(12px)",
                     }}
                   >
-                    <div className="flex items-center gap-2 mb-5">
+                    <div className="flex items-center gap-2">
                       <SlidersHorizontal className="w-4 h-4" style={{ color: "#00F5FF" }} />
                       <h3 className="text-sm font-semibold text-white">Filters</h3>
                       {activeFilterCount > 0 && (
@@ -926,6 +926,11 @@ export default function CourseCatalog() {
                         </span>
                       )}
                     </div>
+                    {!isLoading && !error && courses && courses.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-1 mb-4" data-testid="text-total-courses">
+                        (Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""})
+                      </p>
+                    )}
                     {filterSidebarContent}
                   </div>
                 </aside>
@@ -941,11 +946,7 @@ export default function CourseCatalog() {
                 )}
 
                 {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
-                  <div className="flex items-center justify-between mb-6">
-                    <p className="text-sm text-gray-400" data-testid="text-total-courses">
-                      Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""}
-                    </p>
-
+                  <div className="flex justify-end mb-6">
                     <button
                       className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                       style={{
