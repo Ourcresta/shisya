@@ -381,6 +381,8 @@ export default function Dashboard() {
       value: creditsLoading ? "..." : balance,
       icon: Coins,
       color: "text-amber-500",
+      iconBg: "bg-amber-100 dark:bg-amber-900/30",
+      accent: "#F59E0B",
       href: "/shishya/wallet",
       subtitle: "Learning Points",
     },
@@ -389,6 +391,8 @@ export default function Dashboard() {
       value: inProgressCourses.length,
       icon: BookOpen,
       color: "text-blue-500",
+      iconBg: "bg-blue-100 dark:bg-blue-900/30",
+      accent: "#3B82F6",
       href: "/courses",
       subtitle: inProgressCourses.length > 0 ? `${Math.round(inProgressCourses.reduce((s, c) => s + c.progress, 0) / inProgressCourses.length)}% avg.` : "Start learning",
     },
@@ -397,6 +401,8 @@ export default function Dashboard() {
       value: completedCourses.length,
       icon: CheckCircle,
       color: "text-green-500",
+      iconBg: "bg-green-100 dark:bg-green-900/30",
+      accent: "#10B981",
       href: "/courses",
       subtitle: completedCourses.length > 0 ? `${courses.length} total courses` : "Keep going!",
     },
@@ -405,6 +411,8 @@ export default function Dashboard() {
       value: totalCertificates,
       icon: Award,
       color: "text-yellow-500",
+      iconBg: "bg-yellow-100 dark:bg-yellow-900/30",
+      accent: "#EAB308",
       href: "/shishya/certificates",
       subtitle: totalCertificates > 0 ? "Verified credentials" : "Earn your first",
     },
@@ -413,21 +421,23 @@ export default function Dashboard() {
       value: passedTests,
       icon: ClipboardCheck,
       color: "text-purple-500",
+      iconBg: "bg-purple-100 dark:bg-purple-900/30",
+      accent: "#8B5CF6",
       href: "/shishya/certificates",
       subtitle: passedTests > 0 ? `${Object.keys(allTestAttempts).length} attempted` : "Take a test",
     },
   ];
 
   const quickLinks = [
-    { title: "My Learnings", icon: Library, href: "/shishya/my-learnings" },
-    { title: "Courses", icon: BookOpen, href: "/courses" },
-    { title: "Projects", icon: FolderOpen, href: "/shishya/projects" },
-    { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests" },
-    { title: "Labs", icon: Code2, href: "/shishya/labs" },
-    { title: "Marksheet", icon: GraduationCap, href: "/shishya/marksheet" },
-    { title: "Certificates", icon: Award, href: "/shishya/certificates" },
-    { title: "Portfolio", icon: User, href: "/shishya/profile" },
-    { title: "Udyog", icon: Briefcase, href: "/shishya/udyog/hub" },
+    { title: "My Learnings", icon: Library, href: "/shishya/my-learnings", color: "text-cyan-500 dark:text-cyan-400" },
+    { title: "Courses", icon: BookOpen, href: "/courses", color: "text-blue-500 dark:text-blue-400" },
+    { title: "Projects", icon: FolderOpen, href: "/shishya/projects", color: "text-violet-500 dark:text-violet-400" },
+    { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests", color: "text-amber-500 dark:text-amber-400" },
+    { title: "Labs", icon: Code2, href: "/shishya/labs", color: "text-emerald-500 dark:text-emerald-400" },
+    { title: "Marksheet", icon: GraduationCap, href: "/shishya/marksheet", color: "text-teal-500 dark:text-teal-400" },
+    { title: "Certificates", icon: Award, href: "/shishya/certificates", color: "text-yellow-500 dark:text-yellow-400" },
+    { title: "Portfolio", icon: User, href: "/shishya/profile", color: "text-pink-500 dark:text-pink-400" },
+    { title: "Udyog", icon: Briefcase, href: "/shishya/udyog/hub", color: "text-orange-500 dark:text-orange-400" },
   ];
 
   if (coursesLoading) {
@@ -499,11 +509,11 @@ export default function Dashboard() {
                     {quickLinks.map((link) => (
                       <Link key={link.title} href={link.href}>
                         <div
-                          className="flex flex-col items-center gap-1 cursor-pointer hover-elevate rounded-lg p-2 dark:hover:bg-white/[0.05] transition-colors"
+                          className="flex flex-col items-center gap-1 cursor-pointer hover-elevate rounded-xl p-2 transition-all group"
                           data-testid={`quick-link-${link.title.toLowerCase()}`}
                         >
-                          <div className="p-2 rounded-full bg-background dark:bg-white/[0.06] dark:border dark:border-white/10">
-                            <link.icon className="w-4 h-4 text-muted-foreground dark:text-cyan-400/70" />
+                          <div className="p-2 rounded-xl bg-background dark:bg-white/[0.05] border border-transparent group-hover:border-white/10 transition-all">
+                            <link.icon className={`w-4 h-4 ${link.color}`} />
                           </div>
                           <span className="text-[10px] text-muted-foreground text-center leading-tight truncate w-full">{link.title}</span>
                         </div>
@@ -526,23 +536,18 @@ export default function Dashboard() {
             <motion.div key={stat.title} variants={staggerItem}>
               <Link href={stat.href}>
                 <Card 
-                  className="hover-elevate cursor-pointer transition-all"
+                  className="hover-elevate cursor-pointer transition-all overflow-hidden"
                   data-testid={`stat-${stat.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  style={{ borderTop: `2px solid ${stat.accent}` }}
                 >
-                  <CardContent className="pt-5 pb-4">
+                  <CardContent className="pt-4 pb-4">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground truncate">{stat.title}</p>
-                        <p className="text-2xl sm:text-3xl font-bold mt-0.5">{stat.value}</p>
+                        <p className="text-xs text-muted-foreground truncate font-medium">{stat.title}</p>
+                        <p className="text-2xl sm:text-3xl font-bold mt-0.5 tracking-tight">{stat.value}</p>
                         <p className="text-[10px] text-muted-foreground/70 mt-0.5 truncate">{stat.subtitle}</p>
                       </div>
-                      <div className={`p-2 rounded-lg shrink-0 ${
-                        stat.title === "Credits" ? "bg-amber-100 dark:bg-amber-900/30" :
-                        stat.title === "In Progress" ? "bg-blue-100 dark:bg-blue-900/30" :
-                        stat.title === "Completed" ? "bg-green-100 dark:bg-green-900/30" :
-                        stat.title === "Certificates" ? "bg-yellow-100 dark:bg-yellow-900/30" :
-                        "bg-purple-100 dark:bg-purple-900/30"
-                      }`}>
+                      <div className={`p-2.5 rounded-xl shrink-0 ${stat.iconBg}`}>
                         <stat.icon className={`w-5 h-5 ${stat.color}`} />
                       </div>
                     </div>

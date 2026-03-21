@@ -353,6 +353,21 @@ function HeroSection() {
                 </>
               )}
             </div>
+
+            {/* Social proof stats row */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2" data-testid="hero-social-proof">
+              {[
+                { value: "25K+", label: "Students" },
+                { value: "50+", label: "Courses" },
+                { value: "IIT", label: "Alumni Designed" },
+                { value: "100%", label: "Verified Certs" },
+              ].map((stat, i) => (
+                <div key={i} className="flex flex-col items-center lg:items-start">
+                  <span className="text-lg font-bold" style={{ color: C.teal, fontFamily: "var(--font-display)" }}>{stat.value}</span>
+                  <span className="text-xs" style={{ color: C.textSecondary }}>{stat.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col items-center justify-center">
@@ -409,6 +424,10 @@ function JourneySection() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
+            How It Works
+          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-4"
             style={{
@@ -474,6 +493,10 @@ function FeaturesSection() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+            style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
+            Platform Features
+          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-4"
             style={{
@@ -1105,7 +1128,11 @@ function AISection() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+              style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
+              AI-Powered Learning
+            </div>
+          <h2
               className="text-2xl md:text-3xl font-bold"
               style={{
                 fontFamily: "var(--font-display)",
@@ -1192,6 +1219,10 @@ function TestimonialsSection() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#FBBF24" }}>
+            Student Reviews
+          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-4"
             style={{
@@ -1248,6 +1279,10 @@ function FAQSection() {
     <section className="relative py-20 md:py-24 overflow-hidden">
       <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
+            FAQ
+          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-4"
             style={{

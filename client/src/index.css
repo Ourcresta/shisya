@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   GLOBAL POLISH — scroll, typography, scrollbar
+   ============================================= */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Elegant custom scrollbar (webkit) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.25);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148,163,184,0.45);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.25) transparent;
+}
+
+/* Text selection */
+::selection {
+  background: rgba(0,245,255,0.25);
+  color: inherit;
+}
+.dark ::selection {
+  background: rgba(34,211,238,0.3);
+}
+
+/* Smooth image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* ============================================
    MULTI-THEME SYSTEM
    Themes: neon, cyberpunk, minimal, ocean, sunset
@@ -1127,7 +1187,9 @@ html.dark body {
 }
 
 .auth-navbar-dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 0.85rem;
   font-size: 0.82rem;
   font-weight: 500;
@@ -1283,6 +1345,155 @@ html.dark body {
 
 .auth-navbar-login {
   background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(0,220,224,0.1));
+}
+
+/* ── Landing Navbar Mobile Hamburger ── */
+.landing-nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,220,224,0.15);
+  background: rgba(0,220,224,0.06);
+  color: rgba(200,220,240,0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+.landing-nav-hamburger:hover {
+  background: rgba(0,220,224,0.12);
+  border-color: rgba(0,220,224,0.3);
+  color: #00dce0;
+}
+
+/* Mobile backdrop */
+.landing-nav-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Mobile slide-down panel */
+.landing-nav-mobile-menu {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: rgba(7,12,26,0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,220,224,0.12);
+  box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6);
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  padding: 1rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: slideDownMenu 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes slideDownMenu {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.landing-nav-mobile-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(0,220,224,0.05);
+  border: 1px solid rgba(0,220,224,0.1);
+  margin-bottom: 0.5rem;
+}
+
+.landing-nav-mobile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.landing-nav-mobile-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148,163,184,0.5);
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.landing-nav-mobile-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(200,220,240,0.75);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.landing-nav-mobile-item:hover {
+  background: rgba(0,220,224,0.07);
+  color: #00dce0;
+}
+
+.landing-nav-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 0.5rem;
+}
+
+.landing-nav-mobile-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: linear-gradient(135deg, #00dce0, #06b6d4);
+  color: #060D1F;
+  transition: opacity 0.2s ease;
+}
+.landing-nav-mobile-btn-primary:hover { opacity: 0.9; }
+
+.landing-nav-mobile-btn-ghost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: rgba(255,255,255,0.04);
+  color: rgba(200,220,240,0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.landing-nav-mobile-btn-ghost:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(200,220,240,0.9);
 }
 
 .auth-page-wrapper {
@@ -2211,6 +2422,9 @@ html.dark body {
 @media (max-width: 900px) {
   .auth-navbar-links {
     display: none;
+  }
+  .landing-nav-hamburger {
+    display: flex;
   }
 
   .auth-page-wrapper {
