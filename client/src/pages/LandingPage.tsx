@@ -417,13 +417,21 @@ function HeroSection() {
   );
 }
 
+const journeyColors = [
+  { accent: "#00F5FF", glow: "rgba(0,245,255,0.18)", bg: "rgba(0,245,255,0.07)", border: "rgba(0,245,255,0.22)", text: "#00F5FF" },
+  { accent: "#A78BFA", glow: "rgba(167,139,250,0.18)", bg: "rgba(167,139,250,0.07)", border: "rgba(167,139,250,0.22)", text: "#A78BFA" },
+  { accent: "#34D399", glow: "rgba(52,211,153,0.18)", bg: "rgba(52,211,153,0.07)", border: "rgba(52,211,153,0.22)", text: "#34D399" },
+  { accent: "#FBBF24", glow: "rgba(251,191,36,0.18)", bg: "rgba(251,191,36,0.07)", border: "rgba(251,191,36,0.22)", text: "#FBBF24" },
+  { accent: "#F472B6", glow: "rgba(244,114,182,0.18)", bg: "rgba(244,114,182,0.07)", border: "rgba(244,114,182,0.22)", text: "#F472B6" },
+];
+
 function JourneySection() {
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-20 md:py-28 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
+        <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
             How It Works
@@ -445,49 +453,116 @@ function JourneySection() {
             Your complete learning journey in 5 simple steps
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {journeySteps.map((step, index) => (
-            <GlassCard
-              key={step.title}
-              className="relative flex flex-col items-center text-center p-6"
-              data-testid={`card-journey-step-${index + 1}`}
-            >
-              <div
-                className="absolute -top-3 left-4 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{
-                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                  color: C.bgPrimary,
-                  boxShadow: `0 0 12px rgba(0,245,255,0.4)`,
-                }}
-              >
-                {index + 1}
+
+        {/* Desktop: horizontal timeline */}
+        <div className="hidden lg:flex items-stretch gap-0 relative">
+          {journeySteps.map((step, index) => {
+            const col = journeyColors[index];
+            const isLast = index === journeySteps.length - 1;
+            return (
+              <div key={step.title} className="flex-1 flex items-stretch relative" data-testid={`card-journey-step-${index + 1}`}>
+                <div
+                  className="relative flex flex-col flex-1 rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                  style={{
+                    background: `linear-gradient(160deg, ${col.bg}, rgba(255,255,255,0.02))`,
+                    border: `1px solid ${col.border}`,
+                    boxShadow: `0 0 30px -10px ${col.glow}`,
+                    margin: "0 6px",
+                  }}
+                >
+                  {/* Watermark number */}
+                  <div
+                    className="absolute -right-2 -bottom-4 text-[90px] font-black leading-none select-none pointer-events-none"
+                    style={{ color: col.accent, opacity: 0.07, fontFamily: "var(--font-display)" }}
+                  >
+                    {index + 1}
+                  </div>
+                  {/* Step badge */}
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-5 shrink-0"
+                    style={{ background: col.accent, color: "#050A18", boxShadow: `0 0 14px ${col.glow}` }}
+                  >
+                    {index + 1}
+                  </div>
+                  {/* Icon */}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: col.bg, border: `1px solid ${col.border}` }}
+                  >
+                    <step.icon className="w-6 h-6" style={{ color: col.accent }} />
+                  </div>
+                  <h3 className="text-base font-bold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                    {step.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>{step.description}</p>
+
+                  {/* Connector line (right side) */}
+                  {!isLast && (
+                    <div
+                      className="absolute top-1/2 -right-[7px] -translate-y-1/2 z-10 w-3 h-3 rounded-full"
+                      style={{ background: col.accent, boxShadow: `0 0 8px ${col.accent}` }}
+                    />
+                  )}
+                </div>
+                {/* Dotted connector between cards */}
+                {!isLast && (
+                  <div className="absolute top-1/2 right-0 -translate-y-1/2 w-3 flex items-center justify-center z-20">
+                    <div style={{ width: 2, height: 24, borderLeft: `2px dashed ${col.accent}`, opacity: 0.35 }} />
+                  </div>
+                )}
               </div>
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                style={{
-                  background: "rgba(0,245,255,0.1)",
-                  border: "1px solid rgba(0,245,255,0.2)",
-                }}
-              >
-                <step.icon className="w-7 h-7" style={{ color: C.teal }} />
+            );
+          })}
+        </div>
+
+        {/* Mobile: vertical stacked timeline */}
+        <div className="flex lg:hidden flex-col gap-4 relative">
+          <div className="absolute left-6 top-0 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, rgba(0,245,255,0.3), rgba(244,114,182,0.3))" }} />
+          {journeySteps.map((step, index) => {
+            const col = journeyColors[index];
+            return (
+              <div key={step.title} className="flex gap-4 relative pl-14" data-testid={`card-journey-step-mobile-${index + 1}`}>
+                {/* Number bubble on the timeline */}
+                <div
+                  className="absolute left-2.5 top-5 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10"
+                  style={{ background: col.accent, color: "#050A18", boxShadow: `0 0 12px ${col.glow}` }}
+                >
+                  {index + 1}
+                </div>
+                <div
+                  className="flex-1 rounded-2xl p-4 overflow-hidden"
+                  style={{ background: col.bg, border: `1px solid ${col.border}` }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `${col.accent}18`, border: `1px solid ${col.border}` }}
+                    >
+                      <step.icon className="w-4 h-4" style={{ color: col.accent }} />
+                    </div>
+                    <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+                      {step.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                {step.title}
-              </h3>
-              <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
-            </GlassCard>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-function FeaturesSection() {
-  const iconColors = [C.teal, C.purple, C.success, C.warning, C.teal, C.purple, C.success, C.warning];
+const featureAccents = [
+  "#00F5FF", "#A78BFA", "#34D399", "#FBBF24",
+  "#F472B6", "#60A5FA", "#FB923C", "#A3E635",
+];
 
+function FeaturesSection() {
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-20 md:py-28 overflow-hidden">
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
@@ -513,33 +588,52 @@ function FeaturesSection() {
             Everything you need to master new skills and advance your career
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {features.map((feature, index) => {
-            const accent = iconColors[index % iconColors.length];
+            const accent = featureAccents[index % featureAccents.length];
             return (
-              <GlassCard
+              <div
                 key={feature.title}
-                className="p-6"
+                className="relative group rounded-2xl p-5 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderLeft: `3px solid ${accent}`,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = `${accent}09`;
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 28px -8px ${accent}33`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                }}
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-                    style={{
-                      background: `${accent}15`,
-                      border: `1px solid ${accent}30`,
-                    }}
-                  >
-                    <feature.icon className="w-6 h-6" style={{ color: accent }} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm" style={{ color: C.textSecondary }}>{feature.description}</p>
-                  </div>
+                {/* Giant ghost icon watermark */}
+                <div
+                  className="absolute -right-3 -bottom-3 pointer-events-none select-none"
+                  style={{ opacity: 0.06 }}
+                >
+                  <feature.icon style={{ width: 80, height: 80, color: accent }} />
                 </div>
-              </GlassCard>
+
+                {/* Icon badge */}
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
+                >
+                  <feature.icon className="w-5 h-5" style={{ color: accent }} />
+                </div>
+
+                <h3 className="font-semibold text-white mb-1.5 text-sm" style={{ fontFamily: "var(--font-display)" }}>
+                  {feature.title}
+                </h3>
+                <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                  {feature.description}
+                </p>
+              </div>
             );
           })}
         </div>
