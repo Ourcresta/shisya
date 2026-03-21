@@ -85,19 +85,19 @@ const testimonials = [
   {
     name: "Priya Sharma",
     role: "Software Developer",
-    content: "OurShiksha helped me transition from a non-tech background to landing my first developer job. The structured courses and hands-on projects made all the difference.",
+    content: "Transitioned from non-tech to landing my first dev job — OurShiksha's structured courses made all the difference.",
     rating: 5,
   },
   {
     name: "Rahul Kumar",
     role: "Data Analyst",
-    content: "The Python for Data Science course was exactly what I needed. The guided labs gave me practical experience that I could apply immediately at work.",
+    content: "The guided labs gave me real, applicable experience. Exactly what I needed to break into data analytics.",
     rating: 5,
   },
   {
     name: "Ananya Reddy",
     role: "Full Stack Developer",
-    content: "What I love about OurShiksha is the certificate verification system. Employers can verify my credentials instantly, which has opened many doors for me.",
+    content: "Verified certificates that employers trust instantly. My credential QR code has opened more doors than my degree.",
     rating: 5,
   },
 ];
@@ -105,27 +105,27 @@ const testimonials = [
 const faqItems = [
   {
     question: "What is OurShiksha?",
-    answer: "OurShiksha is a comprehensive skill-learning platform designed for students and professionals. We offer structured courses, hands-on labs, real projects, and verified certificates to help you master new skills and advance your career.",
+    answer: "A skill-learning platform offering structured courses, hands-on labs, real projects, and verified certificates to help you grow your career.",
   },
   {
     question: "How do learning credits work?",
-    answer: "When you sign up, you receive 500 free learning credits. You can use these credits to enroll in paid courses. Some courses are completely free. As you complete courses, you can earn more credits through our rewards system.",
+    answer: "Sign up and receive 500 free credits instantly. Use them to enroll in paid courses — some courses are completely free.",
   },
   {
     question: "Are the certificates industry-recognized?",
-    answer: "Yes! Our certificates come with QR codes for instant verification. Employers and recruiters can verify your credentials on our public verification page, ensuring authenticity and building trust.",
+    answer: "Yes. Each certificate has a unique QR code that lets employers instantly verify your credentials on our public verification page.",
   },
   {
     question: "Can I learn at my own pace?",
-    answer: "Absolutely! All our courses are self-paced. You can learn whenever it suits you, track your progress, and pick up right where you left off. Your progress is saved automatically.",
+    answer: "Yes — all courses are fully self-paced. Your progress is saved automatically so you can pick up exactly where you left off.",
   },
   {
     question: "What is Usha AI Tutor?",
-    answer: "Usha is our AI-powered learning assistant integrated into every lesson, lab, and project. Usha helps you understand concepts by providing hints and explanations without giving away direct answers, promoting genuine learning.",
+    answer: "Usha is an AI assistant built into every lesson, lab, and project. She guides you with smart hints instead of direct answers, ensuring genuine learning.",
   },
   {
     question: "How do I get started?",
-    answer: "Simply sign up for a free account to receive 500 learning credits. Browse our course catalog, enroll in a course that interests you, and start learning immediately. No credit card required!",
+    answer: "Sign up for free, receive 500 credits, and enroll in any course. No credit card required.",
   },
 ];
 
@@ -221,7 +221,7 @@ function HeroSection() {
   const current = modes[mode];
 
   return (
-    <section className="relative overflow-hidden py-14 md:py-20">
+    <section className="relative overflow-hidden py-10 md:py-16">
       <SectionGlow position="top-right" color={C.teal} />
       <SectionGlow position="bottom-left" color={C.purple} />
 
@@ -278,13 +278,11 @@ function HeroSection() {
             </div>
 
             <p
-              className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0"
-              style={{ color: C.textSecondary, lineHeight: "1.8" }}
+              className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0"
+              style={{ color: C.textSecondary, lineHeight: "1.7" }}
               data-testid="text-hero-subheading"
             >
-              OurShiksha is a complete skill-learning platform where students learn concepts,
-              practice with hands-on labs, build real projects, pass assessments, and earn
-              verified certificates.
+              Learn skills, build real projects, pass assessments, and earn verified certificates — all in one place.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               {user ? (
@@ -418,17 +416,17 @@ const journeyColors = [
 
 function JourneySection() {
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
             How It Works
           </div>
           <h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-2"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -438,14 +436,12 @@ function JourneySection() {
             }}
             data-testid="text-journey-title"
           >
-            How OurShiksha Works
+            Your Learning Journey
           </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Your complete learning journey in 5 simple steps
-          </p>
+          <p style={{ color: C.textSecondary }} className="text-sm">5 steps from zero to certified</p>
         </div>
 
-        {/* Desktop: horizontal timeline */}
+        {/* Desktop: horizontal compact timeline */}
         <div className="hidden lg:flex items-stretch gap-0 relative">
           {journeySteps.map((step, index) => {
             const col = journeyColors[index];
@@ -453,52 +449,51 @@ function JourneySection() {
             return (
               <div key={step.title} className="flex-1 flex items-stretch relative" data-testid={`card-journey-step-${index + 1}`}>
                 <div
-                  className="relative flex flex-col flex-1 rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                  className="relative flex flex-col flex-1 rounded-xl p-4 overflow-hidden transition-all duration-300 hover:-translate-y-1"
                   style={{
                     background: `linear-gradient(160deg, ${col.bg}, rgba(255,255,255,0.02))`,
                     border: `1px solid ${col.border}`,
-                    boxShadow: `0 0 30px -10px ${col.glow}`,
-                    margin: "0 6px",
+                    boxShadow: `0 0 20px -10px ${col.glow}`,
+                    margin: "0 5px",
                   }}
                 >
                   {/* Watermark number */}
                   <div
-                    className="absolute -right-2 -bottom-4 text-[90px] font-black leading-none select-none pointer-events-none"
-                    style={{ color: col.accent, opacity: 0.07, fontFamily: "var(--font-display)" }}
+                    className="absolute -right-1 -bottom-3 text-[72px] font-black leading-none select-none pointer-events-none"
+                    style={{ color: col.accent, opacity: 0.06, fontFamily: "var(--font-display)" }}
                   >
                     {index + 1}
                   </div>
-                  {/* Step badge */}
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-5 shrink-0"
-                    style={{ background: col.accent, color: "#050A18", boxShadow: `0 0 14px ${col.glow}` }}
-                  >
-                    {index + 1}
+                  {/* Step badge + icon row */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{ background: col.accent, color: "#050A18" }}
+                    >
+                      {index + 1}
+                    </div>
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                      style={{ background: col.bg, border: `1px solid ${col.border}` }}
+                    >
+                      <step.icon className="w-4 h-4" style={{ color: col.accent }} />
+                    </div>
                   </div>
-                  {/* Icon */}
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: col.bg, border: `1px solid ${col.border}` }}
-                  >
-                    <step.icon className="w-6 h-6" style={{ color: col.accent }} />
-                  </div>
-                  <h3 className="text-base font-bold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                  <h3 className="text-sm font-bold mb-1 text-white" style={{ fontFamily: "var(--font-display)" }}>
                     {step.title}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>{step.description}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>{step.description}</p>
 
-                  {/* Connector line (right side) */}
                   {!isLast && (
                     <div
-                      className="absolute top-1/2 -right-[7px] -translate-y-1/2 z-10 w-3 h-3 rounded-full"
-                      style={{ background: col.accent, boxShadow: `0 0 8px ${col.accent}` }}
+                      className="absolute top-1/2 -right-[6px] -translate-y-1/2 z-10 w-2.5 h-2.5 rounded-full"
+                      style={{ background: col.accent, boxShadow: `0 0 6px ${col.accent}` }}
                     />
                   )}
                 </div>
-                {/* Dotted connector between cards */}
                 {!isLast && (
-                  <div className="absolute top-1/2 right-0 -translate-y-1/2 w-3 flex items-center justify-center z-20">
-                    <div style={{ width: 2, height: 24, borderLeft: `2px dashed ${col.accent}`, opacity: 0.35 }} />
+                  <div className="absolute top-1/2 right-0 -translate-y-1/2 w-2.5 flex items-center justify-center z-20">
+                    <div style={{ width: 2, height: 20, borderLeft: `2px dashed ${col.accent}`, opacity: 0.3 }} />
                   </div>
                 )}
               </div>
@@ -506,36 +501,26 @@ function JourneySection() {
           })}
         </div>
 
-        {/* Mobile: vertical stacked timeline */}
-        <div className="flex lg:hidden flex-col gap-4 relative">
-          <div className="absolute left-6 top-0 bottom-0 w-px" style={{ background: "linear-gradient(to bottom, rgba(0,245,255,0.3), rgba(244,114,182,0.3))" }} />
+        {/* Mobile: compact horizontal scrollable pills */}
+        <div className="flex lg:hidden gap-3 overflow-x-auto pb-2 -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
           {journeySteps.map((step, index) => {
             const col = journeyColors[index];
             return (
-              <div key={step.title} className="flex gap-4 relative pl-14" data-testid={`card-journey-step-mobile-${index + 1}`}>
-                {/* Number bubble on the timeline */}
+              <div
+                key={step.title}
+                className="flex-shrink-0 flex items-center gap-2 rounded-xl px-3 py-2.5"
+                style={{ background: col.bg, border: `1px solid ${col.border}`, minWidth: "120px" }}
+                data-testid={`card-journey-step-mobile-${index + 1}`}
+              >
                 <div
-                  className="absolute left-2.5 top-5 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10"
-                  style={{ background: col.accent, color: "#050A18", boxShadow: `0 0 12px ${col.glow}` }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{ background: col.accent, color: "#050A18" }}
                 >
                   {index + 1}
                 </div>
-                <div
-                  className="flex-1 rounded-2xl p-4 overflow-hidden"
-                  style={{ background: col.bg, border: `1px solid ${col.border}` }}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div
-                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: `${col.accent}18`, border: `1px solid ${col.border}` }}
-                    >
-                      <step.icon className="w-4 h-4" style={{ color: col.accent }} />
-                    </div>
-                    <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                      {step.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
+                <div>
+                  <div className="text-xs font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{step.title}</div>
+                  <div className="text-[10px]" style={{ color: C.textSecondary }}>{step.description}</div>
                 </div>
               </div>
             );
@@ -553,18 +538,18 @@ const featureAccents = [
 
 function FeaturesSection() {
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
             style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
             Platform Features
           </div>
           <h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-2"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -574,28 +559,26 @@ function FeaturesSection() {
             }}
             data-testid="text-features-title"
           >
-            What Students Get
+            Everything You Need
           </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Everything you need to master new skills and advance your career
-          </p>
+          <p style={{ color: C.textSecondary }} className="text-sm">8 pillars of a complete learning experience</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
           {features.map((feature, index) => {
             const accent = featureAccents[index % featureAccents.length];
             return (
               <div
                 key={feature.title}
-                className="relative group rounded-2xl p-5 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                className="relative group rounded-xl p-3.5 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-3"
                 style={{
                   background: "rgba(255,255,255,0.03)",
                   border: "1px solid rgba(255,255,255,0.07)",
-                  borderLeft: `3px solid ${accent}`,
+                  borderLeft: `2px solid ${accent}`,
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = `${accent}09`;
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 28px -8px ${accent}33`;
+                  (e.currentTarget as HTMLElement).style.background = `${accent}08`;
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px -8px ${accent}40`;
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
@@ -603,28 +586,20 @@ function FeaturesSection() {
                 }}
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {/* Giant ghost icon watermark */}
                 <div
-                  className="absolute -right-3 -bottom-3 pointer-events-none select-none"
-                  style={{ opacity: 0.06 }}
-                >
-                  <feature.icon style={{ width: 80, height: 80, color: accent }} />
-                </div>
-
-                {/* Icon badge */}
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                   style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
                 >
-                  <feature.icon className="w-5 h-5" style={{ color: accent }} />
+                  <feature.icon className="w-4 h-4" style={{ color: accent }} />
                 </div>
-
-                <h3 className="font-semibold text-white mb-1.5 text-sm" style={{ fontFamily: "var(--font-display)" }}>
-                  {feature.title}
-                </h3>
-                <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
-                  {feature.description}
-                </p>
+                <div>
+                  <h3 className="font-medium text-white text-xs leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                    {feature.title}
+                  </h3>
+                  <p className="text-[10px] mt-0.5" style={{ color: C.textSecondary }}>
+                    {feature.description}
+                  </p>
+                </div>
               </div>
             );
           })}
@@ -774,7 +749,7 @@ function CourseGroupsMarquee() {
   const durationSec = items.length * 6;
 
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="center" color={C.purple} />
       <SectionGlow position="top-right" color={C.teal} />
 
@@ -793,23 +768,22 @@ function CourseGroupsMarquee() {
       `}</style>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
           <div className="text-center">
             <h2
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl md:text-3xl font-bold mb-1"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.01em",
               }}
               data-testid="text-combo-title"
             >
-              Explore Our Learning Tracks & Programs
+              Tracks & Programs
             </h2>
-            <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-              Curated bundles of courses designed to take you from beginner to job-ready
-            </p>
+            <p style={{ color: C.textSecondary }} className="text-sm">Curated paths from beginner to job-ready</p>
           </div>
         </div>
 
@@ -976,10 +950,10 @@ function CoursePreviewSection() {
 
   if (isLoading) {
     return (
-      <section className="relative py-12 md:py-16 overflow-hidden">
+      <section className="relative py-8 md:py-12 overflow-hidden">
         <SectionGlow position="center" color={C.teal} />
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="h-8 w-56 rounded-xl mx-auto mb-4 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
             <div className="h-4 w-80 rounded mx-auto animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
           </div>
@@ -1004,7 +978,7 @@ function CoursePreviewSection() {
   const durationSec = Math.max(25, items.length * 4);
 
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <style>{`
@@ -1022,23 +996,22 @@ function CoursePreviewSection() {
       `}</style>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
           <div className="text-center">
             <h2
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-2xl md:text-3xl font-bold mb-1"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.01em",
               }}
               data-testid="text-preview-title"
             >
               Featured Courses
             </h2>
-            <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-              Start your learning journey with our carefully crafted courses
-            </p>
+            <p style={{ color: C.textSecondary }} className="text-sm">Scroll to explore — hover to pause</p>
           </div>
         </div>
 
@@ -1149,68 +1122,76 @@ function CoursePreviewSection() {
 
 function AISection() {
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+        <div className="grid lg:grid-cols-2 gap-10 items-center">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
               style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
               AI-Powered Learning
             </div>
-          <h2
-              className="text-3xl md:text-4xl font-bold"
+            <h2
+              className="text-2xl md:text-3xl font-bold"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                letterSpacing: "-0.01em",
+                letterSpacing: "-0.02em",
               }}
               data-testid="text-ai-title"
             >
-              Meet Usha, Your AI Learning Companion
+              Meet Usha, Your AI Tutor
             </h2>
-            <p className="text-lg" style={{ color: C.textSecondary, lineHeight: "1.8" }}>
-              Usha is integrated into every lesson, lab, and project to help you learn effectively.
-              Get instant guidance without direct answers, promoting genuine understanding.
+            <p className="text-sm" style={{ color: C.textSecondary, lineHeight: "1.7" }}>
+              Built into every lesson, lab, and project. Usha gives you smart hints — not direct answers — so you develop real understanding.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {aiFeatures.map((feature) => (
                 <GlassCard
                   key={feature.title}
                   className="p-3"
                   data-testid={`feature-ai-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: `linear-gradient(135deg, rgba(0,245,255,0.15), rgba(124,58,237,0.1))`,
-                        border: "1px solid rgba(0,245,255,0.2)",
+                        background: `linear-gradient(135deg, rgba(0,245,255,0.12), rgba(124,58,237,0.08))`,
+                        border: "1px solid rgba(0,245,255,0.18)",
                       }}
                     >
-                      <feature.icon className="w-5 h-5" style={{ color: C.teal }} />
+                      <feature.icon className="w-4 h-4" style={{ color: C.teal }} />
                     </div>
                     <div>
-                      <h4 className="font-medium text-sm text-white">{feature.title}</h4>
-                      <p className="text-xs" style={{ color: C.textSecondary }}>{feature.description}</p>
+                      <h4 className="font-medium text-xs text-white">{feature.title}</h4>
+                      <p className="text-[10px]" style={{ color: C.textSecondary }}>{feature.description}</p>
                     </div>
                   </div>
                 </GlassCard>
               ))}
             </div>
           </div>
-          <div className="relative">
-            <GlassCard className="aspect-square max-w-md mx-auto p-8 flex items-center justify-center" hover={false}>
+          <div className="relative flex items-center justify-center">
+            <div
+              className="relative rounded-2xl overflow-hidden flex items-center justify-center"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(0,245,255,0.12)",
+                padding: "32px",
+                width: "100%",
+                maxWidth: "340px",
+              }}
+            >
               <div
-                className="relative w-48 h-48 md:w-56 md:h-56 rounded-full flex items-center justify-center overflow-hidden animate-float"
+                className="relative w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden animate-float"
                 style={{
                   background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.teal})`,
-                  boxShadow: `0 0 50px -10px rgba(0,245,255,0.4)`,
-                  border: `4px solid rgba(0,245,255,0.3)`,
+                  boxShadow: `0 0 40px -8px rgba(0,245,255,0.4)`,
+                  border: `3px solid rgba(0,245,255,0.3)`,
                 }}
               >
                 <img
@@ -1219,21 +1200,21 @@ function AISection() {
                   className="w-full h-full object-cover object-center scale-110"
                   data-testid="img-usha-avatar-landing"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/30 to-transparent pointer-events-none" />
               </div>
-              <GlassCard
-                className="absolute top-4 right-4 md:top-8 md:right-8 p-3 md:p-4"
-                hover={false}
+              {/* Floating chat bubbles */}
+              <div
+                className="absolute top-4 right-4 rounded-xl px-3 py-1.5"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
               >
-                <p className="text-sm md:text-base font-medium text-white">Need help with this concept?</p>
-              </GlassCard>
-              <GlassCard
-                className="absolute bottom-4 left-4 md:bottom-8 md:left-8 p-3 md:p-4"
-                hover={false}
+                <p className="text-xs font-medium text-white">Need a hint? 💡</p>
+              </div>
+              <div
+                className="absolute bottom-4 left-4 rounded-xl px-3 py-1.5"
+                style={{ background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.15)" }}
               >
-                <p className="text-sm md:text-base" style={{ color: C.textSecondary }}>Ask me anything!</p>
-              </GlassCard>
-            </GlassCard>
+                <p className="text-xs" style={{ color: C.teal }}>Ask Usha anytime</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1243,57 +1224,54 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="center" color={C.purple} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
             style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#FBBF24" }}>
             Student Reviews
           </div>
           <h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-2"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.01em",
             }}
             data-testid="text-testimonials-title"
           >
             What Our Students Say
           </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Hear from learners who have transformed their careers with OurShiksha
-          </p>
+          <p style={{ color: C.textSecondary }} className="text-sm">Real stories from real learners</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {testimonials.map((testimonial, index) => (
             <GlassCard
               key={testimonial.name}
-              className="relative p-6"
+              className="relative p-4"
               data-testid={`card-testimonial-${index + 1}`}
             >
-              <div className="absolute -top-3 left-6">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.3)" }}
-                >
-                  <Quote className="w-4 h-4" style={{ color: C.teal }} />
-                </div>
-              </div>
-              <div className="flex gap-1 mb-4 pt-2">
+              <div className="flex gap-1 mb-3">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="mb-4 text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="mb-3 text-sm leading-relaxed" style={{ color: C.textSecondary }}>
                 "{testimonial.content}"
               </p>
-              <div className="pt-4" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
-                <p className="font-semibold text-sm text-white">{testimonial.name}</p>
-                <p className="text-xs" style={{ color: C.textSecondary }}>{testimonial.role}</p>
+              <div className="pt-3 flex items-center gap-2" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: "rgba(0,245,255,0.12)", color: C.teal }}>
+                  {testimonial.name[0]}
+                </div>
+                <div>
+                  <p className="font-semibold text-xs text-white">{testimonial.name}</p>
+                  <p className="text-[10px]" style={{ color: C.textSecondary }}>{testimonial.role}</p>
+                </div>
               </div>
             </GlassCard>
           ))}
@@ -1305,15 +1283,15 @@ function TestimonialsSection() {
 
 function FAQSection() {
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
             FAQ
           </div>
           <h2
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-2"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -1324,9 +1302,7 @@ function FAQSection() {
           >
             Frequently Asked Questions
           </h2>
-          <p style={{ color: C.textSecondary }}>
-            Everything you need to know about OurShiksha
-          </p>
+          <p style={{ color: C.textSecondary }} className="text-sm">Common questions, clear answers</p>
         </div>
         <Accordion type="single" collapsible className="space-y-4" data-testid="accordion-faq">
           {faqItems.map((item, index) => (
@@ -1358,12 +1334,12 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-8 md:py-12 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10">
         <div
-          className="rounded-3xl p-10 md:p-14 text-center relative overflow-hidden"
+          className="rounded-3xl p-8 md:p-12 text-center relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.05) 100%)",
             border: "1px solid rgba(0,245,255,0.15)",
