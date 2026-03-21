@@ -221,7 +221,7 @@ function HeroSection() {
   const current = modes[mode];
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
+    <section className="relative overflow-hidden py-14 md:py-20">
       <SectionGlow position="top-right" color={C.teal} />
       <SectionGlow position="bottom-left" color={C.purple} />
 
@@ -418,23 +418,23 @@ const journeyColors = [
 
 function JourneySection() {
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
             How It Works
           </div>
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              letterSpacing: "-0.01em",
+              letterSpacing: "-0.02em",
             }}
             data-testid="text-journey-title"
           >
@@ -553,23 +553,24 @@ const featureAccents = [
 
 function FeaturesSection() {
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
             style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
             Platform Features
           </div>
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.02em",
             }}
             data-testid="text-features-title"
           >
@@ -773,7 +774,7 @@ function CourseGroupsMarquee() {
   const durationSec = items.length * 6;
 
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.purple} />
       <SectionGlow position="top-right" color={C.teal} />
 
@@ -792,10 +793,10 @@ function CourseGroupsMarquee() {
       `}</style>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8">
           <div className="text-center">
             <h2
-              className="text-2xl md:text-3xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
@@ -975,10 +976,10 @@ function CoursePreviewSection() {
 
   if (isLoading) {
     return (
-      <section className="relative py-20 md:py-24 overflow-hidden">
+      <section className="relative py-12 md:py-16 overflow-hidden">
         <SectionGlow position="center" color={C.teal} />
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="text-center mb-14">
+          <div className="text-center mb-8">
             <div className="h-8 w-56 rounded-xl mx-auto mb-4 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
             <div className="h-4 w-80 rounded mx-auto animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
           </div>
@@ -1003,7 +1004,7 @@ function CoursePreviewSection() {
   const durationSec = Math.max(25, items.length * 4);
 
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
       <style>{`
@@ -1021,10 +1022,10 @@ function CoursePreviewSection() {
       `}</style>
 
       <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8">
           <div className="text-center">
             <h2
-              className="text-2xl md:text-3xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -1148,7 +1149,7 @@ function CoursePreviewSection() {
 
 function AISection() {
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
@@ -1160,12 +1161,13 @@ function AISection() {
               AI-Powered Learning
             </div>
           <h2
-              className="text-2xl md:text-3xl font-bold"
+              className="text-3xl md:text-4xl font-bold"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.01em",
               }}
               data-testid="text-ai-title"
             >
@@ -1241,17 +1243,17 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.purple} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
             style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#FBBF24" }}>
             Student Reviews
           </div>
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -1303,15 +1305,15 @@ function TestimonialsSection() {
 
 function FAQSection() {
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-widest uppercase"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
             FAQ
           </div>
           <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4"
             style={{
               fontFamily: "var(--font-display)",
               background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -1356,37 +1358,53 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
+    <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
 
-      <div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative z-10">
-        <div className="flex justify-center mb-6">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center animate-float"
-            style={{
-              background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-              boxShadow: `0 0 30px -5px rgba(0,245,255,0.4)`,
-            }}
-          >
-            <GraduationCap className="w-8 h-8" style={{ color: C.bgPrimary }} />
-          </div>
-        </div>
-        <h2
-          className="text-2xl md:text-3xl font-bold mb-4"
+      <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10">
+        <div
+          className="rounded-3xl p-10 md:p-14 text-center relative overflow-hidden"
           style={{
-            fontFamily: "var(--font-display)",
-            background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.05) 100%)",
+            border: "1px solid rgba(0,245,255,0.15)",
+            boxShadow: "0 0 60px -20px rgba(0,245,255,0.2), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
-          data-testid="text-cta-title"
         >
-          Start your learning journey with OurShiksha today.
-        </h2>
-        <p className="mb-8 max-w-2xl mx-auto" style={{ color: C.textSecondary }}>
-          Join thousands of students mastering new skills and building their careers.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* Inner decorative glows */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
+            style={{ background: "rgba(0,245,255,0.07)" }} />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
+            style={{ background: "rgba(124,58,237,0.07)" }} />
+
+          <div className="relative z-10">
+            <div className="flex justify-center mb-5">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center animate-float"
+                style={{
+                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
+                  boxShadow: `0 0 28px -4px rgba(0,245,255,0.5)`,
+                }}
+              >
+                <GraduationCap className="w-7 h-7" style={{ color: C.bgPrimary }} />
+              </div>
+            </div>
+            <h2
+              className="text-3xl md:text-4xl font-bold mb-4"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.02em",
+              }}
+              data-testid="text-cta-title"
+            >
+              Start your learning journey today.
+            </h2>
+            <p className="mb-8 max-w-xl mx-auto text-base" style={{ color: C.textSecondary, lineHeight: "1.7" }}>
+              Join thousands of students mastering real skills, earning verified certificates, and launching careers — with OurShiksha.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           {user ? (
             <Link href="/shishya/dashboard">
               <button
@@ -1434,6 +1452,8 @@ function CTASection() {
               </Link>
             </>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
