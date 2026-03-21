@@ -6,7 +6,8 @@ import {
   Search, BookOpen, X, Mic, ChevronRight,
   Clock, Coins, Lock, Play, ArrowRight, Star,
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
-  Sparkles, Filter, UserPlus, LogIn, Layers, Trophy
+  Sparkles, Filter, UserPlus, LogIn, Layers, Trophy,
+  Users, GraduationCap, ChevronDown, BarChart3
 } from "lucide-react";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { Button } from "@/components/ui/button";
@@ -44,11 +45,15 @@ type SortOption = "default" | "title-asc" | "title-desc" | "price-low" | "price-
 const CATEGORIES = [
   { id: "all", label: "All Courses" },
   { id: "General", label: "General" },
+  { id: "Programming", label: "Programming" },
   { id: "AI & Data", label: "AI & Data" },
-  { id: "Web Development", label: "Web Dev" },
+  { id: "Data Science", label: "Data Science" },
+  { id: "Web Development", label: "Web Development" },
   { id: "Mobile Development", label: "Mobile" },
   { id: "DevOps", label: "DevOps" },
+  { id: "Cloud", label: "Cloud" },
   { id: "Career Skills", label: "Career" },
+  { id: "Business", label: "Business" },
 ];
 
 function StarRating({ rating }: { rating: number }) {
@@ -158,81 +163,69 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
 
       </div>
 
-      <div className="flex flex-col flex-1 p-4 gap-3">
-        <div>
-          <h3
-            className="text-base font-semibold leading-snug line-clamp-2 text-white"
-            style={{ fontFamily: "var(--font-display)" }}
-            data-testid={`text-course-title-${course.id}`}
-          >
-            {course.groupTitle || course.title}
-          </h3>
-          {rating > 0 && (
-            <div className="flex items-center gap-2 mt-1" data-testid={`rating-${course.id}`}>
-              <StarRating rating={rating} />
-              <span className="text-xs font-medium text-gray-400">{rating.toFixed(1)}</span>
-              {totalStudents > 0 && (
-                <span className="text-xs text-gray-500">({totalStudents.toLocaleString()} students)</span>
-              )}
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col flex-1 p-4 gap-2.5">
+        <h3
+          className="text-sm font-bold leading-snug line-clamp-2 text-white"
+          style={{ fontFamily: "var(--font-display)" }}
+          data-testid={`text-course-title-${course.id}`}
+        >
+          {course.groupTitle || course.title}
+        </h3>
+
+        {rating > 0 && (
+          <div className="flex items-center gap-2" data-testid={`rating-${course.id}`}>
+            <StarRating rating={rating} />
+            <span className="text-xs font-medium text-gray-400">{rating.toFixed(1)}</span>
+            {totalStudents > 0 && (
+              <span className="text-xs text-gray-500">({totalStudents.toLocaleString()})</span>
+            )}
+          </div>
+        )}
 
         {course.description && (
-          <p className="text-sm text-gray-400 line-clamp-2" data-testid={`text-course-description-${course.id}`}>
+          <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed" data-testid={`text-course-description-${course.id}`}>
             {course.description}
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
-          {course.duration && (
-            <span className="flex items-center gap-1" data-testid={`text-duration-${course.id}`}>
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              {course.duration}
-            </span>
-          )}
-          <LevelBadge level={course.level as any} />
-          {projectCount > 0 && (
-            <span className="flex items-center gap-1" data-testid={`text-projects-${course.id}`}>
-              <FolderKanban className="w-3.5 h-3.5" style={{ color: "#00F5FF" }} />
-              {projectCount} Project{projectCount !== 1 ? "s" : ""}
-            </span>
-          )}
-        </div>
+        {/* Level badge — prominent colored pill */}
+        <LevelBadge level={course.level as any} />
 
-        <div className="flex flex-wrap items-center gap-2">
-          {course.testRequired && (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af", border: "1px solid rgba(255,255,255,0.08)" }}
-              data-testid={`badge-certificate-${course.id}`}
-            >
-              <Award className="w-3 h-3 text-amber-400" />
-              Certificate
+        {/* Stats row: Credits + Projects + Duration */}
+        <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+          {!isFree && !isEnrolled && creditCost > 0 && (
+            <span className="flex items-center gap-1 font-medium" style={{ color: "#F59E0B" }} data-testid={`text-price-${course.id}`}>
+              <Coins className="w-3.5 h-3.5" />
+              {creditCost} Credits
             </span>
+          )}
+          {isFree && (
+            <span className="text-emerald-400 font-medium" data-testid={`text-price-${course.id}`}>Free</span>
+          )}
+          {isEnrolled && (
+            <span className="text-emerald-400 font-medium" data-testid={`badge-enrolled-${course.id}`}>Enrolled</span>
+          )}
+          {projectCount > 0 && (
+            <>
+              <span className="text-gray-700">|</span>
+              <span className="flex items-center gap-1" data-testid={`text-projects-${course.id}`}>
+                <FolderKanban className="w-3 h-3" style={{ color: "#00F5FF" }} />
+                {projectCount} Projects
+              </span>
+            </>
+          )}
+          {course.duration && (
+            <>
+              <span className="text-gray-700">|</span>
+              <span className="flex items-center gap-1" data-testid={`text-duration-${course.id}`}>
+                <Clock className="w-3 h-3 text-gray-500" />
+                {course.duration}
+              </span>
+            </>
           )}
         </div>
 
         <div className="mt-auto pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center justify-between mb-3">
-            {isFree ? (
-              <span className="text-sm font-semibold text-emerald-400" data-testid={`text-price-${course.id}`}>Free</span>
-            ) : isEnrolled ? (
-              <span
-                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: "rgba(16,185,129,0.15)", color: "#34d399", border: "1px solid rgba(16,185,129,0.3)" }}
-                data-testid={`badge-enrolled-${course.id}`}
-              >
-                Enrolled
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-sm font-semibold text-amber-400" data-testid={`text-price-${course.id}`}>
-                <Coins className="w-3.5 h-3.5" />
-                {creditCost} Credits
-              </span>
-            )}
-          </div>
-
           {isEnrolled ? (
             <Link href={`/courses/${course.id}`} className="block">
               <button
@@ -698,140 +691,182 @@ export default function CourseCatalog() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #0B1D3A 0%, #0F172A 40%, #0B1120 100%)", color: "#e2e8f0" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#060D1F", color: "#e2e8f0" }}>
       <LandingNavbar />
       <div className="flex-1">
-        <div
-          className="absolute inset-0 pointer-events-none overflow-hidden"
-          style={{ position: "fixed", zIndex: 0 }}
-        >
-          <div
-            className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[120px] opacity-20"
-            style={{ background: "radial-gradient(circle, #4F46E5, transparent)" }}
-          />
-          <div
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[120px] opacity-15"
-            style={{ background: "radial-gradient(circle, #00F5FF, transparent)" }}
-          />
-          <div
-            className="absolute top-1/3 right-1/6 w-64 h-64 rounded-full blur-[100px] opacity-10"
-            style={{ background: "radial-gradient(circle, #F59E0B, transparent)" }}
-          />
-        </div>
 
         <div className="relative z-10">
-          <div className="px-4 md:px-8 pt-6 pb-4">
-            {/* Header row: title left, image right */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1
-                  className="text-3xl md:text-4xl font-bold"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    background: "linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #00F5FF 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  Our Courses
+
+          {/* ═══ HERO BANNER ═══ */}
+          <div className="mx-4 md:mx-8 mt-5 rounded-2xl overflow-hidden relative"
+            style={{
+              background: "linear-gradient(130deg, #070E22 0%, #0C1835 50%, #0A1628 100%)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 8px 48px -12px rgba(0,0,0,0.6)",
+            }}
+          >
+            {/* Ambient glows inside banner */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="absolute -top-20 left-1/4 w-80 h-80 rounded-full blur-[100px] opacity-25"
+                style={{ background: "radial-gradient(circle, #4F46E5, transparent)" }} />
+              <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-[80px] opacity-20"
+                style={{ background: "radial-gradient(circle, #00F5FF, transparent)" }} />
+              <div className="absolute top-0 right-1/3 w-48 h-48 rounded-full blur-[70px] opacity-15"
+                style={{ background: "radial-gradient(circle, #F59E0B, transparent)" }} />
+            </div>
+
+            <div className="relative flex items-center justify-between px-6 md:px-10 py-8">
+              {/* Left: Title + subtitle + stats */}
+              <div className="flex-1 max-w-xl">
+                <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-2"
+                  style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-white">Our </span>
+                  <span style={{ color: "#00F5FF" }}>Courses</span>
                 </h1>
-                <p className="text-sm text-gray-400 mt-1">Designed by IIT Alumnis</p>
+                <p className="text-sm md:text-base text-gray-300 mb-7">
+                  Designed by{" "}
+                  <span className="font-semibold" style={{ color: "#F59E0B" }}>IIT Alumni</span>
+                  {" "}•{" "}
+                  Learn from{" "}
+                  <span className="font-semibold" style={{ color: "#00F5FF" }}>Industry Experts</span>
+                </p>
+
+                {/* Stats row */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {[
+                    { icon: BookOpen, value: `${courses?.length ? `${courses.length}+` : "100+"}`, label: "Courses" },
+                    { icon: Users,     value: "25K+",     label: "Students" },
+                    { icon: GraduationCap, value: "IIT",  label: "Alumni Designed" },
+                    { icon: Award,     value: "Industry", label: "Certified" },
+                  ].map((stat, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        backdropFilter: "blur(8px)",
+                      }}
+                    >
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: "rgba(0,245,255,0.12)", border: "1px solid rgba(0,245,255,0.2)" }}
+                      >
+                        <stat.icon className="w-3.5 h-3.5" style={{ color: "#00F5FF" }} />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-sm leading-none">{stat.value}</div>
+                        <div className="text-gray-400 text-xs mt-0.5 whitespace-nowrap">{stat.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="hidden md:block shrink-0">
+              {/* Right: Illustration */}
+              <div className="hidden md:flex items-end justify-end shrink-0 ml-6 self-end">
                 <img
                   src={catalogIllustration}
                   alt="Learning illustration"
-                  className="h-36 w-auto object-contain drop-shadow-xl"
+                  className="h-56 w-auto object-contain drop-shadow-2xl select-none"
+                  style={{ filter: "drop-shadow(0 0 32px rgba(0,245,255,0.18))" }}
                 />
               </div>
             </div>
+          </div>
 
-            {/* Controls row: search + tabs */}
-            <div className="flex items-center gap-3">
-              <div className="relative max-w-sm w-full">
-                <div
-                  className="absolute -inset-1 rounded-2xl opacity-40 blur-sm"
-                  style={{ background: "linear-gradient(135deg, #00F5FF, #7C3AED, #00F5FF)" }}
-                />
-                <div
-                  className="relative flex items-center rounded-xl overflow-hidden"
-                  style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(0,245,255,0.3)" }}
-                >
-                  <Search className="w-4 h-4 text-gray-400 ml-3 shrink-0" />
+          {/* ═══ CONTROLS STRIP ═══ */}
+          <div className="px-4 md:px-8 py-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Search */}
+              <div className="relative flex-1 min-w-[180px] max-w-xs">
+                <div className="flex items-center rounded-xl overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <Search className="w-4 h-4 text-gray-500 ml-3 shrink-0" />
                   <input
                     type="text"
                     placeholder="Search skills, tools, careers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent px-3 py-3 text-white placeholder:text-gray-500 outline-none text-sm"
+                    className="flex-1 bg-transparent px-3 py-2.5 text-white placeholder:text-gray-600 outline-none text-sm"
                     data-testid="input-search-courses"
                   />
-                  <button
-                    className="p-2 mr-1 rounded-lg transition-colors"
-                    style={{ color: "#6b7280" }}
-                    title="Voice search (coming soon)"
-                    data-testid="button-voice-search"
-                  >
-                    <Mic className="w-4 h-4" />
-                  </button>
+                  {searchTerm && (
+                    <button onClick={() => setSearchTerm("")} className="p-2 mr-1 text-gray-500 hover:text-white transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Filters button */}
+              <button
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0"
+                style={{
+                  background: activeFilterCount > 0 ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.05)",
+                  color: activeFilterCount > 0 ? "#00F5FF" : "#9ca3af",
+                  border: activeFilterCount > 0 ? "1px solid rgba(0,245,255,0.3)" : "1px solid rgba(255,255,255,0.09)",
+                }}
+                onClick={() => setMobileFiltersOpen(true)}
+                data-testid="button-filters-toggle"
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="w-4 h-4 rounded-full text-xs flex items-center justify-center font-bold"
+                    style={{ background: "#00F5FF", color: "#060D1F" }}>
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Course / Track / Program tabs */}
+              <div className="flex items-center gap-1.5 shrink-0 px-1 py-1 rounded-xl"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 {([
-                  { id: "course" as CatalogTab, label: "Course", icon: BookOpen },
-                  { id: "track" as CatalogTab, label: "Track", icon: Layers },
-                  { id: "program" as CatalogTab, label: "Program", icon: Trophy },
+                  { id: "course" as CatalogTab, label: "Courses", icon: BookOpen },
+                  { id: "track" as CatalogTab,  label: "Tracks",  icon: Layers },
+                  { id: "program" as CatalogTab, label: "Programs", icon: Trophy },
                 ]).map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setCatalogTab(tab.id)}
-                    className="flex items-center gap-1.5 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
+                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-sm font-semibold transition-all whitespace-nowrap"
                     style={{
-                      background: catalogTab === tab.id ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.04)",
-                      color: catalogTab === tab.id ? "#00F5FF" : "#9ca3af",
-                      border: catalogTab === tab.id ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
-                      boxShadow: catalogTab === tab.id ? "0 0 14px rgba(0,245,255,0.18)" : "none",
+                      background: catalogTab === tab.id ? "rgba(0,245,255,0.15)" : "transparent",
+                      color: catalogTab === tab.id ? "#00F5FF" : "#6b7280",
+                      boxShadow: catalogTab === tab.id ? "0 0 12px rgba(0,245,255,0.15)" : "none",
                     }}
                     data-testid={`tab-catalog-${tab.id}`}
                   >
-                    <tab.icon className="w-4 h-4" />
+                    <tab.icon className="w-3.5 h-3.5" />
                     {tab.label}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
 
-          {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
-            <motion.div
-              className="px-4 md:px-8 pb-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
+            {/* Category pills — only for course tab */}
+            {catalogTab === "course" && !isLoading && courses && courses.length > 0 && (
               <div
                 ref={pillsRef}
-                className="flex items-center gap-2 overflow-x-auto pb-2 max-w-5xl mx-auto hide-scrollbar"
+                className="flex items-center gap-2 overflow-x-auto mt-3 pb-1 hide-scrollbar"
                 style={{ scrollbarWidth: "none" }}
               >
                 {CATEGORIES.map(cat => {
                   const isActive = selectedCategory === cat.id;
                   const exists = cat.id === "all" || categories.includes(cat.id);
-                  if (!exists && cat.id !== "all") return null;
+                  if (!exists) return null;
                   return (
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap"
+                      className="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap"
                       style={{
-                        background: isActive ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.05)",
-                        color: isActive ? "#00F5FF" : "#9ca3af",
-                        border: isActive
-                          ? "1px solid rgba(0,245,255,0.4)"
-                          : "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: isActive ? "0 0 12px rgba(0,245,255,0.2)" : "none",
+                        background: isActive ? "rgba(0,245,255,0.15)" : "rgba(255,255,255,0.04)",
+                        color: isActive ? "#00F5FF" : "#6b7280",
+                        border: isActive ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
+                        boxShadow: isActive ? "0 0 10px rgba(0,245,255,0.18)" : "none",
                       }}
                       data-testid={`pill-category-${cat.id}`}
                     >
@@ -840,40 +875,37 @@ export default function CourseCatalog() {
                   );
                 })}
               </div>
-            </motion.div>
-          )}
+            )}
+          </div>
 
-          <div className="px-4 md:px-8 pb-16 max-w-[1400px] mx-auto">
-            <div className="flex gap-8">
+          <div className="px-4 md:px-8 pb-16 max-w-[1600px] mx-auto">
+            <div className="flex gap-6">
+              {/* ── Filter Sidebar (desktop) ── */}
               {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
-                <aside
-                  className="hidden lg:block w-64 shrink-0"
-                >
+                <aside className="hidden lg:block w-56 shrink-0">
                   <div
                     className="sticky top-24 rounded-2xl p-5 overflow-y-auto max-h-[calc(100vh-8rem)]"
                     style={{
                       background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      backdropFilter: "blur(12px)",
+                      border: "1px solid rgba(255,255,255,0.07)",
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <SlidersHorizontal className="w-4 h-4" style={{ color: "#00F5FF" }} />
-                      <h3 className="text-sm font-semibold text-white">Filters</h3>
-                      {activeFilterCount > 0 && (
-                        <span
-                          className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF" }}
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-bold text-white">Filter Courses</h3>
+                      {hasActiveFilters && (
+                        <button
+                          onClick={clearFilters}
+                          className="text-xs font-medium transition-colors"
+                          style={{ color: "#00F5FF" }}
+                          data-testid="button-reset-sidebar"
                         >
-                          {activeFilterCount}
-                        </span>
+                          Reset
+                        </button>
                       )}
                     </div>
-                    {!isLoading && !error && courses && courses.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-1 mb-4" data-testid="text-total-courses">
-                        (Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""})
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-500 mb-4" data-testid="text-total-courses">
+                      Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""}
+                    </p>
                     {filterSidebarContent}
                   </div>
                 </aside>
@@ -888,35 +920,66 @@ export default function CourseCatalog() {
                   />
                 )}
 
+                {/* Mobile filter + sort bar */}
                 {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
-                  <div className="lg:hidden flex justify-end mb-6">
-                    <button
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                      style={{
-                        background: "rgba(255,255,255,0.05)",
-                        color: "#9ca3af",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                      onClick={() => setMobileFiltersOpen(true)}
-                      data-testid="button-mobile-filters"
-                    >
-                      <Filter className="w-4 h-4" />
-                      Filters
-                      {activeFilterCount > 0 && (
-                        <span
-                          className="px-1.5 py-0.5 rounded-full text-xs font-medium"
-                          style={{ background: "rgba(0,245,255,0.2)", color: "#00F5FF" }}
+                  <div className="flex items-center justify-between mb-4 gap-3">
+                    {/* All Courses heading */}
+                    <h2 className="text-sm font-semibold text-white">
+                      {selectedCategory === "all" ? "All Courses" : selectedCategory}{" "}
+                      <span className="text-gray-500">({totalCourses})</span>
+                    </h2>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      {/* Sort dropdown */}
+                      <div className="relative">
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as SortOption)}
+                          className="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-medium outline-none cursor-pointer"
+                          style={{
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.09)",
+                            color: "#9ca3af",
+                          }}
+                          data-testid="select-sort"
                         >
-                          {activeFilterCount}
-                        </span>
-                      )}
-                    </button>
+                          <option value="default">Sort: Recommended</option>
+                          <option value="title-asc">Title: A to Z</option>
+                          <option value="title-desc">Title: Z to A</option>
+                          <option value="price-low">Price: Low to High</option>
+                          <option value="price-high">Price: High to Low</option>
+                          <option value="newest">Newest First</option>
+                        </select>
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
+                      </div>
+
+                      {/* Mobile filters button */}
+                      <button
+                        className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          color: "#9ca3af",
+                          border: "1px solid rgba(255,255,255,0.09)",
+                        }}
+                        onClick={() => setMobileFiltersOpen(true)}
+                        data-testid="button-mobile-filters"
+                      >
+                        <Filter className="w-3.5 h-3.5" />
+                        Filters
+                        {activeFilterCount > 0 && (
+                          <span className="w-4 h-4 rounded-full text-xs flex items-center justify-center font-bold"
+                            style={{ background: "#00F5FF", color: "#060D1F" }}>
+                            {activeFilterCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
 
                 {catalogTab !== "course" ? null : isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" data-testid="skeleton-courses">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5" data-testid="skeleton-courses">
+                    {Array.from({ length: 8 }).map((_, i) => (
                       <PremiumSkeleton key={i} />
                     ))}
                   </div>
@@ -975,7 +1038,7 @@ export default function CourseCatalog() {
                   </div>
                 ) : (
                   <motion.div
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
                     data-testid="grid-courses"
                     variants={staggerContainer}
                     initial="initial"
