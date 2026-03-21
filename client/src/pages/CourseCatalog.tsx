@@ -1,12 +1,12 @@
 import { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "wouter";
 import {
   Search, BookOpen, X, Mic, ChevronRight,
   Clock, Coins, Lock, Play, ArrowRight, Star,
   FolderKanban, Award, SlidersHorizontal, ArrowUpDown,
-  Sparkles, Filter, UserPlus, LogIn, Layers, Trophy,
+  Sparkles, UserPlus, LogIn, Layers, Trophy,
   Users, GraduationCap, ChevronDown, BarChart3
 } from "lucide-react";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
@@ -494,7 +494,6 @@ export default function CourseCatalog() {
   const [selectedPricing, setSelectedPricing] = useState<PricingFilter>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const pillsRef = useRef<HTMLDivElement>(null);
 
   const categories = useMemo(() => {
@@ -799,27 +798,6 @@ export default function CourseCatalog() {
                 </div>
               </div>
 
-              {/* Filters button */}
-              <button
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0"
-                style={{
-                  background: activeFilterCount > 0 ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.05)",
-                  color: activeFilterCount > 0 ? "#00F5FF" : "#9ca3af",
-                  border: activeFilterCount > 0 ? "1px solid rgba(0,245,255,0.3)" : "1px solid rgba(255,255,255,0.09)",
-                }}
-                onClick={() => setMobileFiltersOpen(true)}
-                data-testid="button-filters-toggle"
-              >
-                <Filter className="w-4 h-4" />
-                Filters
-                {activeFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full text-xs flex items-center justify-center font-bold"
-                    style={{ background: "#00F5FF", color: "#060D1F" }}>
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-
               {/* Course / Track / Program tabs */}
               <div className="flex items-center gap-1.5 shrink-0 px-1 py-1 rounded-xl"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -953,26 +931,6 @@ export default function CourseCatalog() {
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
                       </div>
 
-                      {/* Mobile filters button */}
-                      <button
-                        className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                        style={{
-                          background: "rgba(255,255,255,0.05)",
-                          color: "#9ca3af",
-                          border: "1px solid rgba(255,255,255,0.09)",
-                        }}
-                        onClick={() => setMobileFiltersOpen(true)}
-                        data-testid="button-mobile-filters"
-                      >
-                        <Filter className="w-3.5 h-3.5" />
-                        Filters
-                        {activeFilterCount > 0 && (
-                          <span className="w-4 h-4 rounded-full text-xs flex items-center justify-center font-bold"
-                            style={{ background: "#00F5FF", color: "#060D1F" }}>
-                            {activeFilterCount}
-                          </span>
-                        )}
-                      </button>
                     </div>
                   </div>
                 )}
@@ -1120,65 +1078,6 @@ export default function CourseCatalog() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {mobileFiltersOpen && (
-            <>
-              <motion.div
-                className="fixed inset-0 z-40"
-                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMobileFiltersOpen(false)}
-              />
-              <motion.div
-                className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl overflow-hidden"
-                style={{
-                  background: "linear-gradient(180deg, #1e293b, #0f172a)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  maxHeight: "80vh",
-                }}
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              >
-                <div className="p-5">
-                  <div className="flex items-center justify-between mb-5">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                      <Filter className="w-5 h-5" style={{ color: "#00F5FF" }} />
-                      Filters
-                    </h3>
-                    <button
-                      onClick={() => setMobileFiltersOpen(false)}
-                      className="p-2 rounded-xl transition-colors"
-                      style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}
-                      data-testid="button-close-mobile-filters"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="overflow-y-auto" style={{ maxHeight: "60vh" }}>
-                    {filterSidebarContent}
-                  </div>
-                  <div className="mt-5">
-                    <button
-                      onClick={() => setMobileFiltersOpen(false)}
-                      className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
-                      style={{
-                        background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
-                        color: "#0B1D3A",
-                      }}
-                      data-testid="button-apply-filters"
-                    >
-                      Apply Filters
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
       <footer className="relative z-10 py-6 mt-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center text-sm text-gray-500">
