@@ -25,9 +25,6 @@ import {
   UserPlus,
   ChevronRight,
   ChevronDown,
-  Coins,
-  Wallet,
-  Gift,
   Globe,
   Sparkles,
   MessageCircle,
@@ -76,12 +73,6 @@ const features = [
   { icon: Handshake, title: "Job Assistance", description: "Placement support & referrals" },
 ];
 
-const rewardsFlow = [
-  { icon: BookOpen, title: "Complete Courses", description: "Finish lessons and projects" },
-  { icon: Coins, title: "Earn Points", description: "Get rewarded for learning" },
-  { icon: Wallet, title: "Fill Your Wallet", description: "Points go to your wallet" },
-  { icon: Gift, title: "Unlock Rewards", description: "Use for new courses" },
-];
 
 const aiFeatures = [
   { icon: Sparkles, title: "Usha AI Tutor", description: "Your personal learning companion" },
@@ -1155,64 +1146,6 @@ function CoursePreviewSection() {
   );
 }
 
-function RewardsSection() {
-  return (
-    <section className="relative py-20 md:py-24 overflow-hidden">
-      <SectionGlow position="top-left" color={C.teal} />
-      <SectionGlow position="top-right" color={C.purple} />
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-14">
-          <h2
-            className="text-2xl md:text-3xl font-bold mb-4"
-            style={{
-              fontFamily: "var(--font-display)",
-              background: `linear-gradient(135deg, ${C.teal}, ${C.textPrimary}, ${C.teal})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            data-testid="text-rewards-title"
-          >
-            Earn While You Learn
-          </h2>
-          <p style={{ color: C.textSecondary }} className="max-w-2xl mx-auto">
-            Complete courses, earn points, and unlock more learning opportunities
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {rewardsFlow.map((step, index) => (
-            <GlassCard
-              key={step.title}
-              className="relative flex flex-col items-center text-center p-6"
-              data-testid={`card-reward-step-${index + 1}`}
-            >
-              {index < rewardsFlow.length - 1 && (
-                <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <ChevronRight className="w-6 h-6" style={{ color: `${C.teal}99` }} />
-                </div>
-              )}
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                style={{
-                  background: "rgba(0,245,255,0.1)",
-                  border: "1px solid rgba(0,245,255,0.25)",
-                  boxShadow: "0 0 20px -5px rgba(0,245,255,0.2)",
-                }}
-              >
-                <step.icon className="w-7 h-7" style={{ color: C.teal }} />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                {step.title}
-              </h3>
-              <p className="text-sm" style={{ color: C.textSecondary }}>{step.description}</p>
-            </GlassCard>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function AISection() {
   return (
     <section className="relative py-20 md:py-24 overflow-hidden">
@@ -1577,7 +1510,6 @@ export default function LandingPage() {
         <HeroSection />
         <JourneySection />
         <FeaturesSection />
-        <RewardsSection />
         <AISection />
         <CoursePreviewSection />
         <CourseGroupsMarquee />
