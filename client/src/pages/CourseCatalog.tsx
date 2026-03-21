@@ -720,7 +720,34 @@ export default function CourseCatalog() {
         </div>
 
         <div className="relative z-10">
-          <div className="pt-4 pb-4 px-4 md:px-8">
+          <div className="px-4 md:px-8 pt-6 pb-4">
+            {/* Header row: title left, image right */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1
+                  className="text-3xl md:text-4xl font-bold"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    background: "linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #00F5FF 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Our Courses
+                </h1>
+                <p className="text-sm text-gray-400 mt-1">Designed by IIT Alumnis</p>
+              </div>
+
+              <div className="hidden md:block shrink-0">
+                <img
+                  src={catalogIllustration}
+                  alt="Learning illustration"
+                  className="h-36 w-auto object-contain drop-shadow-xl"
+                />
+              </div>
+            </div>
+
+            {/* Controls row: search + tabs */}
             <div className="flex items-center gap-3">
               <div className="relative max-w-sm w-full">
                 <div
@@ -773,14 +800,6 @@ export default function CourseCatalog() {
                     {tab.label}
                   </button>
                 ))}
-              </div>
-
-              <div className="hidden md:block shrink-0 ml-auto">
-                <img
-                  src={catalogIllustration}
-                  alt="Learning illustration"
-                  className="h-16 w-auto object-contain drop-shadow-lg"
-                />
               </div>
             </div>
           </div>
