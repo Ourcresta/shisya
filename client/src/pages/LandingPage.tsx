@@ -1282,49 +1282,128 @@ function TestimonialsSection() {
 }
 
 function FAQSection() {
+  const [openItem, setOpenItem] = useState<string | null>(null);
+
   return (
     <section className="relative py-8 md:py-12 overflow-hidden">
-      <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-7">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
-            FAQ
-          </div>
-          <h2
-            className="text-2xl md:text-3xl font-bold mb-2"
-            style={{
-              fontFamily: "var(--font-display)",
-              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            data-testid="text-faq-title"
-          >
-            Frequently Asked Questions
-          </h2>
-          <p style={{ color: C.textSecondary }} className="text-sm">Common questions, clear answers</p>
-        </div>
-        <Accordion type="single" collapsible className="space-y-4" data-testid="accordion-faq">
-          {faqItems.map((item, index) => (
-            <AccordionItem
-              key={item.question}
-              value={`item-${index}`}
-              className="rounded-2xl px-5 backdrop-blur-sm transition-all duration-300 border-0"
-              style={{
-                background: C.cardBg,
-                border: `1px solid ${C.cardBorder}`,
-              }}
-              data-testid={`faq-item-${index + 1}`}
+      <SectionGlow position="top-right" color={C.teal} />
+      <SectionGlow position="bottom-left" color={C.purple} />
+
+      <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="grid lg:grid-cols-[5fr_7fr] gap-10 lg:gap-16 items-start">
+
+          {/* Left: sticky header */}
+          <div className="lg:sticky lg:top-24">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold mb-4 tracking-widest uppercase"
+              style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}
             >
-              <AccordionTrigger className="hover:no-underline text-left text-white">
-                <span className="font-medium">{item.question}</span>
-              </AccordionTrigger>
-              <AccordionContent style={{ color: C.textSecondary }}>
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+              FAQ
+            </div>
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-3 leading-tight"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.02em",
+              }}
+              data-testid="text-faq-title"
+            >
+              Frequently Asked Questions
+            </h2>
+            <p className="text-sm mb-6" style={{ color: C.textSecondary, lineHeight: "1.6" }}>
+              Everything you need to know before you start. Can't find your answer?{" "}
+              <Link href="/contact" className="underline underline-offset-2" style={{ color: C.teal }}>Contact us</Link>.
+            </p>
+
+            {/* Quick stats */}
+            <div className="flex flex-col gap-3">
+              {[
+                { value: "6", label: "topics answered" },
+                { value: "500", label: "free credits on signup" },
+                { value: "0", label: "credit card required" },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.09)" }}
+                >
+                  <span
+                    className="text-lg font-bold"
+                    style={{ color: C.teal, fontFamily: "var(--font-display)", minWidth: "2rem" }}
+                  >
+                    {stat.value}
+                  </span>
+                  <span className="text-xs" style={{ color: C.textSecondary }}>{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: styled accordion */}
+          <div>
+            <Accordion
+              type="single"
+              collapsible
+              className="space-y-2"
+              data-testid="accordion-faq"
+              onValueChange={(val) => setOpenItem(val || null)}
+            >
+              {faqItems.map((item, index) => {
+                const isOpen = openItem === `item-${index}`;
+                return (
+                  <AccordionItem
+                    key={item.question}
+                    value={`item-${index}`}
+                    className="rounded-xl overflow-hidden border-0 transition-all duration-300"
+                    style={{
+                      background: isOpen
+                        ? "linear-gradient(135deg, rgba(0,245,255,0.05), rgba(124,58,237,0.03))"
+                        : "rgba(255,255,255,0.03)",
+                      border: isOpen
+                        ? "1px solid rgba(0,245,255,0.2)"
+                        : "1px solid rgba(255,255,255,0.07)",
+                      boxShadow: isOpen ? "0 0 24px -8px rgba(0,245,255,0.12)" : "none",
+                    }}
+                    data-testid={`faq-item-${index + 1}`}
+                  >
+                    <AccordionTrigger className="hover:no-underline text-left px-4 py-3.5 group">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Number badge */}
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all duration-300"
+                          style={{
+                            background: isOpen ? C.teal : "rgba(255,255,255,0.08)",
+                            color: isOpen ? C.bgPrimary : C.textSecondary,
+                          }}
+                        >
+                          {String(index + 1).padStart(2, "0")}
+                        </div>
+                        <span
+                          className="font-medium text-sm transition-colors duration-200"
+                          style={{ color: isOpen ? C.textPrimary : "rgba(255,255,255,0.85)" }}
+                        >
+                          {item.question}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div
+                        className="pl-9 text-sm leading-relaxed"
+                        style={{ color: C.textSecondary, borderLeft: `2px solid rgba(0,245,255,0.15)`, paddingLeft: "1.25rem" }}
+                      >
+                        {item.answer}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          </div>
+
+        </div>
       </div>
     </section>
   );
