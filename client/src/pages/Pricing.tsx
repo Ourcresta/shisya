@@ -1,3 +1,4 @@
+import studyImg from "@assets/image_1774171868905.png";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -509,31 +510,42 @@ export default function Pricing() {
       <LandingNavbar />
 
       {/* ── HERO ── */}
-      <section className="relative" style={{ overflow: "visible" }}>
-        {/* Unified teal-to-purple ambient glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
-          }}
-        />
+      <section className="relative overflow-hidden">
+        {/* Ambient gradient glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+        }} />
         {/* Dot-grid texture */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.025) 1px, transparent 1px)`,
-            backgroundSize: "40px 40px",
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.025) 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
+        }} />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-0 items-center min-h-[340px] md:min-h-[380px]">
 
-            {/* Hero text */}
-            <div className="pt-10 pb-6">
+            {/* Left: illustration */}
+            <div className="flex items-center justify-center lg:justify-start pt-6 pb-0 lg:pt-0">
+              <img
+                src={studyImg}
+                alt="Student learning online"
+                className="select-none w-full max-w-[420px] lg:max-w-none"
+                draggable={false}
+                style={{
+                  height: "340px",
+                  width: "auto",
+                  objectFit: "contain",
+                  maskImage: "radial-gradient(ellipse 88% 88% at 48% 48%, black 50%, transparent 88%)",
+                  WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 48% 48%, black 50%, transparent 88%)",
+                }}
+              />
+            </div>
+
+            {/* Right: text */}
+            <div className="py-8 lg:py-10 flex flex-col items-start text-left">
               {/* Badge */}
               <div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 w-fit"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4"
                 style={{
                   background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
                   border: "1px solid rgba(0,245,255,0.2)",
@@ -545,37 +557,32 @@ export default function Pricing() {
                 </span>
               </div>
 
-              {/* Heading */}
               <h1
-                className="text-4xl md:text-5xl lg:text-[3.6rem] font-bold mb-4 leading-[1.08]"
+                className="text-4xl md:text-5xl lg:text-[3.2rem] font-bold mb-3 leading-[1.08]"
                 style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.028em" }}
                 data-testid="text-pricing-headline"
               >
                 <span style={{ color: C.textPrimary }}>Choose Your</span>
                 <br />
-                <span
-                  style={{
-                    background: `linear-gradient(100deg, ${C.teal} 0%, #38BDF8 45%, #818CF8 80%, #A78BFA 100%)`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
+                <span style={{
+                  background: `linear-gradient(100deg, ${C.teal} 0%, #38BDF8 45%, #818CF8 80%, #A78BFA 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
                   Learning Power
                 </span>
               </h1>
 
-              {/* Subtitle */}
               <p
-                className="text-base md:text-lg max-w-[420px] mb-7"
-                style={{ color: "#7E99B8", lineHeight: "1.65" }}
+                className="text-base md:text-lg max-w-[400px] mb-6"
+                style={{ color: "#7E99B8", lineHeight: "1.6" }}
                 data-testid="text-pricing-subtitle"
               >
                 Flexible plans built for serious learners and future professionals.
                 Start free, upgrade when you're ready.
               </p>
 
-              {/* Trust chips */}
               <div className="flex flex-wrap gap-2">
                 {[
                   { icon: Gift, label: "500 credits free" },
@@ -602,17 +609,10 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Gradient bridge between hero and cards */}
-      <div
-        className="relative z-10 pointer-events-none"
-        style={{
-          height: "80px",
-          background: "linear-gradient(180deg, transparent 0%, rgba(0,245,255,0.02) 50%, transparent 100%)",
-          borderTop: "1px solid rgba(0,245,255,0.05)",
-        }}
-      />
+      {/* thin separator */}
+      <div className="relative z-10 pointer-events-none" style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(0,245,255,0.08), transparent)" }} />
 
-      <section className="relative z-10 pb-16 md:pb-20">
+      <section className="relative z-10 py-8 md:py-10">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
@@ -657,7 +657,7 @@ export default function Pricing() {
       </section>
 
       {/* ── COMPARE PLANS ── */}
-      <section className="relative py-12 md:py-16 overflow-hidden">
+      <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
@@ -695,7 +695,7 @@ export default function Pricing() {
       </section>
 
       {/* ── TRUST BAR ── */}
-      <section className="relative pb-10 overflow-hidden">
+      <section className="relative pb-8 overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div
             className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap"
@@ -734,7 +734,7 @@ export default function Pricing() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="relative py-12 md:py-16 overflow-hidden">
+      <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
@@ -821,13 +821,13 @@ export default function Pricing() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="relative py-12 md:py-16 overflow-hidden">
+      <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
         <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10 text-center">
           <div
-            className="rounded-[24px] p-10 md:p-14"
+            className="rounded-[24px] p-8 md:p-10"
             style={{
               background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.04) 50%, rgba(0,245,255,0.03) 100%)",
               border: "1px solid rgba(0,245,255,0.14)",
