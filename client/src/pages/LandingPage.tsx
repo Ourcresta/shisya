@@ -970,15 +970,14 @@ function FeaturedCoursesSection() {
 
             {/* ── Courses ── */}
             <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Courses</h3>
+              <div className="mb-1">
                 <Link href="/courses">
                   <span
-                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
-                    style={{ color: C.teal, background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}
-                    data-testid="button-all-courses"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
+                    style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                    data-testid="button-header-courses"
                   >
-                    All <ArrowRight className="w-3 h-3" />
+                    Courses <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </Link>
               </div>
@@ -1049,15 +1048,14 @@ function FeaturedCoursesSection() {
 
             {/* ── Tracks ── */}
             <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Tracks</h3>
+              <div className="mb-1">
                 <Link href="/courses?tab=track">
                   <span
-                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
-                    style={{ color: C.teal, background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}
-                    data-testid="button-all-tracks"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
+                    style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                    data-testid="button-header-tracks"
                   >
-                    All <ArrowRight className="w-3 h-3" />
+                    Tracks <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </Link>
               </div>
@@ -1118,15 +1116,14 @@ function FeaturedCoursesSection() {
 
             {/* ── Programs ── */}
             <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Programs</h3>
+              <div className="mb-1">
                 <Link href="/courses?tab=program">
                   <span
-                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
-                    style={{ color: "#A78BFA", background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.28)" }}
-                    data-testid="button-all-programs"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
+                    style={{ color: "#A78BFA", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", fontFamily: "var(--font-display)" }}
+                    data-testid="button-header-programs"
                   >
-                    All <ArrowRight className="w-3 h-3" />
+                    Programs <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </Link>
               </div>
