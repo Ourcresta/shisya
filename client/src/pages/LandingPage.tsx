@@ -932,13 +932,13 @@ function FeaturedCoursesSection() {
   });
 
   return (
-    <section className="relative py-12 md:py-16 overflow-hidden">
+    <section className="relative py-6 md:py-8 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
       <SectionGlow position="top-right" color={C.purple} />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
+        <div className="text-center mb-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
           >
             <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
@@ -959,7 +959,7 @@ function FeaturedCoursesSection() {
         </div>
 
         <div
-          className="rounded-3xl p-4 md:p-6"
+          className="rounded-3xl p-3 md:p-4"
           style={{
             background: "linear-gradient(145deg, rgba(6,13,31,0.9) 0%, rgba(11,29,58,0.85) 100%)",
             border: "1px solid rgba(0,245,255,0.12)",
