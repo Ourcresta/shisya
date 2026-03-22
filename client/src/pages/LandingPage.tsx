@@ -848,14 +848,59 @@ function FeaturedCoursesSection() {
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
-
   const { data: groups, isLoading: groupsLoading } = useQuery<CourseGroupLanding[]>({
     queryKey: ["/api/course-groups"],
   });
 
-  const tracks = (groups ?? []).filter(g => g.groupType === "track").slice(0, 2);
-  const programs = (groups ?? []).filter(g => g.groupType === "program").slice(0, 2);
-  const featuredCourses = (courses ?? []).slice(0, 2);
+  const allCourses = courses ?? [];
+  const tracks = (groups ?? []).filter(g => g.groupType === "track");
+  const programs = (groups ?? []).filter(g => g.groupType === "program");
+
+  const [courseIdx, setCourseIdx] = useState(0);
+  const [trackIdx, setTrackIdx] = useState(0);
+  const [programIdx, setProgramIdx] = useState(0);
+  const [courseVisible, setCourseVisible] = useState(true);
+  const [trackVisible, setTrackVisible] = useState(true);
+  const [programVisible, setProgramVisible] = useState(true);
+
+  const INTERVAL = 3000;
+  const FADE = 400;
+
+  useEffect(() => {
+    if (allCourses.length <= 1) return;
+    const t = setInterval(() => {
+      setCourseVisible(false);
+      setTimeout(() => {
+        setCourseIdx(i => (i + 1) % allCourses.length);
+        setCourseVisible(true);
+      }, FADE);
+    }, INTERVAL);
+    return () => clearInterval(t);
+  }, [allCourses.length]);
+
+  useEffect(() => {
+    if (tracks.length <= 1) return;
+    const t = setInterval(() => {
+      setTrackVisible(false);
+      setTimeout(() => {
+        setTrackIdx(i => (i + 1) % tracks.length);
+        setTrackVisible(true);
+      }, FADE);
+    }, INTERVAL + 700);
+    return () => clearInterval(t);
+  }, [tracks.length]);
+
+  useEffect(() => {
+    if (programs.length <= 1) return;
+    const t = setInterval(() => {
+      setProgramVisible(false);
+      setTimeout(() => {
+        setProgramIdx(i => (i + 1) % programs.length);
+        setProgramVisible(true);
+      }, FADE);
+    }, INTERVAL + 1400);
+    return () => clearInterval(t);
+  }, [programs.length]);
 
   const isLoading = coursesLoading || groupsLoading;
 
@@ -868,7 +913,7 @@ function FeaturedCoursesSection() {
           <div className="h-9 w-64 rounded-xl mx-auto mb-10 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl h-80 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+              <div key={i} className="rounded-2xl h-72 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
             ))}
           </div>
         </div>
@@ -876,13 +921,22 @@ function FeaturedCoursesSection() {
     );
   }
 
+  const course = allCourses[courseIdx];
+  const track = tracks[trackIdx];
+  const program = programs[programIdx];
+
+  const fadeStyle = (visible: boolean): React.CSSProperties => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(6px)",
+    transition: `opacity ${FADE}ms ease, transform ${FADE}ms ease`,
+  });
+
   return (
     <section className="relative py-12 md:py-16 overflow-hidden">
       <SectionGlow position="center" color={C.teal} />
       <SectionGlow position="top-right" color={C.purple} />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
             style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
@@ -904,7 +958,6 @@ function FeaturedCoursesSection() {
           </h2>
         </div>
 
-        {/* Outer panel */}
         <div
           className="rounded-3xl p-4 md:p-6"
           style={{
@@ -915,7 +968,7 @@ function FeaturedCoursesSection() {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
 
-            {/* ── Column 1: Courses ── */}
+            {/* ── Courses ── */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Courses</h3>
@@ -925,79 +978,72 @@ function FeaturedCoursesSection() {
                   </span>
                 </Link>
               </div>
-
-              {featuredCourses.length === 0 ? (
-                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No courses yet</p>
+              {!course ? (
+                <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No courses yet</p>
               ) : (
-                featuredCourses.map((course) => {
-                  const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
-                  return (
-                    <Link key={course.id} href={`/courses/${course.id}`}>
-                      <div
-                        className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
-                        style={{
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                        }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.28)";
-                          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
-                        }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                          (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                        }}
-                        data-testid={`card-featured-course-${course.id}`}
-                      >
-                        <div className="relative overflow-hidden" style={{ height: "110px" }}>
-                          {course.thumbnailUrl ? (
-                            <img
-                              src={course.thumbnailUrl}
-                              alt={course.title}
-                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div
-                              className="absolute inset-0 flex items-center justify-center"
-                              style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))" }}
-                            >
-                              <BookOpen className="w-9 h-9" style={{ color: "rgba(0,245,255,0.45)" }} />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
-                          <div className="absolute top-2 right-2">
-                            {isFree ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>FREE</span>
+                <div style={fadeStyle(courseVisible)}>
+                  {(() => {
+                    const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
+                    return (
+                      <Link href={`/courses/${course.id}`}>
+                        <div
+                          className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
+                          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                          onMouseEnter={e => {
+                            (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.28)";
+                            (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
+                          }}
+                          onMouseLeave={e => {
+                            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                            (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                          }}
+                          data-testid={`card-featured-course-${course.id}`}
+                        >
+                          <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                            {course.thumbnailUrl ? (
+                              <img src={course.thumbnailUrl} alt={course.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>{course.creditCost} cr</span>
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))" }}>
+                                <BookOpen className="w-10 h-10" style={{ color: "rgba(0,245,255,0.45)" }} />
+                              </div>
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
+                            <div className="absolute top-2 right-2">
+                              {isFree ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>FREE</span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>{course.creditCost} cr</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="p-3 flex flex-col gap-1.5">
+                            <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{course.title}</h4>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
+                              {course.duration && <span className="text-[10px]" style={{ color: C.textSecondary }}>{course.duration}</span>}
+                            </div>
+                            <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                              style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
+                              View Course <ChevronRight className="w-3 h-3" />
+                            </div>
                           </div>
                         </div>
-                        <div className="p-3 flex flex-col gap-1.5">
-                          <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                            {course.title}
-                          </h4>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
-                            {course.duration && (
-                              <span className="text-[10px]" style={{ color: C.textSecondary }}>{course.duration}</span>
-                            )}
-                          </div>
-                          <div
-                            className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                            style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
-                          >
-                            View Course <ChevronRight className="w-3 h-3" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })
+                      </Link>
+                    );
+                  })()}
+                </div>
+              )}
+              {allCourses.length > 1 && (
+                <div className="flex justify-center gap-1 mt-1">
+                  {allCourses.map((_, i) => (
+                    <div key={i} className="rounded-full transition-all duration-300"
+                      style={{ width: i === courseIdx ? "16px" : "6px", height: "4px", background: i === courseIdx ? C.teal : "rgba(255,255,255,0.15)" }} />
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* ── Column 2: Tracks ── */}
+            {/* ── Tracks ── */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Tracks</h3>
@@ -1007,18 +1053,14 @@ function FeaturedCoursesSection() {
                   </span>
                 </Link>
               </div>
-
-              {tracks.length === 0 ? (
-                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No tracks yet</p>
+              {!track ? (
+                <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No tracks yet</p>
               ) : (
-                tracks.map((group) => (
-                  <Link key={group.id} href={`/courses/group/${group.id}`}>
+                <div style={fadeStyle(trackVisible)}>
+                  <Link href={`/courses/group/${track.id}`}>
                     <div
-                      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
-                      style={{
-                        background: "rgba(0,245,255,0.03)",
-                        border: "1px solid rgba(0,245,255,0.1)",
-                      }}
+                      className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
+                      style={{ background: "rgba(0,245,255,0.03)", border: "1px solid rgba(0,245,255,0.1)" }}
                       onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.12)";
@@ -1027,21 +1069,14 @@ function FeaturedCoursesSection() {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.1)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "none";
                       }}
-                      data-testid={`card-featured-track-${group.id}`}
+                      data-testid={`card-featured-track-${track.id}`}
                     >
-                      <div className="relative overflow-hidden" style={{ height: "110px" }}>
-                        {group.thumbnailUrl ? (
-                          <img
-                            src={group.thumbnailUrl}
-                            alt={group.name}
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
+                      <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                        {track.thumbnailUrl ? (
+                          <img src={track.thumbnailUrl} alt={track.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <div
-                            className="absolute inset-0 flex items-center justify-center"
-                            style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.09), rgba(6,182,212,0.05))" }}
-                          >
-                            <Layers className="w-9 h-9" style={{ color: "rgba(0,245,255,0.45)" }} />
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.09), rgba(6,182,212,0.05))" }}>
+                            <Layers className="w-10 h-10" style={{ color: "rgba(0,245,255,0.45)" }} />
                           </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
@@ -1050,26 +1085,30 @@ function FeaturedCoursesSection() {
                         </div>
                       </div>
                       <div className="p-3 flex flex-col gap-1.5">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                          {group.name}
-                        </h4>
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{track.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
-                          {group.courseCount} {group.courseCount === 1 ? "Course" : "Courses"}{group.totalDuration ? ` · ${group.totalDuration}` : ""}
+                          {track.courseCount} {track.courseCount === 1 ? "Course" : "Courses"}{track.totalDuration ? ` · ${track.totalDuration}` : ""}
                         </p>
-                        <div
-                          className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                          style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
-                        >
+                        <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                          style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
                           View Track <ChevronRight className="w-3 h-3" />
                         </div>
                       </div>
                     </div>
                   </Link>
-                ))
+                </div>
+              )}
+              {tracks.length > 1 && (
+                <div className="flex justify-center gap-1 mt-1">
+                  {tracks.map((_, i) => (
+                    <div key={i} className="rounded-full transition-all duration-300"
+                      style={{ width: i === trackIdx ? "16px" : "6px", height: "4px", background: i === trackIdx ? C.teal : "rgba(255,255,255,0.15)" }} />
+                  ))}
+                </div>
               )}
             </div>
 
-            {/* ── Column 3: Programs ── */}
+            {/* ── Programs ── */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Programs</h3>
@@ -1079,18 +1118,14 @@ function FeaturedCoursesSection() {
                   </span>
                 </Link>
               </div>
-
-              {programs.length === 0 ? (
-                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No programs yet</p>
+              {!program ? (
+                <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No programs yet</p>
               ) : (
-                programs.map((group) => (
-                  <Link key={group.id} href={`/courses/group/${group.id}`}>
+                <div style={fadeStyle(programVisible)}>
+                  <Link href={`/courses/group/${program.id}`}>
                     <div
-                      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
-                      style={{
-                        background: "rgba(124,58,237,0.04)",
-                        border: "1px solid rgba(124,58,237,0.15)",
-                      }}
+                      className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
+                      style={{ background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.15)" }}
                       onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(124,58,237,0.15)";
@@ -1099,21 +1134,14 @@ function FeaturedCoursesSection() {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "none";
                       }}
-                      data-testid={`card-featured-program-${group.id}`}
+                      data-testid={`card-featured-program-${program.id}`}
                     >
-                      <div className="relative overflow-hidden" style={{ height: "110px" }}>
-                        {group.thumbnailUrl ? (
-                          <img
-                            src={group.thumbnailUrl}
-                            alt={group.name}
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
+                      <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                        {program.thumbnailUrl ? (
+                          <img src={program.thumbnailUrl} alt={program.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <div
-                            className="absolute inset-0 flex items-center justify-center"
-                            style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))" }}
-                          >
-                            <GraduationCap className="w-9 h-9" style={{ color: "rgba(139,92,246,0.55)" }} />
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))" }}>
+                            <GraduationCap className="w-10 h-10" style={{ color: "rgba(139,92,246,0.55)" }} />
                           </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
@@ -1122,57 +1150,30 @@ function FeaturedCoursesSection() {
                         </div>
                       </div>
                       <div className="p-3 flex flex-col gap-1.5">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
-                          {group.name}
-                        </h4>
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{program.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
-                          {group.courseCount} {group.courseCount === 1 ? "Course" : "Courses"}{group.totalDuration ? ` · ${group.totalDuration}` : ""}
+                          {program.courseCount} {program.courseCount === 1 ? "Course" : "Courses"}{program.totalDuration ? ` · ${program.totalDuration}` : ""}
                         </p>
-                        <div
-                          className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                          style={{ background: "rgba(124,58,237,0.1)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }}
-                        >
+                        <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                          style={{ background: "rgba(124,58,237,0.1)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }}>
                           View Program <ChevronRight className="w-3 h-3" />
                         </div>
                       </div>
                     </div>
                   </Link>
-                ))
+                </div>
+              )}
+              {programs.length > 1 && (
+                <div className="flex justify-center gap-1 mt-1">
+                  {programs.map((_, i) => (
+                    <div key={i} className="rounded-full transition-all duration-300"
+                      style={{ width: i === programIdx ? "16px" : "6px", height: "4px", background: i === programIdx ? "#A78BFA" : "rgba(255,255,255,0.15)" }} />
+                  ))}
+                </div>
               )}
             </div>
 
           </div>
-        </div>
-
-        {/* Bottom CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
-          <Link href="/courses">
-            <button
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
-              style={{ background: "transparent", color: C.teal, border: "1px solid rgba(0,245,255,0.3)" }}
-              data-testid="button-view-all-courses"
-            >
-              All Courses <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
-          <Link href="/courses?tab=track">
-            <button
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
-              style={{ background: "transparent", color: C.teal, border: "1px solid rgba(0,245,255,0.18)" }}
-              data-testid="button-view-all-tracks"
-            >
-              All Tracks <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
-          <Link href="/courses?tab=program">
-            <button
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
-              style={{ background: "transparent", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.3)" }}
-              data-testid="button-view-all-programs"
-            >
-              All Programs <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
         </div>
       </div>
     </section>
