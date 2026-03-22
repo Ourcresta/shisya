@@ -510,24 +510,11 @@ export default function Pricing() {
 
       {/* ── HERO ── */}
       <section className="relative" style={{ overflow: "visible" }}>
-        {/* Teal glow top-right — where the character lives */}
+        {/* Unified teal-to-purple ambient glow */}
         <div
-          className="absolute pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            top: "-60px", right: "-80px",
-            width: "700px", height: "700px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(0,245,255,0.07) 0%, transparent 65%)",
-          }}
-        />
-        {/* Purple glow bottom-left */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            bottom: "-40px", left: "-60px",
-            width: "500px", height: "500px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
           }}
         />
         {/* Dot-grid texture */}
@@ -626,9 +613,8 @@ export default function Pricing() {
       />
 
       <section className="relative z-10 pb-16 md:pb-20">
-        {/* Subtle glow behind the card grid */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.04) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           {isLoading ? (
@@ -673,7 +659,7 @@ export default function Pricing() {
       {/* ── COMPARE PLANS ── */}
       <section className="relative py-12 md:py-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
@@ -750,7 +736,7 @@ export default function Pricing() {
       {/* ── FAQ ── */}
       <section className="relative py-12 md:py-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 50% 60% at 75% 50%, rgba(124,58,237,0.05) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="grid lg:grid-cols-[2fr_3fr] gap-10 lg:gap-16 items-start">
@@ -837,7 +823,7 @@ export default function Pricing() {
       {/* ── CTA ── */}
       <section className="relative py-12 md:py-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 50% 70% at 50% 50%, rgba(0,245,255,0.06) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
         }} />
         <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10 text-center">
           <div
