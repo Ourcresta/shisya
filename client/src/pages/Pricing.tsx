@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import heroPng from "@assets/image_1774157987053.png";
 import {
   Check,
   X,
@@ -488,53 +489,113 @@ export default function Pricing() {
     >
       <LandingNavbar />
 
-      <section className="relative overflow-hidden pt-16 pb-8 md:pt-24 md:pb-12">
+      <section className="relative overflow-hidden pt-14 pb-0 md:pt-20 md:pb-0">
         <SectionGlow position="top-right" color={C.teal} />
         <SectionGlow position="bottom-left" color={C.purple} />
 
-        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-            style={{
-              background: "rgba(0,245,255,0.06)",
-              border: "1px solid rgba(0,245,255,0.15)",
-            }}
-          >
-            <Sparkles className="w-4 h-4" style={{ color: C.teal }} />
-            <span className="text-sm font-medium" style={{ color: C.teal }}>
-              Flexible plans for every learner
-            </span>
+        {/* Subtle dot-grid texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.035) 1px, transparent 1px)`,
+            backgroundSize: "36px 36px",
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="grid lg:grid-cols-[55fr_45fr] gap-6 lg:gap-0 items-end">
+
+            {/* Left: text */}
+            <div className="py-8 md:py-12 lg:py-16">
+              {/* Badge */}
+              <div
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+                style={{
+                  background: "rgba(0,245,255,0.06)",
+                  border: "1px solid rgba(0,245,255,0.18)",
+                }}
+              >
+                <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
+                <span className="text-xs font-semibold tracking-wide" style={{ color: C.teal }}>
+                  Flexible plans for every learner
+                </span>
+              </div>
+
+              {/* Heading */}
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-[1.12]"
+                style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.025em" }}
+                data-testid="text-pricing-headline"
+              >
+                <span style={{ color: C.textPrimary }}>Choose Your</span>
+                <br />
+                <span
+                  style={{
+                    background: `linear-gradient(90deg, ${C.teal} 0%, #06B6D4 60%, #818CF8 100%)`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Learning Power
+                </span>
+              </h1>
+
+              {/* Subtitle */}
+              <p
+                className="text-base md:text-lg max-w-lg mb-8"
+                style={{ color: C.textSecondary, lineHeight: "1.7" }}
+                data-testid="text-pricing-subtitle"
+              >
+                Flexible plans built for serious learners and future professionals.
+                Start free, upgrade when you're ready.
+              </p>
+
+              {/* Trust chips */}
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  { icon: Gift, label: "500 credits free" },
+                  { icon: CreditCard, label: "No card required" },
+                  { icon: RefreshCw, label: "Cancel anytime" },
+                ].map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: C.textSecondary,
+                    }}
+                  >
+                    <Icon className="w-3 h-3" style={{ color: C.teal }} />
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: illustration */}
+            <div className="hidden lg:flex items-end justify-center relative">
+              {/* Ambient glow behind illustration */}
+              <div
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-[120px] pointer-events-none"
+                style={{ background: "rgba(0,245,255,0.08)" }}
+              />
+              <img
+                src={heroPng}
+                alt="Choose your learning plan"
+                className="relative w-full max-w-[480px] object-contain drop-shadow-2xl select-none"
+                draggable={false}
+                style={{ filter: "drop-shadow(0 0 40px rgba(0,245,255,0.12))" }}
+              />
+            </div>
+
           </div>
-
-          <h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6"
-            style={{
-              fontFamily: "var(--font-display)",
-              background: `linear-gradient(135deg, ${C.textPrimary} 30%, ${C.teal} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              letterSpacing: "-0.02em",
-              lineHeight: "1.15",
-            }}
-            data-testid="text-pricing-headline"
-          >
-            Choose Your Learning Power
-          </h1>
-
-          <p
-            className="text-lg md:text-xl max-w-2xl mx-auto mb-4"
-            style={{ color: C.textSecondary, lineHeight: "1.7" }}
-            data-testid="text-pricing-subtitle"
-          >
-            Flexible plans built for serious learners and future professionals.
-            Start free, upgrade when you're ready.
-          </p>
         </div>
       </section>
 
-      <section className="relative z-10 pb-20 md:pb-28">
+      <section className="relative z-10 pt-12 pb-20 md:pt-16 md:pb-28">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="mb-16" />
+          <div className="mb-0" />
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
