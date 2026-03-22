@@ -521,88 +521,108 @@ export default function Pricing() {
           backgroundSize: "40px 40px",
         }} />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-0 items-center min-h-[340px] md:min-h-[380px]">
+        {/* ── Illustration: absolutely anchored top-right ── */}
+        <img
+          src={studyImg}
+          alt=""
+          aria-hidden
+          draggable={false}
+          className="absolute top-0 right-0 select-none pointer-events-none hidden md:block"
+          style={{
+            height: "420px",
+            width: "auto",
+            objectFit: "contain",
+            opacity: 0.22,
+            mixBlendMode: "screen",
+            maskImage: [
+              "radial-gradient(ellipse 70% 80% at 70% 40%, black 30%, transparent 75%)",
+              "linear-gradient(to bottom, black 40%, transparent 100%)",
+              "linear-gradient(to left, black 20%, transparent 60%)",
+            ].join(", "),
+            WebkitMaskImage: [
+              "radial-gradient(ellipse 70% 80% at 70% 40%, black 30%, transparent 75%)",
+              "linear-gradient(to bottom, black 40%, transparent 100%)",
+              "linear-gradient(to left, black 20%, transparent 60%)",
+            ].join(", "),
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
+            zIndex: 1,
+          }}
+        />
 
-            {/* Left: illustration */}
-            <div className="flex items-center justify-center lg:justify-start pt-6 pb-0 lg:pt-0">
-              <img
-                src={studyImg}
-                alt="Student learning online"
-                className="select-none w-full max-w-[420px] lg:max-w-none"
-                draggable={false}
-                style={{
-                  height: "340px",
-                  width: "auto",
-                  objectFit: "contain",
-                  maskImage: "radial-gradient(ellipse 88% 88% at 48% 48%, black 50%, transparent 88%)",
-                  WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 48% 48%, black 50%, transparent 88%)",
-                }}
-              />
+        {/* Decorative teal glow behind where the image sits */}
+        <div
+          className="absolute top-0 right-0 pointer-events-none hidden md:block"
+          style={{
+            width: "480px",
+            height: "480px",
+            background: "radial-gradient(ellipse 60% 60% at 80% 20%, rgba(0,245,255,0.07) 0%, transparent 70%)",
+            zIndex: 0,
+          }}
+        />
+
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative" style={{ zIndex: 2 }}>
+          <div className="py-12 md:py-16 max-w-[580px]">
+
+            {/* Badge */}
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
+                border: "1px solid rgba(0,245,255,0.22)",
+              }}
+            >
+              <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
+              <span className="text-xs font-semibold tracking-wide" style={{ color: C.teal }}>
+                Flexible plans for every learner
+              </span>
             </div>
 
-            {/* Right: text */}
-            <div className="py-8 lg:py-10 flex flex-col items-start text-left">
-              {/* Badge */}
-              <div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4"
-                style={{
-                  background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
-                  border: "1px solid rgba(0,245,255,0.2)",
-                }}
-              >
-                <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
-                <span className="text-xs font-semibold tracking-wide" style={{ color: C.teal }}>
-                  Flexible plans for every learner
-                </span>
-              </div>
+            <h1
+              className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold mb-4 leading-[1.06]"
+              style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}
+              data-testid="text-pricing-headline"
+            >
+              <span style={{ color: C.textPrimary }}>Choose Your</span>
+              <br />
+              <span style={{
+                background: `linear-gradient(100deg, ${C.teal} 0%, #38BDF8 40%, #818CF8 75%, #A78BFA 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                Learning Power
+              </span>
+            </h1>
 
-              <h1
-                className="text-4xl md:text-5xl lg:text-[3.2rem] font-bold mb-3 leading-[1.08]"
-                style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.028em" }}
-                data-testid="text-pricing-headline"
-              >
-                <span style={{ color: C.textPrimary }}>Choose Your</span>
-                <br />
-                <span style={{
-                  background: `linear-gradient(100deg, ${C.teal} 0%, #38BDF8 45%, #818CF8 80%, #A78BFA 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>
-                  Learning Power
-                </span>
-              </h1>
+            <p
+              className="text-base md:text-[1.05rem] max-w-[420px] mb-7 leading-relaxed"
+              style={{ color: "#7E99B8" }}
+              data-testid="text-pricing-subtitle"
+            >
+              Flexible plans built for serious learners and future professionals.
+              Start free, upgrade when you're ready.
+            </p>
 
-              <p
-                className="text-base md:text-lg max-w-[400px] mb-6"
-                style={{ color: "#7E99B8", lineHeight: "1.6" }}
-                data-testid="text-pricing-subtitle"
-              >
-                Flexible plans built for serious learners and future professionals.
-                Start free, upgrade when you're ready.
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { icon: Gift, label: "500 credits free" },
-                  { icon: CreditCard, label: "No card required" },
-                  { icon: RefreshCw, label: "Cancel anytime" },
-                ].map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
-                    style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.09)",
-                      color: "#94A3B8",
-                    }}
-                  >
-                    <Icon className="w-3 h-3" style={{ color: C.teal }} />
-                    {label}
-                  </div>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { icon: Gift, label: "500 credits free" },
+                { icon: CreditCard, label: "No card required" },
+                { icon: RefreshCw, label: "Cancel anytime" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    color: "#94A3B8",
+                  }}
+                >
+                  <Icon className="w-3 h-3" style={{ color: C.teal }} />
+                  {label}
+                </div>
+              ))}
             </div>
 
           </div>
