@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import heroPng from "@assets/hero_analytics_nobg.png";
+import heroPng from "@assets/image_1774169528095.png";
 import {
   Check,
   X,
@@ -593,14 +593,21 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: image fills column, bottom-aligned to meet text baseline */}
+            {/* Right: image fills column, edges faded via CSS mask to hide dark bg */}
             <div className="hidden lg:flex items-end justify-center pointer-events-none">
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
                 className="select-none block"
                 draggable={false}
-                style={{ height: "460px", width: "auto", objectFit: "contain", display: "block" }}
+                style={{
+                  height: "460px",
+                  width: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                  maskImage: "radial-gradient(ellipse 82% 88% at 55% 48%, black 50%, transparent 100%)",
+                  WebkitMaskImage: "radial-gradient(ellipse 82% 88% at 55% 48%, black 50%, transparent 100%)",
+                }}
               />
             </div>
 
