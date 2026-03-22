@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import heroPng from "@assets/image_1774157987053.png";
+import heroPng from "@assets/hero_character_nobg.png";
 import {
   Check,
   X,
@@ -503,7 +503,7 @@ export default function Pricing() {
         />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid lg:grid-cols-[55fr_45fr] gap-6 lg:gap-0 items-end">
+          <div className="grid lg:grid-cols-[55fr_45fr] gap-6 lg:gap-0 items-stretch min-h-[440px]">
 
             {/* Left: text */}
             <div className="py-8 md:py-12 lg:py-16">
@@ -573,19 +573,13 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: illustration */}
-            <div className="hidden lg:flex items-end justify-center relative">
-              {/* Ambient glow behind illustration */}
-              <div
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-[120px] pointer-events-none"
-                style={{ background: "rgba(0,245,255,0.08)" }}
-              />
+            {/* Right: full-bleed illustration */}
+            <div className="hidden lg:block relative self-stretch pointer-events-none">
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
-                className="relative w-full max-w-[480px] object-contain drop-shadow-2xl select-none"
+                className="absolute bottom-0 right-0 h-full max-h-[560px] w-auto object-contain object-bottom select-none"
                 draggable={false}
-                style={{ filter: "drop-shadow(0 0 40px rgba(0,245,255,0.12))" }}
               />
             </div>
 
