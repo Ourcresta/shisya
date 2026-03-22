@@ -509,7 +509,7 @@ export default function Pricing() {
     >
       <LandingNavbar />
 
-      <section className="relative overflow-hidden pt-10 pb-0 md:pt-14 md:pb-0" style={{ minHeight: "520px" }}>
+      <section className="relative pt-8 pb-0 md:pt-10 md:pb-0" style={{ minHeight: "580px" }}>
         <SectionGlow position="top-right" color={C.teal} />
         <SectionGlow position="bottom-left" color={C.purple} />
 
@@ -522,14 +522,14 @@ export default function Pricing() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 h-full">
-          <div className="grid lg:grid-cols-[52fr_48fr] gap-0 items-center" style={{ minHeight: "520px" }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10" style={{ minHeight: "580px" }}>
+          <div className="grid lg:grid-cols-[50fr_50fr] gap-0 h-full" style={{ minHeight: "580px" }}>
 
-            {/* Left: text */}
-            <div className="py-10 md:py-14 lg:py-16 pr-0 lg:pr-8">
+            {/* Left: text — vertically centered */}
+            <div className="flex flex-col justify-center py-10 pr-0 lg:pr-10">
               {/* Badge */}
               <div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 w-fit"
                 style={{
                   background: "rgba(0,245,255,0.06)",
                   border: "1px solid rgba(0,245,255,0.18)",
@@ -562,7 +562,7 @@ export default function Pricing() {
 
               {/* Subtitle */}
               <p
-                className="text-base md:text-lg max-w-md mb-7"
+                className="text-base md:text-lg max-w-md mb-6"
                 style={{ color: C.textSecondary, lineHeight: "1.65" }}
                 data-testid="text-pricing-subtitle"
               >
@@ -593,14 +593,14 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: full-bleed illustration — vertically centered */}
-            <div className="hidden lg:flex items-center justify-end relative h-full pointer-events-none" style={{ minHeight: "520px" }}>
+            {/* Right: image anchored to bottom, overflows section bottom for larger feel */}
+            <div className="hidden lg:block relative pointer-events-none overflow-visible" style={{ minHeight: "580px" }}>
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
-                className="w-full max-w-[600px] object-contain select-none"
+                className="absolute bottom-0 right-0 select-none"
                 draggable={false}
-                style={{ maxHeight: "680px" }}
+                style={{ height: "115%", maxHeight: "740px", width: "auto", objectFit: "contain", objectPosition: "bottom right" }}
               />
             </div>
 
