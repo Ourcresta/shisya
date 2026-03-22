@@ -717,14 +717,6 @@ interface CourseGroupLanding {
   courses: Course[];
 }
 
-type FeaturedTab = "courses" | "tracks" | "programs";
-
-const FEATURED_TABS: { key: FeaturedTab; label: string; href: string }[] = [
-  { key: "courses", label: "Courses", href: "/courses" },
-  { key: "tracks", label: "Tracks", href: "/courses?tab=track" },
-  { key: "programs", label: "Programs", href: "/courses?tab=program" },
-];
-
 function GroupCard({ group }: { group: CourseGroupLanding }) {
   const isTrack = group.groupType === "track";
   return (
@@ -853,8 +845,6 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
 }
 
 function FeaturedCoursesSection() {
-  const [activeTab, setActiveTab] = useState<FeaturedTab>("courses");
-
   const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
@@ -863,46 +853,22 @@ function FeaturedCoursesSection() {
     queryKey: ["/api/course-groups"],
   });
 
-  const tracks = groups?.filter(g => g.groupType === "track") ?? [];
-  const programs = groups?.filter(g => g.groupType === "program") ?? [];
+  const tracks = (groups ?? []).filter(g => g.groupType === "track").slice(0, 2);
+  const programs = (groups ?? []).filter(g => g.groupType === "program").slice(0, 2);
+  const featuredCourses = (courses ?? []).slice(0, 2);
 
   const isLoading = coursesLoading || groupsLoading;
 
-  const courseItems = courses
-    ? (courses.length < 5 ? [...courses, ...courses, ...courses] : [...courses, ...courses])
-    : [];
-  const trackItems = tracks.length < 4
-    ? [...tracks, ...tracks, ...tracks]
-    : [...tracks, ...tracks];
-  const programItems = programs.length < 4
-    ? [...programs, ...programs, ...programs]
-    : [...programs, ...programs];
-
-  const courseDuration = Math.max(25, courseItems.length * 4);
-  const trackDuration = Math.max(20, trackItems.length * 6);
-  const programDuration = Math.max(20, programItems.length * 6);
-
-  const viewAllHref = FEATURED_TABS.find(t => t.key === activeTab)?.href ?? "/courses";
-  const viewAllLabel = activeTab === "courses" ? "View All Courses" : activeTab === "tracks" ? "See All Tracks" : "See All Programs";
-
-  const glowColor = activeTab === "programs" ? C.purple : C.teal;
-
   if (isLoading) {
     return (
-      <section className="relative py-8 md:py-12 overflow-hidden">
+      <section className="relative py-12 md:py-16 overflow-hidden">
         <SectionGlow position="center" color={C.teal} />
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="text-center mb-6">
-            <div className="h-8 w-56 rounded-xl mx-auto mb-4 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
-            <div className="flex items-center justify-center gap-2 mt-3">
-              {FEATURED_TABS.map(t => (
-                <div key={t.key} className="h-8 w-24 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
-              ))}
-            </div>
-          </div>
-          <div className="flex gap-4 overflow-hidden mt-6">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-[220px] shrink-0 h-64 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="h-5 w-32 rounded-full mx-auto mb-3 animate-pulse" style={{ background: "rgba(0,245,255,0.1)" }} />
+          <div className="h-9 w-64 rounded-xl mx-auto mb-10 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="rounded-2xl h-80 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
             ))}
           </div>
         </div>
@@ -910,224 +876,301 @@ function FeaturedCoursesSection() {
     );
   }
 
-  const isEmpty =
-    (activeTab === "courses" && courseItems.length === 0) ||
-    (activeTab === "tracks" && trackItems.length === 0) ||
-    (activeTab === "programs" && programItems.length === 0);
-
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
-      <SectionGlow position="center" color={glowColor} />
+    <section className="relative py-12 md:py-16 overflow-hidden">
+      <SectionGlow position="center" color={C.teal} />
+      <SectionGlow position="top-right" color={C.purple} />
 
-      <style>{`
-        @keyframes fc-marquee-ltr {
-          0%   { transform: translateX(-50%); }
-          100% { transform: translateX(0%); }
-        }
-        @keyframes fc-marquee-rtl {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .fc-courses-track {
-          animation: fc-marquee-ltr ${courseDuration}s linear infinite;
-          will-change: transform;
-        }
-        .fc-tracks-track {
-          animation: fc-marquee-rtl ${trackDuration}s linear infinite;
-          will-change: transform;
-        }
-        .fc-programs-track {
-          animation: fc-marquee-rtl ${programDuration}s linear infinite;
-          will-change: transform;
-        }
-        .fc-courses-track:hover,
-        .fc-tracks-track:hover,
-        .fc-programs-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
-      <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
-              style={{
-                background: "rgba(0,245,255,0.08)",
-                border: "1px solid rgba(0,245,255,0.2)",
-                color: C.teal,
-              }}
-            >
-              <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
-            </div>
-            <h2
-              className="text-2xl md:text-3xl font-bold mb-3"
-              style={{
-                fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                letterSpacing: "-0.01em",
-              }}
-              data-testid="text-preview-title"
-            >
-              Featured Courses
-            </h2>
-
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              {FEATURED_TABS.map(tab => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className="px-5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-[1.03]"
-                    style={
-                      isActive
-                        ? {
-                            background: "rgba(0,245,255,0.12)",
-                            color: C.teal,
-                            border: "1px solid rgba(0,245,255,0.35)",
-                            boxShadow: "0 0 12px -4px rgba(0,245,255,0.3)",
-                          }
-                        : {
-                            background: "rgba(255,255,255,0.04)",
-                            color: C.textSecondary,
-                            border: "1px solid rgba(255,255,255,0.08)",
-                          }
-                    }
-                    data-testid={`tab-featured-${tab.key}`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-xs" style={{ color: C.textSecondary }}>Scroll to explore — hover to pause</p>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
+            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
+          >
+            <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
           </div>
+          <h2
+            className="text-2xl md:text-3xl font-bold"
+            style={{
+              fontFamily: "var(--font-display)",
+              background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.01em",
+            }}
+            data-testid="text-preview-title"
+          >
+            Featured Courses
+          </h2>
         </div>
 
-        {isEmpty ? (
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 text-center">
-            <p className="text-sm" style={{ color: C.textSecondary }}>
-              No {activeTab === "courses" ? "courses" : activeTab} available yet. Check back soon!
-            </p>
-          </div>
-        ) : (
-          <div
-            className="relative overflow-hidden"
-            style={{
-              maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
-            }}
-          >
-            {activeTab === "courses" && (
-              <div className={`fc-courses-track flex gap-4 py-4`} style={{ width: "max-content" }}>
-                {courseItems.map((course, idx) => {
+        {/* Outer panel */}
+        <div
+          className="rounded-3xl p-4 md:p-6"
+          style={{
+            background: "linear-gradient(145deg, rgba(6,13,31,0.9) 0%, rgba(11,29,58,0.85) 100%)",
+            border: "1px solid rgba(0,245,255,0.12)",
+            boxShadow: "0 0 60px -20px rgba(0,245,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+
+            {/* ── Column 1: Courses ── */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Courses</h3>
+                <Link href="/courses">
+                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: C.teal }}>
+                    All <ArrowRight className="w-3 h-3" />
+                  </span>
+                </Link>
+              </div>
+
+              {featuredCourses.length === 0 ? (
+                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No courses yet</p>
+              ) : (
+                featuredCourses.map((course) => {
                   const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
                   return (
-                    <Link key={`${course.id}-${idx}`} href={`/courses/${course.id}`}>
+                    <Link key={course.id} href={`/courses/${course.id}`}>
                       <div
-                        className="w-[220px] shrink-0 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                        className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
                         style={{
                           background: "rgba(255,255,255,0.04)",
                           border: "1px solid rgba(255,255,255,0.08)",
-                          boxShadow: "0 4px 20px -6px rgba(0,0,0,0.4)",
                         }}
                         onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.25)";
+                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.28)";
                           (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
                         }}
                         onMouseLeave={e => {
                           (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                          (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px -6px rgba(0,0,0,0.4)";
+                          (e.currentTarget as HTMLElement).style.boxShadow = "none";
                         }}
-                        data-testid={`card-featured-course-${course.id}-${idx}`}
+                        data-testid={`card-featured-course-${course.id}`}
                       >
-                        <div className="relative overflow-hidden" style={{ height: "120px" }}>
+                        <div className="relative overflow-hidden" style={{ height: "110px" }}>
                           {course.thumbnailUrl ? (
                             <img
                               src={course.thumbnailUrl}
                               alt={course.title}
-                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
                             <div
                               className="absolute inset-0 flex items-center justify-center"
-                              style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.06))" }}
+                              style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))" }}
                             >
-                              <BookOpen className="w-8 h-8" style={{ color: "rgba(0,245,255,0.5)" }} />
+                              <BookOpen className="w-9 h-9" style={{ color: "rgba(0,245,255,0.45)" }} />
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/50 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
                           <div className="absolute top-2 right-2">
                             {isFree ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>FREE</span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>FREE</span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>{course.creditCost} cr</span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>{course.creditCost} cr</span>
                             )}
                           </div>
                         </div>
-                        <div className="p-3 flex flex-col gap-2 flex-1">
-                          <h3
-                            className="text-xs font-semibold leading-snug line-clamp-2 text-white"
-                            style={{ fontFamily: "var(--font-display)" }}
-                          >
+                        <div className="p-3 flex flex-col gap-1.5">
+                          <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
                             {course.title}
-                          </h3>
+                          </h4>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
-                            {course.language && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full uppercase" style={{ background: "rgba(255,255,255,0.06)", color: C.textSecondary }}>
-                                {course.language}
-                              </span>
+                            {course.duration && (
+                              <span className="text-[10px]" style={{ color: C.textSecondary }}>{course.duration}</span>
                             )}
                           </div>
                           <div
-                            className="mt-auto pt-1.5 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
+                            className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
                             style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
                           >
-                            View Course
-                            <ChevronRight className="w-3 h-3" />
+                            View Course <ChevronRight className="w-3 h-3" />
                           </div>
                         </div>
                       </div>
                     </Link>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
 
-            {activeTab === "tracks" && (
-              <div className="fc-tracks-track flex gap-5 py-4" style={{ width: "max-content" }}>
-                {trackItems.map((group, idx) => (
-                  <GroupCard key={`${group.id}-${idx}`} group={group} />
-                ))}
+            {/* ── Column 2: Tracks ── */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Tracks</h3>
+                <Link href="/courses?tab=track">
+                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: C.teal }}>
+                    All <ArrowRight className="w-3 h-3" />
+                  </span>
+                </Link>
               </div>
-            )}
 
-            {activeTab === "programs" && (
-              <div className="fc-programs-track flex gap-5 py-4" style={{ width: "max-content" }}>
-                {programItems.map((group, idx) => (
-                  <GroupCard key={`${group.id}-${idx}`} group={group} />
-                ))}
+              {tracks.length === 0 ? (
+                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No tracks yet</p>
+              ) : (
+                tracks.map((group) => (
+                  <Link key={group.id} href={`/courses/group/${group.id}`}>
+                    <div
+                      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
+                      style={{
+                        background: "rgba(0,245,255,0.03)",
+                        border: "1px solid rgba(0,245,255,0.1)",
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.12)";
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.1)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                      }}
+                      data-testid={`card-featured-track-${group.id}`}
+                    >
+                      <div className="relative overflow-hidden" style={{ height: "110px" }}>
+                        {group.thumbnailUrl ? (
+                          <img
+                            src={group.thumbnailUrl}
+                            alt={group.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center"
+                            style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.09), rgba(6,182,212,0.05))" }}
+                          >
+                            <Layers className="w-9 h-9" style={{ color: "rgba(0,245,255,0.45)" }} />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
+                        <div className="absolute top-2 right-2">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(0,245,255,0.18)", color: C.teal, border: "1px solid rgba(0,245,255,0.3)" }}>Track</span>
+                        </div>
+                      </div>
+                      <div className="p-3 flex flex-col gap-1.5">
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                          {group.name}
+                        </h4>
+                        <p className="text-[10px]" style={{ color: C.textSecondary }}>
+                          {group.courseCount} {group.courseCount === 1 ? "Course" : "Courses"}{group.totalDuration ? ` · ${group.totalDuration}` : ""}
+                        </p>
+                        <div
+                          className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                          style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
+                        >
+                          View Track <ChevronRight className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+
+            {/* ── Column 3: Programs ── */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Programs</h3>
+                <Link href="/courses?tab=program">
+                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: "#A78BFA" }}>
+                    All <ArrowRight className="w-3 h-3" />
+                  </span>
+                </Link>
               </div>
-            )}
+
+              {programs.length === 0 ? (
+                <p className="text-xs py-6 text-center" style={{ color: C.textSecondary }}>No programs yet</p>
+              ) : (
+                programs.map((group) => (
+                  <Link key={group.id} href={`/courses/group/${group.id}`}>
+                    <div
+                      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-0.5 group"
+                      style={{
+                        background: "rgba(124,58,237,0.04)",
+                        border: "1px solid rgba(124,58,237,0.15)",
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(124,58,237,0.15)";
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                      }}
+                      data-testid={`card-featured-program-${group.id}`}
+                    >
+                      <div className="relative overflow-hidden" style={{ height: "110px" }}>
+                        {group.thumbnailUrl ? (
+                          <img
+                            src={group.thumbnailUrl}
+                            alt={group.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center"
+                            style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))" }}
+                          >
+                            <GraduationCap className="w-9 h-9" style={{ color: "rgba(139,92,246,0.55)" }} />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
+                        <div className="absolute top-2 right-2">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(124,58,237,0.22)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.35)" }}>Program</span>
+                        </div>
+                      </div>
+                      <div className="p-3 flex flex-col gap-1.5">
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                          {group.name}
+                        </h4>
+                        <p className="text-[10px]" style={{ color: C.textSecondary }}>
+                          {group.courseCount} {group.courseCount === 1 ? "Course" : "Courses"}{group.totalDuration ? ` · ${group.totalDuration}` : ""}
+                        </p>
+                        <div
+                          className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                          style={{ background: "rgba(124,58,237,0.1)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }}
+                        >
+                          View Program <ChevronRight className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+
           </div>
-        )}
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 text-center">
-          <Link href={viewAllHref}>
+        {/* Bottom CTAs */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+          <Link href="/courses">
             <button
-              className="px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 mx-auto hover:scale-[1.02]"
-              style={{
-                background: "transparent",
-                color: C.teal,
-                border: `1px solid rgba(0,245,255,0.3)`,
-              }}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
+              style={{ background: "transparent", color: C.teal, border: "1px solid rgba(0,245,255,0.3)" }}
               data-testid="button-view-all-courses"
             >
-              {viewAllLabel}
-              <ArrowRight className="w-4 h-4" />
+              All Courses <ArrowRight className="w-4 h-4" />
+            </button>
+          </Link>
+          <Link href="/courses?tab=track">
+            <button
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
+              style={{ background: "transparent", color: C.teal, border: "1px solid rgba(0,245,255,0.18)" }}
+              data-testid="button-view-all-tracks"
+            >
+              All Tracks <ArrowRight className="w-4 h-4" />
+            </button>
+          </Link>
+          <Link href="/courses?tab=program">
+            <button
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 hover:scale-[1.02]"
+              style={{ background: "transparent", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.3)" }}
+              data-testid="button-view-all-programs"
+            >
+              All Programs <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
