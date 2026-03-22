@@ -509,7 +509,7 @@ export default function Pricing() {
     >
       <LandingNavbar />
 
-      <section className="relative pt-8 pb-0 md:pt-10 md:pb-0" style={{ minHeight: "580px" }}>
+      <section className="relative overflow-hidden">
         <SectionGlow position="top-right" color={C.teal} />
         <SectionGlow position="bottom-left" color={C.purple} />
 
@@ -522,11 +522,11 @@ export default function Pricing() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10" style={{ minHeight: "580px" }}>
-          <div className="grid lg:grid-cols-[50fr_50fr] gap-0 h-full" style={{ minHeight: "580px" }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-0 items-start">
 
-            {/* Left: text — vertically centered */}
-            <div className="flex flex-col justify-center py-10 pr-0 lg:pr-10">
+            {/* Left: text — starts at top, compact */}
+            <div className="pt-8 pb-0 pr-0 lg:pr-8">
               {/* Badge */}
               <div
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 w-fit"
@@ -543,7 +543,7 @@ export default function Pricing() {
 
               {/* Heading */}
               <h1
-                className="text-4xl md:text-5xl lg:text-[3.75rem] font-bold mb-4 leading-[1.1]"
+                className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold mb-4 leading-[1.1]"
                 style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.025em" }}
                 data-testid="text-pricing-headline"
               >
@@ -563,7 +563,7 @@ export default function Pricing() {
               {/* Subtitle */}
               <p
                 className="text-base md:text-lg max-w-md mb-6"
-                style={{ color: C.textSecondary, lineHeight: "1.65" }}
+                style={{ color: C.textSecondary, lineHeight: "1.6" }}
                 data-testid="text-pricing-subtitle"
               >
                 Flexible plans built for serious learners and future professionals.
@@ -571,7 +571,7 @@ export default function Pricing() {
               </p>
 
               {/* Trust chips */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-0">
                 {[
                   { icon: Gift, label: "500 credits free" },
                   { icon: CreditCard, label: "No card required" },
@@ -593,14 +593,14 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: image — fixed height, aligned bottom, slight overflow for drama */}
-            <div className="hidden lg:flex items-end justify-end pointer-events-none">
+            {/* Right: image fills column, bottom-aligned to meet text baseline */}
+            <div className="hidden lg:flex items-end justify-center pointer-events-none">
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
-                className="select-none"
+                className="select-none block"
                 draggable={false}
-                style={{ height: "620px", width: "auto", objectFit: "contain", marginBottom: "-40px" }}
+                style={{ height: "460px", width: "auto", objectFit: "contain", display: "block" }}
               />
             </div>
 
