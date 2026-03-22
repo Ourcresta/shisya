@@ -704,27 +704,6 @@ function CoursePreviewCard({ course }: { course: Course }) {
   );
 }
 
-function CoursePreviewSkeleton() {
-  return (
-    <div
-      className="flex flex-col h-full rounded-2xl overflow-hidden animate-pulse"
-      style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
-    >
-      <div className="aspect-video" style={{ background: "rgba(255,255,255,0.06)" }} />
-      <div className="p-4 space-y-3 flex-1">
-        <div className="h-5 rounded" style={{ background: "rgba(255,255,255,0.08)", width: "75%" }} />
-        <div className="space-y-2">
-          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "100%" }} />
-          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "60%" }} />
-        </div>
-      </div>
-      <div className="p-4 pt-0">
-        <div className="h-10 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }} />
-      </div>
-    </div>
-  );
-}
-
 interface CourseGroupLanding {
   id: number;
   name: string;
@@ -738,215 +717,175 @@ interface CourseGroupLanding {
   courses: Course[];
 }
 
-function CourseGroupsMarquee() {
-  const { data: groups, isLoading } = useQuery<CourseGroupLanding[]>({
-    queryKey: ["/api/course-groups"],
-  });
+type FeaturedTab = "courses" | "tracks" | "programs";
 
-  if (isLoading || !groups || groups.length === 0) return null;
+const FEATURED_TABS: { key: FeaturedTab; label: string; href: string }[] = [
+  { key: "courses", label: "Courses", href: "/courses" },
+  { key: "tracks", label: "Tracks", href: "/courses?tab=track" },
+  { key: "programs", label: "Programs", href: "/courses?tab=program" },
+];
 
-  const items = groups.length < 4 ? [...groups, ...groups, ...groups] : [...groups, ...groups];
-  const durationSec = items.length * 6;
-
+function GroupCard({ group }: { group: CourseGroupLanding }) {
+  const isTrack = group.groupType === "track";
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
-      <SectionGlow position="center" color={C.purple} />
-      <SectionGlow position="top-right" color={C.teal} />
-
-      <style>{`
-        @keyframes marquee-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track {
-          animation: marquee-scroll ${durationSec}s linear infinite;
-          will-change: transform;
-        }
-        .marquee-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
-      <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
-          <div className="text-center">
-            <h2
-              className="text-2xl md:text-3xl font-bold mb-1"
+    <div
+      className="w-[300px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 8px 32px -8px rgba(0,0,0,0.4)",
+      }}
+    >
+      <div className="relative aspect-video overflow-hidden">
+        {group.thumbnailUrl ? (
+          <img
+            src={group.thumbnailUrl}
+            alt={group.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background: isTrack
+                ? "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(6,182,212,0.04))"
+                : "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))",
+            }}
+          >
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
               style={{
-                fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.purple})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                letterSpacing: "-0.01em",
+                background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)",
+                border: `1px solid ${isTrack ? "rgba(0,245,255,0.22)" : "rgba(124,58,237,0.28)"}`,
               }}
-              data-testid="text-combo-title"
             >
-              Tracks & Programs
-            </h2>
-            <p style={{ color: C.textSecondary }} className="text-sm">Curated paths from beginner to job-ready</p>
+              {isTrack
+                ? <Layers className="w-7 h-7" style={{ color: C.teal }} />
+                : <Trophy className="w-7 h-7" style={{ color: "#A78BFA" }} />
+              }
+            </div>
           </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080F1E]/70 via-transparent to-transparent" />
+        <div className="absolute top-3 left-3">
+          <span
+            className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
+            style={{
+              background: isTrack ? "rgba(0,245,255,0.82)" : "rgba(124,58,237,0.85)",
+              color: "#fff",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            {isTrack ? "🛤 Track" : "🎓 Program"}
+          </span>
+        </div>
+        <div className="absolute top-3 right-3">
+          {group.price > 0 ? (
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>
+              {group.price} Credits
+            </span>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>
+              FREE
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        <div>
+          <h3 className="text-white font-semibold text-base leading-snug line-clamp-1" style={{ fontFamily: "var(--font-display)" }}>
+            {group.name}
+          </h3>
+          {group.description && (
+            <p className="text-xs mt-1 line-clamp-2" style={{ color: C.textSecondary }}>{group.description}</p>
+          )}
         </div>
 
-        <div
-          className="relative overflow-hidden"
-          style={{
-            maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
-          }}
-        >
-          <div className="marquee-track flex gap-5 py-4" style={{ width: "max-content" }}>
-            {items.map((group, idx) => {
-              const isTrack = group.groupType === "track";
-              return (
-                <div
-                  key={`${group.id}-${idx}`}
-                  className="w-[300px] md:w-[340px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    boxShadow: "0 8px 32px -8px rgba(0,0,0,0.4)",
-                  }}
-                  data-testid={`card-group-${group.id}-${idx}`}
+        <div className="flex items-center gap-3 text-xs" style={{ color: C.textSecondary }}>
+          <span className="flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5" />
+            {group.courseCount} courses
+          </span>
+          <span className="capitalize px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+            {group.level}
+          </span>
+        </div>
+
+        {group.courses.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            {group.courses.slice(0, 3).map((c, i) => (
+              <div key={c.id} className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
+                <span
+                  className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold"
+                  style={{ background: "rgba(0,245,255,0.1)", color: C.teal }}
                 >
-                  <div className="relative aspect-video overflow-hidden">
-                    {group.thumbnailUrl ? (
-                      <img
-                        src={group.thumbnailUrl}
-                        alt={group.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
-                          background: isTrack
-                            ? "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(6,182,212,0.04))"
-                            : "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))",
-                        }}
-                      >
-                        <div
-                          className="w-14 h-14 rounded-full flex items-center justify-center"
-                          style={{
-                            background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)",
-                            border: `1px solid ${isTrack ? "rgba(0,245,255,0.22)" : "rgba(124,58,237,0.28)"}`,
-                          }}
-                        >
-                          {isTrack
-                            ? <Layers className="w-7 h-7" style={{ color: C.teal }} />
-                            : <Trophy className="w-7 h-7" style={{ color: "#A78BFA" }} />
-                          }
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#080F1E]/70 via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3">
-                      <span
-                        className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                        style={{
-                          background: isTrack ? "rgba(0,245,255,0.82)" : "rgba(124,58,237,0.85)",
-                          color: "#fff",
-                          backdropFilter: "blur(8px)",
-                        }}
-                      >
-                        {isTrack ? "🛤 Track" : "🎓 Program"}
-                      </span>
-                    </div>
-                    <div className="absolute top-3 right-3">
-                      {group.price > 0 ? (
-                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>
-                          {group.price} Credits
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>
-                          FREE
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-4 flex flex-col gap-3 flex-1">
-                    <div>
-                      <h3 className="text-white font-semibold text-base leading-snug line-clamp-1" style={{ fontFamily: "var(--font-display)" }}>
-                        {group.name}
-                      </h3>
-                      {group.description && (
-                        <p className="text-xs mt-1 line-clamp-2" style={{ color: C.textSecondary }}>{group.description}</p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs" style={{ color: C.textSecondary }}>
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {group.courseCount} courses
-                      </span>
-                      <span className="capitalize px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
-                        {group.level}
-                      </span>
-                    </div>
-
-                    {group.courses.length > 0 && (
-                      <div className="flex flex-col gap-1.5">
-                        {group.courses.slice(0, 3).map((c, i) => (
-                          <div key={c.id} className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
-                            <span
-                              className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold"
-                              style={{ background: "rgba(0,245,255,0.1)", color: C.teal }}
-                            >
-                              {i + 1}
-                            </span>
-                            <span className="truncate">{c.title}</span>
-                          </div>
-                        ))}
-                        {group.courseCount > 3 && (
-                          <span className="text-xs pl-6" style={{ color: "rgba(148,163,184,0.5)" }}>+{group.courseCount - 3} more</span>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="mt-auto pt-1">
-                      <Link href={`/group/${group.id}`}>
-                        <button
-                          className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                          style={{
-                            background: isTrack ? "rgba(0,245,255,0.08)" : "rgba(124,58,237,0.1)",
-                            color: isTrack ? C.teal : "#A78BFA",
-                            border: `1px solid ${isTrack ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}`,
-                          }}
-                          data-testid={`button-view-group-${group.id}`}
-                        >
-                          View Courses
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  {i + 1}
+                </span>
+                <span className="truncate">{c.title}</span>
+              </div>
+            ))}
+            {group.courseCount > 3 && (
+              <span className="text-xs pl-6" style={{ color: "rgba(148,163,184,0.5)" }}>+{group.courseCount - 3} more</span>
+            )}
           </div>
-        </div>
+        )}
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 text-center">
-          <Link href="/courses?tab=track">
+        <div className="mt-auto pt-1">
+          <Link href={`/group/${group.id}`}>
             <button
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02]"
-              style={{ background: "rgba(255,255,255,0.05)", color: C.textSecondary, border: "1px solid rgba(255,255,255,0.08)" }}
-              data-testid="button-view-all-groups"
+              className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              style={{
+                background: isTrack ? "rgba(0,245,255,0.08)" : "rgba(124,58,237,0.1)",
+                color: isTrack ? C.teal : "#A78BFA",
+                border: `1px solid ${isTrack ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}`,
+              }}
+              data-testid={`button-view-group-${group.id}`}
             >
-              See all Tracks & Programs
-              <ArrowRight className="w-4 h-4 inline ml-2" />
+              View Courses
+              <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
-function CoursePreviewSection() {
-  const { data: courses, isLoading } = useQuery<Course[]>({
+function FeaturedCoursesSection() {
+  const [activeTab, setActiveTab] = useState<FeaturedTab>("courses");
+
+  const { data: courses, isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
+
+  const { data: groups, isLoading: groupsLoading } = useQuery<CourseGroupLanding[]>({
+    queryKey: ["/api/course-groups"],
+  });
+
+  const tracks = groups?.filter(g => g.groupType === "track") ?? [];
+  const programs = groups?.filter(g => g.groupType === "program") ?? [];
+
+  const isLoading = coursesLoading || groupsLoading;
+
+  const courseItems = courses
+    ? (courses.length < 5 ? [...courses, ...courses, ...courses] : [...courses, ...courses])
+    : [];
+  const trackItems = tracks.length < 4
+    ? [...tracks, ...tracks, ...tracks]
+    : [...tracks, ...tracks];
+  const programItems = programs.length < 4
+    ? [...programs, ...programs, ...programs]
+    : [...programs, ...programs];
+
+  const courseDuration = Math.max(25, courseItems.length * 4);
+  const trackDuration = Math.max(20, trackItems.length * 6);
+  const programDuration = Math.max(20, programItems.length * 6);
+
+  const viewAllHref = FEATURED_TABS.find(t => t.key === activeTab)?.href ?? "/courses";
+  const viewAllLabel = activeTab === "courses" ? "View All Courses" : activeTab === "tracks" ? "See All Tracks" : "See All Programs";
+
+  const glowColor = activeTab === "programs" ? C.purple : C.teal;
 
   if (isLoading) {
     return (
@@ -955,9 +894,13 @@ function CoursePreviewSection() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-6">
             <div className="h-8 w-56 rounded-xl mx-auto mb-4 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
-            <div className="h-4 w-80 rounded mx-auto animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {FEATURED_TABS.map(t => (
+                <div key={t.key} className="h-8 w-24 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.06)" }} />
+              ))}
+            </div>
           </div>
-          <div className="flex gap-4 overflow-hidden">
+          <div className="flex gap-4 overflow-hidden mt-6">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="w-[220px] shrink-0 h-64 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />
             ))}
@@ -967,30 +910,39 @@ function CoursePreviewSection() {
     );
   }
 
-  if (!courses || courses.length === 0) return null;
-
-  const items = courses.length < 5
-    ? [...courses, ...courses, ...courses]
-    : courses.length < 8
-    ? [...courses, ...courses]
-    : [...courses, ...courses];
-
-  const durationSec = Math.max(25, items.length * 4);
+  const isEmpty =
+    (activeTab === "courses" && courseItems.length === 0) ||
+    (activeTab === "tracks" && trackItems.length === 0) ||
+    (activeTab === "programs" && programItems.length === 0);
 
   return (
     <section className="relative py-8 md:py-12 overflow-hidden">
-      <SectionGlow position="center" color={C.teal} />
+      <SectionGlow position="center" color={glowColor} />
 
       <style>{`
-        @keyframes marquee-ltr {
+        @keyframes fc-marquee-ltr {
           0%   { transform: translateX(-50%); }
           100% { transform: translateX(0%); }
         }
-        .marquee-ltr-track {
-          animation: marquee-ltr ${durationSec}s linear infinite;
+        @keyframes fc-marquee-rtl {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .fc-courses-track {
+          animation: fc-marquee-ltr ${courseDuration}s linear infinite;
           will-change: transform;
         }
-        .marquee-ltr-track:hover {
+        .fc-tracks-track {
+          animation: fc-marquee-rtl ${trackDuration}s linear infinite;
+          will-change: transform;
+        }
+        .fc-programs-track {
+          animation: fc-marquee-rtl ${programDuration}s linear infinite;
+          will-change: transform;
+        }
+        .fc-courses-track:hover,
+        .fc-tracks-track:hover,
+        .fc-programs-track:hover {
           animation-play-state: paused;
         }
       `}</style>
@@ -999,7 +951,7 @@ function CoursePreviewSection() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
           <div className="text-center">
             <h2
-              className="text-2xl md:text-3xl font-bold mb-1"
+              className="text-2xl md:text-3xl font-bold mb-3"
               style={{
                 fontFamily: "var(--font-display)",
                 background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
@@ -1011,96 +963,151 @@ function CoursePreviewSection() {
             >
               Featured Courses
             </h2>
-            <p style={{ color: C.textSecondary }} className="text-sm">Scroll to explore — hover to pause</p>
-          </div>
-        </div>
 
-        <div
-          className="relative overflow-hidden"
-          style={{
-            maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
-          }}
-        >
-          <div className="marquee-ltr-track flex gap-4 py-4" style={{ width: "max-content" }}>
-            {items.map((course, idx) => {
-              const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
-              return (
-                <Link key={`${course.id}-${idx}`} href={`/courses/${course.id}`}>
-                  <div
-                    className="w-[220px] shrink-0 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "0 4px 20px -6px rgba(0,0,0,0.4)",
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.25)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px -6px rgba(0,0,0,0.4)";
-                    }}
-                    data-testid={`card-featured-course-${course.id}-${idx}`}
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {FEATURED_TABS.map(tab => {
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className="px-5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-[1.03]"
+                    style={
+                      isActive
+                        ? {
+                            background: "rgba(0,245,255,0.12)",
+                            color: C.teal,
+                            border: "1px solid rgba(0,245,255,0.35)",
+                            boxShadow: "0 0 12px -4px rgba(0,245,255,0.3)",
+                          }
+                        : {
+                            background: "rgba(255,255,255,0.04)",
+                            color: C.textSecondary,
+                            border: "1px solid rgba(255,255,255,0.08)",
+                          }
+                    }
+                    data-testid={`tab-featured-${tab.key}`}
                   >
-                    <div className="relative overflow-hidden" style={{ height: "120px" }}>
-                      {course.thumbnailUrl ? (
-                        <img
-                          src={course.thumbnailUrl}
-                          alt={course.title}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                      ) : (
-                        <div
-                          className="absolute inset-0 flex items-center justify-center"
-                          style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.06))" }}
-                        >
-                          <BookOpen className="w-8 h-8" style={{ color: "rgba(0,245,255,0.5)" }} />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/50 via-transparent to-transparent" />
-                      <div className="absolute top-2 right-2">
-                        {isFree ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>FREE</span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>{course.creditCost} cr</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="p-3 flex flex-col gap-2 flex-1">
-                      <h3
-                        className="text-xs font-semibold leading-snug line-clamp-2 text-white"
-                        style={{ fontFamily: "var(--font-display)" }}
-                      >
-                        {course.title}
-                      </h3>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
-                        {course.language && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full uppercase" style={{ background: "rgba(255,255,255,0.06)", color: C.textSecondary }}>
-                            {course.language}
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className="mt-auto pt-1.5 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
-                        style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
-                      >
-                        View Course
-                        <ChevronRight className="w-3 h-3" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs" style={{ color: C.textSecondary }}>Scroll to explore — hover to pause</p>
           </div>
         </div>
+
+        {isEmpty ? (
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 text-center">
+            <p className="text-sm" style={{ color: C.textSecondary }}>
+              No {activeTab === "courses" ? "courses" : activeTab} available yet. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div
+            className="relative overflow-hidden"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
+            }}
+          >
+            {activeTab === "courses" && (
+              <div className={`fc-courses-track flex gap-4 py-4`} style={{ width: "max-content" }}>
+                {courseItems.map((course, idx) => {
+                  const isFree = course.isFree || !course.creditCost || course.creditCost === 0;
+                  return (
+                    <Link key={`${course.id}-${idx}`} href={`/courses/${course.id}`}>
+                      <div
+                        className="w-[220px] shrink-0 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          boxShadow: "0 4px 20px -6px rgba(0,0,0,0.4)",
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.25)";
+                          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                          (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 20px -6px rgba(0,0,0,0.4)";
+                        }}
+                        data-testid={`card-featured-course-${course.id}-${idx}`}
+                      >
+                        <div className="relative overflow-hidden" style={{ height: "120px" }}>
+                          {course.thumbnailUrl ? (
+                            <img
+                              src={course.thumbnailUrl}
+                              alt={course.title}
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                          ) : (
+                            <div
+                              className="absolute inset-0 flex items-center justify-center"
+                              style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.06))" }}
+                            >
+                              <BookOpen className="w-8 h-8" style={{ color: "rgba(0,245,255,0.5)" }} />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/50 via-transparent to-transparent" />
+                          <div className="absolute top-2 right-2">
+                            {isFree ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>FREE</span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>{course.creditCost} cr</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-3 flex flex-col gap-2 flex-1">
+                          <h3
+                            className="text-xs font-semibold leading-snug line-clamp-2 text-white"
+                            style={{ fontFamily: "var(--font-display)" }}
+                          >
+                            {course.title}
+                          </h3>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
+                            {course.language && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full uppercase" style={{ background: "rgba(255,255,255,0.06)", color: C.textSecondary }}>
+                                {course.language}
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className="mt-auto pt-1.5 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
+                            style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}
+                          >
+                            View Course
+                            <ChevronRight className="w-3 h-3" />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {activeTab === "tracks" && (
+              <div className="fc-tracks-track flex gap-5 py-4" style={{ width: "max-content" }}>
+                {trackItems.map((group, idx) => (
+                  <GroupCard key={`${group.id}-${idx}`} group={group} />
+                ))}
+              </div>
+            )}
+
+            {activeTab === "programs" && (
+              <div className="fc-programs-track flex gap-5 py-4" style={{ width: "max-content" }}>
+                {programItems.map((group, idx) => (
+                  <GroupCard key={`${group.id}-${idx}`} group={group} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8 text-center">
-          <Link href="/courses">
+          <Link href={viewAllHref}>
             <button
               className="px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 mx-auto hover:scale-[1.02]"
               style={{
@@ -1110,7 +1117,7 @@ function CoursePreviewSection() {
               }}
               data-testid="button-view-all-courses"
             >
-              View All Courses
+              {viewAllLabel}
               <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
@@ -1586,8 +1593,7 @@ export default function LandingPage() {
         <JourneySection />
         <FeaturesSection />
         <AISection />
-        <CoursePreviewSection />
-        <CourseGroupsMarquee />
+        <FeaturedCoursesSection />
         <TestimonialsSection />
         <FAQSection />
         <CTASection />
