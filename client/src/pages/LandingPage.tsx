@@ -973,7 +973,11 @@ function FeaturedCoursesSection() {
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Courses</h3>
                 <Link href="/courses">
-                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: C.teal }}>
+                  <span
+                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
+                    style={{ color: C.teal, background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}
+                    data-testid="button-all-courses"
+                  >
                     All <ArrowRight className="w-3 h-3" />
                   </span>
                 </Link>
@@ -1048,7 +1052,11 @@ function FeaturedCoursesSection() {
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Tracks</h3>
                 <Link href="/courses?tab=track">
-                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: C.teal }}>
+                  <span
+                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
+                    style={{ color: C.teal, background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}
+                    data-testid="button-all-tracks"
+                  >
                     All <ArrowRight className="w-3 h-3" />
                   </span>
                 </Link>
@@ -1113,7 +1121,11 @@ function FeaturedCoursesSection() {
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Programs</h3>
                 <Link href="/courses?tab=program">
-                  <span className="text-[11px] font-medium flex items-center gap-0.5 hover:underline" style={{ color: "#A78BFA" }}>
+                  <span
+                    className="text-[11px] font-semibold flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 hover:scale-[1.04]"
+                    style={{ color: "#A78BFA", background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.28)" }}
+                    data-testid="button-all-programs"
+                  >
                     All <ArrowRight className="w-3 h-3" />
                   </span>
                 </Link>
