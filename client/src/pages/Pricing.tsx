@@ -593,14 +593,14 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: image anchored to bottom, overflows section bottom for larger feel */}
-            <div className="hidden lg:block relative pointer-events-none overflow-visible" style={{ minHeight: "580px" }}>
+            {/* Right: image — fixed height, aligned bottom, slight overflow for drama */}
+            <div className="hidden lg:flex items-end justify-end pointer-events-none">
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
-                className="absolute bottom-0 right-0 select-none"
+                className="select-none"
                 draggable={false}
-                style={{ height: "115%", maxHeight: "740px", width: "auto", objectFit: "contain", objectPosition: "bottom right" }}
+                style={{ height: "620px", width: "auto", objectFit: "contain", marginBottom: "-40px" }}
               />
             </div>
 
