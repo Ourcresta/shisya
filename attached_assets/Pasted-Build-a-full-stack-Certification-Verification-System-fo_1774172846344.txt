@@ -1,0 +1,108 @@
+Build a full-stack Certification Verification System for an online learning platform called "Our Shiksha".
+
+GOAL:
+Create a public page where users can enter a Certificate ID, verify its authenticity, view certificate details, and download the certificate PDF.
+
+TECH STACK:
+
+* Backend: Python (Flask)
+* Frontend: HTML, CSS, JavaScript (modern UI)
+* Database: SQLite (simple setup)
+* Optional: Use Bootstrap or Tailwind for styling
+
+FEATURES REQUIRED:
+
+1. FRONTEND UI:
+
+* Create a clean, modern, professional page
+* Title: "Verify Your Certificate"
+* Subtitle: "Enter your certification number to validate authenticity"
+* Input field: Certificate ID
+* Button: "Verify Certificate"
+* Show results in a card:
+
+  * Status (Valid / Invalid)
+  * Student Name
+  * Course Name
+  * Issue Date
+  * Certificate ID
+* Buttons:
+
+  * View Certificate (open PDF in new tab)
+  * Download Certificate
+
+2. BACKEND (Flask API):
+
+* Endpoint: POST /verify-cert
+* Accept JSON: { certificate_id: "string" }
+* Check database for matching certificate
+* Return:
+  IF FOUND:
+  {
+  status: "valid",
+  student_name,
+  course_name,
+  issue_date,
+  pdf_url
+  }
+  ELSE:
+  {
+  status: "invalid"
+  }
+
+3. DATABASE (SQLite):
+   Create a table named "certificates" with:
+
+* id (primary key)
+* certificate_id (unique)
+* student_name
+* course_name
+* issue_date
+* pdf_url
+* status (valid/revoked)
+
+Insert 3–5 sample records for testing.
+
+4. FUNCTIONALITY:
+
+* On button click → call API using fetch()
+* Display result dynamically without page reload
+* Show green success UI for valid certificate
+* Show red error UI for invalid certificate
+
+5. UI/UX DESIGN:
+
+* Centered card layout
+* Soft shadows / glassmorphism style
+* Smooth animations on result display
+* Mobile responsive design
+* Professional look similar to modern ed-tech platforms
+
+6. BONUS FEATURES (if possible):
+
+* Add loading spinner while verifying
+* Add QR code placeholder area (future use)
+* Add share button (LinkedIn style)
+
+7. PROJECT STRUCTURE:
+
+* app.py (Flask backend)
+* templates/index.html
+* static/style.css
+* static/script.js
+* database.db
+
+8. RUN INSTRUCTIONS:
+
+* Include instructions to install dependencies
+* Run Flask server
+* Open in browser
+
+IMPORTANT:
+
+* Code should be clean and production-ready
+* Use comments for clarity
+* Ensure everything works end-to-end
+
+OUTPUT:
+Provide complete working code for all files.

@@ -26,8 +26,9 @@ const Contact           = lazy(() => import("@/pages/Contact"));
 const CourseCatalog     = lazy(() => import("@/pages/CourseCatalog"));
 const CourseOverview    = lazy(() => import("@/pages/CourseOverview"));
 const CourseGroupPage   = lazy(() => import("@/pages/CourseGroupPage"));
-const CertificateVerify = lazy(() => import("@/pages/CertificateVerify"));
-const MarksheetVerify   = lazy(() => import("@/pages/MarksheetVerify"));
+const CertificateVerify      = lazy(() => import("@/pages/CertificateVerify"));
+const MarksheetVerify        = lazy(() => import("@/pages/MarksheetVerify"));
+const CertVerificationHub    = lazy(() => import("@/pages/CertVerificationHub"));
 const PublicProfilePage = lazy(() => import("@/pages/PublicProfilePage"));
 const AiUshaMentor      = lazy(() => import("@/pages/AiUshaMentor"));
 const BecomeGuru        = lazy(() => import("@/pages/BecomeGuru"));
@@ -167,6 +168,7 @@ function Router() {
         <Route path="/courses" component={CourseCatalog} />
         <Route path="/courses/:courseId" component={CourseOverview} />
         <Route path="/group/:id" component={CourseGroupPage} />
+        <Route path="/verify-certificate" component={CertVerificationHub} />
         <Route path="/verify/:certificateId" component={CertificateVerify} />
         <Route path="/verify/marksheet/:marksheetId" component={MarksheetVerify} />
         <Route path="/verify/marksheet/code/:code" component={MarksheetVerify} />

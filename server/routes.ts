@@ -18,7 +18,7 @@ import { startCdnEvaluator, recordPlayStart, recordBufferingEvent, getTodayMetri
 import { exchangeCodeForTokens } from "./zohoService";
 import { sendGenericEmail } from "./resend";
 import { db } from "./db";
-import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages, courseGroups, courseGroupItems } from "@shared/schema";
+import { userProfiles, marksheets, marksheetVerifications, courses as coursesTable, modules as modulesTable, lessons as lessonsTable, pricingPlans, projects as projectsTable, creditPacks, sitePages, courseGroups, courseGroupItems, shishyaUsers, shishyaUserCertificates, udyogCertificates, udyogInternships } from "@shared/schema";
 import { eq, like, or, and, desc as descOrder, sql, count, asc, inArray } from "drizzle-orm";
 import type { ModuleWithLessons } from "@shared/schema";
 
@@ -1607,6 +1607,88 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching marksheet:", error);
       res.status(500).json({ error: "Failed to fetch marksheet" });
+    }
+  });
+
+  // GET /api/public/verify-certificate/:id - Unified public cert verification (OurShiksha + OurUdyog)
+  app.get("/api/public/verify-certificate/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const certId = id.trim().toUpperCase();
+
+      // 1. Check OurShiksha course certificates
+      const [shishyaCert] = await db
+        .select({
+          certificateId: shishyaUserCertificates.certificateId,
+          courseTitle: shishyaUserCertificates.courseTitle,
+          certificateTitle: shishyaUserCertificates.certificateTitle,
+          certificateType: shishyaUserCertificates.certificateType,
+          level: shishyaUserCertificates.level,
+          skills: shishyaUserCertificates.skills,
+          issuedAt: shishyaUserCertificates.issuedAt,
+          studentName: shishyaUsers.fullName,
+          studentEmail: shishyaUsers.email,
+        })
+        .from(shishyaUserCertificates)
+        .innerJoin(shishyaUsers, eq(shishyaUsers.id, shishyaUserCertificates.userId))
+        .where(eq(shishyaUserCertificates.certificateId, certId))
+        .limit(1);
+
+      if (shishyaCert) {
+        return res.json({
+          valid: true,
+          platform: "ourshiksha",
+          certificateId: shishyaCert.certificateId,
+          studentName: shishyaCert.studentName || "Student",
+          title: shishyaCert.courseTitle,
+          subtitle: shishyaCert.certificateTitle,
+          type: shishyaCert.certificateType,
+          level: shishyaCert.level,
+          skills: shishyaCert.skills,
+          completionDate: shishyaCert.issuedAt,
+        });
+      }
+
+      // 2. Check OurUdyog internship certificates
+      const [udyogCert] = await db
+        .select({
+          certificateId: udyogCertificates.certificateId,
+          role: udyogCertificates.role,
+          performanceScore: udyogCertificates.performanceScore,
+          duration: udyogCertificates.duration,
+          issueDate: udyogCertificates.issueDate,
+          studentName: shishyaUsers.fullName,
+          internshipTitle: udyogInternships.title,
+          internshipDomain: udyogInternships.domain,
+        })
+        .from(udyogCertificates)
+        .innerJoin(shishyaUsers, eq(shishyaUsers.id, udyogCertificates.userId))
+        .innerJoin(udyogInternships, eq(udyogInternships.id, udyogCertificates.internshipId))
+        .where(eq(udyogCertificates.certificateId, certId))
+        .limit(1);
+
+      if (udyogCert) {
+        return res.json({
+          valid: true,
+          platform: "ourudyog",
+          certificateId: udyogCert.certificateId,
+          studentName: udyogCert.studentName || "Student",
+          title: udyogCert.internshipTitle,
+          subtitle: udyogCert.role || "Virtual Internship",
+          type: "internship",
+          level: udyogCert.internshipDomain || "",
+          skills: "",
+          performanceScore: udyogCert.performanceScore,
+          duration: udyogCert.duration,
+          completionDate: udyogCert.issueDate,
+        });
+      }
+
+      // Not found in either platform
+      return res.status(404).json({ valid: false, error: "Certificate not found" });
+    } catch (err) {
+      console.error("[CertVerify] Error:", err);
+      res.status(500).json({ valid: false, error: "Verification failed. Please try again." });
     }
   });
 

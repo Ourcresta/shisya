@@ -18,7 +18,7 @@ const udyogDropdownItems = [
 const moreDropdownItems = [
   { label: "About Our Shiksha", href: "/about", icon: Info },
   { label: "AI Usha Mentor", href: "/ai-usha-mentor", icon: Sparkles },
-  { label: "Certifications", href: "/shishya/certificates", icon: Award },
+  { label: "Verify Certificate", href: "/verify-certificate", icon: Award },
   { label: "Become a Guru", href: "/become-guru", icon: Handshake },
   { label: "Help Center", href: "/help", icon: HelpCircle },
   { label: "Contact Us", href: "/contact", icon: Mail },
