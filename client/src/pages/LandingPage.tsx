@@ -729,7 +729,7 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
   const isTrack = group.groupType === "track";
   return (
     <div
-      className="w-[300px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
+      className="w-[300px] md:w-[340px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
       style={{
         background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.08)",
@@ -950,6 +950,15 @@ function FeaturedCoursesSection() {
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6">
           <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4"
+              style={{
+                background: "rgba(0,245,255,0.08)",
+                border: "1px solid rgba(0,245,255,0.2)",
+                color: C.teal,
+              }}
+            >
+              <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
+            </div>
             <h2
               className="text-2xl md:text-3xl font-bold mb-3"
               style={{
