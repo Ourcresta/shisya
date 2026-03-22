@@ -608,7 +608,7 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative z-10 pt-8 pb-12 md:pt-10 md:pb-16">
+      <section className="relative z-10 pt-4 pb-12 md:pt-6 md:pb-16">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="mb-0" />
 
