@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import heroPng from "@assets/image_1774169528095.png";
 import {
   Check,
   X,
@@ -541,10 +540,10 @@ export default function Pricing() {
         />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-0 items-start">
+          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
 
-            {/* Left: text */}
-            <div className="pt-10 pb-6 pr-0 lg:pr-10">
+            {/* Hero text */}
+            <div className="pt-10 pb-6">
               {/* Badge */}
               <div
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 w-fit"
@@ -610,36 +609,6 @@ export default function Pricing() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Right: character — mix-blend-mode:lighten makes the near-black bg vanish */}
-            <div
-              className="hidden lg:flex items-end justify-center pointer-events-none"
-              style={{ position: "relative" }}
-            >
-              {/* Ambient glow behind character */}
-              <div
-                className="absolute"
-                style={{
-                  bottom: "10%", left: "50%", transform: "translateX(-50%)",
-                  width: "340px", height: "340px", borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(0,245,255,0.09) 0%, transparent 70%)",
-                  pointerEvents: "none",
-                }}
-              />
-              <img
-                src={heroPng}
-                alt="Choose your learning plan"
-                className="select-none relative z-10"
-                draggable={false}
-                style={{
-                  height: "480px",
-                  width: "auto",
-                  objectFit: "contain",
-                  display: "block",
-                  mixBlendMode: "lighten",
-                }}
-              />
             </div>
 
           </div>
