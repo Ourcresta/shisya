@@ -1,4 +1,4 @@
-import studyImg from "@assets/image_1774171868905.png";
+import studyImg from "@assets/image_1774172322092.png";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
