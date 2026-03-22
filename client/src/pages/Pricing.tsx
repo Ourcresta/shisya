@@ -503,36 +503,54 @@ export default function Pricing() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: `linear-gradient(180deg, ${C.bgDeep} 0%, ${C.bgPrimary} 30%, ${C.bgSecondary} 100%)`,
+        background: `linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)`,
         color: C.textPrimary,
       }}
     >
       <LandingNavbar />
 
-      <section className="relative overflow-hidden">
-        <SectionGlow position="top-right" color={C.teal} />
-        <SectionGlow position="bottom-left" color={C.purple} />
-
-        {/* Subtle dot-grid texture */}
+      {/* ── HERO ── */}
+      <section className="relative" style={{ overflow: "visible" }}>
+        {/* Teal glow top-right — where the character lives */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: "-60px", right: "-80px",
+            width: "700px", height: "700px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(0,245,255,0.07) 0%, transparent 65%)",
+          }}
+        />
+        {/* Purple glow bottom-left */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            bottom: "-40px", left: "-60px",
+            width: "500px", height: "500px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 65%)",
+          }}
+        />
+        {/* Dot-grid texture */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.03) 1px, transparent 1px)`,
-            backgroundSize: "36px 36px",
+            backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.025) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
           }}
         />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
           <div className="grid lg:grid-cols-[1fr_1fr] gap-0 items-start">
 
-            {/* Left: text — starts at top, compact */}
-            <div className="pt-8 pb-0 pr-0 lg:pr-8">
+            {/* Left: text */}
+            <div className="pt-10 pb-6 pr-0 lg:pr-10">
               {/* Badge */}
               <div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 w-fit"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 w-fit"
                 style={{
-                  background: "rgba(0,245,255,0.06)",
-                  border: "1px solid rgba(0,245,255,0.18)",
+                  background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
+                  border: "1px solid rgba(0,245,255,0.2)",
                 }}
               >
                 <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
@@ -543,17 +561,18 @@ export default function Pricing() {
 
               {/* Heading */}
               <h1
-                className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold mb-4 leading-[1.1]"
-                style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.025em" }}
+                className="text-4xl md:text-5xl lg:text-[3.6rem] font-bold mb-4 leading-[1.08]"
+                style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.028em" }}
                 data-testid="text-pricing-headline"
               >
                 <span style={{ color: C.textPrimary }}>Choose Your</span>
                 <br />
                 <span
                   style={{
-                    background: `linear-gradient(90deg, ${C.teal} 0%, #06B6D4 55%, #818CF8 100%)`,
+                    background: `linear-gradient(100deg, ${C.teal} 0%, #38BDF8 45%, #818CF8 80%, #A78BFA 100%)`,
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
                   }}
                 >
                   Learning Power
@@ -562,8 +581,8 @@ export default function Pricing() {
 
               {/* Subtitle */}
               <p
-                className="text-base md:text-lg max-w-md mb-6"
-                style={{ color: C.textSecondary, lineHeight: "1.6" }}
+                className="text-base md:text-lg max-w-[420px] mb-7"
+                style={{ color: "#7E99B8", lineHeight: "1.65" }}
                 data-testid="text-pricing-subtitle"
               >
                 Flexible plans built for serious learners and future professionals.
@@ -571,7 +590,7 @@ export default function Pricing() {
               </p>
 
               {/* Trust chips */}
-              <div className="flex flex-wrap gap-2 mb-0">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { icon: Gift, label: "500 credits free" },
                   { icon: CreditCard, label: "No card required" },
@@ -581,9 +600,9 @@ export default function Pricing() {
                     key={label}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      color: C.textSecondary,
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      color: "#94A3B8",
                     }}
                   >
                     <Icon className="w-3 h-3" style={{ color: C.teal }} />
@@ -593,20 +612,32 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Right: image fills column, edges faded via CSS mask to hide dark bg */}
-            <div className="hidden lg:flex items-end justify-center pointer-events-none">
+            {/* Right: character — mix-blend-mode:lighten makes the near-black bg vanish */}
+            <div
+              className="hidden lg:flex items-end justify-center pointer-events-none"
+              style={{ position: "relative" }}
+            >
+              {/* Ambient glow behind character */}
+              <div
+                className="absolute"
+                style={{
+                  bottom: "10%", left: "50%", transform: "translateX(-50%)",
+                  width: "340px", height: "340px", borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(0,245,255,0.09) 0%, transparent 70%)",
+                  pointerEvents: "none",
+                }}
+              />
               <img
                 src={heroPng}
                 alt="Choose your learning plan"
-                className="select-none block"
+                className="select-none relative z-10"
                 draggable={false}
                 style={{
-                  height: "460px",
+                  height: "480px",
                   width: "auto",
                   objectFit: "contain",
                   display: "block",
-                  maskImage: "radial-gradient(ellipse 82% 88% at 55% 48%, black 50%, transparent 100%)",
-                  WebkitMaskImage: "radial-gradient(ellipse 82% 88% at 55% 48%, black 50%, transparent 100%)",
+                  mixBlendMode: "lighten",
                 }}
               />
             </div>
@@ -615,10 +646,22 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative z-10 pt-4 pb-12 md:pt-6 md:pb-16">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="mb-0" />
+      {/* Gradient bridge between hero and cards */}
+      <div
+        className="relative z-10 pointer-events-none"
+        style={{
+          height: "80px",
+          background: "linear-gradient(180deg, transparent 0%, rgba(0,245,255,0.02) 50%, transparent 100%)",
+          borderTop: "1px solid rgba(0,245,255,0.05)",
+        }}
+      />
 
+      <section className="relative z-10 pb-16 md:pb-20">
+        {/* Subtle glow behind the card grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.04) 0%, transparent 70%)",
+        }} />
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
               {[0, 1, 2].map((i) => (
@@ -658,8 +701,11 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative py-10 md:py-14 overflow-hidden">
-        <SectionGlow position="center" color={C.teal} />
+      {/* ── COMPARE PLANS ── */}
+      <section className="relative py-12 md:py-16 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%)",
+        }} />
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-8">
@@ -693,13 +739,13 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative py-8 md:py-10 overflow-hidden">
+      {/* ── TRUST BAR ── */}
+      <section className="relative pb-10 overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
-          {/* Trust bar — horizontal strip */}
           <div
             className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap"
             style={{
-              background: "rgba(255,255,255,0.025)",
+              background: "linear-gradient(135deg, rgba(0,245,255,0.03), rgba(124,58,237,0.02))",
               border: "1px solid rgba(255,255,255,0.07)",
             }}
             data-testid="section-trust-bar"
@@ -707,11 +753,14 @@ export default function Pricing() {
             {trustItems.map((item, i) => (
               <div key={item.title} className="flex items-center gap-3 min-w-0">
                 {i > 0 && (
-                  <div className="hidden sm:block w-px h-8 shrink-0" style={{ background: "rgba(255,255,255,0.08)" }} />
+                  <div className="hidden sm:block w-px h-8 shrink-0" style={{ background: "rgba(255,255,255,0.07)" }} />
                 )}
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.14)" }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
+                    border: "1px solid rgba(0,245,255,0.15)",
+                  }}
                 >
                   <item.icon className="w-4 h-4" style={{ color: C.teal }} />
                 </div>
@@ -729,52 +778,53 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative py-10 md:py-14 overflow-hidden">
+      {/* ── FAQ ── */}
+      <section className="relative py-12 md:py-16 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 50% 60% at 75% 50%, rgba(124,58,237,0.05) 0%, transparent 70%)",
+        }} />
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
-          {/* 2-column split: sticky label left, numbered accordion right */}
           <div className="grid lg:grid-cols-[2fr_3fr] gap-10 lg:gap-16 items-start">
-
-            {/* Left: sticky header */}
             <div className="lg:sticky lg:top-24">
               <div
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-                style={{ background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.16)", color: C.teal }}
+                style={{
+                  background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.04))",
+                  border: "1px solid rgba(0,245,255,0.18)",
+                  color: C.teal,
+                }}
               >
                 <Sparkles className="w-3 h-3" /> FAQ
               </div>
               <h2
                 className="text-2xl md:text-3xl font-bold mb-3 leading-tight"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  color: C.textPrimary,
-                  letterSpacing: "-0.02em",
-                }}
+                style={{ fontFamily: "var(--font-display)", color: C.textPrimary, letterSpacing: "-0.02em" }}
                 data-testid="text-faq-title"
               >
                 Frequently Asked
                 <br />
                 <span style={{
-                  background: `linear-gradient(135deg, ${C.teal}, #818CF8)`,
+                  background: `linear-gradient(100deg, ${C.teal}, #38BDF8 50%, #818CF8)`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}>Questions</span>
               </h2>
-              <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="text-sm leading-relaxed" style={{ color: "#7E99B8" }}>
                 Everything you need to know before subscribing. Can't find an answer? Reach out to our support team.
               </p>
             </div>
 
-            {/* Right: numbered accordion */}
             <Accordion type="single" collapsible className="space-y-2">
               {faqs.map((faq, index) => (
                 <AccordionItem
                   key={index}
                   value={`item-${index}`}
-                  className="rounded-[14px] px-5 border-0 group"
+                  className="rounded-[14px] px-5 border-0"
                   style={{
-                    background: C.cardBg,
-                    border: `1px solid ${C.cardBorder}`,
-                    transition: "border-color 0.2s",
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    transition: "border-color 0.2s, background 0.2s",
                   }}
                   data-testid={`faq-question-${index}`}
                 >
@@ -784,9 +834,9 @@ export default function Pricing() {
                   >
                     <div className="flex items-center gap-3 flex-1">
                       <span
-                        className="flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center transition-colors"
+                        className="flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center"
                         style={{
-                          background: "rgba(0,245,255,0.06)",
+                          background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))",
                           border: "1px solid rgba(0,245,255,0.2)",
                           color: C.teal,
                           fontFamily: "var(--font-display)",
@@ -798,10 +848,10 @@ export default function Pricing() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent
-                    className="pb-4 text-[13.5px] leading-relaxed pl-9"
+                    className="pb-4 text-[13.5px] leading-relaxed"
                     style={{
-                      color: C.textSecondary,
-                      borderLeft: `2px solid rgba(0,245,255,0.15)`,
+                      color: "#7E99B8",
+                      borderLeft: `2px solid rgba(0,245,255,0.18)`,
                       marginLeft: "0.75rem",
                       paddingLeft: "1.25rem",
                     }}
@@ -815,23 +865,25 @@ export default function Pricing() {
         </div>
       </section>
 
-      <section className="relative py-10 md:py-14 overflow-hidden">
-        <SectionGlow position="center" color={C.teal} />
-
+      {/* ── CTA ── */}
+      <section className="relative py-12 md:py-16 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse 50% 70% at 50% 50%, rgba(0,245,255,0.06) 0%, transparent 65%)",
+        }} />
         <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10 text-center">
-          <GlassCard
-            hover={false}
-            className="p-8 md:p-12"
+          <div
+            className="rounded-[24px] p-10 md:p-14"
             style={{
-              background: "linear-gradient(135deg, rgba(0,245,255,0.04), rgba(124,58,237,0.03))",
-              border: "1px solid rgba(0,245,255,0.12)",
+              background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.04) 50%, rgba(0,245,255,0.03) 100%)",
+              border: "1px solid rgba(0,245,255,0.14)",
+              boxShadow: "0 0 80px -20px rgba(0,245,255,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
             }}
           >
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
               style={{
                 background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
-                boxShadow: "0 0 30px rgba(0,245,255,0.25)",
+                boxShadow: "0 0 40px rgba(0,245,255,0.3)",
               }}
             >
               <GraduationCap className="w-8 h-8" style={{ color: C.bgDeep }} />
@@ -863,11 +915,11 @@ export default function Pricing() {
                 <ArrowRight className="w-5 h-5" />
               </button>
             </Link>
-          </GlassCard>
+          </div>
         </div>
       </section>
 
-      <footer className="relative z-10 py-6 mt-auto" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+      <footer className="relative z-10 py-6 mt-auto" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-center text-sm" style={{ color: C.textSecondary }}>
           <p>Invest in your future. Start learning today.</p>
         </div>
