@@ -970,17 +970,15 @@ function FeaturedCoursesSection() {
 
             {/* ── Courses ── */}
             <div className="flex flex-col gap-3">
-              <div className="mb-1">
-                <Link href="/courses">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
-                    style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
-                    data-testid="button-header-courses"
-                  >
-                    Courses <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </Link>
-              </div>
+              <Link href="/courses" className="block">
+                <span
+                  className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                  style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                  data-testid="button-header-courses"
+                >
+                  Courses <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
               {!course ? (
                 <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No courses yet</p>
               ) : (
@@ -991,7 +989,7 @@ function FeaturedCoursesSection() {
                       <Link href={`/courses/${course.id}`}>
                         <div
                           className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", height: "240px" }}
                           onMouseEnter={e => {
                             (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.28)";
                             (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
@@ -1002,7 +1000,7 @@ function FeaturedCoursesSection() {
                           }}
                           data-testid={`card-featured-course-${course.id}`}
                         >
-                          <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                          <div className="relative overflow-hidden" style={{ height: "130px", flexShrink: 0 }}>
                             {course.thumbnailUrl ? (
                               <img src={course.thumbnailUrl} alt={course.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             ) : (
@@ -1019,13 +1017,13 @@ function FeaturedCoursesSection() {
                               )}
                             </div>
                           </div>
-                          <div className="p-3 flex flex-col gap-1.5">
-                            <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{course.title}</h4>
+                          <div className="p-3 flex flex-col gap-1.5 flex-1">
+                            <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{course.title}</h4>
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
                               {course.duration && <span className="text-[10px]" style={{ color: C.textSecondary }}>{course.duration}</span>}
                             </div>
-                            <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                            <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
                               style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
                               View Course <ChevronRight className="w-3 h-3" />
                             </div>
@@ -1048,17 +1046,15 @@ function FeaturedCoursesSection() {
 
             {/* ── Tracks ── */}
             <div className="flex flex-col gap-3">
-              <div className="mb-1">
-                <Link href="/courses?tab=track">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
-                    style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
-                    data-testid="button-header-tracks"
-                  >
-                    Tracks <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </Link>
-              </div>
+              <Link href="/courses?tab=track" className="block">
+                <span
+                  className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                  style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                  data-testid="button-header-tracks"
+                >
+                  Tracks <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
               {!track ? (
                 <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No tracks yet</p>
               ) : (
@@ -1066,7 +1062,7 @@ function FeaturedCoursesSection() {
                   <Link href={`/courses/group/${track.id}`}>
                     <div
                       className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                      style={{ background: "rgba(0,245,255,0.03)", border: "1px solid rgba(0,245,255,0.1)" }}
+                      style={{ background: "rgba(0,245,255,0.03)", border: "1px solid rgba(0,245,255,0.1)", height: "240px" }}
                       onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.12)";
@@ -1077,7 +1073,7 @@ function FeaturedCoursesSection() {
                       }}
                       data-testid={`card-featured-track-${track.id}`}
                     >
-                      <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                      <div className="relative overflow-hidden" style={{ height: "130px", flexShrink: 0 }}>
                         {track.thumbnailUrl ? (
                           <img src={track.thumbnailUrl} alt={track.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
@@ -1090,12 +1086,12 @@ function FeaturedCoursesSection() {
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(0,245,255,0.18)", color: C.teal, border: "1px solid rgba(0,245,255,0.3)" }}>Track</span>
                         </div>
                       </div>
-                      <div className="p-3 flex flex-col gap-1.5">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{track.name}</h4>
+                      <div className="p-3 flex flex-col gap-1.5 flex-1">
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{track.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
                           {track.courseCount} {track.courseCount === 1 ? "Course" : "Courses"}{track.totalDuration ? ` · ${track.totalDuration}` : ""}
                         </p>
-                        <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                        <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
                           style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
                           View Track <ChevronRight className="w-3 h-3" />
                         </div>
@@ -1116,17 +1112,15 @@ function FeaturedCoursesSection() {
 
             {/* ── Programs ── */}
             <div className="flex flex-col gap-3">
-              <div className="mb-1">
-                <Link href="/courses?tab=program">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.03] cursor-pointer"
-                    style={{ color: "#A78BFA", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", fontFamily: "var(--font-display)" }}
-                    data-testid="button-header-programs"
-                  >
-                    Programs <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </Link>
-              </div>
+              <Link href="/courses?tab=program" className="block">
+                <span
+                  className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                  style={{ color: "#A78BFA", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", fontFamily: "var(--font-display)" }}
+                  data-testid="button-header-programs"
+                >
+                  Programs <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
               {!program ? (
                 <p className="text-xs py-8 text-center" style={{ color: C.textSecondary }}>No programs yet</p>
               ) : (
@@ -1134,7 +1128,7 @@ function FeaturedCoursesSection() {
                   <Link href={`/courses/group/${program.id}`}>
                     <div
                       className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                      style={{ background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.15)" }}
+                      style={{ background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.15)", height: "240px" }}
                       onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(124,58,237,0.15)";
@@ -1145,7 +1139,7 @@ function FeaturedCoursesSection() {
                       }}
                       data-testid={`card-featured-program-${program.id}`}
                     >
-                      <div className="relative overflow-hidden" style={{ height: "130px" }}>
+                      <div className="relative overflow-hidden" style={{ height: "130px", flexShrink: 0 }}>
                         {program.thumbnailUrl ? (
                           <img src={program.thumbnailUrl} alt={program.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
@@ -1158,12 +1152,12 @@ function FeaturedCoursesSection() {
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(124,58,237,0.22)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.35)" }}>Program</span>
                         </div>
                       </div>
-                      <div className="p-3 flex flex-col gap-1.5">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white" style={{ fontFamily: "var(--font-display)" }}>{program.name}</h4>
+                      <div className="p-3 flex flex-col gap-1.5 flex-1">
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{program.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
                           {program.courseCount} {program.courseCount === 1 ? "Course" : "Courses"}{program.totalDuration ? ` · ${program.totalDuration}` : ""}
                         </p>
-                        <div className="mt-1 text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
+                        <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
                           style={{ background: "rgba(124,58,237,0.1)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }}>
                           View Program <ChevronRight className="w-3 h-3" />
                         </div>
