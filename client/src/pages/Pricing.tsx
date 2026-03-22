@@ -532,21 +532,11 @@ export default function Pricing() {
             height: "420px",
             width: "auto",
             objectFit: "contain",
-            opacity: 0.22,
-            mixBlendMode: "screen",
-            maskImage: [
-              "radial-gradient(ellipse 70% 80% at 70% 40%, black 30%, transparent 75%)",
-              "linear-gradient(to bottom, black 40%, transparent 100%)",
-              "linear-gradient(to left, black 20%, transparent 60%)",
-            ].join(", "),
-            WebkitMaskImage: [
-              "radial-gradient(ellipse 70% 80% at 70% 40%, black 30%, transparent 75%)",
-              "linear-gradient(to bottom, black 40%, transparent 100%)",
-              "linear-gradient(to left, black 20%, transparent 60%)",
-            ].join(", "),
+            zIndex: 3,
+            maskImage: "linear-gradient(to right, transparent 0%, black 18%), linear-gradient(to top, transparent 0%, black 14%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 18%), linear-gradient(to top, transparent 0%, black 14%)",
             maskComposite: "intersect",
             WebkitMaskComposite: "source-in",
-            zIndex: 1,
           }}
         />
 
@@ -561,7 +551,7 @@ export default function Pricing() {
           }}
         />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-8 relative" style={{ zIndex: 2 }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8 relative" style={{ zIndex: 4 }}>
           <div className="py-12 md:py-16 max-w-[580px]">
 
             {/* Badge */}
