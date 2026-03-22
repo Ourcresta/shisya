@@ -1381,28 +1381,6 @@ function FAQSection() {
               <Link href="/contact" className="underline underline-offset-2" style={{ color: C.teal }}>Contact us</Link>.
             </p>
 
-            {/* Quick stats */}
-            <div className="flex flex-col gap-3">
-              {[
-                { value: "6", label: "topics answered" },
-                { value: "500", label: "free credits on signup" },
-                { value: "0", label: "credit card required" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3"
-                  style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.09)" }}
-                >
-                  <span
-                    className="text-lg font-bold"
-                    style={{ color: C.teal, fontFamily: "var(--font-display)", minWidth: "2rem" }}
-                  >
-                    {stat.value}
-                  </span>
-                  <span className="text-xs" style={{ color: C.textSecondary }}>{stat.label}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Right: styled accordion */}
