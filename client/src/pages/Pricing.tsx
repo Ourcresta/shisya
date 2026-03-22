@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import heroPng from "@assets/image_1774168302073.png";
+import heroPng from "@assets/hero_analytics_nobg.png";
 import {
   Check,
   X,
