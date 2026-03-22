@@ -690,7 +690,7 @@ export default function CourseCatalog() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#060D1F", color: "#e2e8f0" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)", color: "#E8F4FF" }}>
       <LandingNavbar />
       <div className="flex-1">
 

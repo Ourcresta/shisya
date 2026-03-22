@@ -13,13 +13,13 @@ import { GroupEnrollmentModal } from "@/components/GroupEnrollmentModal";
 import type { Course } from "@shared/schema";
 
 const C = {
-  bgPrimary: "#0B1D3A",
-  bgCard: "rgba(255,255,255,0.04)",
-  cardBorder: "rgba(255,255,255,0.08)",
+  bgPrimary: "#020814",
+  bgCard: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
   teal: "#00F5FF",
   purple: "#7C3AED",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#94A3B8",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
 };
 
 interface GroupDetail {
@@ -178,7 +178,7 @@ export default function CourseGroupPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: C.bgPrimary }}>
+      <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)" }}>
         <LandingNavbar />
         <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 animate-pulse space-y-6">
           <div className="h-8 rounded-xl w-64" style={{ background: "rgba(255,255,255,0.07)" }} />
@@ -202,7 +202,7 @@ export default function CourseGroupPage() {
 
   if (!group) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: C.bgPrimary }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)" }}>
         <LandingNavbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -227,7 +227,7 @@ export default function CourseGroupPage() {
   const skillsList = group.aggregatedSkills ? group.aggregatedSkills.split(",").map(s => s.trim()).filter(Boolean) : [];
 
   return (
-    <div className="min-h-screen" style={{ background: C.bgPrimary }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)" }}>
       <LandingNavbar />
 
       <div className="pt-20">

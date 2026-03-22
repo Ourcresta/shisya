@@ -2,8 +2,17 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { GraduationCap, FileText } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Header } from "@/components/layout/Header";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
+
+const C = {
+  bg: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)",
+  teal: "#00F5FF",
+  purple: "#7C3AED",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
+};
 
 interface PublicConfig {
   supportEmail: string;
@@ -13,213 +22,153 @@ interface PublicConfig {
   companyName: string;
 }
 
-function Footer() {
+function DarkFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="border-t py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer style={{ borderTop: "1px solid rgba(0,245,255,0.08)", background: "rgba(2,8,20,0.8)" }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.purple})` }}>
+              <GraduationCap className="w-4 h-4 text-black" />
             </div>
-            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-              OurShiksha
-            </span>
+            <span className="font-semibold" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>OurShiksha</span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/about" className="hover:text-foreground transition-colors">
-              About
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors">
-              Contact
-            </Link>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            {[{ href: "/about", label: "About" }, { href: "/privacy", label: "Privacy Policy" }, { href: "/terms", label: "Terms" }, { href: "/contact", label: "Contact" }].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-white transition-colors">
+                {l.label}
+              </Link>
+            ))}
           </nav>
-          <p className="text-sm text-muted-foreground">
-            OurShiksha {new Date().getFullYear()}
-          </p>
+          <p className="text-sm" style={{ color: C.textSecondary }}>OurShiksha {year}</p>
         </div>
       </div>
     </footer>
   );
 }
 
-export default function Terms() {
-  const { data: config } = useQuery<PublicConfig>({
-    queryKey: ["/api/config/public"],
-  });
+const sections = [
+  {
+    title: "1. Platform Usage",
+    body: `OurShiksha is an educational platform providing online courses, practice labs, tests, and certification services. By using our platform, you agree to these terms and our commitment to quality education.\n\nYou must be at least 13 years old to use OurShiksha. Users under 18 should have parental consent. We reserve the right to modify or discontinue services with reasonable notice.`,
+  },
+  {
+    title: "2. Account Responsibility",
+    body: `You are responsible for maintaining the security of your account credentials. Do not share your login details with others. Each account is personal and non-transferable.\n\nYou must provide accurate information during registration. We may suspend accounts that violate our policies or contain false information.`,
+  },
+  {
+    title: "3. Course Access & Credits",
+    body: `OurShiksha uses a credit-based system for accessing premium features. Credits are used for AI tutoring, labs, tests, project evaluations, and certificate generation.`,
+    list: [
+      "Free signup credits (500) never expire",
+      "Subscription credits reset monthly and don't carry over",
+      "Purchased coin packs never expire",
+      "Credits are non-transferable between accounts",
+    ],
+  },
+  {
+    title: "4. Payments & Refunds",
+    body: `Payments are processed securely through Razorpay. We accept UPI, cards, net banking, and popular wallets.\n\nRefunds are considered on a case-by-case basis within 7 days of purchase if credits remain unused. Subscription fees are non-refundable once the billing cycle begins. Contact support for refund requests.`,
+  },
+  {
+    title: "5. Academic Integrity",
+    body: "We take academic integrity seriously. The following are strictly prohibited:",
+    list: [
+      "Sharing test questions or answers with others",
+      "Using unauthorized assistance during tests",
+      "Submitting work that is not your own",
+      "Attempting to manipulate scores or certificates",
+      "Creating multiple accounts for unfair advantage",
+    ],
+    footer: "Violations may result in certificate revocation and account termination.",
+  },
+  {
+    title: "6. Certificate Authenticity",
+    body: `Certificates issued by OurShiksha are verifiable through our public verification system. Each certificate has a unique ID and QR code.\n\nWe reserve the right to revoke certificates if we discover they were obtained through fraudulent means.`,
+  },
+  {
+    title: "7. Misuse & Termination",
+    body: "We may terminate or suspend accounts that:",
+    list: [
+      "Violate academic integrity policies",
+      "Attempt to exploit or hack the platform",
+      "Harass other users or staff",
+      "Use the platform for illegal activities",
+      "Violate any part of these terms",
+    ],
+  },
+  {
+    title: "8. Limitation of Liability",
+    body: `OurShiksha provides educational content "as is" without warranties of any kind. We are not liable for career outcomes, employment decisions, or any indirect damages resulting from platform use.\n\nOur liability is limited to the amount you paid for services in the preceding 12 months.`,
+  },
+  {
+    title: "9. Governing Law",
+    body: "These terms are governed by the laws of India. Any disputes shall be resolved in the courts of Chennai, Tamil Nadu, India.",
+  },
+];
 
+export default function Terms() {
+  const { data: config } = useQuery<PublicConfig>({ queryKey: ["/api/config/public"] });
   const legalEmail = config?.legalEmail || "legal@ourshiksha.com";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
+    <div className="min-h-screen flex flex-col" style={{ background: C.bg, color: C.textPrimary }}>
+      <LandingNavbar />
+
       <main className="flex-1">
-        <section className="py-12 md:py-16">
-          <div className="max-w-4xl mx-auto px-4 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Badge variant="secondary" className="mb-4 gap-1.5">
-                <FileText className="w-4 h-4" />
+        <section className="py-10 md:py-14">
+          <div className="max-w-3xl mx-auto px-4 md:px-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
+                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                <FileText className="w-3.5 h-3.5" />
                 Legal
-              </Badge>
-              
-              <h1 
-                className="text-3xl md:text-4xl font-bold mb-2"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              </div>
+
+              <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
                 Terms of Service
               </h1>
-              <p className="text-muted-foreground mb-8">
-                Last updated: December 2024
-              </p>
-              
-              <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">1. Platform Usage</h2>
-                  <p className="text-muted-foreground">
-                    OurShiksha is an educational platform providing online courses, practice labs, 
-                    tests, and certification services. By using our platform, you agree to these 
-                    terms and our commitment to quality education.
-                  </p>
-                  <p className="text-muted-foreground">
-                    You must be at least 13 years old to use OurShiksha. Users under 18 should 
-                    have parental consent. We reserve the right to modify or discontinue services 
-                    with reasonable notice.
-                  </p>
-                </section>
+              <p className="mb-8 text-sm" style={{ color: C.textSecondary }}>Last updated: December 2024</p>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">2. Account Responsibility</h2>
-                  <p className="text-muted-foreground">
-                    You are responsible for maintaining the security of your account credentials. 
-                    Do not share your login details with others. Each account is personal and 
-                    non-transferable.
-                  </p>
-                  <p className="text-muted-foreground">
-                    You must provide accurate information during registration. We may suspend 
-                    accounts that violate our policies or contain false information.
-                  </p>
-                </section>
+              <div
+                className="rounded-2xl p-6 md:p-8 space-y-7"
+                style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
+              >
+                {sections.map((s, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>{s.title}</h2>
+                    {s.body.split("\n\n").map((para, j) => (
+                      <p key={j} className="mb-2 leading-relaxed text-sm" style={{ color: C.textSecondary }}>{para}</p>
+                    ))}
+                    {s.list && (
+                      <ul className="list-disc pl-5 space-y-1.5 mt-2" style={{ color: C.textSecondary }}>
+                        {s.list.map((item, k) => <li key={k} className="text-sm">{item}</li>)}
+                      </ul>
+                    )}
+                    {s.footer && <p className="mt-2 text-sm" style={{ color: C.textSecondary }}>{s.footer}</p>}
+                  </div>
+                ))}
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">3. Course Access & Credits</h2>
-                  <p className="text-muted-foreground">
-                    OurShiksha uses a credit-based system for accessing premium features. 
-                    Credits are used for AI tutoring, labs, tests, project evaluations, and 
-                    certificate generation.
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                    <li>Free signup credits (500) never expire</li>
-                    <li>Subscription credits reset monthly and don't carry over</li>
-                    <li>Purchased coin packs never expire</li>
-                    <li>Credits are non-transferable between accounts</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">4. Payments & Refunds</h2>
-                  <p className="text-muted-foreground">
-                    Payments are processed securely through Razorpay. We accept UPI, cards, 
-                    net banking, and popular wallets.
-                  </p>
-                  <p className="text-muted-foreground">
-                    Refunds are considered on a case-by-case basis within 7 days of purchase 
-                    if credits remain unused. Subscription fees are non-refundable once the 
-                    billing cycle begins. Contact support for refund requests.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">5. Academic Integrity</h2>
-                  <p className="text-muted-foreground">
-                    We take academic integrity seriously. The following are strictly prohibited:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                    <li>Sharing test questions or answers with others</li>
-                    <li>Using unauthorized assistance during tests</li>
-                    <li>Submitting work that is not your own</li>
-                    <li>Attempting to manipulate scores or certificates</li>
-                    <li>Creating multiple accounts for unfair advantage</li>
-                  </ul>
-                  <p className="text-muted-foreground">
-                    Violations may result in certificate revocation and account termination.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">6. Certificate Authenticity</h2>
-                  <p className="text-muted-foreground">
-                    Certificates issued by OurShiksha are verifiable through our public 
-                    verification system. Each certificate has a unique ID and QR code.
-                  </p>
-                  <p className="text-muted-foreground">
-                    We reserve the right to revoke certificates if we discover they were 
-                    obtained through fraudulent means. Certificate authenticity is guaranteed 
-                    for legitimately earned credentials.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">7. Misuse & Termination</h2>
-                  <p className="text-muted-foreground">
-                    We may terminate or suspend accounts that:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                    <li>Violate academic integrity policies</li>
-                    <li>Attempt to exploit or hack the platform</li>
-                    <li>Harass other users or staff</li>
-                    <li>Use the platform for illegal activities</li>
-                    <li>Violate any part of these terms</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">8. Limitation of Liability</h2>
-                  <p className="text-muted-foreground">
-                    OurShiksha provides educational content "as is" without warranties of 
-                    any kind. We are not liable for career outcomes, employment decisions, 
-                    or any indirect damages resulting from platform use.
-                  </p>
-                  <p className="text-muted-foreground">
-                    Our liability is limited to the amount you paid for services in the 
-                    preceding 12 months.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">9. Governing Law</h2>
-                  <p className="text-muted-foreground">
-                    These terms are governed by the laws of India. Any disputes shall be 
-                    resolved in the courts of Chennai, Tamil Nadu, India.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">10. Contact</h2>
-                  <p className="text-muted-foreground">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>10. Contact</h2>
+                  <p className="text-sm" style={{ color: C.textSecondary }}>
                     For questions about these terms, contact us at{" "}
-                    <a href={`mailto:${legalEmail}`} className="text-primary hover:underline">
+                    <a href={`mailto:${legalEmail}`} style={{ color: C.teal }} className="hover:underline">
                       {legalEmail}
                     </a>
                   </p>
-                </section>
+                </div>
               </div>
+
             </motion.div>
           </div>
         </section>
       </main>
-      
-      <Footer />
+
+      <DarkFooter />
     </div>
   );
 }

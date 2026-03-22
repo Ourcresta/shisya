@@ -41,17 +41,17 @@ import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
 const C = {
-  bgPrimary: "#0B1D3A",
-  bgSecondary: "#0F172A",
-  cardBg: "rgba(255,255,255,0.05)",
-  cardBorder: "rgba(255,255,255,0.08)",
+  bgPrimary: "#020814",
+  bgSecondary: "#060D1F",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
   teal: "#00F5FF",
   purple: "#7C3AED",
   success: "#10B981",
   warning: "#F59E0B",
   danger: "#EF4444",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#94A3B8",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
 };
 
 const journeySteps = [
@@ -1576,7 +1576,7 @@ export default function LandingPage() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: `linear-gradient(180deg, ${C.bgPrimary} 0%, ${C.bgSecondary} 40%, #0B1120 100%)`,
+        background: `linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)`,
         color: C.textPrimary,
       }}
     >

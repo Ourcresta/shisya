@@ -2,21 +2,20 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  GraduationCap, 
-  Mail, 
-  MapPin, 
-  Send, 
+import {
+  GraduationCap,
+  Mail,
+  MapPin,
+  Send,
   MessageSquare,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Clock,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -27,9 +26,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Header } from "@/components/layout/Header";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+const C = {
+  bg: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)",
+  teal: "#00F5FF",
+  purple: "#7C3AED",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
+};
 
 interface PublicConfig {
   supportEmail: string;
@@ -48,41 +57,52 @@ const contactSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-function Footer() {
+function DarkFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="border-t py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer style={{ borderTop: "1px solid rgba(0,245,255,0.08)", background: "rgba(2,8,20,0.8)" }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.purple})` }}>
+              <GraduationCap className="w-4 h-4 text-black" />
             </div>
-            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="font-semibold" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
               OurShiksha
             </span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/about" className="hover:text-foreground transition-colors">
-              About
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors">
-              Contact
-            </Link>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            {[
+              { href: "/about", label: "About" },
+              { href: "/privacy", label: "Privacy" },
+              { href: "/terms", label: "Terms" },
+              { href: "/contact", label: "Contact" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-white transition-colors">
+                {l.label}
+              </Link>
+            ))}
           </nav>
-          <p className="text-sm text-muted-foreground">
-            OurShiksha {new Date().getFullYear()}
-          </p>
+          <p className="text-sm" style={{ color: C.textSecondary }}>OurShiksha {year}</p>
         </div>
       </div>
     </footer>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  background: "rgba(11,29,58,0.8)",
+  border: "1px solid rgba(0,245,255,0.12)",
+  color: "#E8F4FF",
+  borderRadius: "10px",
+};
+
+const labelStyle: React.CSSProperties = {
+  color: "#7E99B8",
+  fontSize: "13px",
+  fontWeight: 500,
+};
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -95,15 +115,10 @@ export default function Contact() {
 
   const supportEmail = config?.supportEmail || "support@ourshiksha.com";
   const companyLocation = config?.companyLocation || "Chennai, Tamil Nadu, India";
-  
+
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
+    defaultValues: { name: "", email: "", subject: "", message: "" },
   });
 
   const onSubmit = async (data: ContactFormData) => {
@@ -111,153 +126,179 @@ export default function Contact() {
     try {
       const response = await apiRequest("POST", "/api/contact", data);
       const result = await response.json();
-      
       if (result.success) {
         setSubmitted(true);
-        toast({
-          title: "Message Sent",
-          description: result.message || "We'll get back to you soon!",
-        });
+        toast({ title: "Message Sent", description: result.message || "We'll get back to you soon!" });
       } else {
-        toast({
-          title: "Failed to send",
-          description: result.error || "Please try again later.",
-          variant: "destructive",
-        });
+        toast({ title: "Failed to send", description: result.error || "Please try again later.", variant: "destructive" });
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again later.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error", description: "Failed to send message. Please try again later.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const infoCards = [
+    {
+      icon: Mail,
+      title: "Email Us",
+      content: supportEmail,
+      isLink: true,
+      href: `mailto:${supportEmail}`,
+      accent: C.teal,
+    },
+    {
+      icon: MapPin,
+      title: "Location",
+      content: companyLocation,
+      isLink: false,
+      accent: C.purple,
+    },
+    {
+      icon: Clock,
+      title: "Response Time",
+      content: "We typically respond within 24–48 hours on business days.",
+      isLink: false,
+      accent: "#F59E0B",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
+    <div className="min-h-screen flex flex-col" style={{ background: C.bg, color: C.textPrimary }}>
+      <LandingNavbar />
+
       <main className="flex-1">
-        <section className="py-12 md:py-16">
-          <div className="max-w-4xl mx-auto px-4 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-center mb-12"
-            >
-              <Badge variant="secondary" className="mb-4 gap-1.5">
-                <MessageSquare className="w-4 h-4" />
+
+        {/* ── Hero ── */}
+        <section className="relative overflow-hidden pt-14 pb-10 md:pt-20 md:pb-12">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full blur-[130px] opacity-10"
+              style={{ background: `radial-gradient(circle, ${C.teal}, transparent)` }} />
+            <div className="absolute bottom-0 left-0 w-[350px] h-[350px] rounded-full blur-[100px] opacity-10"
+              style={{ background: `radial-gradient(circle, ${C.purple}, transparent)` }} />
+          </div>
+
+          <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
+            <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
+                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                <MessageSquare className="w-3.5 h-3.5" />
                 Get in Touch
-              </Badge>
-              
-              <h1 
-                className="text-3xl md:text-4xl font-bold mb-4"
-                style={{ fontFamily: "var(--font-display)" }}
+              </div>
+
+              <h1
+                className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  letterSpacing: "-0.02em",
+                  background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 55%, ${C.purple} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
               >
                 Contact Us
               </h1>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Have questions about OurShiksha? We'd love to hear from you. 
+
+              <p className="text-base md:text-lg max-w-xl mx-auto" style={{ color: C.textSecondary }}>
+                Have questions about OurShiksha? We'd love to hear from you.
                 Send us a message and we'll respond as soon as possible.
               </p>
             </motion.div>
+          </div>
+        </section>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <motion.div 
-                className="md:col-span-1 space-y-6"
+        {/* ── Content ── */}
+        <section className="pb-14 md:pb-16">
+          <div className="max-w-4xl mx-auto px-4 md:px-8">
+            <div className="grid md:grid-cols-3 gap-6">
+
+              {/* Left: Info cards */}
+              <motion.div
+                className="md:col-span-1 space-y-4"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <Card>
-                  <CardContent className="p-6">
+                {infoCards.map((card, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-5"
+                    style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
+                  >
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Mail className="w-5 h-5 text-primary" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: `${card.accent}15`, border: `1px solid ${card.accent}30` }}>
+                        <card.icon className="w-5 h-5" style={{ color: card.accent }} />
                       </div>
                       <div>
-                        <h3 className="font-medium mb-1">Email Us</h3>
-                        <a 
-                          href={`mailto:${supportEmail}`}
-                          className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                          data-testid="link-email-support"
-                        >
-                          {supportEmail}
-                        </a>
+                        <h3 className="font-semibold text-sm mb-1" style={{ color: C.textPrimary }}>{card.title}</h3>
+                        {card.isLink ? (
+                          <a
+                            href={card.href}
+                            className="text-xs hover:underline transition-colors"
+                            style={{ color: C.textSecondary }}
+                            data-testid="link-email-support"
+                          >
+                            {card.content}
+                          </a>
+                        ) : (
+                          <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>{card.content}</p>
+                        )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium mb-1">Location</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {companyLocation}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="mb-2">
-                    <strong>Response Time:</strong>
-                  </p>
-                  <p>We typically respond within 24-48 hours on business days.</p>
-                </div>
+                  </div>
+                ))}
               </motion.div>
 
-              <motion.div 
+              {/* Right: Form */}
+              <motion.div
                 className="md:col-span-2"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <Card>
-                  <CardContent className="p-6">
-                    {submitted ? (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-                          <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2">Message Sent!</h3>
-                        <p className="text-muted-foreground mb-6">
-                          Thank you for reaching out. We'll get back to you soon.
-                        </p>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => {
-                            setSubmitted(false);
-                            form.reset();
-                          }}
-                          data-testid="button-send-another"
-                        >
-                          Send Another Message
-                        </Button>
+                <div
+                  className="rounded-2xl p-6 md:p-7"
+                  style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
+                >
+                  {submitted ? (
+                    <div className="text-center py-10">
+                      <div
+                        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                        style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)" }}
+                      >
+                        <CheckCircle2 className="w-8 h-8" style={{ color: "#10B981" }} />
                       </div>
-                    ) : (
-                      <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <h3 className="text-xl font-semibold mb-2" style={{ color: C.textPrimary }}>Message Sent!</h3>
+                      <p className="text-sm mb-6" style={{ color: C.textSecondary }}>
+                        Thank you for reaching out. We'll get back to you soon.
+                      </p>
+                      <button
+                        onClick={() => { setSubmitted(false); form.reset(); }}
+                        className="px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                        style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
+                        data-testid="button-send-another"
+                      >
+                        Send Another Message
+                      </button>
+                    </div>
+                  ) : (
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                        <div className="grid md:grid-cols-2 gap-5">
                           <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel style={labelStyle}>Name</FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    placeholder="Your name" 
-                                    {...field} 
+                                  <Input
+                                    placeholder="Your name"
+                                    {...field}
+                                    style={inputStyle}
+                                    className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
                                     data-testid="input-contact-name"
                                   />
                                 </FormControl>
@@ -265,18 +306,19 @@ export default function Contact() {
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel style={labelStyle}>Email</FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    type="email" 
-                                    placeholder="your@email.com" 
-                                    {...field} 
+                                  <Input
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    {...field}
+                                    style={inputStyle}
+                                    className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
                                     data-testid="input-contact-email"
                                   />
                                 </FormControl>
@@ -284,74 +326,84 @@ export default function Contact() {
                               </FormItem>
                             )}
                           />
+                        </div>
 
-                          <FormField
-                            control={form.control}
-                            name="subject"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Subject</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="What is this about?" 
-                                    {...field} 
-                                    data-testid="input-contact-subject"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={form.control}
+                          name="subject"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel style={labelStyle}>Subject</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="What is this about?"
+                                  {...field}
+                                  style={inputStyle}
+                                  className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                  data-testid="input-contact-subject"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={form.control}
-                            name="message"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Message</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="How can we help you?" 
-                                    className="min-h-[150px] resize-none"
-                                    {...field} 
-                                    data-testid="input-contact-message"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={form.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel style={labelStyle}>Message</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="How can we help you?"
+                                  className="min-h-[140px] resize-none placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                  {...field}
+                                  style={inputStyle}
+                                  data-testid="input-contact-message"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <Button 
-                            type="submit" 
-                            className="w-full gap-2"
-                            disabled={isSubmitting}
-                            data-testid="button-submit-contact"
-                          >
-                            {isSubmitting ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Sending...
-                              </>
-                            ) : (
-                              <>
-                                <Send className="w-4 h-4" />
-                                Send Message
-                              </>
-                            )}
-                          </Button>
-                        </form>
-                      </Form>
-                    )}
-                  </CardContent>
-                </Card>
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                          style={{
+                            background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
+                            color: "#fff",
+                            boxShadow: "0 0 20px rgba(0,245,255,0.2)",
+                          }}
+                          data-testid="button-submit-contact"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              Send Message
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    </Form>
+                  )}
+                </div>
               </motion.div>
+
             </div>
           </div>
         </section>
+
       </main>
-      
-      <Footer />
+
+      <DarkFooter />
     </div>
   );
 }

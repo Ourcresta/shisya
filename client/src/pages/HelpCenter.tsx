@@ -1,40 +1,58 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { HelpCircle, Sparkles, GraduationCap } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Header } from "@/components/layout/Header";
+import { HelpCircle, Sparkles, GraduationCap, MessageSquare, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import type { SitePage, HelpCenterContent, FaqItem } from "@shared/schema";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+const C = {
+  bg: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)",
+  teal: "#00F5FF",
+  purple: "#7C3AED",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0 },
 };
 
-function Footer() {
+function DarkFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="border-t py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer style={{ borderTop: "1px solid rgba(0,245,255,0.08)", background: "rgba(2,8,20,0.8)" }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.purple})` }}>
+              <GraduationCap className="w-4 h-4 text-black" />
             </div>
-            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>OurShiksha</span>
+            <span className="font-semibold" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>OurShiksha</span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/about" className="hover:text-foreground transition-colors" data-testid="link-about">About</Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors" data-testid="link-contact">Contact</Link>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            {[
+              { href: "/about", label: "About" },
+              { href: "/contact", label: "Contact" },
+              { href: "/privacy", label: "Privacy" },
+              { href: "/terms", label: "Terms" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-white transition-colors">
+                {l.label}
+              </Link>
+            ))}
           </nav>
-          <p className="text-sm text-muted-foreground">OurShiksha {new Date().getFullYear()}</p>
+          <p className="text-sm" style={{ color: C.textSecondary }}>OurShiksha {year}</p>
         </div>
       </div>
     </footer>
@@ -44,98 +62,167 @@ function Footer() {
 export default function HelpCenter() {
   const { data: page, isLoading } = useQuery<SitePage>({
     queryKey: ["/api/pages", "help-center"],
-    queryFn: () => fetch("/api/pages/help-center").then(r => r.json()),
+    queryFn: () => fetch("/api/pages/help-center").then((r) => r.json()),
   });
 
   const content = (page?.content || {}) as HelpCenterContent;
+  const faq: FaqItem[] = content.faq || [];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
+      <div className="min-h-screen flex flex-col" style={{ background: C.bg }}>
+        <LandingNavbar />
         <main className="flex-1 max-w-4xl mx-auto px-4 py-16 w-full">
-          <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
-          <Skeleton className="h-6 w-1/2 mx-auto mb-8" />
-          {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-16 mb-3" />)}
+          <Skeleton className="h-10 w-3/4 mx-auto mb-4" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <Skeleton className="h-5 w-1/2 mx-auto mb-10" style={{ background: "rgba(255,255,255,0.04)" }} />
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-14 mb-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }} />
+          ))}
         </main>
       </div>
     );
   }
 
-  const faq: FaqItem[] = content.faq || [];
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <div className="min-h-screen flex flex-col" style={{ background: C.bg, color: C.textPrimary }}>
+      <LandingNavbar />
+
       <main className="flex-1">
-        <section className="relative overflow-hidden py-16 md:py-24">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-          <div className="max-w-4xl mx-auto px-4 md:px-8 relative">
-            <motion.div
-              className="text-center"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Badge variant="secondary" className="mb-4 gap-1.5 px-4 py-1.5">
-                <HelpCircle className="w-4 h-4" />
+
+        {/* ── Hero ── */}
+        <section className="relative overflow-hidden pt-14 pb-10 md:pt-20 md:pb-14">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full blur-[130px] opacity-10"
+              style={{ background: `radial-gradient(circle, ${C.teal}, transparent)` }} />
+            <div className="absolute bottom-0 left-0 w-[350px] h-[350px] rounded-full blur-[100px] opacity-10"
+              style={{ background: `radial-gradient(circle, ${C.purple}, transparent)` }} />
+          </div>
+
+          <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
+            <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
+                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                <HelpCircle className="w-3.5 h-3.5" />
                 Help Center
-              </Badge>
+              </div>
+
               <h1
-                className="text-4xl md:text-5xl font-bold tracking-tight mb-6"
-                style={{ fontFamily: "var(--font-display)" }}
+                className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  letterSpacing: "-0.02em",
+                  background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 55%, ${C.purple} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
                 data-testid="text-hero-heading"
               >
                 {content.heroHeading || "How Can We Help You?"}
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto" data-testid="text-hero-subtext">
-                {content.heroSubtext || "Find answers to common questions."}
+
+              <p className="text-base md:text-lg max-w-xl mx-auto" style={{ color: C.textSecondary }}
+                data-testid="text-hero-subtext">
+                {content.heroSubtext || "Find answers to common questions about OurShiksha."}
               </p>
             </motion.div>
           </div>
         </section>
 
-        <section className="py-12 md:py-16">
-          <div className="max-w-3xl mx-auto px-4 md:px-8">
-            <motion.div variants={containerVariants} initial="hidden" animate="visible">
-              <Accordion type="single" collapsible className="w-full">
-                {faq.map((item: FaqItem, index: number) => (
-                  <motion.div key={index} variants={itemVariants}>
-                    <AccordionItem value={`faq-${index}`} data-testid={`faq-item-${index}`}>
-                      <AccordionTrigger className="text-left font-medium">
-                        {item.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">
-                        {item.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  </motion.div>
-                ))}
-              </Accordion>
-            </motion.div>
-          </div>
-        </section>
+        {/* ── FAQ Accordion ── */}
+        {faq.length > 0 && (
+          <section className="py-6 md:py-8">
+            <div className="max-w-3xl mx-auto px-4 md:px-8">
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+              >
+                <Accordion type="single" collapsible className="space-y-2">
+                  {faq.map((item: FaqItem, i: number) => (
+                    <motion.div key={i} variants={itemVariants}>
+                      <AccordionItem
+                        value={`faq-${i}`}
+                        className="rounded-xl overflow-hidden border-0"
+                        style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
+                        data-testid={`faq-item-${i}`}
+                      >
+                        <AccordionTrigger
+                          className="px-5 py-4 text-sm md:text-base font-medium text-left hover:no-underline"
+                          style={{ color: C.textPrimary }}
+                        >
+                          {item.question}
+                        </AccordionTrigger>
+                        <AccordionContent
+                          className="px-5 pb-4 text-sm leading-relaxed"
+                          style={{ color: C.textSecondary }}
+                        >
+                          {item.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </motion.div>
+                  ))}
+                </Accordion>
+              </motion.div>
+            </div>
+          </section>
+        )}
 
-        <section className="py-12 md:py-16 bg-muted/30">
-          <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
+        {/* ── Still need help CTA ── */}
+        <section className="py-10 md:py-14">
+          <div className="max-w-xl mx-auto px-4 md:px-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="rounded-2xl p-6 md:p-8"
+              style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
+            >
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
+                style={{ background: "rgba(0,245,255,0.10)", border: "1px solid rgba(0,245,255,0.2)" }}>
+                <MessageSquare className="w-5 h-5" style={{ color: C.teal }} />
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
                 Still need help?
               </h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-sm mb-6" style={{ color: C.textSecondary }}>
                 Our support team is ready to assist you.
               </p>
               <Link href="/contact">
-                <Button size="lg" className="gap-2" data-testid="button-cta">
-                  <Sparkles className="w-5 h-5" />
+                <button
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+                  style={{
+                    background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
+                    color: "#fff",
+                    boxShadow: "0 0 20px rgba(0,245,255,0.25)",
+                  }}
+                  data-testid="button-cta"
+                >
+                  <Sparkles className="w-4 h-4" />
                   {content.ctaText || "Contact Support"}
-                </Button>
+                </button>
               </Link>
+
+              <div className="mt-6 flex items-center justify-center gap-6 flex-wrap">
+                {[
+                  { icon: BookOpen, label: "Browse Courses", href: "/courses" },
+                  { icon: GraduationCap, label: "Get Started Free", href: "/signup" },
+                ].map((item, i) => (
+                  <Link key={i} href={item.href}>
+                    <div className="flex items-center gap-1.5 text-sm cursor-pointer transition-colors hover:text-white"
+                      style={{ color: C.textSecondary }}>
+                      <item.icon className="w-4 h-4" style={{ color: C.teal }} />
+                      {item.label}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
+
       </main>
-      <Footer />
+
+      <DarkFooter />
     </div>
   );
 }

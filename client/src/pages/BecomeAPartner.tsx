@@ -57,14 +57,14 @@ const partnerFormSchema = z.object({
 type PartnerFormData = z.infer<typeof partnerFormSchema>;
 
 const C = {
-  bgPrimary: "#0B1D3A",
-  bgSecondary: "#0F172A",
-  cardBg: "rgba(255,255,255,0.05)",
-  cardBorder: "rgba(255,255,255,0.08)",
+  bgPrimary: "#020814",
+  bgSecondary: "#060D1F",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
   teal: "#00F5FF",
   purple: "#7C3AED",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#94A3B8",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
 };
 
 const sectionVariants = {
@@ -346,7 +346,7 @@ function FaqAccordion() {
 
 export default function BecomeAPartner() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: C.bgPrimary }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)" }}>
       <LandingNavbar />
 
       <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">

@@ -2,8 +2,17 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { GraduationCap, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Header } from "@/components/layout/Header";
+import { LandingNavbar } from "@/components/layout/LandingNavbar";
+
+const C = {
+  bg: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)",
+  teal: "#00F5FF",
+  purple: "#7C3AED",
+  textPrimary: "#E8F4FF",
+  textSecondary: "#7E99B8",
+  cardBg: "rgba(11,29,58,0.6)",
+  cardBorder: "rgba(0,245,255,0.1)",
+};
 
 interface PublicConfig {
   supportEmail: string;
@@ -13,36 +22,27 @@ interface PublicConfig {
   companyName: string;
 }
 
-function Footer() {
+function DarkFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="border-t py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer style={{ borderTop: "1px solid rgba(0,245,255,0.08)", background: "rgba(2,8,20,0.8)" }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.purple})` }}>
+              <GraduationCap className="w-4 h-4 text-black" />
             </div>
-            <span className="font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-              OurShiksha
-            </span>
+            <span className="font-semibold" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>OurShiksha</span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link href="/about" className="hover:text-foreground transition-colors">
-              About
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors">
-              Contact
-            </Link>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            {[{ href: "/about", label: "About" }, { href: "/privacy", label: "Privacy Policy" }, { href: "/terms", label: "Terms" }, { href: "/contact", label: "Contact" }].map((l) => (
+              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-white transition-colors">
+                {l.label}
+              </Link>
+            ))}
           </nav>
-          <p className="text-sm text-muted-foreground">
-            OurShiksha {new Date().getFullYear()}
-          </p>
+          <p className="text-sm" style={{ color: C.textSecondary }}>OurShiksha {year}</p>
         </div>
       </div>
     </footer>
@@ -50,67 +50,62 @@ function Footer() {
 }
 
 export default function Privacy() {
-  const { data: config } = useQuery<PublicConfig>({
-    queryKey: ["/api/config/public"],
-  });
+  const { data: config } = useQuery<PublicConfig>({ queryKey: ["/api/config/public"] });
 
   const privacyEmail = config?.privacyEmail || "privacy@ourshiksha.com";
   const companyLocation = config?.companyLocation || "Chennai, Tamil Nadu, India";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
+    <div className="min-h-screen flex flex-col" style={{ background: C.bg, color: C.textPrimary }}>
+      <LandingNavbar />
+
       <main className="flex-1">
-        <section className="py-12 md:py-16">
-          <div className="max-w-4xl mx-auto px-4 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Badge variant="secondary" className="mb-4 gap-1.5">
-                <Shield className="w-4 h-4" />
+        <section className="py-10 md:py-14">
+          <div className="max-w-3xl mx-auto px-4 md:px-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
+                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                <Shield className="w-3.5 h-3.5" />
                 Privacy
-              </Badge>
-              
-              <h1 
-                className="text-3xl md:text-4xl font-bold mb-2"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              </div>
+
+              <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
                 Privacy Policy
               </h1>
-              <p className="text-muted-foreground mb-8">
-                Last updated: December 2024
-              </p>
-              
-              <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Introduction</h2>
-                  <p className="text-muted-foreground">
-                    OurShiksha ("we", "our", "us") is committed to protecting your privacy. 
-                    This policy explains how we collect, use, and safeguard your information 
-                    when you use our educational platform.
-                  </p>
-                </section>
+              <p className="mb-8 text-sm" style={{ color: C.textSecondary }}>Last updated: December 2024</p>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Data We Collect</h2>
-                  <p className="text-muted-foreground mb-3">
-                    We collect information you provide directly:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                    <li><strong>Account Data:</strong> Name, email address, password (hashed)</li>
-                    <li><strong>Profile Data:</strong> Bio, location, social links, profile photo</li>
-                    <li><strong>Learning Data:</strong> Course progress, test scores, project submissions</li>
-                    <li><strong>Payment Data:</strong> Transaction IDs, credit balance (card details handled by Razorpay)</li>
-                    <li><strong>Communication:</strong> Support messages, contact form submissions</li>
+              <div
+                className="rounded-2xl p-6 md:p-8 space-y-8"
+                style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
+              >
+                {[
+                  {
+                    title: "Introduction",
+                    content: `OurShiksha ("we", "our", "us") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information when you use our educational platform.`,
+                  },
+                ].map((s, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>{s.title}</h2>
+                    <p style={{ color: C.textSecondary }}>{s.content}</p>
+                  </div>
+                ))}
+
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Data We Collect</h2>
+                  <p className="mb-3" style={{ color: C.textSecondary }}>We collect information you provide directly:</p>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
+                    <li><strong style={{ color: C.textPrimary }}>Account Data:</strong> Name, email address, password (hashed)</li>
+                    <li><strong style={{ color: C.textPrimary }}>Profile Data:</strong> Bio, location, social links, profile photo</li>
+                    <li><strong style={{ color: C.textPrimary }}>Learning Data:</strong> Course progress, test scores, project submissions</li>
+                    <li><strong style={{ color: C.textPrimary }}>Payment Data:</strong> Transaction IDs, credit balance (card details handled by Razorpay)</li>
+                    <li><strong style={{ color: C.textPrimary }}>Communication:</strong> Support messages, contact form submissions</li>
                   </ul>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">How We Use Your Data</h2>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>How We Use Your Data</h2>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
                     <li>Provide and improve our educational services</li>
                     <li>Track your learning progress and issue certificates</li>
                     <li>Process payments and manage credits</li>
@@ -118,142 +113,119 @@ export default function Privacy() {
                     <li>Respond to support inquiries</li>
                     <li>Prevent fraud and ensure platform security</li>
                   </ul>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Payment Handling</h2>
-                  <p className="text-muted-foreground">
-                    All payment processing is handled by Razorpay, a PCI-DSS compliant payment 
-                    gateway. We never store your full card details. Only transaction references 
-                    and amounts are stored for record-keeping.
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Payment Handling</h2>
+                  <p className="mb-2" style={{ color: C.textSecondary }}>
+                    All payment processing is handled by Razorpay, a PCI-DSS compliant payment gateway. We never store your full card details.
+                    Only transaction references and amounts are stored for record-keeping.
                   </p>
-                  <p className="text-muted-foreground">
-                    Razorpay's privacy policy applies to payment data:{" "}
-                    <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  <p style={{ color: C.textSecondary }}>
+                    Razorpay's privacy policy:{" "}
+                    <a href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer"
+                      style={{ color: C.teal }} className="hover:underline">
                       razorpay.com/privacy
                     </a>
                   </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Cookies & Analytics</h2>
-                  <p className="text-muted-foreground">
-                    We use essential cookies for:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Cookies &amp; Analytics</h2>
+                  <p className="mb-2" style={{ color: C.textSecondary }}>We use essential cookies for:</p>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
                     <li>Session management (keeping you logged in)</li>
                     <li>Theme preferences (light/dark mode)</li>
                     <li>Learning progress tracking</li>
                   </ul>
-                  <p className="text-muted-foreground">
-                    We may use analytics to understand platform usage and improve our services. 
-                    No personal data is shared with analytics providers.
-                  </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Data Security</h2>
-                  <p className="text-muted-foreground">
-                    We implement industry-standard security measures:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Data Security</h2>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
                     <li>Passwords hashed with bcrypt (12 rounds)</li>
                     <li>HTTPS encryption for all data transmission</li>
                     <li>HTTP-only session cookies</li>
                     <li>Regular security audits</li>
                     <li>Secure cloud hosting on Replit</li>
                   </ul>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Data Sharing</h2>
-                  <p className="text-muted-foreground">
-                    <strong>We do not sell your personal data.</strong>
-                  </p>
-                  <p className="text-muted-foreground">
-                    We may share data only in these cases:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Data Sharing</h2>
+                  <p className="mb-2 font-medium" style={{ color: C.textPrimary }}>We do not sell your personal data.</p>
+                  <p className="mb-2" style={{ color: C.textSecondary }}>We may share data only in these cases:</p>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
                     <li>With your consent (e.g., public portfolio)</li>
                     <li>Payment processors (Razorpay) for transactions</li>
                     <li>Legal requirements or court orders</li>
                     <li>Certificate verification (public verification page)</li>
                   </ul>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Your Rights</h2>
-                  <p className="text-muted-foreground">
-                    You have the right to:
-                  </p>
-                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Your Rights</h2>
+                  <ul className="list-disc pl-5 space-y-1.5" style={{ color: C.textSecondary }}>
                     <li>Access your personal data</li>
                     <li>Correct inaccurate information</li>
                     <li>Delete your account and associated data</li>
                     <li>Export your learning progress and certificates</li>
                     <li>Opt out of non-essential communications</li>
                   </ul>
-                  <p className="text-muted-foreground">
-                    To exercise these rights, contact us at the address below.
-                  </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Data Retention</h2>
-                  <p className="text-muted-foreground">
-                    We retain your data as long as your account is active. Upon account 
-                    deletion, we remove personal data within 30 days. Certificate records 
-                    may be retained for verification purposes.
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Data Retention</h2>
+                  <p style={{ color: C.textSecondary }}>
+                    We retain your data as long as your account is active. Upon account deletion, we remove personal data within 30 days.
+                    Certificate records may be retained for verification purposes.
                   </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Children's Privacy</h2>
-                  <p className="text-muted-foreground">
-                    OurShiksha is not intended for children under 13. We do not knowingly 
-                    collect data from children under 13. If you believe a child has provided 
-                    us data, please contact us immediately.
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Children's Privacy</h2>
+                  <p style={{ color: C.textSecondary }}>
+                    OurShiksha is not intended for children under 13. We do not knowingly collect data from children under 13.
+                    If you believe a child has provided us data, please contact us immediately.
                   </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Indian Data Practices</h2>
-                  <p className="text-muted-foreground">
-                    We comply with applicable Indian data protection regulations. Our servers 
-                    and data processing are designed with Indian users in mind. We follow 
-                    best practices as recommended by Indian regulatory authorities.
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Indian Data Practices</h2>
+                  <p style={{ color: C.textSecondary }}>
+                    We comply with applicable Indian data protection regulations. Our servers and data processing are designed with
+                    Indian users in mind. We follow best practices as recommended by Indian regulatory authorities.
                   </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Policy Updates</h2>
-                  <p className="text-muted-foreground">
-                    We may update this policy periodically. Significant changes will be 
-                    communicated via email or platform notification. Continued use after 
-                    updates constitutes acceptance.
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Policy Updates</h2>
+                  <p style={{ color: C.textSecondary }}>
+                    We may update this policy periodically. Significant changes will be communicated via email or platform notification.
+                    Continued use after updates constitutes acceptance.
                   </p>
-                </section>
+                </div>
 
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Contact for Data Queries</h2>
-                  <p className="text-muted-foreground">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>Contact for Data Queries</h2>
+                  <p style={{ color: C.textSecondary }}>
                     For privacy-related questions or data requests, contact us at:{" "}
-                    <a href={`mailto:${privacyEmail}`} className="text-primary hover:underline">
+                    <a href={`mailto:${privacyEmail}`} style={{ color: C.teal }} className="hover:underline">
                       {privacyEmail}
                     </a>
                   </p>
-                  <p className="text-muted-foreground">
-                    OurShiksha<br />
-                    {companyLocation}
+                  <p className="mt-1" style={{ color: C.textSecondary }}>
+                    OurShiksha<br />{companyLocation}
                   </p>
-                </section>
+                </div>
               </div>
+
             </motion.div>
           </div>
         </section>
       </main>
-      
-      <Footer />
+
+      <DarkFooter />
     </div>
   );
 }
