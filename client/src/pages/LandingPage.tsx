@@ -40,6 +40,11 @@ import {
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
 import ushaHeroImage from "@assets/image_1774463715608.png";
+import icon3dCourses from "@assets/generated_images/icon-3d-courses.png";
+import icon3dLabs from "@assets/generated_images/icon-3d-labs.png";
+import icon3dProjects from "@assets/generated_images/icon-3d-projects.png";
+import icon3dCertificate from "@assets/generated_images/icon-3d-certificate.png";
+import icon3dInternship from "@assets/generated_images/icon-3d-internship.png";
 import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
@@ -71,13 +76,13 @@ const journeySteps = [
 ];
 
 const features = [
-  { icon: BookOpen, title: "Structured Courses", description: "Clear learning paths" },
-  { icon: FlaskConical, title: "Guided Labs", description: "Hands-on practice" },
-  { icon: FolderKanban, title: "Real Projects", description: "Build your portfolio" },
+  { icon: BookOpen, imgSrc: icon3dCourses, title: "Structured Courses", description: "Clear learning paths" },
+  { icon: FlaskConical, imgSrc: icon3dLabs, title: "Guided Labs", description: "Hands-on practice" },
+  { icon: FolderKanban, imgSrc: icon3dProjects, title: "Real Projects", description: "Build your portfolio" },
   { icon: ClipboardCheck, title: "Skill Assessments", description: "Validate your knowledge" },
-  { icon: Award, title: "Verified Certificates", description: "Prove your skills" },
+  { icon: Award, imgSrc: icon3dCertificate, title: "Verified Certificates", description: "Prove your skills" },
   { icon: Briefcase, title: "Career Portfolio", description: "Showcase your work" },
-  { icon: Building2, title: "Guaranteed Internship", description: "Real-world work experience" },
+  { icon: Building2, imgSrc: icon3dInternship, title: "Guaranteed Internship", description: "Real-world work experience" },
   { icon: Handshake, title: "Job Assistance", description: "Placement support & referrals" },
 ];
 
@@ -657,10 +662,18 @@ function FeaturesSection() {
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+                  style={{ background: (feature as any).imgSrc ? "transparent" : `${accent}14`, border: (feature as any).imgSrc ? "none" : `1px solid ${accent}28` }}
                 >
-                  <feature.icon className="w-4 h-4" style={{ color: accent }} />
+                  {(feature as any).imgSrc ? (
+                    <img
+                      src={(feature as any).imgSrc}
+                      alt={feature.title}
+                      className="w-9 h-9 object-contain"
+                    />
+                  ) : (
+                    <feature.icon className="w-4 h-4" style={{ color: accent }} />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-semibold text-xs leading-tight" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
