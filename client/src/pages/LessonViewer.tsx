@@ -344,7 +344,7 @@ export default function LessonViewer() {
                         {assignedLab.description}
                       </p>
                     )}
-                    <Link href={`/shishya/learn/${courseId}/labs`}>
+                    <Link href={`/shishya/labs/${courseId}/${lesson?.unlocksLabId}`}>
                       <Button
                         size="sm"
                         className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white"
@@ -379,7 +379,7 @@ export default function LessonViewer() {
                         {assignedProject.description}
                       </p>
                     )}
-                    <Link href={`/shishya/learn/${courseId}/projects`}>
+                    <Link href={`/shishya/projects/${courseId}/${lesson?.unlocksProjectId}`}>
                       <Button
                         size="sm"
                         className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white"

@@ -763,7 +763,7 @@ function LessonContent({
                 {assignedLab?.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2">{assignedLab.description}</p>
                 )}
-                <Link href={`/shishya/learn/${courseId}/labs`}>
+                <Link href={`/shishya/labs/${courseId}/${lessonAny?.unlocksLabId}`}>
                   <Button
                     size="sm"
                     className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white"
@@ -795,7 +795,7 @@ function LessonContent({
                 {assignedProject?.description && (
                   <p className="text-xs text-muted-foreground line-clamp-2">{assignedProject.description}</p>
                 )}
-                <Link href={`/shishya/learn/${courseId}/projects`}>
+                <Link href={`/shishya/projects/${courseId}/${lessonAny?.unlocksProjectId}`}>
                   <Button
                     size="sm"
                     className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white"
