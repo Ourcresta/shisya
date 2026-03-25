@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "RwctT_RnqXwdprvWHrOSs"
+uri = "file://icon_list.md"
+type = "text"
+title = "Icon Shopping List — OurShiksha"
