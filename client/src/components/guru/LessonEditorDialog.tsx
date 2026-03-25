@@ -36,6 +36,8 @@ interface AudioTrack { languageCode: string; languageName: string; audioUrl: str
 interface SubtitleTrack { languageCode: string; languageName: string; subtitleUrl: string; }
 interface Attachment { name: string; url: string; fileType: string; size?: number; }
 interface CodeSnippet { title: string; language: string; code: string; }
+interface LabItem { id: number; title: string; }
+interface ProjectItem { id: number; title: string; }
 
 interface LessonFull {
   id?: number;
@@ -134,12 +136,12 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
   const [pendingAudioLang, setPendingAudioLang] = useState("en");
   const [pendingSubtitleLang, setPendingSubtitleLang] = useState("en");
 
-  const { data: courseLabs } = useQuery<any[]>({
+  const { data: courseLabs } = useQuery<LabItem[]>({
     queryKey: ["/api/guru/courses", courseId, "labs"],
     enabled: !!courseId,
   });
 
-  const { data: courseProjects } = useQuery<any[]>({
+  const { data: courseProjects } = useQuery<ProjectItem[]>({
     queryKey: ["/api/guru/courses", courseId, "projects"],
     enabled: !!courseId,
   });
@@ -794,8 +796,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       checked={!!form.unlocksLabId}
                       onCheckedChange={(checked) => {
                         if (!checked) setForm((f) => ({ ...f, unlocksLabId: null }));
-                        else if ((courseLabs || []).length > 0)
-                          setForm((f) => ({ ...f, unlocksLabId: (courseLabs as any[])[0].id }));
+                        else setForm((f) => ({ ...f, unlocksLabId: courseLabs?.[0]?.id ?? null }));
                       }}
                       data-testid="checkbox-assign-lab"
                     />
@@ -811,7 +812,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       <SelectTrigger data-testid="select-unlock-lab"><SelectValue placeholder="Select a lab" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">No lab</SelectItem>
-                        {(courseLabs || []).map((lab: any) => (
+                        {(courseLabs || []).map((lab) => (
                           <SelectItem key={lab.id} value={String(lab.id)}>{lab.title}</SelectItem>
                         ))}
                       </SelectContent>
@@ -827,8 +828,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       checked={!!form.unlocksProjectId}
                       onCheckedChange={(checked) => {
                         if (!checked) setForm((f) => ({ ...f, unlocksProjectId: null }));
-                        else if ((courseProjects || []).length > 0)
-                          setForm((f) => ({ ...f, unlocksProjectId: (courseProjects as any[])[0].id }));
+                        else setForm((f) => ({ ...f, unlocksProjectId: courseProjects?.[0]?.id ?? null }));
                       }}
                       data-testid="checkbox-assign-project"
                     />
@@ -844,7 +844,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                       <SelectTrigger data-testid="select-unlock-project"><SelectValue placeholder="Select a project" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">No project</SelectItem>
-                        {(courseProjects || []).map((proj: any) => (
+                        {(courseProjects || []).map((proj) => (
                           <SelectItem key={proj.id} value={String(proj.id)}>{proj.title}</SelectItem>
                         ))}
                       </SelectContent>
