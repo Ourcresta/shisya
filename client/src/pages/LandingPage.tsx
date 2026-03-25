@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LevelBadge } from "@/components/ui/level-badge";
@@ -29,30 +28,39 @@ import {
   Sparkles,
   MessageCircle,
   Star,
-  Quote,
   Layers,
   Trophy,
   Building2,
   Handshake,
+  Play,
+  CheckCircle2,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
+import ushaHeroImage from "@assets/image_1774460295264.png";
 import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
 const C = {
-  bgPrimary: "#020814",
-  bgSecondary: "#060D1F",
-  cardBg: "rgba(11,29,58,0.6)",
-  cardBorder: "rgba(0,245,255,0.1)",
-  teal: "#00F5FF",
-  purple: "#7C3AED",
+  bgPrimary: "#FFFFFF",
+  bgSecondary: "#F8F7FF",
+  cardBg: "#FFFFFF",
+  cardBorder: "#EDE9FF",
+  teal: "#6367FF",
+  purple: "#8494FF",
   success: "#10B981",
   warning: "#F59E0B",
   danger: "#EF4444",
-  textPrimary: "#E8F4FF",
-  textSecondary: "#7E99B8",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#4B5563",
+  highlight: "#FFDBFD",
+  lightBg: "#C9BEFF",
 };
+
+const HERO_GRAD = "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)";
+const CTA_GRAD = "linear-gradient(135deg, #6367FF 0%, #8494FF 100%)";
 
 const journeySteps = [
   { icon: BookOpen, title: "Learn", description: "Structured lessons designed for clarity" },
@@ -72,7 +80,6 @@ const features = [
   { icon: Building2, title: "Guaranteed Internship", description: "Real-world work experience" },
   { icon: Handshake, title: "Job Assistance", description: "Placement support & referrals" },
 ];
-
 
 const aiFeatures = [
   { icon: Sparkles, title: "Usha AI Tutor", description: "Your personal learning companion" },
@@ -133,7 +140,6 @@ function GlassCard({
   children,
   className = "",
   hover = true,
-  glow = false,
   style,
   ...props
 }: {
@@ -146,23 +152,25 @@ function GlassCard({
 }) {
   return (
     <div
-      className={`rounded-2xl backdrop-blur-sm transition-all duration-300 ${
-        hover ? "hover:-translate-y-1 hover:shadow-[0_8px_30px_-8px_rgba(0,245,255,0.2)]" : ""
+      className={`rounded-2xl transition-all duration-300 ${
+        hover ? "hover:-translate-y-1 hover:shadow-[0_8px_30px_-8px_rgba(99,103,255,0.18)]" : ""
       } ${className}`}
       style={{
         background: C.cardBg,
         border: `1px solid ${C.cardBorder}`,
-        ...(hover ? {} : {}),
+        boxShadow: "0 1px 4px rgba(99,103,255,0.06)",
         ...style,
       }}
       onMouseEnter={(e) => {
         if (hover) {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.35)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 30px -8px rgba(99,103,255,0.18)";
         }
       }}
       onMouseLeave={(e) => {
         if (hover) {
           (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 4px rgba(99,103,255,0.06)";
         }
       }}
       {...props}
@@ -181,7 +189,7 @@ function SectionGlow({ position = "center", color = C.teal }: { position?: strin
   };
   return (
     <div
-      className="absolute w-[500px] h-[500px] rounded-full blur-[150px] opacity-[0.07] pointer-events-none"
+      className="absolute w-[400px] h-[400px] rounded-full blur-[120px] opacity-[0.08] pointer-events-none"
       style={{ background: `radial-gradient(circle, ${color}, transparent)`, ...posStyles[position] }}
     />
   );
@@ -221,27 +229,44 @@ function HeroSection() {
   const current = modes[mode];
 
   return (
-    <section className="relative overflow-hidden py-10 md:py-16">
-      <SectionGlow position="top-right" color={C.teal} />
-      <SectionGlow position="bottom-left" color={C.purple} />
+    <section
+      className="relative overflow-hidden py-12 md:py-16 lg:py-20"
+      style={{ background: HERO_GRAD }}
+    >
+      {/* Decorative blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[130px] pointer-events-none"
+        style={{ background: "rgba(255,255,255,0.08)" }} />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none"
+        style={{ background: "rgba(201,190,255,0.15)" }} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+          {/* Left: Text content */}
           <div className="text-center lg:text-left space-y-6">
-            <div className="min-h-[140px] md:min-h-[170px] lg:min-h-[200px] flex flex-col justify-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
+              style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", backdropFilter: "blur(8px)" }}>
+              <Sparkles className="w-3.5 h-3.5" />
+              India's Premier AI Learning Platform
+            </div>
+
+            <div className="min-h-[140px] md:min-h-[170px] lg:min-h-[190px] flex flex-col justify-center">
+              <p
+                className="text-base md:text-lg font-medium mb-2"
+                style={{ color: "rgba(255,255,255,0.8)", letterSpacing: "0.01em" }}
+              >
+                Your Path to Mastery
+              </p>
               <h1
                 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
                 style={{
                   fontFamily: "var(--font-display)",
-                  background: `linear-gradient(135deg, ${C.textPrimary} 0%, ${C.teal} 50%, ${C.purple} 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: "#FFFFFF",
                   letterSpacing: "-0.02em",
                   opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(10px)",
                   transition: "opacity 400ms ease, transform 400ms ease",
-                  textShadow: "0 0 40px rgba(0,245,255,0.15)",
-                  filter: visible ? "drop-shadow(0 0 20px rgba(0,245,255,0.2))" : "none",
                 }}
                 data-testid="text-hero-headline"
               >
@@ -250,9 +275,9 @@ function HeroSection() {
 
               <div className="relative inline-block mt-3">
                 <p
-                  className="text-base md:text-lg font-medium tracking-wide"
+                  className="text-sm md:text-base font-medium"
                   style={{
-                    color: "rgba(148,163,184,0.9)",
+                    color: "rgba(255,255,255,0.75)",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "translateY(0)" : "translateY(10px)",
                     transition: "opacity 400ms ease 80ms, transform 400ms ease 80ms",
@@ -265,11 +290,10 @@ function HeroSection() {
                 <div
                   className="mt-2 h-[2px] rounded-full"
                   style={{
-                    background: `linear-gradient(90deg, ${C.teal}, ${C.purple})`,
+                    background: "rgba(255,255,255,0.6)",
                     width: underlineWidth,
-                    maxWidth: mode === 0 ? "210px" : "200px",
+                    maxWidth: mode === 0 ? "210px" : "220px",
                     transition: "width 800ms cubic-bezier(0.22, 1, 0.36, 1)",
-                    boxShadow: `0 0 8px rgba(0,245,255,0.5), 0 0 20px rgba(0,245,255,0.2)`,
                     opacity: visible ? 1 : 0,
                   }}
                   data-testid="hero-underline-glow"
@@ -279,20 +303,21 @@ function HeroSection() {
 
             <p
               className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0"
-              style={{ color: C.textSecondary, lineHeight: "1.7" }}
+              style={{ color: "rgba(255,255,255,0.82)", lineHeight: "1.7" }}
               data-testid="text-hero-subheading"
             >
-              Learn skills, build real projects, pass assessments, and earn verified certificates — all in one place.
+              An AI-powered e-learning platform combining structured courses, hands-on labs, real projects, and a personal AI tutor —Usha— to accelerate your career.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               {user ? (
                 <Link href="/shishya/dashboard">
                   <button
-                    className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                    className="min-w-[190px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
                     style={{
-                      background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                      color: C.bgPrimary,
-                      boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                      background: "#FFFFFF",
+                      color: C.teal,
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
                     }}
                     data-testid="button-go-to-shishya"
                   >
@@ -304,102 +329,147 @@ function HeroSection() {
                 <>
                   <Link href="/login">
                     <button
-                      className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      className="min-w-[190px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
                       style={{
-                        background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                        color: C.bgPrimary,
-                        boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
+                        background: "#FFFFFF",
+                        color: C.teal,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
                       }}
                       data-testid="button-hero-login"
                     >
-                      <LogIn className="w-5 h-5" />
-                      Login to Shishya
+                      Start Learning Free
+                      <ArrowRight className="w-5 h-5" />
                     </button>
                   </Link>
                   <Link href="/courses">
                     <button
-                      className="min-w-[200px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      className="min-w-[170px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
                       style={{
                         background: "transparent",
-                        color: C.teal,
-                        border: `1px solid rgba(0,245,255,0.3)`,
-                        boxShadow: "none",
+                        color: "#FFFFFF",
+                        border: "1.5px solid rgba(255,255,255,0.55)",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(0,245,255,0.2)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.6)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.8)";
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
+                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.55)";
                       }}
                       data-testid="button-hero-explore"
                     >
-                      Explore Courses
-                      <ChevronRight className="w-5 h-5" />
+                      <Play className="w-4 h-4 fill-current" />
+                      Watch Demo
                     </button>
                   </Link>
                 </>
               )}
             </div>
 
-            {/* Social proof stats row */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2" data-testid="hero-social-proof">
+            {/* Social proof pills */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 pt-1" data-testid="hero-social-proof">
               {[
-                { value: "25K+", label: "Students" },
-                { value: "50+", label: "Courses" },
-                { value: "IIT", label: "Alumni Designed" },
-                { value: "100%", label: "Verified Certs" },
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center lg:items-start">
-                  <span className="text-lg font-bold" style={{ color: C.teal, fontFamily: "var(--font-display)" }}>{stat.value}</span>
-                  <span className="text-xs" style={{ color: C.textSecondary }}>{stat.label}</span>
+                { icon: CheckCircle2, label: "500 Free Credits" },
+                { icon: TrendingUp, label: "Self-Paced" },
+                { icon: Award, label: "Verified Certs" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <item.icon className="w-4 h-4" style={{ color: "rgba(255,255,255,0.7)" }} />
+                  <span className="text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>{item.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center">
-            <div
-              className="relative w-40 h-40 md:w-52 md:h-52 lg:w-60 lg:h-60 rounded-full p-1 animate-float"
-              style={{
-                background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.teal})`,
-                boxShadow: `0 0 50px -10px rgba(0,245,255,0.4)`,
-              }}
-            >
+          {/* Right: Usha character + floating cards */}
+          <div className="relative flex items-end justify-center lg:justify-end">
+            {/* Usha full-body image */}
+            <div className="relative" style={{ maxWidth: "380px", width: "100%" }}>
               <img
-                src={ushaAvatarImage}
+                src={ushaHeroImage}
                 alt="Usha AI Tutor"
-                className="w-full h-full rounded-full object-cover"
-                style={{ border: `4px solid ${C.bgPrimary}` }}
+                className="relative z-10 w-full object-contain"
+                style={{ maxHeight: "420px", objectPosition: "top", filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.25))" }}
                 data-testid="img-usha-avatar-hero"
               />
+
+              {/* Floating: My Progress card */}
               <div
-                className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg"
+                className="absolute hidden md:block z-20 rounded-xl shadow-xl"
                 style={{
-                  background: `linear-gradient(135deg, ${C.success}, #059669)`,
-                  border: `4px solid ${C.bgPrimary}`,
+                  top: "16px",
+                  right: "-24px",
+                  background: "#FFFFFF",
+                  border: "1px solid #EDE9FF",
+                  padding: "12px 16px",
+                  minWidth: "170px",
+                  boxShadow: "0 8px 32px rgba(99,103,255,0.18)",
                 }}
               >
-                <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                <div className="flex justify-between items-center mb-8px">
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#1A1A1A" }}>My Progress</span>
+                  <span style={{ fontSize: "9px", background: C.highlight, color: C.teal, padding: "2px 6px", borderRadius: "6px", fontWeight: 600 }}>Active</span>
+                </div>
+                <div className="space-y-2 mt-2">
+                  {[{ label: "Python Basics", pct: 76 }, { label: "Web Dev Bootcamp", pct: 60 }, { label: "Data Science", pct: 20 }].map(item => (
+                    <div key={item.label}>
+                      <div className="flex justify-between mb-0.5">
+                        <span style={{ fontSize: "9px", color: C.textSecondary }}>{item.label}</span>
+                        <span style={{ fontSize: "9px", fontWeight: 600, color: C.teal }}>{item.pct}%</span>
+                      </div>
+                      <div style={{ height: "3px", background: "#EDE9FF", borderRadius: "4px" }}>
+                        <div style={{ width: `${item.pct}%`, height: "100%", background: CTA_GRAD, borderRadius: "4px" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Floating: Certificate Earned */}
+              <div
+                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl shadow-xl"
+                style={{
+                  bottom: "120px",
+                  right: "-20px",
+                  background: "#FFFFFF",
+                  border: "1px solid #EDE9FF",
+                  padding: "10px 14px",
+                  boxShadow: "0 8px 24px rgba(99,103,255,0.15)",
+                }}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: CTA_GRAD }}>
+                  <Award className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p style={{ fontSize: "10px", fontWeight: 700, color: "#1A1A1A" }}>Certificate Earned!</p>
+                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Python Developer</p>
+                </div>
+              </div>
+
+              {/* Floating: Usha says */}
+              <div
+                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl shadow-xl"
+                style={{
+                  bottom: "60px",
+                  left: "-20px",
+                  background: "#FFFFFF",
+                  border: "1px solid #EDE9FF",
+                  padding: "10px 14px",
+                  boxShadow: "0 8px 24px rgba(99,103,255,0.15)",
+                  maxWidth: "160px",
+                }}
+              >
+                <img src={ushaAvatarImage} alt="Usha" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                <div>
+                  <p style={{ fontSize: "10px", fontWeight: 700, color: "#1A1A1A" }}>Usha AI says...</p>
+                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Try the next lab</p>
+                </div>
               </div>
             </div>
-            <div className="mt-6 text-center">
-              <p
-                className="text-xl md:text-2xl font-bold"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-                data-testid="text-meet-usha"
-              >
-                Meet Usha
-              </p>
-              <p className="text-sm md:text-base mt-1" style={{ color: C.textSecondary }}>Your AI Learning Companion</p>
-            </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -407,22 +477,22 @@ function HeroSection() {
 }
 
 const journeyColors = [
-  { accent: "#00F5FF", glow: "rgba(0,245,255,0.18)", bg: "rgba(0,245,255,0.07)", border: "rgba(0,245,255,0.22)", text: "#00F5FF" },
-  { accent: "#A78BFA", glow: "rgba(167,139,250,0.18)", bg: "rgba(167,139,250,0.07)", border: "rgba(167,139,250,0.22)", text: "#A78BFA" },
-  { accent: "#34D399", glow: "rgba(52,211,153,0.18)", bg: "rgba(52,211,153,0.07)", border: "rgba(52,211,153,0.22)", text: "#34D399" },
-  { accent: "#FBBF24", glow: "rgba(251,191,36,0.18)", bg: "rgba(251,191,36,0.07)", border: "rgba(251,191,36,0.22)", text: "#FBBF24" },
-  { accent: "#F472B6", glow: "rgba(244,114,182,0.18)", bg: "rgba(244,114,182,0.07)", border: "rgba(244,114,182,0.22)", text: "#F472B6" },
+  { accent: "#6367FF", glow: "rgba(99,103,255,0.15)", bg: "rgba(99,103,255,0.06)", border: "rgba(99,103,255,0.2)", text: "#6367FF" },
+  { accent: "#8494FF", glow: "rgba(132,148,255,0.15)", bg: "rgba(132,148,255,0.06)", border: "rgba(132,148,255,0.2)", text: "#8494FF" },
+  { accent: "#10B981", glow: "rgba(16,185,129,0.15)", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.2)", text: "#10B981" },
+  { accent: "#F59E0B", glow: "rgba(245,158,11,0.15)", bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.2)", text: "#F59E0B" },
+  { accent: "#EC4899", glow: "rgba(236,72,153,0.15)", bg: "rgba(236,72,153,0.06)", border: "rgba(236,72,153,0.2)", text: "#EC4899" },
 ];
 
 function JourneySection() {
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgSecondary }}>
       <SectionGlow position="center" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}>
+            style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
             How It Works
           </div>
           <h2
@@ -451,24 +521,22 @@ function JourneySection() {
                 <div
                   className="relative flex flex-col flex-1 rounded-xl p-4 overflow-hidden transition-all duration-300 hover:-translate-y-1"
                   style={{
-                    background: `linear-gradient(160deg, ${col.bg}, rgba(255,255,255,0.02))`,
+                    background: `linear-gradient(160deg, ${col.bg}, ${C.cardBg})`,
                     border: `1px solid ${col.border}`,
-                    boxShadow: `0 0 20px -10px ${col.glow}`,
+                    boxShadow: `0 2px 16px -8px ${col.glow}`,
                     margin: "0 5px",
                   }}
                 >
-                  {/* Watermark number */}
                   <div
                     className="absolute -right-1 -bottom-3 text-[72px] font-black leading-none select-none pointer-events-none"
-                    style={{ color: col.accent, opacity: 0.06, fontFamily: "var(--font-display)" }}
+                    style={{ color: col.accent, opacity: 0.05, fontFamily: "var(--font-display)" }}
                   >
                     {index + 1}
                   </div>
-                  {/* Step badge + icon row */}
                   <div className="flex items-center gap-2 mb-3">
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                      style={{ background: col.accent, color: "#050A18" }}
+                      style={{ background: col.accent, color: "#FFFFFF" }}
                     >
                       {index + 1}
                     </div>
@@ -479,7 +547,7 @@ function JourneySection() {
                       <step.icon className="w-4 h-4" style={{ color: col.accent }} />
                     </div>
                   </div>
-                  <h3 className="text-sm font-bold mb-1 text-white" style={{ fontFamily: "var(--font-display)" }}>
+                  <h3 className="text-sm font-bold mb-1" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
                     {step.title}
                   </h3>
                   <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>{step.description}</p>
@@ -487,7 +555,7 @@ function JourneySection() {
                   {!isLast && (
                     <div
                       className="absolute top-1/2 -right-[6px] -translate-y-1/2 z-10 w-2.5 h-2.5 rounded-full"
-                      style={{ background: col.accent, boxShadow: `0 0 6px ${col.accent}` }}
+                      style={{ background: col.accent }}
                     />
                   )}
                 </div>
@@ -514,12 +582,12 @@ function JourneySection() {
               >
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: col.accent, color: "#050A18" }}
+                  style={{ background: col.accent, color: "#FFFFFF" }}
                 >
                   {index + 1}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{step.title}</div>
+                  <div className="text-xs font-bold" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>{step.title}</div>
                   <div className="text-[10px]" style={{ color: C.textSecondary }}>{step.description}</div>
                 </div>
               </div>
@@ -532,20 +600,20 @@ function JourneySection() {
 }
 
 const featureAccents = [
-  "#00F5FF", "#A78BFA", "#34D399", "#FBBF24",
-  "#F472B6", "#60A5FA", "#FB923C", "#A3E635",
+  "#6367FF", "#8494FF", "#10B981", "#F59E0B",
+  "#EC4899", "#3B82F6", "#F97316", "#84CC16",
 ];
 
 function FeaturesSection() {
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgPrimary }}>
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-7">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
+            style={{ background: "rgba(132,148,255,0.1)", border: "1px solid rgba(132,148,255,0.25)", color: C.purple }}>
             Platform Features
           </div>
           <h2
@@ -572,16 +640,16 @@ function FeaturesSection() {
                 key={feature.title}
                 className="relative group rounded-xl p-3.5 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-3"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderLeft: `2px solid ${accent}`,
+                  background: "#FAFAFE",
+                  border: "1px solid #EDE9FF",
+                  borderLeft: `3px solid ${accent}`,
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background = `${accent}08`;
                   (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px -8px ${accent}40`;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+                  (e.currentTarget as HTMLElement).style.background = "#FAFAFE";
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
@@ -593,7 +661,7 @@ function FeaturesSection() {
                   <feature.icon className="w-4 h-4" style={{ color: accent }} />
                 </div>
                 <div>
-                  <h3 className="font-medium text-white text-xs leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                  <h3 className="font-semibold text-xs leading-tight" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
                     {feature.title}
                   </h3>
                   <p className="text-[10px] mt-0.5" style={{ color: C.textSecondary }}>
@@ -616,18 +684,19 @@ function CoursePreviewCard({ course }: { course: Course }) {
 
   return (
     <div
-      className="flex flex-col h-full rounded-2xl overflow-hidden backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
+      className="flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
       style={{
         background: C.cardBg,
         border: `1px solid ${C.cardBorder}`,
+        boxShadow: "0 2px 12px rgba(99,103,255,0.08)",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 30px -8px rgba(0,245,255,0.15)";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.35)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 30px -8px rgba(99,103,255,0.18)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(99,103,255,0.08)";
       }}
       data-testid={`card-preview-course-${course.id}`}
     >
@@ -642,22 +711,22 @@ function CoursePreviewCard({ course }: { course: Course }) {
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, rgba(0,245,255,0.1), rgba(124,58,237,0.08))` }}
+            style={{ background: `linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.06))` }}
           >
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.25)" }}
+              style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.22)" }}
             >
               <BookOpen className="w-7 h-7" style={{ color: C.teal }} />
             </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         {course.category && (
           <div className="absolute top-3 left-3">
             <span
               className="px-2.5 py-1 rounded-full text-xs font-medium"
-              style={{ background: `${C.teal}CC`, color: C.bgPrimary, backdropFilter: "blur(8px)" }}
+              style={{ background: C.teal, color: "#FFFFFF", backdropFilter: "blur(8px)" }}
             >
               {course.category}
             </span>
@@ -669,8 +738,8 @@ function CoursePreviewCard({ course }: { course: Course }) {
       </div>
       <div className="p-4 flex-1 flex flex-col gap-2">
         <h3
-          className="text-base font-semibold leading-snug line-clamp-2 text-white"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="text-base font-semibold leading-snug line-clamp-2"
+          style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
         >
           {course.title}
         </h3>
@@ -689,9 +758,9 @@ function CoursePreviewCard({ course }: { course: Course }) {
           <button
             className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
             style={{
-              background: "transparent",
+              background: "rgba(99,103,255,0.06)",
               color: C.teal,
-              border: `1px solid rgba(0,245,255,0.3)`,
+              border: `1px solid rgba(99,103,255,0.2)`,
             }}
             data-testid={`button-view-course-${course.id}`}
           >
@@ -723,9 +792,9 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
     <div
       className="w-[300px] md:w-[340px] shrink-0 rounded-2xl overflow-hidden flex flex-col"
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 8px 32px -8px rgba(0,0,0,0.4)",
+        background: C.cardBg,
+        border: `1px solid ${C.cardBorder}`,
+        boxShadow: "0 4px 20px rgba(99,103,255,0.1)",
       }}
     >
       <div className="relative aspect-video overflow-hidden">
@@ -740,32 +809,31 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
             className="absolute inset-0 flex items-center justify-center"
             style={{
               background: isTrack
-                ? "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(6,182,212,0.04))"
-                : "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))",
+                ? "linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.04))"
+                : "linear-gradient(135deg, rgba(132,148,255,0.1), rgba(201,190,255,0.06))",
             }}
           >
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center"
               style={{
-                background: isTrack ? "rgba(0,245,255,0.12)" : "rgba(124,58,237,0.15)",
-                border: `1px solid ${isTrack ? "rgba(0,245,255,0.22)" : "rgba(124,58,237,0.28)"}`,
+                background: isTrack ? "rgba(99,103,255,0.12)" : "rgba(132,148,255,0.15)",
+                border: `1px solid ${isTrack ? "rgba(99,103,255,0.22)" : "rgba(132,148,255,0.28)"}`,
               }}
             >
               {isTrack
                 ? <Layers className="w-7 h-7" style={{ color: C.teal }} />
-                : <Trophy className="w-7 h-7" style={{ color: "#A78BFA" }} />
+                : <Trophy className="w-7 h-7" style={{ color: C.purple }} />
               }
             </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080F1E]/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
         <div className="absolute top-3 left-3">
           <span
             className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
             style={{
-              background: isTrack ? "rgba(0,245,255,0.82)" : "rgba(124,58,237,0.85)",
+              background: isTrack ? C.teal : C.purple,
               color: "#fff",
-              backdropFilter: "blur(8px)",
             }}
           >
             {isTrack ? "🛤 Track" : "🎓 Program"}
@@ -773,11 +841,11 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
         </div>
         <div className="absolute top-3 right-3">
           {group.price > 0 ? (
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.88)", color: "#fff" }}>
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.9)", color: "#fff" }}>
               {group.price} Credits
             </span>
           ) : (
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(16,185,129,0.88)", color: "#fff" }}>
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>
               FREE
             </span>
           )}
@@ -786,7 +854,7 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
 
       <div className="p-4 flex flex-col gap-3 flex-1">
         <div>
-          <h3 className="text-white font-semibold text-base leading-snug line-clamp-1" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className="font-semibold text-base leading-snug line-clamp-1" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
             {group.name}
           </h3>
           {group.description && (
@@ -799,7 +867,7 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
             <BookOpen className="w-3.5 h-3.5" />
             {group.courseCount} courses
           </span>
-          <span className="capitalize px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <span className="capitalize px-2 py-0.5 rounded-full" style={{ background: "rgba(99,103,255,0.07)", color: C.teal }}>
             {group.level}
           </span>
         </div>
@@ -810,7 +878,7 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
               <div key={c.id} className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
                 <span
                   className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: "rgba(0,245,255,0.1)", color: C.teal }}
+                  style={{ background: "rgba(99,103,255,0.1)", color: C.teal }}
                 >
                   {i + 1}
                 </span>
@@ -818,7 +886,7 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
               </div>
             ))}
             {group.courseCount > 3 && (
-              <span className="text-xs pl-6" style={{ color: "rgba(148,163,184,0.5)" }}>+{group.courseCount - 3} more</span>
+              <span className="text-xs pl-6" style={{ color: C.textSecondary }}>+{group.courseCount - 3} more</span>
             )}
           </div>
         )}
@@ -828,9 +896,9 @@ function GroupCard({ group }: { group: CourseGroupLanding }) {
             <button
               className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{
-                background: isTrack ? "rgba(0,245,255,0.08)" : "rgba(124,58,237,0.1)",
-                color: isTrack ? C.teal : "#A78BFA",
-                border: `1px solid ${isTrack ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}`,
+                background: isTrack ? "rgba(99,103,255,0.07)" : "rgba(132,148,255,0.1)",
+                color: isTrack ? C.teal : C.purple,
+                border: `1px solid ${isTrack ? "rgba(99,103,255,0.2)" : "rgba(132,148,255,0.25)"}`,
               }}
               data-testid={`button-view-group-${group.id}`}
             >
@@ -870,10 +938,7 @@ function FeaturedCoursesSection() {
     if (allCourses.length <= 1) return;
     const t = setInterval(() => {
       setCourseVisible(false);
-      setTimeout(() => {
-        setCourseIdx(i => (i + 1) % allCourses.length);
-        setCourseVisible(true);
-      }, FADE);
+      setTimeout(() => { setCourseIdx(i => (i + 1) % allCourses.length); setCourseVisible(true); }, FADE);
     }, INTERVAL);
     return () => clearInterval(t);
   }, [allCourses.length]);
@@ -882,10 +947,7 @@ function FeaturedCoursesSection() {
     if (tracks.length <= 1) return;
     const t = setInterval(() => {
       setTrackVisible(false);
-      setTimeout(() => {
-        setTrackIdx(i => (i + 1) % tracks.length);
-        setTrackVisible(true);
-      }, FADE);
+      setTimeout(() => { setTrackIdx(i => (i + 1) % tracks.length); setTrackVisible(true); }, FADE);
     }, INTERVAL + 700);
     return () => clearInterval(t);
   }, [tracks.length]);
@@ -894,10 +956,7 @@ function FeaturedCoursesSection() {
     if (programs.length <= 1) return;
     const t = setInterval(() => {
       setProgramVisible(false);
-      setTimeout(() => {
-        setProgramIdx(i => (i + 1) % programs.length);
-        setProgramVisible(true);
-      }, FADE);
+      setTimeout(() => { setProgramIdx(i => (i + 1) % programs.length); setProgramVisible(true); }, FADE);
     }, INTERVAL + 1400);
     return () => clearInterval(t);
   }, [programs.length]);
@@ -906,14 +965,13 @@ function FeaturedCoursesSection() {
 
   if (isLoading) {
     return (
-      <section className="relative py-12 md:py-16 overflow-hidden">
-        <SectionGlow position="center" color={C.teal} />
+      <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgSecondary }}>
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="h-5 w-32 rounded-full mx-auto mb-3 animate-pulse" style={{ background: "rgba(0,245,255,0.1)" }} />
-          <div className="h-9 w-64 rounded-xl mx-auto mb-10 animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div className="h-5 w-32 rounded-full mx-auto mb-3 animate-pulse" style={{ background: "rgba(99,103,255,0.1)" }} />
+          <div className="h-9 w-64 rounded-xl mx-auto mb-10 animate-pulse" style={{ background: "rgba(99,103,255,0.07)" }} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl h-72 animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+              <div key={i} className="rounded-2xl h-72 animate-pulse" style={{ background: "rgba(99,103,255,0.05)" }} />
             ))}
           </div>
         </div>
@@ -932,14 +990,14 @@ function FeaturedCoursesSection() {
   });
 
   return (
-    <section className="relative py-6 md:py-8 overflow-hidden">
+    <section className="relative py-8 md:py-10 overflow-hidden" style={{ background: C.bgSecondary }}>
       <SectionGlow position="center" color={C.teal} />
       <SectionGlow position="top-right" color={C.purple} />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2"
-            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
+            style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}
           >
             <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
           </div>
@@ -961,9 +1019,9 @@ function FeaturedCoursesSection() {
         <div
           className="rounded-3xl p-3 md:p-4"
           style={{
-            background: "linear-gradient(145deg, rgba(6,13,31,0.9) 0%, rgba(11,29,58,0.85) 100%)",
-            border: "1px solid rgba(0,245,255,0.12)",
-            boxShadow: "0 0 60px -20px rgba(0,245,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+            background: "#FFFFFF",
+            border: "1px solid #EDE9FF",
+            boxShadow: "0 4px 40px rgba(99,103,255,0.1)",
           }}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
@@ -973,7 +1031,7 @@ function FeaturedCoursesSection() {
               <Link href="/courses" className="block">
                 <span
                   className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
-                  style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                  style={{ color: C.teal, background: "rgba(99,103,255,0.07)", border: "1px solid rgba(99,103,255,0.18)", fontFamily: "var(--font-display)" }}
                   data-testid="button-header-courses"
                 >
                   Courses <ArrowRight className="w-3.5 h-3.5" />
@@ -989,13 +1047,13 @@ function FeaturedCoursesSection() {
                       <Link href={`/courses/${course.id}`}>
                         <div
                           className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", height: "240px" }}
+                          style={{ background: "#FAFAFE", border: "1px solid #EDE9FF", height: "240px" }}
                           onMouseEnter={e => {
-                            (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.28)";
-                            (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.15)";
+                            (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.3)";
+                            (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(99,103,255,0.15)";
                           }}
                           onMouseLeave={e => {
-                            (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                            (e.currentTarget as HTMLElement).style.borderColor = "#EDE9FF";
                             (e.currentTarget as HTMLElement).style.boxShadow = "none";
                           }}
                           data-testid={`card-featured-course-${course.id}`}
@@ -1004,11 +1062,11 @@ function FeaturedCoursesSection() {
                             {course.thumbnailUrl ? (
                               <img src={course.thumbnailUrl} alt={course.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             ) : (
-                              <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))" }}>
-                                <BookOpen className="w-10 h-10" style={{ color: "rgba(0,245,255,0.45)" }} />
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.05))" }}>
+                                <BookOpen className="w-10 h-10" style={{ color: "rgba(99,103,255,0.45)" }} />
                               </div>
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/60 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                             <div className="absolute top-2 right-2">
                               {isFree ? (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(16,185,129,0.9)", color: "#fff" }}>FREE</span>
@@ -1018,13 +1076,13 @@ function FeaturedCoursesSection() {
                             </div>
                           </div>
                           <div className="p-3 flex flex-col gap-1.5 flex-1">
-                            <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{course.title}</h4>
+                            <h4 className="text-xs font-semibold leading-snug line-clamp-2 flex-1" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>{course.title}</h4>
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <LevelBadge level={(course.level || "beginner") as "beginner" | "intermediate" | "advanced"} />
                               {course.duration && <span className="text-[10px]" style={{ color: C.textSecondary }}>{course.duration}</span>}
                             </div>
                             <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                              style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
+                              style={{ background: "rgba(99,103,255,0.07)", color: C.teal, border: "1px solid rgba(99,103,255,0.15)" }}>
                               View Course <ChevronRight className="w-3 h-3" />
                             </div>
                           </div>
@@ -1038,7 +1096,7 @@ function FeaturedCoursesSection() {
                 <div className="flex justify-center gap-1 mt-1">
                   {allCourses.map((_, i) => (
                     <div key={i} className="rounded-full transition-all duration-300"
-                      style={{ width: i === courseIdx ? "16px" : "6px", height: "4px", background: i === courseIdx ? C.teal : "rgba(255,255,255,0.15)" }} />
+                      style={{ width: i === courseIdx ? "16px" : "6px", height: "4px", background: i === courseIdx ? C.teal : "rgba(99,103,255,0.15)" }} />
                   ))}
                 </div>
               )}
@@ -1049,7 +1107,7 @@ function FeaturedCoursesSection() {
               <Link href="/courses?tab=track" className="block">
                 <span
                   className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
-                  style={{ color: C.teal, background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.18)", fontFamily: "var(--font-display)" }}
+                  style={{ color: C.teal, background: "rgba(99,103,255,0.07)", border: "1px solid rgba(99,103,255,0.18)", fontFamily: "var(--font-display)" }}
                   data-testid="button-header-tracks"
                 >
                   Tracks <ArrowRight className="w-3.5 h-3.5" />
@@ -1062,13 +1120,13 @@ function FeaturedCoursesSection() {
                   <Link href={`/courses/group/${track.id}`}>
                     <div
                       className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                      style={{ background: "rgba(0,245,255,0.03)", border: "1px solid rgba(0,245,255,0.1)", height: "240px" }}
+                      style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.12)", height: "240px" }}
                       onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.3)";
-                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(0,245,255,0.12)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.32)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(99,103,255,0.12)";
                       }}
                       onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.1)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.12)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "none";
                       }}
                       data-testid={`card-featured-track-${track.id}`}
@@ -1077,22 +1135,22 @@ function FeaturedCoursesSection() {
                         {track.thumbnailUrl ? (
                           <img src={track.thumbnailUrl} alt={track.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.09), rgba(6,182,212,0.05))" }}>
-                            <Layers className="w-10 h-10" style={{ color: "rgba(0,245,255,0.45)" }} />
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.05))" }}>
+                            <Layers className="w-10 h-10" style={{ color: "rgba(99,103,255,0.45)" }} />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                         <div className="absolute top-2 right-2">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(0,245,255,0.18)", color: C.teal, border: "1px solid rgba(0,245,255,0.3)" }}>Track</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(99,103,255,0.15)", color: C.teal, border: "1px solid rgba(99,103,255,0.25)" }}>Track</span>
                         </div>
                       </div>
                       <div className="p-3 flex flex-col gap-1.5 flex-1">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{track.name}</h4>
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 flex-1" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>{track.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
-                          {track.courseCount} {track.courseCount === 1 ? "Course" : "Courses"}{track.totalDuration ? ` · ${track.totalDuration}` : ""}
+                          {track.courseCount} {track.courseCount === 1 ? "Course" : "Courses"}{(track as any).totalDuration ? ` · ${(track as any).totalDuration}` : ""}
                         </p>
                         <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                          style={{ background: "rgba(0,245,255,0.07)", color: C.teal, border: "1px solid rgba(0,245,255,0.15)" }}>
+                          style={{ background: "rgba(99,103,255,0.07)", color: C.teal, border: "1px solid rgba(99,103,255,0.15)" }}>
                           View Track <ChevronRight className="w-3 h-3" />
                         </div>
                       </div>
@@ -1104,7 +1162,7 @@ function FeaturedCoursesSection() {
                 <div className="flex justify-center gap-1 mt-1">
                   {tracks.map((_, i) => (
                     <div key={i} className="rounded-full transition-all duration-300"
-                      style={{ width: i === trackIdx ? "16px" : "6px", height: "4px", background: i === trackIdx ? C.teal : "rgba(255,255,255,0.15)" }} />
+                      style={{ width: i === trackIdx ? "16px" : "6px", height: "4px", background: i === trackIdx ? C.teal : "rgba(99,103,255,0.15)" }} />
                   ))}
                 </div>
               )}
@@ -1115,7 +1173,7 @@ function FeaturedCoursesSection() {
               <Link href="/courses?tab=program" className="block">
                 <span
                   className="flex items-center justify-between w-full px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] cursor-pointer"
-                  style={{ color: "#A78BFA", background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", fontFamily: "var(--font-display)" }}
+                  style={{ color: C.purple, background: "rgba(132,148,255,0.08)", border: "1px solid rgba(132,148,255,0.25)", fontFamily: "var(--font-display)" }}
                   data-testid="button-header-programs"
                 >
                   Programs <ArrowRight className="w-3.5 h-3.5" />
@@ -1128,13 +1186,13 @@ function FeaturedCoursesSection() {
                   <Link href={`/courses/group/${program.id}`}>
                     <div
                       className="rounded-2xl overflow-hidden flex flex-col cursor-pointer group"
-                      style={{ background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.15)", height: "240px" }}
+                      style={{ background: "rgba(132,148,255,0.04)", border: "1px solid rgba(132,148,255,0.15)", height: "240px" }}
                       onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.35)";
-                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(124,58,237,0.15)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(132,148,255,0.35)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -6px rgba(132,148,255,0.15)";
                       }}
                       onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(124,58,237,0.15)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(132,148,255,0.15)";
                         (e.currentTarget as HTMLElement).style.boxShadow = "none";
                       }}
                       data-testid={`card-featured-program-${program.id}`}
@@ -1143,22 +1201,22 @@ function FeaturedCoursesSection() {
                         {program.thumbnailUrl ? (
                           <img src={program.thumbnailUrl} alt={program.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(139,92,246,0.06))" }}>
-                            <GraduationCap className="w-10 h-10" style={{ color: "rgba(139,92,246,0.55)" }} />
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(132,148,255,0.1), rgba(201,190,255,0.06))" }}>
+                            <GraduationCap className="w-10 h-10" style={{ color: "rgba(132,148,255,0.55)" }} />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#060D1F]/70 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
                         <div className="absolute top-2 right-2">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(124,58,237,0.22)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.35)" }}>Program</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: "rgba(132,148,255,0.18)", color: C.purple, border: "1px solid rgba(132,148,255,0.3)" }}>Program</span>
                         </div>
                       </div>
                       <div className="p-3 flex flex-col gap-1.5 flex-1">
-                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 text-white flex-1" style={{ fontFamily: "var(--font-display)" }}>{program.name}</h4>
+                        <h4 className="text-xs font-semibold leading-snug line-clamp-2 flex-1" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>{program.name}</h4>
                         <p className="text-[10px]" style={{ color: C.textSecondary }}>
-                          {program.courseCount} {program.courseCount === 1 ? "Course" : "Courses"}{program.totalDuration ? ` · ${program.totalDuration}` : ""}
+                          {program.courseCount} {program.courseCount === 1 ? "Course" : "Courses"}{(program as any).totalDuration ? ` · ${(program as any).totalDuration}` : ""}
                         </p>
                         <div className="mt-auto text-[11px] font-semibold flex items-center justify-center gap-1 py-1.5 rounded-lg"
-                          style={{ background: "rgba(124,58,237,0.1)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }}>
+                          style={{ background: "rgba(132,148,255,0.1)", color: C.purple, border: "1px solid rgba(132,148,255,0.22)" }}>
                           View Program <ChevronRight className="w-3 h-3" />
                         </div>
                       </div>
@@ -1170,7 +1228,7 @@ function FeaturedCoursesSection() {
                 <div className="flex justify-center gap-1 mt-1">
                   {programs.map((_, i) => (
                     <div key={i} className="rounded-full transition-all duration-300"
-                      style={{ width: i === programIdx ? "16px" : "6px", height: "4px", background: i === programIdx ? "#A78BFA" : "rgba(255,255,255,0.15)" }} />
+                      style={{ width: i === programIdx ? "16px" : "6px", height: "4px", background: i === programIdx ? C.purple : "rgba(132,148,255,0.15)" }} />
                   ))}
                 </div>
               )}
@@ -1185,7 +1243,7 @@ function FeaturedCoursesSection() {
 
 function AISection() {
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgPrimary }}>
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
 
@@ -1193,14 +1251,14 @@ function AISection() {
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
-              style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)", color: "#A78BFA" }}>
+              style={{ background: "rgba(132,148,255,0.1)", border: "1px solid rgba(132,148,255,0.25)", color: C.purple }}>
               AI-Powered Learning
             </div>
             <h2
               className="text-2xl md:text-3xl font-bold"
               style={{
                 fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`,
+                background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 letterSpacing: "-0.02em",
@@ -1223,14 +1281,14 @@ function AISection() {
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: `linear-gradient(135deg, rgba(0,245,255,0.12), rgba(124,58,237,0.08))`,
-                        border: "1px solid rgba(0,245,255,0.18)",
+                        background: `linear-gradient(135deg, rgba(99,103,255,0.1), rgba(132,148,255,0.07))`,
+                        border: "1px solid rgba(99,103,255,0.18)",
                       }}
                     >
                       <feature.icon className="w-4 h-4" style={{ color: C.teal }} />
                     </div>
                     <div>
-                      <h4 className="font-medium text-xs text-white">{feature.title}</h4>
+                      <h4 className="font-semibold text-xs" style={{ color: C.textPrimary }}>{feature.title}</h4>
                       <p className="text-[10px]" style={{ color: C.textSecondary }}>{feature.description}</p>
                     </div>
                   </div>
@@ -1242,19 +1300,20 @@ function AISection() {
             <div
               className="relative rounded-2xl overflow-hidden flex items-center justify-center"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(0,245,255,0.12)",
+                background: C.bgSecondary,
+                border: `1px solid ${C.cardBorder}`,
                 padding: "32px",
                 width: "100%",
                 maxWidth: "340px",
+                boxShadow: "0 4px 32px rgba(99,103,255,0.12)",
               }}
             >
               <div
                 className="relative w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden animate-float"
                 style={{
-                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.teal})`,
-                  boxShadow: `0 0 40px -8px rgba(0,245,255,0.4)`,
-                  border: `3px solid rgba(0,245,255,0.3)`,
+                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.lightBg})`,
+                  boxShadow: `0 0 40px -8px rgba(99,103,255,0.4)`,
+                  border: `3px solid rgba(99,103,255,0.25)`,
                 }}
               >
                 <img
@@ -1267,13 +1326,13 @@ function AISection() {
               {/* Floating chat bubbles */}
               <div
                 className="absolute top-4 right-4 rounded-xl px-3 py-1.5"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}`, boxShadow: "0 2px 8px rgba(99,103,255,0.1)" }}
               >
-                <p className="text-xs font-medium text-white">Need a hint? 💡</p>
+                <p className="text-xs font-medium" style={{ color: C.textPrimary }}>Need a hint? 💡</p>
               </div>
               <div
                 className="absolute bottom-4 left-4 rounded-xl px-3 py-1.5"
-                style={{ background: "rgba(0,245,255,0.07)", border: "1px solid rgba(0,245,255,0.15)" }}
+                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.18)" }}
               >
                 <p className="text-xs" style={{ color: C.teal }}>Ask Usha anytime</p>
               </div>
@@ -1287,13 +1346,13 @@ function AISection() {
 
 function TestimonialsSection() {
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgSecondary }}>
       <SectionGlow position="center" color={C.purple} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-7">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#FBBF24" }}>
+            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#D97706" }}>
             Student Reviews
           </div>
           <h2
@@ -1315,7 +1374,7 @@ function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <GlassCard
               key={testimonial.name}
-              className="relative p-4"
+              className="relative p-5"
               data-testid={`card-testimonial-${index + 1}`}
             >
               <div className="flex gap-1 mb-3">
@@ -1323,16 +1382,16 @@ function TestimonialsSection() {
                   <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="mb-3 text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="mb-4 text-sm leading-relaxed" style={{ color: C.textSecondary }}>
                 "{testimonial.content}"
               </p>
-              <div className="pt-3 flex items-center gap-2" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: "rgba(0,245,255,0.12)", color: C.teal }}>
+              <div className="pt-3 flex items-center gap-2.5" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: CTA_GRAD, color: "#FFFFFF" }}>
                   {testimonial.name[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-xs text-white">{testimonial.name}</p>
+                  <p className="font-semibold text-xs" style={{ color: C.textPrimary }}>{testimonial.name}</p>
                   <p className="text-[10px]" style={{ color: C.textSecondary }}>{testimonial.role}</p>
                 </div>
               </div>
@@ -1348,7 +1407,7 @@ function FAQSection() {
   const [openItem, setOpenItem] = useState<string | null>(null);
 
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgPrimary }}>
       <SectionGlow position="top-right" color={C.teal} />
       <SectionGlow position="bottom-left" color={C.purple} />
 
@@ -1359,7 +1418,7 @@ function FAQSection() {
           <div className="lg:sticky lg:top-24">
             <div
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold mb-4 tracking-widest uppercase"
-              style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.18)", color: C.teal }}
+              style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}
             >
               FAQ
             </div>
@@ -1380,7 +1439,6 @@ function FAQSection() {
               Everything you need to know before you start. Can't find your answer?{" "}
               <Link href="/contact" className="underline underline-offset-2" style={{ color: C.teal }}>Contact us</Link>.
             </p>
-
           </div>
 
           {/* Right: styled accordion */}
@@ -1401,30 +1459,29 @@ function FAQSection() {
                     className="rounded-xl overflow-hidden border-0 transition-all duration-300"
                     style={{
                       background: isOpen
-                        ? "linear-gradient(135deg, rgba(0,245,255,0.05), rgba(124,58,237,0.03))"
-                        : "rgba(255,255,255,0.03)",
+                        ? "linear-gradient(135deg, rgba(99,103,255,0.05), rgba(132,148,255,0.03))"
+                        : "#FAFAFE",
                       border: isOpen
-                        ? "1px solid rgba(0,245,255,0.2)"
-                        : "1px solid rgba(255,255,255,0.07)",
-                      boxShadow: isOpen ? "0 0 24px -8px rgba(0,245,255,0.12)" : "none",
+                        ? "1px solid rgba(99,103,255,0.22)"
+                        : "1px solid #EDE9FF",
+                      boxShadow: isOpen ? "0 0 24px -8px rgba(99,103,255,0.12)" : "none",
                     }}
                     data-testid={`faq-item-${index + 1}`}
                   >
                     <AccordionTrigger className="hover:no-underline text-left px-4 py-3.5 group">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {/* Number badge */}
                         <div
                           className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-all duration-300"
                           style={{
-                            background: isOpen ? C.teal : "rgba(255,255,255,0.08)",
-                            color: isOpen ? C.bgPrimary : C.textSecondary,
+                            background: isOpen ? CTA_GRAD : "rgba(99,103,255,0.1)",
+                            color: isOpen ? "#FFFFFF" : C.teal,
                           }}
                         >
                           {String(index + 1).padStart(2, "0")}
                         </div>
                         <span
                           className="font-medium text-sm transition-colors duration-200"
-                          style={{ color: isOpen ? C.textPrimary : "rgba(255,255,255,0.85)" }}
+                          style={{ color: isOpen ? C.textPrimary : C.textPrimary }}
                         >
                           {item.question}
                         </span>
@@ -1433,7 +1490,7 @@ function FAQSection() {
                     <AccordionContent className="px-4 pb-4">
                       <div
                         className="pl-9 text-sm leading-relaxed"
-                        style={{ color: C.textSecondary, borderLeft: `2px solid rgba(0,245,255,0.15)`, paddingLeft: "1.25rem" }}
+                        style={{ color: C.textSecondary, borderLeft: `2px solid rgba(99,103,255,0.2)`, paddingLeft: "1.25rem" }}
                       >
                         {item.answer}
                       </div>
@@ -1454,100 +1511,95 @@ function CTASection() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-8 md:py-12 overflow-hidden">
-      <SectionGlow position="center" color={C.teal} />
-
+    <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgSecondary }}>
       <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10">
         <div
           className="rounded-3xl p-8 md:p-12 text-center relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.05) 100%)",
-            border: "1px solid rgba(0,245,255,0.15)",
-            boxShadow: "0 0 60px -20px rgba(0,245,255,0.2), inset 0 1px 0 rgba(255,255,255,0.04)",
+            background: HERO_GRAD,
+            boxShadow: "0 12px 60px rgba(99,103,255,0.3)",
           }}
         >
-          {/* Inner decorative glows */}
+          {/* Inner decorative blobs */}
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
-            style={{ background: "rgba(0,245,255,0.07)" }} />
+            style={{ background: "rgba(255,255,255,0.1)" }} />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
-            style={{ background: "rgba(124,58,237,0.07)" }} />
+            style={{ background: "rgba(201,190,255,0.2)" }} />
 
           <div className="relative z-10">
             <div className="flex justify-center mb-5">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center animate-float"
                 style={{
-                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                  boxShadow: `0 0 28px -4px rgba(0,245,255,0.5)`,
+                  background: "rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(255,255,255,0.35)",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                <GraduationCap className="w-7 h-7" style={{ color: C.bgPrimary }} />
+                <GraduationCap className="w-7 h-7 text-white" />
               </div>
             </div>
             <h2
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4 text-white"
               style={{
                 fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
                 letterSpacing: "-0.02em",
               }}
               data-testid="text-cta-title"
             >
               Start your learning journey today.
             </h2>
-            <p className="mb-8 max-w-xl mx-auto text-base" style={{ color: C.textSecondary, lineHeight: "1.7" }}>
+            <p className="mb-8 max-w-xl mx-auto text-base" style={{ color: "rgba(255,255,255,0.82)", lineHeight: "1.7" }}>
               Join thousands of students mastering real skills, earning verified certificates, and launching careers — with OurShiksha.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          {user ? (
-            <Link href="/shishya/dashboard">
-              <button
-                className="min-w-[180px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
-                style={{
-                  background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                  color: C.bgPrimary,
-                  boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
-                }}
-                data-testid="button-cta-shishya"
-              >
-                Go to Shishya
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">
-                <button
-                  className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
-                  style={{
-                    background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-                    color: C.bgPrimary,
-                    boxShadow: `0 4px 20px -4px rgba(0,245,255,0.4)`,
-                  }}
-                  data-testid="button-cta-login"
-                >
-                  <LogIn className="w-5 h-5" />
-                  Login
-                </button>
-              </Link>
-              <Link href="/signup">
-                <button
-                  className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
-                  style={{
-                    background: "transparent",
-                    color: C.teal,
-                    border: `1px solid rgba(0,245,255,0.3)`,
-                  }}
-                  data-testid="button-cta-signup"
-                >
-                  <UserPlus className="w-5 h-5" />
-                  Sign Up
-                </button>
-              </Link>
-            </>
-          )}
+              {user ? (
+                <Link href="/shishya/dashboard">
+                  <button
+                    className="min-w-[180px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                    style={{
+                      background: "#FFFFFF",
+                      color: C.teal,
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+                    }}
+                    data-testid="button-cta-shishya"
+                  >
+                    Go to Shishya
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <button
+                      className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      style={{
+                        background: "#FFFFFF",
+                        color: C.teal,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+                      }}
+                      data-testid="button-cta-login"
+                    >
+                      <LogIn className="w-5 h-5" />
+                      Login
+                    </button>
+                  </Link>
+                  <Link href="/signup">
+                    <button
+                      className="min-w-[150px] px-8 py-3.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                      style={{
+                        background: "transparent",
+                        color: "#FFFFFF",
+                        border: "1.5px solid rgba(255,255,255,0.55)",
+                      }}
+                      data-testid="button-cta-signup"
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      Sign Up Free
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1560,23 +1612,21 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="py-8" style={{ borderTop: `1px solid ${C.cardBorder}` }}>
+    <footer className="py-8" style={{ background: C.bgPrimary, borderTop: `1px solid ${C.cardBorder}` }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <div
               className="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm"
-              style={{
-                background: `linear-gradient(135deg, ${C.teal}, #06B6D4)`,
-              }}
+              style={{ background: CTA_GRAD }}
             >
-              <GraduationCap className="w-4 h-4" style={{ color: C.bgPrimary }} />
+              <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <span
               className="font-semibold"
               style={{
                 fontFamily: "var(--font-display)",
-                background: `linear-gradient(135deg, ${C.textPrimary}, ${C.teal})`,
+                background: CTA_GRAD,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -1584,7 +1634,7 @@ function Footer() {
               OurShiksha
             </span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: C.textSecondary }}>
+          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
             {[
               { href: "/", label: "Home", testId: "link-home" },
               { href: "/about", label: "About", testId: "link-about" },
@@ -1595,7 +1645,7 @@ function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="transition-colors"
+                className="transition-colors hover:text-[#6367FF]"
                 style={{ color: C.textSecondary }}
                 data-testid={link.testId}
               >
@@ -1617,7 +1667,7 @@ export default function LandingPage() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: `linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)`,
+        background: "#FFFFFF",
         color: C.textPrimary,
       }}
     >

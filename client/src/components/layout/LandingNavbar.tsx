@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { ChevronDown, Home, LogOut, Menu, X, Briefcase, BookOpen, CreditCard, Info, Sparkles, Mail, Handshake, HelpCircle, Award } from "lucide-react";
+import { ChevronDown, Home, LogOut, Menu, X, Briefcase, BookOpen, CreditCard, Info, Sparkles, Mail, Handshake, HelpCircle, Award, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import sealLogo from "@assets/image_1771692892158.png";
 
@@ -115,61 +115,59 @@ export function LandingNavbar() {
           </div>
 
           <div className="auth-navbar-right">
-            <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-profile-dropdown">
-              <button className="auth-navbar-action" data-testid="link-nav-profile">
-                {user && (
+            {user ? (
+              /* Logged-in: avatar dropdown */
+              <div className="auth-navbar-dropdown auth-navbar-dropdown-right" data-testid="nav-profile-dropdown">
+                <button className="auth-navbar-action" data-testid="link-nav-profile">
                   <span className="landing-nav-avatar" data-testid="avatar-initials">
                     {initials}
                   </span>
-                )}
-                Profile
-                <ChevronDown className="auth-navbar-chevron" />
-              </button>
-              <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right landing-nav-profile-menu">
-                {user ? (
-                  <>
-                    <div className="landing-nav-user-info" data-testid="text-user-info">
-                      <span className="landing-nav-avatar landing-nav-avatar-lg" data-testid="avatar-initials-lg">
-                        {initials}
+                  {displayName || "My Account"}
+                  <ChevronDown className="auth-navbar-chevron" />
+                </button>
+                <div className="auth-navbar-dropdown-menu auth-navbar-dropdown-menu-right landing-nav-profile-menu">
+                  <div className="landing-nav-user-info" data-testid="text-user-info">
+                    <span className="landing-nav-avatar landing-nav-avatar-lg" data-testid="avatar-initials-lg">
+                      {initials}
+                    </span>
+                    <div className="landing-nav-user-details">
+                      <span className="landing-nav-user-name" data-testid="text-user-name">
+                        {displayName || "Student"}
                       </span>
-                      <div className="landing-nav-user-details">
-                        <span className="landing-nav-user-name" data-testid="text-user-name">
-                          {displayName || "Student"}
-                        </span>
-                        <span className="landing-nav-user-email" data-testid="text-user-email">
-                          {user.email}
-                        </span>
-                      </div>
+                      <span className="landing-nav-user-email" data-testid="text-user-email">
+                        {user.email}
+                      </span>
                     </div>
-                    <Link
-                      href="/shishya/dashboard"
-                      className="auth-navbar-dropdown-item landing-nav-dashboard-link"
-                      data-testid="link-profile-dashboard"
-                    >
-                      <Home className="w-4 h-4" />
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="landing-nav-logout-btn"
-                      data-testid="button-logout"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" className="auth-navbar-dropdown-item" data-testid="link-profile-login">
-                      Login
-                    </Link>
-                    <Link href="/signup" className="auth-navbar-dropdown-item" data-testid="link-profile-signup">
-                      Sign up
-                    </Link>
-                  </>
-                )}
+                  </div>
+                  <Link
+                    href="/shishya/dashboard"
+                    className="auth-navbar-dropdown-item landing-nav-dashboard-link"
+                    data-testid="link-profile-dashboard"
+                  >
+                    <Home className="w-4 h-4" />
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="landing-nav-logout-btn"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Logged-out: Log In link + Get Started button */
+              <>
+                <Link href="/login" className="auth-navbar-login-link" data-testid="link-profile-login">
+                  Log In
+                </Link>
+                <Link href="/signup" className="auth-navbar-cta-btn" data-testid="link-profile-signup">
+                  Get Started Free
+                </Link>
+              </>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -197,8 +195,8 @@ export function LandingNavbar() {
               <div className="landing-nav-mobile-user">
                 <span className="landing-nav-avatar landing-nav-avatar-lg">{initials}</span>
                 <div>
-                  <div className="text-sm font-semibold text-white">{displayName || "Student"}</div>
-                  <div className="text-xs" style={{ color: "rgba(148,163,184,0.7)" }}>{user.email}</div>
+                  <div className="text-sm font-semibold" style={{ color: "#1A1A1A" }}>{displayName || "Student"}</div>
+                  <div className="text-xs" style={{ color: "#6B7280" }}>{user.email}</div>
                 </div>
               </div>
             )}
@@ -245,13 +243,13 @@ export function LandingNavbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="landing-nav-mobile-btn-primary" onClick={closeMobile}
-                    data-testid="mobile-link-login">
-                    Login
-                  </Link>
-                  <Link href="/signup" className="landing-nav-mobile-btn-ghost" onClick={closeMobile}
+                  <Link href="/signup" className="landing-nav-mobile-btn-primary" onClick={closeMobile}
                     data-testid="mobile-link-signup">
-                    Sign Up Free
+                    Get Started Free
+                  </Link>
+                  <Link href="/login" className="landing-nav-mobile-btn-ghost" onClick={closeMobile}
+                    data-testid="mobile-link-login">
+                    Log In
                   </Link>
                 </>
               )}
