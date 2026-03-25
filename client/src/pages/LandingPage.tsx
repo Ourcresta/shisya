@@ -230,7 +230,7 @@ function HeroSection() {
 
   return (
     <section
-      className="relative overflow-hidden pt-12 md:pt-16 lg:pt-20"
+      className="relative overflow-x-hidden pt-12 md:pt-16 lg:pt-20"
       style={{ background: HERO_GRAD, minHeight: "clamp(560px, 82vh, 800px)" }}
     >
       {/* Decorative blobs */}
@@ -384,18 +384,20 @@ function HeroSection() {
 
           {/* Right: Usha character + floating cards */}
           <div className="relative flex items-end justify-center lg:justify-end">
-            {/* Usha full-body image — full hero height */}
+            {/* Usha full-body image — large, crops tight, overflows bottom+right */}
             <div
               className="relative flex items-end"
-              style={{ width: "100%", maxWidth: "580px" }}
+              style={{ width: "100%", maxWidth: "780px" }}
             >
               <img
                 src={ushaHeroImage}
                 alt="Usha AI Tutor"
                 className="relative z-10 w-full object-contain object-bottom"
                 style={{
-                  height: "clamp(540px, 82vh, 800px)",
-                  filter: "drop-shadow(0 24px 60px rgba(0,0,0,0.25))",
+                  height: "clamp(700px, 110vh, 1050px)",
+                  transform: "translate(6%, 6%)",
+                  transformOrigin: "bottom right",
+                  filter: "drop-shadow(0 32px 72px rgba(0,0,0,0.28)) brightness(1.04) saturate(1.08)",
                 }}
                 data-testid="img-usha-avatar-hero"
               />
