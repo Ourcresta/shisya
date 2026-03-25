@@ -19,14 +19,15 @@ import { executeJavaScript, compareOutput } from "@/lib/labRunner";
 import { UshaAvatar } from "@/components/usha";
 import { useUsha } from "@/contexts/UshaContext";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Lab, Course } from "@shared/schema";
+import type { Lab, Course, ModuleWithLessons } from "@shared/schema";
 import { 
   ArrowLeft, 
   Play, 
   RotateCcw, 
   CheckCircle2, 
   Lock,
-  FlaskConical
+  FlaskConical,
+  BookOpen,
 } from "lucide-react";
 
 export default function LabPractice() {
@@ -55,6 +56,19 @@ export default function LabPractice() {
     queryKey: ["/api/courses", courseId.toString()],
     enabled: courseId > 0,
   });
+
+  const { data: modulesData } = useQuery<ModuleWithLessons[]>({
+    queryKey: ["/api/courses", courseId.toString(), "modules-with-lessons"],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${courseId}/modules-with-lessons`);
+      return res.json();
+    },
+    enabled: courseId > 0,
+  });
+
+  const linkedLesson = modulesData
+    ?.flatMap(m => m.lessons || [])
+    .find((l: any) => l.unlocksLabId === labId);
 
   useEffect(() => {
     if (lab) {
@@ -200,13 +214,27 @@ export default function LabPractice() {
               Back to Labs
             </Button>
           </Link>
-          
-          {completed && (
-            <div className="flex items-center gap-2 text-emerald-600">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-medium">Completed</span>
-            </div>
-          )}
+
+          <div className="flex items-center gap-3">
+            {linkedLesson && (
+              <Link href={`/shishya/learn/${courseId}/${linkedLesson.id}`}>
+                <Button
+                  size="sm"
+                  className="gap-2 bg-teal-500 hover:bg-teal-600 text-white"
+                  data-testid="button-continue-learning"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Continue Learning
+                </Button>
+              </Link>
+            )}
+            {completed && (
+              <div className="flex items-center gap-2 text-emerald-600">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="font-medium">Completed</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">

@@ -14,7 +14,8 @@ import {
   ChevronDown,
   ChevronRight,
   Wrench,
-  ListChecks
+  ListChecks,
+  BookOpen,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { UshaAvatar } from "@/components/usha";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Project, ProjectSubmission, Course } from "@shared/schema";
+import type { Project, ProjectSubmission, Course, ModuleWithLessons } from "@shared/schema";
 
 type AiTask = {
   title: string;
@@ -79,6 +80,19 @@ export default function ProjectDetail() {
     queryKey: ["/api/courses", courseId],
   });
 
+  const { data: modulesData } = useQuery<ModuleWithLessons[]>({
+    queryKey: ["/api/courses", courseId, "modules-with-lessons"],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${courseId}/modules-with-lessons`);
+      return res.json();
+    },
+    enabled: !!courseId,
+  });
+
+  const linkedLesson = modulesData
+    ?.flatMap(m => m.lessons || [])
+    .find((l: any) => l.unlocksProjectId === projectIdNum);
+
   const submitMutation = useMutation({
     mutationFn: async (data: { githubUrl: string; liveUrl?: string; notes?: string }) => {
       // Save to localStorage first
@@ -118,12 +132,27 @@ export default function ProjectDetail() {
       ) : project ? (
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Navigation */}
-          <Link href={`/shishya/projects/${courseId}`}>
-            <Button variant="ghost" size="sm" className="gap-2 -ml-2" data-testid="button-back">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Projects
-            </Button>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href={`/shishya/projects/${courseId}`}>
+              <Button variant="ghost" size="sm" className="gap-2 -ml-2" data-testid="button-back">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Projects
+              </Button>
+            </Link>
+
+            {linkedLesson && (
+              <Link href={`/shishya/learn/${courseId}/${linkedLesson.id}`}>
+                <Button
+                  size="sm"
+                  className="gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+                  data-testid="button-continue-learning"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Continue Learning
+                </Button>
+              </Link>
+            )}
+          </div>
 
           {/* Project Header */}
           <div className="space-y-4">
