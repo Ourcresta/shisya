@@ -60,21 +60,14 @@ function resolveMode(mode: ThemeMode): "light" | "dark" {
 
 function applyThemeToDOM(isShishya: boolean, themeColor: ThemeColor, themeMode: ThemeMode): "light" | "dark" {
   const root = document.documentElement;
-
-  if (isShishya) {
-    const resolved = resolveMode(themeMode);
-    root.setAttribute("data-theme", themeColor);
-    if (resolved === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    return resolved;
+  const resolved = resolveMode(themeMode);
+  root.setAttribute("data-theme", themeColor);
+  if (resolved === "dark") {
+    root.classList.add("dark");
   } else {
     root.classList.remove("dark");
-    root.removeAttribute("data-theme");
-    return "light";
   }
+  return resolved;
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -85,10 +78,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const isShishya = checkIsShishyaRoute(location);
 
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "light";
-    const initialIsShishya = checkIsShishyaRoute(window.location.pathname);
-    if (initialIsShishya) return resolveMode(getStoredThemeMode());
-    return "light";
+    if (typeof window === "undefined") return "dark";
+    return resolveMode(getStoredThemeMode());
   });
 
   useLayoutEffect(() => {
