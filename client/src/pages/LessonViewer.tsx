@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Lesson, AINotes, Course } from "@shared/schema";
+import type { Lesson, AINotes, Course, ModuleWithLessons } from "@shared/schema";
 
 type LessonWithAssignments = Lesson & {
   unlocksLabId?: number | null;
@@ -72,6 +72,19 @@ export default function LessonViewer() {
     queryKey: ["/api/projects", String(lesson?.unlocksProjectId)],
     enabled: hasProject,
   });
+
+  const { data: modulesData } = useQuery<ModuleWithLessons[]>({
+    queryKey: ["/api/courses", courseId, "modules-with-lessons"],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${courseId}/modules-with-lessons`);
+      return res.json();
+    },
+    enabled: !!courseId,
+  });
+
+  const allLessons = modulesData?.flatMap(m => m.lessons || []) ?? [];
+  const currentIndex = allLessons.findIndex(l => l.id === lessonIdNum);
+  const nextLesson = currentIndex >= 0 ? allLessons[currentIndex + 1] ?? null : null;
 
   const isLoading = lessonLoading || notesLoading;
 
@@ -293,24 +306,38 @@ export default function LessonViewer() {
               </Button>
             </Link>
 
-            <Button
-              onClick={handleToggleComplete}
-              variant={isCompleted ? "secondary" : "default"}
-              className="gap-2"
-              data-testid="button-mark-complete-bottom"
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  Mark as Completed
-                </>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                onClick={handleToggleComplete}
+                variant={isCompleted ? "secondary" : "default"}
+                className="gap-2"
+                data-testid="button-mark-complete-bottom"
+              >
+                {isCompleted ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    Completed
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-4 h-4" />
+                    Mark as Completed
+                  </>
+                )}
+              </Button>
+
+              {isCompleted && nextLesson && (
+                <Link href={`/shishya/learn/${courseId}/${nextLesson.id}`}>
+                  <Button
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    data-testid="button-next-lesson"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Next Lesson
+                  </Button>
+                </Link>
               )}
-            </Button>
+            </div>
           </div>
 
           {/* ── Assignment Dialog ── */}
