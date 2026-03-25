@@ -15,7 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Video, Music, Captions, FileText, Code, Lock, Upload, Loader2,
-  Plus, Trash2, CheckCircle2, AlertCircle, Zap, RefreshCw,
+  Plus, Trash2, CheckCircle2, AlertCircle, Zap, RefreshCw, ClipboardList,
+  FlaskConical, FolderKanban,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -443,7 +444,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid grid-cols-7 shrink-0">
+            <TabsList className="grid grid-cols-8 shrink-0">
               <TabsTrigger value="basic" className="text-xs px-2">Basic</TabsTrigger>
               <TabsTrigger value="video" className="text-xs px-2 gap-1">
                 <Video className="w-3 h-3" />Video
@@ -465,9 +466,12 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                 <Code className="w-3 h-3" />Code
                 {tabCount("code") > 0 && <Badge variant="secondary" className="h-4 px-1 text-[10px]">{tabCount("code")}</Badge>}
               </TabsTrigger>
+              <TabsTrigger value="assignment" className="text-xs px-2 gap-1">
+                <ClipboardList className="w-3 h-3" />Assign
+                {(form.unlocksLabId || form.unlocksProjectId) && <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />}
+              </TabsTrigger>
               <TabsTrigger value="access" className="text-xs px-2 gap-1">
                 <Lock className="w-3 h-3" />Access
-                {(form.unlocksLabId || form.unlocksProjectId) && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
               </TabsTrigger>
             </TabsList>
 
@@ -776,66 +780,95 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                     </div>}
               </TabsContent>
 
-              {/* ── ACCESS CONTROL ── */}
-              <TabsContent value="access" className="space-y-5 mt-0">
+              {/* ── ASSIGNMENT ── */}
+              <TabsContent value="assignment" className="space-y-5 mt-0">
                 <p className="text-sm text-muted-foreground">
-                  Gate labs and projects behind video completion. The selected lab/project is only accessible after a student finishes watching this lesson.
+                  Link a lab and/or a project to this lesson. Students will see an assignment button in their lesson viewer once these are set.
                 </p>
 
-                <div className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-amber-500" />
-                    <span className="text-sm font-medium">Unlock Lab After Video</span>
+                {/* Lab assignment */}
+                <div className="border border-teal-500/30 rounded-lg p-4 space-y-3 bg-teal-500/5">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="assign-lab-cb"
+                      checked={!!form.unlocksLabId}
+                      onCheckedChange={(checked) => {
+                        if (!checked) setForm((f) => ({ ...f, unlocksLabId: null }));
+                        else if ((courseLabs || []).length > 0)
+                          setForm((f) => ({ ...f, unlocksLabId: (courseLabs as any[])[0].id }));
+                      }}
+                      data-testid="checkbox-assign-lab"
+                    />
+                    <label htmlFor="assign-lab-cb" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <FlaskConical className="w-4 h-4 text-teal-500" />
+                      Assign a Lab
+                    </label>
                   </div>
-                  <Select
-                    value={form.unlocksLabId ? String(form.unlocksLabId) : "none"}
-                    onValueChange={(v) => setForm((f) => ({ ...f, unlocksLabId: v === "none" ? null : parseInt(v) }))}>
-                    <SelectTrigger data-testid="select-unlock-lab"><SelectValue placeholder="No lab gate" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No lab gate</SelectItem>
-                      {(courseLabs || []).map((lab: any) => (
-                        <SelectItem key={lab.id} value={String(lab.id)}>{lab.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.unlocksLabId && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 flex gap-1 items-start">
-                      <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
-                      Students must complete this video before accessing the lab.
-                    </p>
+                  {form.unlocksLabId !== null && (
+                    <Select
+                      value={form.unlocksLabId ? String(form.unlocksLabId) : "none"}
+                      onValueChange={(v) => setForm((f) => ({ ...f, unlocksLabId: v === "none" ? null : parseInt(v) }))}>
+                      <SelectTrigger data-testid="select-unlock-lab"><SelectValue placeholder="Select a lab" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No lab</SelectItem>
+                        {(courseLabs || []).map((lab: any) => (
+                          <SelectItem key={lab.id} value={String(lab.id)}>{lab.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
 
-                <div className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-violet-500" />
-                    <span className="text-sm font-medium">Unlock Project After Video</span>
+                {/* Project assignment */}
+                <div className="border border-violet-500/30 rounded-lg p-4 space-y-3 bg-violet-500/5">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="assign-project-cb"
+                      checked={!!form.unlocksProjectId}
+                      onCheckedChange={(checked) => {
+                        if (!checked) setForm((f) => ({ ...f, unlocksProjectId: null }));
+                        else if ((courseProjects || []).length > 0)
+                          setForm((f) => ({ ...f, unlocksProjectId: (courseProjects as any[])[0].id }));
+                      }}
+                      data-testid="checkbox-assign-project"
+                    />
+                    <label htmlFor="assign-project-cb" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <FolderKanban className="w-4 h-4 text-violet-500" />
+                      Assign a Project
+                    </label>
                   </div>
-                  <Select
-                    value={form.unlocksProjectId ? String(form.unlocksProjectId) : "none"}
-                    onValueChange={(v) => setForm((f) => ({ ...f, unlocksProjectId: v === "none" ? null : parseInt(v) }))}>
-                    <SelectTrigger data-testid="select-unlock-project"><SelectValue placeholder="No project gate" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No project gate</SelectItem>
-                      {(courseProjects || []).map((proj: any) => (
-                        <SelectItem key={proj.id} value={String(proj.id)}>{proj.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.unlocksProjectId && (
-                    <p className="text-xs text-violet-600 dark:text-violet-400 flex gap-1 items-start">
-                      <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
-                      Students must complete this video before accessing the project.
-                    </p>
+                  {form.unlocksProjectId !== null && (
+                    <Select
+                      value={form.unlocksProjectId ? String(form.unlocksProjectId) : "none"}
+                      onValueChange={(v) => setForm((f) => ({ ...f, unlocksProjectId: v === "none" ? null : parseInt(v) }))}>
+                      <SelectTrigger data-testid="select-unlock-project"><SelectValue placeholder="Select a project" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No project</SelectItem>
+                        {(courseProjects || []).map((proj: any) => (
+                          <SelectItem key={proj.id} value={String(proj.id)}>{proj.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
 
                 {(form.unlocksLabId || form.unlocksProjectId) && (
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs">
                     <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>Video completion is tracked via the student&apos;s watch progress. The gate unlocks at 90% video completion.</span>
+                    <span>The assigned lab/project unlocks after the student watches 90% of this lesson&apos;s video.</span>
                   </div>
                 )}
+              </TabsContent>
+
+              {/* ── ACCESS CONTROL ── */}
+              <TabsContent value="access" className="space-y-5 mt-0">
+                <p className="text-sm text-muted-foreground">
+                  Control how this lesson is accessed. Labs and projects linked to this lesson are gated behind 90% video completion — configure them in the <strong>Assign</strong> tab.
+                </p>
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-muted-foreground text-xs">
+                  <Lock className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>Video completion is tracked automatically. Assignments unlock once the student reaches 90% watch progress on this lesson.</span>
+                </div>
               </TabsContent>
 
             </div>

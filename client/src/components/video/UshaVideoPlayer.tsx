@@ -687,9 +687,7 @@ export function UshaVideoPlayer({
         <div className="vp-hls-badge" data-testid="badge-hls">
           {hlsLevels.length > 0 && selectedQuality >= 0
             ? getQualityLabel(hlsLevels[selectedQuality]?.height || 0)
-            : hlsLevels.length > 0
-              ? "HD"
-              : "HLS"}
+            : "HD"}
           <span className="vp-hls-badge-dot" />
         </div>
       )}

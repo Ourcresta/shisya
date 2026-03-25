@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link, Redirect } from "wouter";
 import { 
@@ -10,28 +11,42 @@ import {
   Video,
   LinkIcon,
   BookOpen,
-  Play
+  Play,
+  ClipboardList,
+  FlaskConical,
+  FolderKanban,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useCourseProgress } from "@/contexts/ProgressContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Lesson, AINotes, Course } from "@shared/schema";
 
+type LessonWithAssignments = Lesson & {
+  unlocksLabId?: number | null;
+  unlocksProjectId?: number | null;
+};
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const courseIdNum = parseInt(courseId || "0", 10);
   const lessonIdNum = parseInt(lessonId || "0", 10);
   const { user } = useAuth();
+  const [assignmentOpen, setAssignmentOpen] = useState(false);
 
   const { isLessonCompleted, toggleLessonComplete } = useCourseProgress(courseIdNum);
   const isCompleted = isLessonCompleted(lessonIdNum);
 
-  const { data: lesson, isLoading: lessonLoading, error: lessonError } = useQuery<Lesson>({
+  const { data: lesson, isLoading: lessonLoading, error: lessonError } = useQuery<LessonWithAssignments>({
     queryKey: ["/api/lessons", lessonId],
   });
 
@@ -44,12 +59,25 @@ export default function LessonViewer() {
     enabled: !!lesson,
   });
 
+  const hasLab = !!(lesson?.unlocksLabId);
+  const hasProject = !!(lesson?.unlocksProjectId);
+  const hasAssignment = hasLab || hasProject;
+
+  const { data: assignedLab } = useQuery<any>({
+    queryKey: ["/api/labs", String(lesson?.unlocksLabId)],
+    enabled: hasLab,
+  });
+
+  const { data: assignedProject } = useQuery<any>({
+    queryKey: ["/api/projects", String(lesson?.unlocksProjectId)],
+    enabled: hasProject,
+  });
+
   const isLoading = lessonLoading || notesLoading;
 
   const handleToggleComplete = () => {
     toggleLessonComplete(lessonIdNum);
   };
-
 
   if (lessonError) {
     return <Redirect to={`/shishya/learn/${courseId}`} />;
@@ -69,24 +97,39 @@ export default function LessonViewer() {
               </Button>
             </Link>
 
-            <Button
-              onClick={handleToggleComplete}
-              variant={isCompleted ? "secondary" : "default"}
-              className="gap-2"
-              data-testid="button-mark-complete"
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  <Circle className="w-4 h-4" />
-                  Mark as Completed
-                </>
+            <div className="flex items-center gap-2">
+              {hasAssignment && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-teal-500/40 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10"
+                  onClick={() => setAssignmentOpen(true)}
+                  data-testid="button-view-assignments"
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  Assignments
+                </Button>
               )}
-            </Button>
+
+              <Button
+                onClick={handleToggleComplete}
+                variant={isCompleted ? "secondary" : "default"}
+                className="gap-2"
+                data-testid="button-mark-complete"
+              >
+                {isCompleted ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    Completed
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-4 h-4" />
+                    Mark as Completed
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -269,6 +312,89 @@ export default function LessonViewer() {
               )}
             </Button>
           </div>
+
+          {/* ── Assignment Dialog ── */}
+          <Dialog open={assignmentOpen} onOpenChange={setAssignmentOpen}>
+            <DialogContent className="max-w-md" data-testid="dialog-assignments">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-teal-500" />
+                  Your Assignments
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                {hasLab && (
+                  <div
+                    className="rounded-xl border border-teal-500/30 bg-teal-500/5 p-4 space-y-3"
+                    data-testid="card-assigned-lab"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center shrink-0">
+                        <FlaskConical className="w-4 h-4 text-teal-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-teal-600 dark:text-teal-400 font-medium uppercase tracking-wide">Lab</p>
+                        <p className="text-sm font-semibold" data-testid="text-lab-title">
+                          {assignedLab?.title || "Lab Assignment"}
+                        </p>
+                      </div>
+                    </div>
+                    {assignedLab?.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {assignedLab.description}
+                      </p>
+                    )}
+                    <Link href={`/shishya/learn/${courseId}/labs`}>
+                      <Button
+                        size="sm"
+                        className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white"
+                        onClick={() => setAssignmentOpen(false)}
+                        data-testid="button-open-lab"
+                      >
+                        <FlaskConical className="w-3.5 h-3.5" />
+                        Open Lab →
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
+                {hasProject && (
+                  <div
+                    className="rounded-xl border border-violet-500/30 bg-violet-500/5 p-4 space-y-3"
+                    data-testid="card-assigned-project"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0">
+                        <FolderKanban className="w-4 h-4 text-violet-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-violet-600 dark:text-violet-400 font-medium uppercase tracking-wide">Project</p>
+                        <p className="text-sm font-semibold" data-testid="text-project-title">
+                          {assignedProject?.title || "Project Assignment"}
+                        </p>
+                      </div>
+                    </div>
+                    {assignedProject?.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {assignedProject.description}
+                      </p>
+                    )}
+                    <Link href={`/shishya/learn/${courseId}/projects`}>
+                      <Button
+                        size="sm"
+                        className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white"
+                        onClick={() => setAssignmentOpen(false)}
+                        data-testid="button-open-project"
+                      >
+                        <FolderKanban className="w-3.5 h-3.5" />
+                        Open Project →
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       ) : null}
     </Layout>
