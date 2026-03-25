@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
-import ushaHeroImage from "@assets/image_1774460295264.png";
+import ushaHeroImage from "@assets/image_1774461793661_nobg.png";
 import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
@@ -385,29 +385,32 @@ function HeroSection() {
           {/* Right: Usha character + floating cards */}
           <div className="relative flex items-end justify-center lg:justify-end">
             {/* Usha full-body image */}
-            <div className="relative" style={{ maxWidth: "380px", width: "100%" }}>
+            <div className="relative" style={{ maxWidth: "460px", width: "100%" }}>
               <img
                 src={ushaHeroImage}
                 alt="Usha AI Tutor"
-                className="relative z-10 w-full object-contain"
-                style={{ maxHeight: "420px", objectPosition: "top", filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.25))" }}
+                className="relative z-10 w-full object-contain object-bottom"
+                style={{
+                  maxHeight: "500px",
+                  filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.22))",
+                }}
                 data-testid="img-usha-avatar-hero"
               />
 
-              {/* Floating: My Progress card */}
+              {/* Floating: My Progress card — top left of character */}
               <div
-                className="absolute hidden md:block z-20 rounded-xl shadow-xl"
+                className="absolute hidden md:block z-20 rounded-xl"
                 style={{
-                  top: "16px",
-                  right: "-24px",
+                  top: "40px",
+                  left: "-16px",
                   background: "#FFFFFF",
                   border: "1px solid #EDE9FF",
-                  padding: "12px 16px",
-                  minWidth: "170px",
+                  padding: "12px 14px",
+                  minWidth: "168px",
                   boxShadow: "0 8px 32px rgba(99,103,255,0.18)",
                 }}
               >
-                <div className="flex justify-between items-center mb-8px">
+                <div className="flex justify-between items-center">
                   <span style={{ fontSize: "11px", fontWeight: 700, color: "#1A1A1A" }}>My Progress</span>
                   <span style={{ fontSize: "9px", background: C.highlight, color: C.teal, padding: "2px 6px", borderRadius: "6px", fontWeight: 600 }}>Active</span>
                 </div>
@@ -426,16 +429,16 @@ function HeroSection() {
                 </div>
               </div>
 
-              {/* Floating: Certificate Earned */}
+              {/* Floating: Certificate Earned — right side */}
               <div
-                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl shadow-xl"
+                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl"
                 style={{
-                  bottom: "120px",
-                  right: "-20px",
+                  top: "160px",
+                  right: "-18px",
                   background: "#FFFFFF",
                   border: "1px solid #EDE9FF",
                   padding: "10px 14px",
-                  boxShadow: "0 8px 24px rgba(99,103,255,0.15)",
+                  boxShadow: "0 8px 24px rgba(99,103,255,0.16)",
                 }}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -448,23 +451,23 @@ function HeroSection() {
                 </div>
               </div>
 
-              {/* Floating: Usha says */}
+              {/* Floating: Usha says — bottom left */}
               <div
-                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl shadow-xl"
+                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl"
                 style={{
-                  bottom: "60px",
-                  left: "-20px",
+                  bottom: "80px",
+                  left: "-16px",
                   background: "#FFFFFF",
                   border: "1px solid #EDE9FF",
                   padding: "10px 14px",
                   boxShadow: "0 8px 24px rgba(99,103,255,0.15)",
-                  maxWidth: "160px",
+                  maxWidth: "165px",
                 }}
               >
                 <img src={ushaAvatarImage} alt="Usha" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                 <div>
                   <p style={{ fontSize: "10px", fontWeight: 700, color: "#1A1A1A" }}>Usha AI says...</p>
-                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Try the next lab</p>
+                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Try the next lab! 💡</p>
                 </div>
               </div>
             </div>
