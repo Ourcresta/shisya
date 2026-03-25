@@ -691,46 +691,42 @@ function LessonContent({
       )}
 
       {/* ── Assignment | Quiz | Summary pill buttons ── */}
-      {(hasAssignment || hasQuiz) && (
-        <div className="flex items-center justify-center gap-2 flex-wrap mt-2" data-testid="lesson-action-pills">
-          {hasAssignment && (
+      <div className="flex items-center justify-center gap-2 flex-wrap mt-2" data-testid="lesson-action-pills">
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5 border-teal-500/50 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10"
+          onClick={() => setAssignmentOpen(true)}
+          data-testid="pill-assignment"
+        >
+          <ClipboardList className="w-3.5 h-3.5" />
+          Assignment
+        </Button>
+        {hasQuiz && (
+          <Link href={`/shishya/tests/${courseId}/${lessonAny?.unlocksTestId}`}>
             <Button
               size="sm"
               variant="outline"
-              className="gap-1.5 border-teal-500/50 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10"
-              onClick={() => setAssignmentOpen(true)}
-              data-testid="pill-assignment"
+              className="gap-1.5 border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+              data-testid="pill-quiz"
             >
-              <ClipboardList className="w-3.5 h-3.5" />
-              Assignment
-            </Button>
-          )}
-          {hasQuiz && (
-            <Link href={`/shishya/tests/${courseId}/${lessonAny?.unlocksTestId}`}>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
-                data-testid="pill-quiz"
-              >
-                <ListChecks className="w-3.5 h-3.5" />
-                Quiz
-              </Button>
-            </Link>
-          )}
-          <Link href={`/shishya/learn/${courseId}/${lessonId}`}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 border-blue-500/50 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
-              data-testid="pill-summary"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              Summary
+              <ListChecks className="w-3.5 h-3.5" />
+              Quiz
             </Button>
           </Link>
-        </div>
-      )}
+        )}
+        <Link href={`/shishya/learn/${courseId}/${lessonId}`}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 border-blue-500/50 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
+            data-testid="pill-summary"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            Summary
+          </Button>
+        </Link>
+      </div>
 
       <Card className="mt-4">
         <CardContent className="p-4">
