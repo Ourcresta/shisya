@@ -1,3 +1,4 @@
+import { type ComponentType } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,7 +76,14 @@ const journeySteps = [
   { icon: Award, title: "Prove", description: "Certificates and portfolio" },
 ];
 
-const features = [
+interface FeatureItem {
+  icon: ComponentType<{ className?: string; style?: Record<string, string> }>;
+  imgSrc?: string;
+  title: string;
+  description: string;
+}
+
+const features: FeatureItem[] = [
   { icon: BookOpen, imgSrc: icon3dCourses, title: "Structured Courses", description: "Clear learning paths" },
   { icon: FlaskConical, imgSrc: icon3dLabs, title: "Guided Labs", description: "Hands-on practice" },
   { icon: FolderKanban, imgSrc: icon3dProjects, title: "Real Projects", description: "Build your portfolio" },
@@ -662,14 +670,14 @@ function FeaturesSection() {
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
-                  style={{ background: (feature as any).imgSrc ? "transparent" : `${accent}14`, border: (feature as any).imgSrc ? "none" : `1px solid ${accent}28` }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+                  style={{ background: feature.imgSrc ? "transparent" : `${accent}14`, border: feature.imgSrc ? "none" : `1px solid ${accent}28` }}
                 >
-                  {(feature as any).imgSrc ? (
+                  {feature.imgSrc ? (
                     <img
-                      src={(feature as any).imgSrc}
+                      src={feature.imgSrc}
                       alt={feature.title}
-                      className="w-9 h-9 object-contain"
+                      className="w-8 h-8 object-contain"
                     />
                   ) : (
                     <feature.icon className="w-4 h-4" style={{ color: accent }} />
