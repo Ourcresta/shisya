@@ -231,7 +231,7 @@ function HeroSection() {
   return (
     <section
       className="relative overflow-hidden pt-12 md:pt-16 lg:pt-20"
-      style={{ background: HERO_GRAD, minHeight: "clamp(480px, 70vh, 680px)" }}
+      style={{ background: HERO_GRAD, minHeight: "clamp(560px, 82vh, 800px)" }}
     >
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[130px] pointer-events-none"
@@ -239,11 +239,11 @@ function HeroSection() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none"
         style={{ background: "rgba(201,190,255,0.15)" }} />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 h-full">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-8 items-end">
 
           {/* Left: Text content */}
-          <div className="text-center lg:text-left space-y-6 pb-10 lg:pb-14">
+          <div className="text-center lg:text-left space-y-6 pb-10 lg:pb-16">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
               style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", backdropFilter: "blur(8px)" }}>
@@ -383,18 +383,18 @@ function HeroSection() {
           </div>
 
           {/* Right: Usha character + floating cards */}
-          <div className="relative flex items-end justify-center lg:justify-end self-stretch">
-            {/* Usha full-body image — large, bottom-anchored */}
+          <div className="relative flex items-end justify-center lg:justify-end">
+            {/* Usha full-body image — full hero height */}
             <div
               className="relative flex items-end"
-              style={{ width: "100%", maxWidth: "520px", alignSelf: "flex-end" }}
+              style={{ width: "100%", maxWidth: "580px" }}
             >
               <img
                 src={ushaHeroImage}
                 alt="Usha AI Tutor"
                 className="relative z-10 w-full object-contain object-bottom"
                 style={{
-                  height: "clamp(420px, 60vh, 640px)",
+                  height: "clamp(540px, 82vh, 800px)",
                   filter: "drop-shadow(0 24px 60px rgba(0,0,0,0.25))",
                 }}
                 data-testid="img-usha-avatar-hero"
