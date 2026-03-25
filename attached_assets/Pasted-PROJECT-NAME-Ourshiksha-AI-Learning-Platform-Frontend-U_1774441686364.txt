@@ -1,0 +1,255 @@
+PROJECT NAME: Ourshiksha AI Learning Platform (Frontend UI)
+
+GOAL:
+Build a modern, premium AI-powered e-learning platform UI using React (Vite) + Tailwind CSS. The design must follow a soft pastel blue-purple theme and feel like a mix of Coursera + Notion + modern SaaS dashboards.
+
+---
+
+🎨 COLOR SYSTEM (STRICT USAGE)
+
+Primary: #6367FF
+Secondary: #8494FF
+Light Background: #C9BEFF
+Highlight: #FFDBFD
+
+Text Primary: #1A1A1A
+White: #FFFFFF
+
+Use gradients:
+
+* Primary Gradient: linear-gradient(135deg, #6367FF, #8494FF)
+* Soft Background Gradient: very light lavender tint
+
+---
+
+⚙️ TECH STACK
+
+* React (Vite)
+* Tailwind CSS
+* Framer Motion (animations)
+* React Router
+* Recharts (for analytics)
+* Lucide Icons
+
+---
+
+📁 FOLDER STRUCTURE
+
+/src
+/components
+/pages
+/layouts
+/sections
+/ui
+/data
+
+---
+
+🌐 PAGES TO BUILD
+
+1. Landing Page (Homepage)
+2. Dashboard (Student)
+3. Course Detail Page
+4. Learning Player Page
+5. Performance Page
+6. Certificate Verification Page
+
+---
+
+🏠 LANDING PAGE UI
+
+Hero Section:
+
+* Full width gradient background (primary gradient)
+* Heading: “Learn. Build. Get Certified.”
+* Subtext: AI-powered learning platform
+* CTA Button: White background, blue text
+* Add floating UI cards animation
+
+Sections:
+
+1. Learning Journey (4 cards)
+
+   * Learn (light lavender)
+   * Practice (soft blue)
+   * Build (primary blue)
+   * Validate (pink highlight)
+
+2. Featured Courses
+
+   * Card layout (3–4 per row)
+   * Hover: lift + shadow + border glow
+
+3. Why Ourshiksha
+
+   * Icons + short text
+
+4. Footer
+
+   * Minimal, clean
+
+---
+
+📊 DASHBOARD PAGE
+
+Layout:
+
+* Sidebar (left) → primary blue (#6367FF)
+* Topbar → white
+* Main content → light background
+
+Sidebar Menu:
+
+* Dashboard
+* My Courses
+* Performance
+* Certificates
+* Settings
+
+Widgets:
+
+* Progress Overview (progress bars with gradient)
+* Active Courses
+* AI Recommendations
+* Performance Score Card
+
+---
+
+📘 COURSE DETAIL PAGE
+
+* Course banner with gradient overlay
+* Course title, instructor, duration
+* Tabs:
+
+  * Overview
+  * Lessons
+  * Assignments
+  * Projects
+
+Lessons:
+
+* Accordion style
+* Show completion status
+
+---
+
+🎥 LEARNING PLAYER PAGE
+
+Layout:
+
+* Left: Video player (mock video)
+* Right: Lesson list
+
+Below video:
+
+* Tabs:
+
+  * Notes
+  * Quiz
+  * Assignment
+
+Add:
+
+* “Mark as Complete” button
+* Progress tracker
+
+---
+
+📈 PERFORMANCE PAGE
+
+Include:
+
+* Score cards:
+
+  * Quiz Score
+  * Assignment Score
+  * Project Score
+  * Engagement Score
+
+Charts:
+
+* Line chart for progress
+* Pie chart for completion
+
+Final:
+
+* Overall Performance Score (highlight with pink)
+
+---
+
+🎓 CERTIFICATE PAGE
+
+* Input field: Certificate ID
+* Button: Verify
+
+On success:
+
+* Show certificate card
+* Download button
+
+Design:
+
+* Clean white card
+* Soft purple border
+* Highlight seal in pink
+
+---
+
+✨ UI COMPONENT RULES
+
+Buttons:
+
+* Primary → blue
+* Hover → lighter blue
+
+Cards:
+
+* Rounded-xl
+* Soft shadow
+* Hover lift effect
+
+Animations:
+
+* Use Framer Motion
+* Smooth transitions (no harsh movement)
+
+Spacing:
+
+* Clean, minimal, premium
+
+---
+
+📱 RESPONSIVENESS
+
+* Fully responsive
+* Mobile sidebar collapse
+* Stack cards on smaller screens
+
+---
+
+🚀 EXTRA (IMPORTANT)
+
+* Use reusable components
+* Maintain consistent spacing
+* Use modern SaaS UI patterns
+* Avoid clutter
+* Keep UI clean and premium
+
+---
+
+OUTPUT EXPECTATION:
+
+Generate complete working UI with:
+
+* Clean component structure
+* Routing between pages
+* Styled components using Tailwind
+* Dummy data for courses and analytics
+
+Ensure everything runs with:
+npm install
+npm run dev
+
+---
+
+END OF PROMPT
