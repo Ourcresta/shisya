@@ -27,6 +27,7 @@ import {
   ClipboardList,
   FlaskConical,
   FolderKanban,
+  ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -424,10 +425,11 @@ function LessonContent({
 
   const isLoading = lessonLoading || notesLoading;
 
-  const lessonAny = lesson as (Lesson & { unlocksLabId?: number | null; unlocksProjectId?: number | null }) | undefined;
+  const lessonAny = lesson as (Lesson & { unlocksLabId?: number | null; unlocksProjectId?: number | null; unlocksTestId?: number | null }) | undefined;
   const hasLab = !!(lessonAny?.unlocksLabId);
   const hasProject = !!(lessonAny?.unlocksProjectId);
   const hasAssignment = hasLab || hasProject;
+  const hasQuiz = !!(lessonAny?.unlocksTestId);
 
   const { data: assignedLab } = useQuery<{ id: number; title: string; description?: string }>({
     queryKey: ["/api/labs", String(lessonAny?.unlocksLabId)],
@@ -686,6 +688,48 @@ function LessonContent({
             </ul>
           </CardContent>
         </Card>
+      )}
+
+      {/* ── Assignment | Quiz | Summary pill buttons ── */}
+      {(hasAssignment || hasQuiz) && (
+        <div className="flex items-center justify-center gap-2 flex-wrap mt-2" data-testid="lesson-action-pills">
+          {hasAssignment && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 border-teal-500/50 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10"
+              onClick={() => setAssignmentOpen(true)}
+              data-testid="pill-assignment"
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              Assignment
+            </Button>
+          )}
+          {hasQuiz && (
+            <Link href={`/shishya/tests/${courseId}/${lessonAny?.unlocksTestId}`}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                data-testid="pill-quiz"
+              >
+                <ListChecks className="w-3.5 h-3.5" />
+                Quiz
+              </Button>
+            </Link>
+          )}
+          <Link href={`/shishya/learn/${courseId}/${lessonId}`}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 border-blue-500/50 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
+              data-testid="pill-summary"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              Summary
+            </Button>
+          </Link>
+        </div>
       )}
 
       <Card className="mt-4">

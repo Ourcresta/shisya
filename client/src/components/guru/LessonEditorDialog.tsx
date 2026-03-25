@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Video, Music, Captions, FileText, Code, Lock, Upload, Loader2,
   Plus, Trash2, CheckCircle2, AlertCircle, Zap, RefreshCw, ClipboardList,
-  FlaskConical, FolderKanban,
+  FlaskConical, FolderKanban, ListChecks,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -38,6 +38,7 @@ interface Attachment { name: string; url: string; fileType: string; size?: numbe
 interface CodeSnippet { title: string; language: string; code: string; }
 interface LabItem { id: number; title: string; }
 interface ProjectItem { id: number; title: string; }
+interface TestItem { id: number; title: string; }
 
 interface LessonFull {
   id?: number;
@@ -54,6 +55,7 @@ interface LessonFull {
   codeSnippets: CodeSnippet[];
   unlocksLabId: number | null;
   unlocksProjectId: number | null;
+  unlocksTestId: number | null;
   durationMinutes: number;
   orderIndex: number;
   isPreview: boolean;
@@ -71,7 +73,7 @@ interface Props {
 const defaultForm: LessonFull = {
   title: "", content: "", videoUrl: "", hlsUrl: "", hlsStatus: "none",
   audioTracks: [], subtitleTracks: [], attachments: [], codeSnippets: [],
-  unlocksLabId: null, unlocksProjectId: null,
+  unlocksLabId: null, unlocksProjectId: null, unlocksTestId: null,
   durationMinutes: 0, orderIndex: 0, isPreview: false,
 };
 
@@ -146,6 +148,15 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
     enabled: !!courseId,
   });
 
+  const { data: courseTests } = useQuery<TestItem[]>({
+    queryKey: ["/api/courses", courseId, "tests"],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${courseId}/tests`);
+      return res.json();
+    },
+    enabled: !!courseId,
+  });
+
   useEffect(() => {
     if (!open) return;
     if (editingLesson) {
@@ -161,6 +172,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
         codeSnippets: Array.isArray(editingLesson.codeSnippets) ? editingLesson.codeSnippets : [],
         unlocksLabId: editingLesson.unlocksLabId || null,
         unlocksProjectId: editingLesson.unlocksProjectId || null,
+        unlocksTestId: editingLesson.unlocksTestId || null,
         durationMinutes: editingLesson.durationMinutes || 0,
         orderIndex: editingLesson.orderIndex || 0,
         isPreview: editingLesson.isPreview || false,
@@ -446,7 +458,7 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid grid-cols-8 shrink-0">
+            <TabsList className="grid grid-cols-9 shrink-0">
               <TabsTrigger value="basic" className="text-xs px-2">Basic</TabsTrigger>
               <TabsTrigger value="video" className="text-xs px-2 gap-1">
                 <Video className="w-3 h-3" />Video
@@ -471,6 +483,10 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
               <TabsTrigger value="assignment" className="text-xs px-2 gap-1">
                 <ClipboardList className="w-3 h-3" />Assign
                 {(form.unlocksLabId || form.unlocksProjectId) && <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />}
+              </TabsTrigger>
+              <TabsTrigger value="quiz" className="text-xs px-2 gap-1">
+                <ListChecks className="w-3 h-3" />Quiz
+                {form.unlocksTestId && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
               </TabsTrigger>
               <TabsTrigger value="access" className="text-xs px-2 gap-1">
                 <Lock className="w-3 h-3" />Access
@@ -856,6 +872,51 @@ export function LessonEditorDialog({ open, onClose, courseId, moduleId, editingL
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs">
                     <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                     <span>The assigned lab/project unlocks after the student watches 90% of this lesson&apos;s video.</span>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* ── QUIZ ── */}
+              <TabsContent value="quiz" className="space-y-5 mt-0">
+                <p className="text-sm text-muted-foreground">
+                  Link a quiz/test to this lesson. Students will see a Quiz button to take the test directly from the lesson.
+                </p>
+
+                <div className="border border-amber-500/30 rounded-lg p-4 space-y-3 bg-amber-500/5">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="assign-quiz-cb"
+                      checked={!!form.unlocksTestId}
+                      onCheckedChange={(checked) => {
+                        if (!checked) setForm((f) => ({ ...f, unlocksTestId: null }));
+                        else setForm((f) => ({ ...f, unlocksTestId: courseTests?.[0]?.id ?? null }));
+                      }}
+                      data-testid="checkbox-assign-quiz"
+                    />
+                    <label htmlFor="assign-quiz-cb" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                      <ListChecks className="w-4 h-4 text-amber-500" />
+                      Assign a Quiz
+                    </label>
+                  </div>
+                  {form.unlocksTestId !== null && (
+                    <Select
+                      value={form.unlocksTestId ? String(form.unlocksTestId) : "none"}
+                      onValueChange={(v) => setForm((f) => ({ ...f, unlocksTestId: v === "none" ? null : parseInt(v) }))}>
+                      <SelectTrigger data-testid="select-unlock-quiz"><SelectValue placeholder="Select a quiz" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No quiz</SelectItem>
+                        {(courseTests || []).map((test) => (
+                          <SelectItem key={test.id} value={String(test.id)}>{test.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {form.unlocksTestId && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>Students will see a Quiz button in this lesson, linking directly to the assigned test.</span>
                   </div>
                 )}
               </TabsContent>

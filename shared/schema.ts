@@ -67,6 +67,7 @@ export const lessons = pgTable("lessons", {
   codeSnippets: text("code_snippets"),
   unlocksLabId: integer("unlocks_lab_id"),
   unlocksProjectId: integer("unlocks_project_id"),
+  unlocksTestId: integer("unlocks_test_id"),
   trainerCentralUrl: text("trainer_central_url"),
   durationMinutes: integer("duration_minutes"),
   orderIndex: integer("order_index").notNull().default(0),

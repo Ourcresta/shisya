@@ -262,7 +262,7 @@ guruRouter.post("/lessons", async (req: Request, res: Response) => {
     const {
       moduleId, courseId, title, content, videoUrl, hlsUrl, hlsStatus,
       audioTracks, subtitleTracks, attachments, codeSnippets,
-      unlocksLabId, unlocksProjectId,
+      unlocksLabId, unlocksProjectId, unlocksTestId,
       durationMinutes, orderIndex, isPreview,
     } = req.body;
     if (!moduleId || !courseId || !title) return res.status(400).json({ error: "Module ID, Course ID, and title are required" });
@@ -275,6 +275,7 @@ guruRouter.post("/lessons", async (req: Request, res: Response) => {
       codeSnippets: codeSnippets ? JSON.stringify(codeSnippets) : null,
       unlocksLabId: unlocksLabId || null,
       unlocksProjectId: unlocksProjectId || null,
+      unlocksTestId: unlocksTestId || null,
       durationMinutes, orderIndex: orderIndex || 0, isPreview: isPreview || false,
     }).returning();
     res.json(parseLessonJson(newLesson));
@@ -290,7 +291,7 @@ guruRouter.put("/lessons/:id", async (req: Request, res: Response) => {
     const {
       title, content, videoUrl, hlsUrl, hlsStatus,
       audioTracks, subtitleTracks, attachments, codeSnippets,
-      unlocksLabId, unlocksProjectId,
+      unlocksLabId, unlocksProjectId, unlocksTestId,
       durationMinutes, orderIndex, isPreview,
     } = req.body;
     const [updated] = await db.update(lessons).set({
@@ -302,6 +303,7 @@ guruRouter.put("/lessons/:id", async (req: Request, res: Response) => {
       codeSnippets: codeSnippets !== undefined ? (codeSnippets ? JSON.stringify(codeSnippets) : null) : undefined,
       unlocksLabId: unlocksLabId !== undefined ? (unlocksLabId || null) : undefined,
       unlocksProjectId: unlocksProjectId !== undefined ? (unlocksProjectId || null) : undefined,
+      unlocksTestId: unlocksTestId !== undefined ? (unlocksTestId || null) : undefined,
       durationMinutes, orderIndex, isPreview,
     }).where(eq(lessons.id, id)).returning();
     if (!updated) return res.status(404).json({ error: "Lesson not found" });
