@@ -647,50 +647,67 @@ function FeaturesSection() {
           <p style={{ color: C.textSecondary }} className="text-sm">8 pillars of a complete learning experience</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           {features.map((feature, index) => {
             const accent = featureAccents[index % featureAccents.length];
             return (
               <div
                 key={feature.title}
-                className="relative group rounded-xl p-3.5 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-3"
+                className="relative group rounded-2xl p-4 overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col items-center text-center gap-3"
                 style={{
                   background: "#FAFAFE",
                   border: "1px solid #EDE9FF",
-                  borderLeft: `3px solid ${accent}`,
+                  boxShadow: "0 2px 12px rgba(99,103,255,0.06)",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = `${accent}08`;
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px -8px ${accent}40`;
+                  (e.currentTarget as HTMLElement).style.background = `${accent}06`;
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 28px -6px ${accent}30`;
+                  (e.currentTarget as HTMLElement).style.borderColor = `${accent}40`;
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background = "#FAFAFE";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(99,103,255,0.06)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#EDE9FF";
                 }}
                 data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, "-")}`}
               >
+                {/* Icon */}
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
-                  style={{ background: feature.imgSrc ? "transparent" : `${accent}14`, border: feature.imgSrc ? "none" : `1px solid ${accent}28` }}
+                  className="flex items-center justify-center shrink-0"
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "16px",
+                    background: feature.imgSrc ? "transparent" : `${accent}12`,
+                    border: feature.imgSrc ? "none" : `1px solid ${accent}25`,
+                  }}
                 >
                   {feature.imgSrc ? (
                     <img
                       src={feature.imgSrc}
                       alt={feature.title}
-                      className="w-8 h-8 object-contain"
+                      style={{ width: "56px", height: "56px", objectFit: "contain" }}
                     />
                   ) : (
-                    <feature.icon className="w-4 h-4" style={{ color: accent }} />
+                    <feature.icon className="w-7 h-7" style={{ color: accent }} />
                   )}
                 </div>
+
+                {/* Text */}
                 <div>
-                  <h3 className="font-semibold text-xs leading-tight" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
+                  <h3 className="font-semibold text-xs leading-snug" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
                     {feature.title}
                   </h3>
-                  <p className="text-[10px] mt-0.5" style={{ color: C.textSecondary }}>
+                  <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: C.textSecondary }}>
                     {feature.description}
                   </p>
                 </div>
+
+                {/* Subtle accent dot */}
+                <div
+                  className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full opacity-40"
+                  style={{ background: accent }}
+                />
               </div>
             );
           })}
