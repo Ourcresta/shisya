@@ -39,7 +39,6 @@ import {
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
-import ushaHeroImage from "@assets/image_1774461793661_nobg.png";
 import sealLogo from "@assets/image_1771692892158.png";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
@@ -230,8 +229,8 @@ function HeroSection() {
 
   return (
     <section
-      className="relative overflow-x-hidden pt-12 md:pt-16 lg:pt-20"
-      style={{ background: HERO_GRAD, minHeight: "clamp(560px, 82vh, 800px)" }}
+      className="relative overflow-hidden py-16 md:py-24 lg:py-32"
+      style={{ background: HERO_GRAD }}
     >
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[130px] pointer-events-none"
@@ -239,11 +238,11 @@ function HeroSection() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none"
         style={{ background: "rgba(201,190,255,0.15)" }} />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 h-full">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-8 items-end">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="max-w-3xl mx-auto">
 
-          {/* Left: Text content */}
-          <div className="text-center lg:text-left space-y-6 pb-10 lg:pb-16">
+          {/* Hero text content — centered */}
+          <div className="text-center space-y-6 pb-10 lg:pb-16">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
               style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", backdropFilter: "blur(8px)" }}>
@@ -302,14 +301,14 @@ function HeroSection() {
             </div>
 
             <p
-              className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0"
+              className="text-base md:text-lg leading-relaxed max-w-xl mx-auto"
               style={{ color: "rgba(255,255,255,0.82)", lineHeight: "1.7" }}
               data-testid="text-hero-subheading"
             >
               An AI-powered e-learning platform combining structured courses, hands-on labs, real projects, and a personal AI tutor —Usha— to accelerate your career.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               {user ? (
                 <Link href="/shishya/dashboard">
                   <button
@@ -368,7 +367,7 @@ function HeroSection() {
             </div>
 
             {/* Social proof pills */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 pt-1" data-testid="hero-social-proof">
+            <div className="flex flex-wrap items-center justify-center gap-5 pt-1" data-testid="hero-social-proof">
               {[
                 { icon: CheckCircle2, label: "500 Free Credits" },
                 { icon: TrendingUp, label: "Self-Paced" },
@@ -381,103 +380,6 @@ function HeroSection() {
               ))}
             </div>
           </div>
-
-          {/* Right: Usha character + floating cards */}
-          <div className="relative flex items-end justify-center lg:justify-end">
-            {/* Usha full-body image — large, crops tight, overflows bottom+right */}
-            <div
-              className="relative flex items-end"
-              style={{ width: "100%", maxWidth: "780px" }}
-            >
-              <img
-                src={ushaHeroImage}
-                alt="Usha AI Tutor"
-                className="relative z-10 w-full object-contain object-bottom"
-                style={{
-                  height: "clamp(700px, 110vh, 1050px)",
-                  transform: "translate(6%, 6%)",
-                  transformOrigin: "bottom right",
-                  filter: "drop-shadow(0 32px 72px rgba(0,0,0,0.28)) brightness(1.04) saturate(1.08)",
-                }}
-                data-testid="img-usha-avatar-hero"
-              />
-
-              {/* Floating: My Progress card — top left of character */}
-              <div
-                className="absolute hidden md:block z-20 rounded-xl"
-                style={{
-                  top: "40px",
-                  left: "-16px",
-                  background: "#FFFFFF",
-                  border: "1px solid #EDE9FF",
-                  padding: "12px 14px",
-                  minWidth: "168px",
-                  boxShadow: "0 8px 32px rgba(99,103,255,0.18)",
-                }}
-              >
-                <div className="flex justify-between items-center">
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#1A1A1A" }}>My Progress</span>
-                  <span style={{ fontSize: "9px", background: C.highlight, color: C.teal, padding: "2px 6px", borderRadius: "6px", fontWeight: 600 }}>Active</span>
-                </div>
-                <div className="space-y-2 mt-2">
-                  {[{ label: "Python Basics", pct: 76 }, { label: "Web Dev Bootcamp", pct: 60 }, { label: "Data Science", pct: 20 }].map(item => (
-                    <div key={item.label}>
-                      <div className="flex justify-between mb-0.5">
-                        <span style={{ fontSize: "9px", color: C.textSecondary }}>{item.label}</span>
-                        <span style={{ fontSize: "9px", fontWeight: 600, color: C.teal }}>{item.pct}%</span>
-                      </div>
-                      <div style={{ height: "3px", background: "#EDE9FF", borderRadius: "4px" }}>
-                        <div style={{ width: `${item.pct}%`, height: "100%", background: CTA_GRAD, borderRadius: "4px" }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Floating: Certificate Earned — right side */}
-              <div
-                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl"
-                style={{
-                  top: "160px",
-                  right: "-18px",
-                  background: "#FFFFFF",
-                  border: "1px solid #EDE9FF",
-                  padding: "10px 14px",
-                  boxShadow: "0 8px 24px rgba(99,103,255,0.16)",
-                }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: CTA_GRAD }}>
-                  <Award className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p style={{ fontSize: "10px", fontWeight: 700, color: "#1A1A1A" }}>Certificate Earned!</p>
-                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Python Developer</p>
-                </div>
-              </div>
-
-              {/* Floating: Usha says — bottom left */}
-              <div
-                className="absolute hidden md:flex items-center gap-2 z-20 rounded-xl"
-                style={{
-                  bottom: "80px",
-                  left: "-16px",
-                  background: "#FFFFFF",
-                  border: "1px solid #EDE9FF",
-                  padding: "10px 14px",
-                  boxShadow: "0 8px 24px rgba(99,103,255,0.15)",
-                  maxWidth: "165px",
-                }}
-              >
-                <img src={ushaAvatarImage} alt="Usha" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-                <div>
-                  <p style={{ fontSize: "10px", fontWeight: 700, color: "#1A1A1A" }}>Usha AI says...</p>
-                  <p style={{ fontSize: "9px", color: C.textSecondary }}>Try the next lab! 💡</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
