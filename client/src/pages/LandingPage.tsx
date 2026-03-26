@@ -1893,7 +1893,6 @@ export default function LandingPage() {
         <FAQSection />
         <CTASection />
       </main>
-      <Footer />
     </div>
   );
 }
