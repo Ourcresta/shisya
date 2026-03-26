@@ -522,11 +522,11 @@ export default function GuruProjects() {
                       const url = urlPart ? urlPart.replace(")", "") : null;
                       return url ? (
                         <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                          className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                          className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full hover:bg-violet-500/20 transition-colors">
                           {name.trim()}
                         </a>
                       ) : (
-                        <span key={i} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                        <span key={i} className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full">
                           {name.trim()}
                         </span>
                       );
@@ -561,7 +561,7 @@ export default function GuruProjects() {
                             {(task.tools || []).length > 0 && !isOpen && (
                               <div className="flex items-center gap-1 mt-1 flex-wrap">
                                 {(task.tools || []).slice(0, 3).map((tool, tli) => (
-                                  <span key={tli} className="text-xs bg-teal-500/15 text-teal-700 dark:text-teal-300 px-1.5 py-0.5 rounded">
+                                  <span key={tli} className="text-xs bg-violet-500/15 text-violet-700 dark:text-violet-300 px-1.5 py-0.5 rounded">
                                     {tool.split(" (")[0]}
                                   </span>
                                 ))}
@@ -587,11 +587,11 @@ export default function GuruProjects() {
                                     const url = urlPart ? urlPart.replace(")", "") : null;
                                     return url ? (
                                       <a key={tli} href={url} target="_blank" rel="noopener noreferrer"
-                                        className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                                        className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full hover:bg-violet-500/20 transition-colors">
                                         {name.trim()}
                                       </a>
                                     ) : (
-                                      <span key={tli} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                                      <span key={tli} className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full">
                                         {name.trim()}
                                       </span>
                                     );

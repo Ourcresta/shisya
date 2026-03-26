@@ -102,7 +102,7 @@ export default function HelpCenter() {
           <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
             <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
                 <HelpCircle className="w-3.5 h-3.5" />
                 Help Center
               </div>
@@ -179,7 +179,7 @@ export default function HelpCenter() {
               style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}`, backdropFilter: "blur(12px)" }}
             >
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(0,245,255,0.10)", border: "1px solid rgba(0,245,255,0.2)" }}>
+                style={{ background: "rgba(99,103,255,0.10)", border: "1px solid rgba(99,103,255,0.2)" }}>
                 <MessageSquare className="w-5 h-5" style={{ color: C.teal }} />
               </div>
               <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
@@ -194,7 +194,7 @@ export default function HelpCenter() {
                   style={{
                     background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
                     color: "#fff",
-                    boxShadow: "0 0 20px rgba(0,245,255,0.25)",
+                    boxShadow: "0 0 20px rgba(99,103,255,0.25)",
                   }}
                   data-testid="button-cta"
                 >

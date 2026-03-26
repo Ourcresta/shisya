@@ -796,7 +796,7 @@ export default function GuruInternships() {
             })();
             const guideFeatures: any[] = parsedStructure?.features || [];
             const featurePalettes = [
-              { border: "border-teal-500", bg: "bg-teal-500/10", text: "text-teal-700 dark:text-teal-400", badge: "bg-teal-500/20 text-teal-700 dark:text-teal-300", dot: "bg-teal-500" },
+              { border: "border-violet-500", bg: "bg-violet-500/10", text: "text-violet-700 dark:text-violet-400", badge: "bg-violet-500/20 text-violet-700 dark:text-violet-300", dot: "bg-violet-500" },
               { border: "border-blue-500", bg: "bg-blue-500/10", text: "text-blue-700 dark:text-blue-400", badge: "bg-blue-500/20 text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
               { border: "border-purple-500", bg: "bg-purple-500/10", text: "text-purple-700 dark:text-purple-400", badge: "bg-purple-500/20 text-purple-700 dark:text-purple-300", dot: "bg-purple-500" },
             ];
@@ -925,7 +925,7 @@ export default function GuruInternships() {
                                           {(task.tools || []).length > 0 && !isTaskOpen && (
                                             <div className="flex items-center gap-1 mt-1 flex-wrap">
                                               {(task.tools || []).slice(0, 3).map((tool: string, tli: number) => (
-                                                <span key={tli} className="text-xs bg-teal-500/15 text-teal-700 dark:text-teal-300 px-1.5 py-0.5 rounded">
+                                                <span key={tli} className="text-xs bg-violet-500/15 text-violet-700 dark:text-violet-300 px-1.5 py-0.5 rounded">
                                                   {tool.split(" (")[0]}
                                                 </span>
                                               ))}
@@ -952,11 +952,11 @@ export default function GuruInternships() {
                                                   const url = urlPart ? urlPart.replace(")", "") : null;
                                                   return url ? (
                                                     <a key={tli} href={url} target="_blank" rel="noopener noreferrer"
-                                                      className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full hover:bg-teal-500/20 transition-colors">
+                                                      className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full hover:bg-violet-500/20 transition-colors">
                                                       {name}
                                                     </a>
                                                   ) : (
-                                                    <span key={tli} className="text-xs bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                                                    <span key={tli} className="text-xs bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-400/30 px-2 py-0.5 rounded-full">
                                                       {name}
                                                     </span>
                                                   );
@@ -2137,15 +2137,15 @@ export default function GuruInternships() {
                   </div>
                 )}
                 {aiPreview.goal && (
-                  <div className="rounded-lg border-l-4 border-teal-400 bg-teal-50 dark:bg-teal-950/30 p-3">
-                    <Label className="text-teal-700 dark:text-teal-400 text-xs font-semibold uppercase tracking-wide">Goal</Label>
+                  <div className="rounded-lg border-l-4 border-violet-400 bg-violet-50 dark:bg-violet-950/30 p-3">
+                    <Label className="text-violet-700 dark:text-violet-400 text-xs font-semibold uppercase tracking-wide">Goal</Label>
                     <p className="text-sm mt-1 text-foreground/80">{aiPreview.goal}</p>
                   </div>
                 )}
                 {aiPreview.features && aiPreview.features.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <ListTree className="w-4 h-4 text-teal-600" />
+                      <ListTree className="w-4 h-4 text-violet-600" />
                       <Label className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
                         Project Features ({aiPreview.features.length} Features · {aiPreview.features.reduce((a: number, f: any) => a + (f.tasks?.length || 0), 0)} Tasks)
                       </Label>
@@ -2155,7 +2155,7 @@ export default function GuruInternships() {
                         const fKey = `f${fi}`;
                         const fExpanded = expandedPreviewNodes.has(fKey);
                         const featureColors = [
-                          { dot: "bg-teal-500", text: "text-teal-700 dark:text-teal-300", hover: "hover:bg-teal-50 dark:hover:bg-teal-950/20", badge: "border-teal-300 text-teal-700 dark:text-teal-400" },
+                          { dot: "bg-violet-500", text: "text-violet-700 dark:text-violet-300", hover: "hover:bg-violet-50 dark:hover:bg-violet-950/20", badge: "border-violet-300 text-violet-700 dark:text-violet-400" },
                           { dot: "bg-blue-500", text: "text-blue-700 dark:text-blue-300", hover: "hover:bg-blue-50 dark:hover:bg-blue-950/20", badge: "border-blue-300 text-blue-700 dark:text-blue-400" },
                           { dot: "bg-purple-500", text: "text-purple-700 dark:text-purple-300", hover: "hover:bg-purple-50 dark:hover:bg-purple-950/20", badge: "border-purple-300 text-purple-700 dark:text-purple-400" },
                         ];

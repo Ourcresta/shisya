@@ -101,7 +101,7 @@ export default function UdyogJobs() {
   });
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
+    <div className="min-h-screen" style={{ background: "#F8F7FF" }}>
       <LandingNavbar />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
@@ -115,7 +115,7 @@ export default function UdyogJobs() {
         <section className="text-center mb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1
-              className="text-3xl md:text-5xl font-bold text-white mb-4"
+              className="text-3xl md:text-5xl font-bold text-[#1E1B4B] mb-4"
               style={{ fontFamily: "var(--font-display)" }}
               data-testid="text-jobs-title"
             >
@@ -127,7 +127,7 @@ export default function UdyogJobs() {
                 Opportunities
               </span>
             </h1>
-            <p className="text-gray-400 max-w-xl mx-auto mb-8">
+            <p className="text-gray-500 max-w-xl mx-auto mb-8">
               Explore job openings from top companies looking for Our Udyog graduates
             </p>
             <div className="max-w-md mx-auto relative">
@@ -137,8 +137,8 @@ export default function UdyogJobs() {
                 placeholder="Search by title, skills, or company..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
-                style={{ background: "rgba(255,255,255,0.05)" }}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#EDE9FF] text-[#1E1B4B] placeholder-gray-400 focus:outline-none focus:border-violet-500/50 transition-colors"
+                style={{ background: "#FFFFFF" }}
                 data-testid="input-search-jobs"
               />
             </div>
@@ -148,11 +148,11 @@ export default function UdyogJobs() {
         {jobsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-                <Skeleton className="h-6 w-3/4 mb-3 bg-white/10" />
-                <Skeleton className="h-4 w-1/2 mb-2 bg-white/10" />
-                <Skeleton className="h-4 w-2/3 mb-4 bg-white/10" />
-                <Skeleton className="h-10 w-28 bg-white/10" />
+              <div key={i} className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
+                <Skeleton className="h-6 w-3/4 mb-3 bg-violet-100" />
+                <Skeleton className="h-4 w-1/2 mb-2 bg-violet-100" />
+                <Skeleton className="h-4 w-2/3 mb-4 bg-violet-100" />
+                <Skeleton className="h-10 w-28 bg-violet-100" />
               </div>
             ))}
           </div>
@@ -175,17 +175,17 @@ export default function UdyogJobs() {
                 <motion.div
                   key={job.id}
                   variants={itemVariants}
-                  className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
-                  style={{ background: "rgba(255,255,255,0.03)" }}
+                  className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-300"
+                  style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}
                   whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                   data-testid={`job-card-${job.id}`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
-                      <h3 className="text-lg font-bold text-white mb-1 truncate" style={{ fontFamily: "var(--font-display)" }}>
+                      <h3 className="text-lg font-bold text-[#1E1B4B] mb-1 truncate" style={{ fontFamily: "var(--font-display)" }}>
                         {job.title}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-gray-400 text-sm">
+                      <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                         <Building2 className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate">{hr?.companyName || "Company"}</span>
                       </div>
@@ -195,7 +195,7 @@ export default function UdyogJobs() {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-3">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
                     {job.location && (
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
@@ -219,7 +219,7 @@ export default function UdyogJobs() {
                       {skills.slice(0, 5).map((skill: string) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-300 border border-white/10"
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-50 text-gray-600 border border-violet-100"
                         >
                           {skill}
                         </span>
@@ -233,12 +233,12 @@ export default function UdyogJobs() {
                   )}
 
                   {job.internshipRequired && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/15 text-teal-400 border border-teal-500/30 mb-3">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-500/15 text-violet-500 border border-violet-500/30 mb-3">
                       Internship Required
                     </span>
                   )}
 
-                  <div className="flex items-center gap-3 pt-3 border-t border-white/5">
+                  <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
                     {isApplied ? (
                       <span
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/30"
@@ -267,16 +267,16 @@ export default function UdyogJobs() {
           </motion.div>
         ) : (
           <motion.div
-            className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
-            style={{ background: "rgba(255,255,255,0.02)" }}
+            className="text-center py-20 rounded-2xl border border-[#EDE9FF] backdrop-blur-xl"
+            style={{ background: "#F8F7FF" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+            <Briefcase className="w-12 h-12 text-violet-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }}>
               {searchQuery ? "No matching jobs found" : "No Jobs Available"}
             </h3>
-            <p className="text-gray-400 max-w-md mx-auto">
+            <p className="text-gray-500 max-w-md mx-auto">
               {searchQuery
                 ? "Try adjusting your search terms"
                 : "New job postings from our partner companies are added regularly. Check back soon!"}

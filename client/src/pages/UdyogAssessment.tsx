@@ -290,7 +290,7 @@ export default function UdyogAssessment() {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
+    <div className="min-h-screen relative" style={{ background: "#F8F7FF" }}>
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-12 md:py-20">
         <AnimatePresence mode="wait">
           {screen === "domain" && (
@@ -305,7 +305,7 @@ export default function UdyogAssessment() {
                 <Link href="/shishya/udyog/hub">
                   <Button
                     variant="outline"
-                    className="border-white/10 text-gray-300 bg-transparent hover:bg-white/5"
+                    className="border-[#EDE9FF] text-gray-600 bg-transparent hover:bg-violet-50"
                     data-testid="button-back-hub"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -326,7 +326,7 @@ export default function UdyogAssessment() {
                   </div>
                 </motion.div>
                 <h1
-                  className="text-3xl md:text-5xl font-bold text-white mb-4"
+                  className="text-3xl md:text-5xl font-bold text-[#1E1B4B] mb-4"
                   style={{ fontFamily: "var(--font-display)" }}
                   data-testid="text-assessment-title"
                 >
@@ -335,7 +335,7 @@ export default function UdyogAssessment() {
                     Domain
                   </span>
                 </h1>
-                <p className="text-gray-400 max-w-lg mx-auto" data-testid="text-assessment-subtitle">
+                <p className="text-gray-500 max-w-lg mx-auto" data-testid="text-assessment-subtitle">
                   Select a domain to begin your AI-powered skill assessment. 10 questions to determine your internship level.
                 </p>
               </div>
@@ -350,19 +350,19 @@ export default function UdyogAssessment() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.08 }}
                       onClick={() => handleDomainSelect(domain.key)}
-                      className="text-left rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300 cursor-pointer group"
-                      style={{ background: "rgba(255,255,255,0.03)" }}
+                      className="text-left rounded-2xl border border-[#EDE9FF] p-6 backdrop-blur-xl transition-all duration-300 cursor-pointer group"
+                      style={{ background: "rgba(99,103,255,0.02)" }}
                       whileHover={{ borderColor: "rgba(99,103,255,0.4)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                       data-testid={`card-domain-${domain.key}`}
                     >
                       <div
-                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 border border-violet-500/20 transition-all duration-300 group-hover:border-cyan-500/40"
+                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 border border-violet-500/20 transition-all duration-300 group-hover:border-violet-500/40"
                         style={{ background: "rgba(99,103,255,0.1)" }}
                       >
                         <Icon className="w-7 h-7 text-violet-500" />
                       </div>
                       <h3
-                        className="text-lg font-semibold text-white mb-1"
+                        className="text-lg font-semibold text-[#1E1B4B] mb-1"
                         style={{ fontFamily: "var(--font-display)" }}
                         data-testid={`text-domain-label-${domain.key}`}
                       >
@@ -396,15 +396,15 @@ export default function UdyogAssessment() {
                     {(() => { const Icon = questionBank[selectedDomain].icon; return <Icon className="w-5 h-5 text-violet-500" />; })()}
                   </div>
                   <div>
-                    <h2 className="text-white font-semibold" style={{ fontFamily: "var(--font-display)" }} data-testid="text-current-domain">
+                    <h2 className="text-[#1E1B4B] font-semibold" style={{ fontFamily: "var(--font-display)" }} data-testid="text-current-domain">
                       {questionBank[selectedDomain].label}
                     </h2>
                     <p className="text-gray-500 text-xs">Question {currentQuestion + 1} of {questions.length}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#EDE9FF]" style={{ background: "rgba(99,103,255,0.03)" }}>
                   <Clock className="w-4 h-4 text-violet-500" />
-                  <span className="text-gray-300 text-sm font-mono" data-testid="text-elapsed-time">{formatTime(elapsedTime)}</span>
+                  <span className="text-gray-600 text-sm font-mono" data-testid="text-elapsed-time">{formatTime(elapsedTime)}</span>
                 </div>
               </div>
 
@@ -413,7 +413,7 @@ export default function UdyogAssessment() {
                   <span className="text-gray-500 text-xs">Progress</span>
                   <span className="text-violet-500 text-xs font-medium">{Math.round(progressPercent)}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.08)" }}>
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: "linear-gradient(90deg, #6367FF, #8494FF)" }}
@@ -431,8 +431,8 @@ export default function UdyogAssessment() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ duration: 0.3 }}
-                  className="rounded-2xl border border-white/10 p-6 md:p-8 backdrop-blur-xl"
-                  style={{ background: "rgba(255,255,255,0.03)" }}
+                  className="rounded-2xl border border-[#EDE9FF] p-6 md:p-8 backdrop-blur-xl"
+                  style={{ background: "rgba(99,103,255,0.02)" }}
                   data-testid="card-question"
                 >
                   <div className="flex items-start gap-4 mb-8">
@@ -442,7 +442,7 @@ export default function UdyogAssessment() {
                     >
                       {currentQuestion + 1}
                     </div>
-                    <h3 className="text-lg md:text-xl text-white font-medium leading-relaxed" data-testid="text-question">
+                    <h3 className="text-lg md:text-xl text-[#1E1B4B] font-medium leading-relaxed" data-testid="text-question">
                       {questions[currentQuestion].question}
                     </h3>
                   </div>
@@ -456,8 +456,8 @@ export default function UdyogAssessment() {
                           onClick={() => handleOptionSelect(optIndex)}
                           className="w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-center gap-3"
                           style={{
-                            background: isSelected ? "rgba(99,103,255,0.1)" : "rgba(255,255,255,0.02)",
-                            borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(255,255,255,0.08)",
+                            background: isSelected ? "rgba(99,103,255,0.1)" : "rgba(99,103,255,0.01)",
+                            borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(99,103,255,0.08)",
                           }}
                           whileHover={{ borderColor: "rgba(99,103,255,0.3)" }}
                           data-testid={`option-${optIndex}`}
@@ -465,14 +465,14 @@ export default function UdyogAssessment() {
                           <div
                             className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold border transition-all duration-200"
                             style={{
-                              background: isSelected ? "rgba(99,103,255,0.2)" : "rgba(255,255,255,0.05)",
-                              borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(255,255,255,0.1)",
+                              background: isSelected ? "rgba(99,103,255,0.2)" : "rgba(99,103,255,0.03)",
+                              borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(99,103,255,0.08)",
                               color: isSelected ? "#6367FF" : "#9ca3af",
                             }}
                           >
                             {String.fromCharCode(65 + optIndex)}
                           </div>
-                          <span className={`text-sm md:text-base ${isSelected ? "text-cyan-300" : "text-gray-300"}`}>
+                          <span className={`text-sm md:text-base ${isSelected ? "text-violet-600" : "text-gray-600"}`}>
                             {option}
                           </span>
                           {isSelected && <CheckCircle className="w-5 h-5 text-violet-500 ml-auto shrink-0" />}
@@ -486,7 +486,7 @@ export default function UdyogAssessment() {
               <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
                 <Button
                   variant="outline"
-                  className="border-white/10 text-gray-300 bg-transparent"
+                  className="border-[#EDE9FF] text-gray-600 bg-transparent"
                   onClick={() => setCurrentQuestion((q) => Math.max(0, q - 1))}
                   disabled={currentQuestion === 0}
                   data-testid="button-previous"
@@ -530,12 +530,12 @@ export default function UdyogAssessment() {
                         ? "rgba(99,103,255,0.2)"
                         : answers[i] !== null
                           ? "rgba(99,103,255,0.08)"
-                          : "rgba(255,255,255,0.03)",
+                          : "rgba(99,103,255,0.02)",
                       borderColor: i === currentQuestion
                         ? "rgba(99,103,255,0.5)"
                         : answers[i] !== null
                           ? "rgba(99,103,255,0.2)"
-                          : "rgba(255,255,255,0.08)",
+                          : "rgba(99,103,255,0.08)",
                       color: i === currentQuestion ? "#6367FF" : answers[i] !== null ? "#67e8f9" : "#6b7280",
                     }}
                     data-testid={`nav-question-${i}`}
@@ -565,24 +565,24 @@ export default function UdyogAssessment() {
                   <Award className="w-12 h-12 text-violet-500 mx-auto mb-4" />
                 </motion.div>
                 <h1
-                  className="text-3xl md:text-4xl font-bold text-white mb-2"
+                  className="text-3xl md:text-4xl font-bold text-[#1E1B4B] mb-2"
                   style={{ fontFamily: "var(--font-display)" }}
                   data-testid="text-result-title"
                 >
                   Assessment Complete
                 </h1>
-                <p className="text-gray-400">Your skill evaluation for {questionBank[selectedDomain]?.label}</p>
+                <p className="text-gray-500">Your skill evaluation for {questionBank[selectedDomain]?.label}</p>
               </div>
 
               <div
-                className="rounded-2xl border border-white/10 p-8 md:p-10 backdrop-blur-xl"
-                style={{ background: "rgba(255,255,255,0.03)" }}
+                className="rounded-2xl border border-[#EDE9FF] p-8 md:p-10 backdrop-blur-xl"
+                style={{ background: "rgba(99,103,255,0.02)" }}
                 data-testid="card-result"
               >
                 <div className="flex flex-col items-center mb-8">
                   <div className="relative w-40 h-40 mb-6">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
-                      <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                      <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(99,103,255,0.08)" strokeWidth="8" />
                       <motion.circle
                         cx="80" cy="80" r="70" fill="none"
                         stroke="url(#scoreGradient)"
@@ -600,7 +600,7 @@ export default function UdyogAssessment() {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-bold text-white" data-testid="text-score-percentage">{animatedScore}%</span>
+                      <span className="text-4xl font-bold text-[#1E1B4B]" data-testid="text-score-percentage">{animatedScore}%</span>
                       <span className="text-gray-500 text-xs">{result.score}/{result.total}</span>
                     </div>
                   </div>
@@ -620,12 +620,12 @@ export default function UdyogAssessment() {
                 </div>
 
                 <div
-                  className="rounded-xl border border-white/10 p-5 mb-8 text-center"
+                  className="rounded-xl border border-[#EDE9FF] p-5 mb-8 text-center"
                   style={{ background: "rgba(99,103,255,0.05)" }}
                   data-testid="card-role-preview"
                 >
-                  <p className="text-gray-400 text-sm mb-1">Based on your score, you qualify as:</p>
-                  <p className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assigned-role">
+                  <p className="text-gray-500 text-sm mb-1">Based on your score, you qualify as:</p>
+                  <p className="text-xl font-bold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assigned-role">
                     {result.role}
                   </p>
                 </div>
@@ -654,7 +654,7 @@ export default function UdyogAssessment() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-white/10 text-gray-300 bg-transparent"
+                    className="border-[#EDE9FF] text-gray-600 bg-transparent"
                     onClick={() => {
                       setScreen("domain");
                       setResult(null);

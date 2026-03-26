@@ -588,7 +588,7 @@ export default function Pricing() {
 
             <p
               className="text-base md:text-[1.05rem] max-w-[420px] mb-7 leading-relaxed"
-              style={{ color: "#7E99B8" }}
+              style={{ color: "#6B7280" }}
               data-testid="text-pricing-subtitle"
             >
               Flexible plans built for serious learners and future professionals.
@@ -776,7 +776,7 @@ export default function Pricing() {
                   backgroundClip: "text",
                 }}>Questions</span>
               </h2>
-              <p className="text-sm leading-relaxed" style={{ color: "#7E99B8" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>
                 Everything you need to know before subscribing. Can't find an answer? Reach out to our support team.
               </p>
             </div>
@@ -816,7 +816,7 @@ export default function Pricing() {
                   <AccordionContent
                     className="pb-4 text-[13.5px] leading-relaxed"
                     style={{
-                      color: "#7E99B8",
+                      color: "#6B7280",
                       borderLeft: `2px solid rgba(99,103,255,0.22)`,
                       marginLeft: "0.75rem",
                       paddingLeft: "1.25rem",

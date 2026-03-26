@@ -93,14 +93,14 @@ function DarkFooter() {
 }
 
 const inputStyle: React.CSSProperties = {
-  background: "rgba(11,29,58,0.8)",
-  border: "1px solid rgba(0,245,255,0.12)",
-  color: "#E8F4FF",
+  background: "#FFFFFF",
+  border: "1px solid #EDE9FF",
+  color: "#1E1B4B",
   borderRadius: "10px",
 };
 
 const labelStyle: React.CSSProperties = {
-  color: "#7E99B8",
+  color: "#6B7280",
   fontSize: "13px",
   fontWeight: 500,
 };
@@ -183,7 +183,7 @@ export default function Contact() {
           <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
             <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
                 <MessageSquare className="w-3.5 h-3.5" />
                 Get in Touch
               </div>
@@ -278,7 +278,7 @@ export default function Contact() {
                       <button
                         onClick={() => { setSubmitted(false); form.reset(); }}
                         className="px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                        style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}
+                        style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}
                         data-testid="button-send-another"
                       >
                         Send Another Message
@@ -299,7 +299,7 @@ export default function Contact() {
                                     placeholder="Your name"
                                     {...field}
                                     style={inputStyle}
-                                    className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                    className="placeholder:text-[#9CA3AF] focus-visible:ring-[rgba(99,103,255,0.3)] focus-visible:border-[rgba(99,103,255,0.3)]"
                                     data-testid="input-contact-name"
                                   />
                                 </FormControl>
@@ -319,7 +319,7 @@ export default function Contact() {
                                     placeholder="your@email.com"
                                     {...field}
                                     style={inputStyle}
-                                    className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                    className="placeholder:text-[#9CA3AF] focus-visible:ring-[rgba(99,103,255,0.3)] focus-visible:border-[rgba(99,103,255,0.3)]"
                                     data-testid="input-contact-email"
                                   />
                                 </FormControl>
@@ -340,7 +340,7 @@ export default function Contact() {
                                   placeholder="What is this about?"
                                   {...field}
                                   style={inputStyle}
-                                  className="placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                  className="placeholder:text-[#9CA3AF] focus-visible:ring-[rgba(99,103,255,0.3)] focus-visible:border-[rgba(99,103,255,0.3)]"
                                   data-testid="input-contact-subject"
                                 />
                               </FormControl>
@@ -358,7 +358,7 @@ export default function Contact() {
                               <FormControl>
                                 <Textarea
                                   placeholder="How can we help you?"
-                                  className="min-h-[140px] resize-none placeholder:text-[#3A5070] focus-visible:ring-[rgba(0,245,255,0.3)] focus-visible:border-[rgba(0,245,255,0.3)]"
+                                  className="min-h-[140px] resize-none placeholder:text-[#9CA3AF] focus-visible:ring-[rgba(99,103,255,0.3)] focus-visible:border-[rgba(99,103,255,0.3)]"
                                   {...field}
                                   style={inputStyle}
                                   data-testid="input-contact-message"
@@ -376,7 +376,7 @@ export default function Contact() {
                           style={{
                             background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
                             color: "#fff",
-                            boxShadow: "0 0 20px rgba(0,245,255,0.2)",
+                            boxShadow: "0 0 20px rgba(99,103,255,0.2)",
                           }}
                           data-testid="button-submit-contact"
                         >

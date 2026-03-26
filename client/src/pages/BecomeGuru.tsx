@@ -95,7 +95,7 @@ export default function BecomeGuru() {
           <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
             <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
                 <GraduationCap className="w-3.5 h-3.5" />
                 Become a Guru
               </div>
@@ -126,7 +126,7 @@ export default function BecomeGuru() {
         {benefits.length > 0 && (
           <section className="py-8 md:py-12 relative overflow-hidden">
             <div className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.04) 0%, rgba(124,58,237,0.02) 55%, transparent 70%)" }} />
+              style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99,103,255,0.04) 0%, rgba(132,148,255,0.02) 55%, transparent 70%)" }} />
 
             <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
               <motion.h2
@@ -178,7 +178,7 @@ export default function BecomeGuru() {
                   style={{
                     background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
                     color: "#fff",
-                    boxShadow: "0 0 24px rgba(0,245,255,0.25)",
+                    boxShadow: "0 0 24px rgba(99,103,255,0.25)",
                   }}
                   data-testid="button-cta"
                 >

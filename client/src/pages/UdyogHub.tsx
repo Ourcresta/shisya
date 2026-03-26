@@ -82,7 +82,7 @@ export default function UdyogHub() {
   const ctaHref = user ? "/shishya/udyog/assess" : "/login?redirect=/shishya/udyog/assess";
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" }}>
+    <div className="min-h-screen" style={{ background: "#F8F7FF" }}>
       <LandingNavbar />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
@@ -93,23 +93,23 @@ export default function UdyogHub() {
           className="mb-8"
         >
           <h1
-            className="text-3xl md:text-4xl font-bold text-white mb-2"
+            className="text-3xl md:text-4xl font-bold text-[#1E1B4B] mb-2"
             style={{ fontFamily: "var(--font-display)" }}
             data-testid="text-udyog-hub-title"
           >
             Our{" "}
             <span
               className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
+              style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #8494FF)" }}
             >
               Udyog
             </span>
           </h1>
-          <p className="text-gray-400 text-sm">AI-Powered Virtual Internship & Career Platform</p>
+          <p className="text-gray-500 text-sm">AI-Powered Virtual Internship & Career Platform</p>
         </motion.div>
 
         <div className="mb-8 overflow-x-auto">
-          <div className="flex gap-1 p-1 rounded-xl border border-white/10 backdrop-blur-xl min-w-max" style={{ background: "rgba(255,255,255,0.03)" }} data-testid="udyog-hub-tabs">
+          <div className="flex gap-1 p-1 rounded-xl border border-[#EDE9FF] backdrop-blur-xl min-w-max" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }} data-testid="udyog-hub-tabs">
             {hubTabs.map((tab) => {
               const isActive = activeTab === tab.key;
               const Icon = tab.icon;
@@ -220,18 +220,18 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
-        style={{ background: "rgba(255,255,255,0.02)" }}
+        className="text-center py-20 rounded-2xl backdrop-blur-xl"
+        style={{ background: "#F8F7FF" }}
       >
         <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+        <h3 className="text-xl font-semibold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }}>
           Sign In Required
         </h3>
-        <p className="text-gray-400 max-w-md mx-auto mb-6">
+        <p className="text-gray-500 max-w-md mx-auto mb-6">
           Log in to view your internship dashboard and track your progress.
         </p>
         <Link href="/login?redirect=/shishya/udyog/hub">
-          <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
+          <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}>
             Sign In
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -244,10 +244,10 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
         {[1, 2, 3].map(i => (
-          <div key={i} className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <Skeleton className="h-6 w-3/4 mb-3 bg-white/10" />
-            <Skeleton className="h-4 w-1/2 mb-2 bg-white/10" />
-            <Skeleton className="h-4 w-2/3 bg-white/10" />
+          <div key={i} className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
+            <Skeleton className="h-6 w-3/4 mb-3 bg-violet-100" />
+            <Skeleton className="h-4 w-1/2 mb-2 bg-violet-100" />
+            <Skeleton className="h-4 w-2/3 bg-violet-100" />
           </div>
         ))}
       </motion.div>
@@ -271,7 +271,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           <>
             <div
               className="rounded-2xl border p-6"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
+              style={{ background: "rgba(99,103,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
@@ -281,7 +281,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                   <Brain className="w-5 h-5 text-violet-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assessment-dashboard-title">
+                  <h3 className="text-lg font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assessment-dashboard-title">
                     Your Assessment Scores
                   </h3>
                   <p className="text-xs text-gray-400">AI-evaluated skill results across domains</p>
@@ -300,11 +300,11 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.08 }}
                       className="rounded-xl border p-4"
-                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
+                      style={{ background: "rgba(99,103,255,0.03)", borderColor: "rgba(99,103,255,0.12)" }}
                       data-testid={`assessment-card-${a.id || idx}`}
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-white">{a.domain}</span>
+                        <span className="text-sm font-medium text-[#1E1B4B]">{a.domain}</span>
                         <span
                           className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border"
                           style={{ background: levelStyle.bg, color: levelStyle.text, borderColor: levelStyle.border }}
@@ -313,10 +313,10 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                         </span>
                       </div>
                       <div className="flex items-end gap-2 mb-2">
-                        <span className="text-3xl font-bold text-white">{a.score}</span>
+                        <span className="text-3xl font-bold text-[#1E1B4B]">{a.score}</span>
                         <span className="text-sm text-gray-500 mb-1">/ 100</span>
                       </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.08)" }}>
                         <div
                           className="h-full rounded-full transition-all"
                           style={{ width: `${a.score}%`, background: `linear-gradient(90deg, ${levelStyle.text}, #6367FF)` }}
@@ -325,14 +325,14 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                       <p className="text-[10px] text-gray-500 mt-2 mb-3">
                         {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}
                       </p>
-                      <div className="pt-3 border-t border-white/5">
+                      <div className="pt-3 border-t border-gray-100">
                         <p className="text-[10px] text-gray-500 mb-2">
                           Qualifies as: <span className="text-violet-500 font-medium">{roleLabel}</span>
                         </p>
                         <Button
                           size="sm"
                           className="w-full text-white border-0 text-xs"
-                          style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
+                          style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                           onClick={() => assignMutation.mutate(a.id)}
                           disabled={assignMutation.isPending}
                           data-testid={`button-start-internship-${a.id || idx}`}
@@ -358,7 +358,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                 >
                   <Award className="w-8 h-8 text-violet-500 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-white font-medium">
+                    <p className="text-sm text-[#1E1B4B] font-medium">
                       Best Score: <span className="text-violet-500">{bestAssessment.score}%</span> in {bestAssessment.domain}
                     </p>
                     <p className="text-xs text-gray-400">
@@ -374,11 +374,11 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
 
             <div
               className="rounded-2xl border p-6"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }}
+              style={{ background: "rgba(99,103,255,0.03)", borderColor: "rgba(99,103,255,0.08)" }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <Zap className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
+                <h3 className="text-base font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }}>
                   Want to Try Another Domain?
                 </h3>
               </div>
@@ -387,7 +387,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href={ctaHref}>
-                  <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-retake-assessment-hub">
+                  <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }} data-testid="button-retake-assessment-hub">
                     <Target className="w-4 h-4 mr-2" />
                     Take Assessment
                   </Button>
@@ -397,22 +397,22 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
 
             {allAssignments.length > 0 && (
               <div
-                className="rounded-2xl border border-white/10 p-6"
-                style={{ background: "rgba(255,255,255,0.03)" }}
+                className="rounded-2xl p-6"
+                style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}
               >
-                <h3 className="text-base font-semibold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>
+                <h3 className="text-base font-semibold text-[#1E1B4B] mb-4" style={{ fontFamily: "var(--font-display)" }}>
                   Past Internships
                 </h3>
                 <div className="space-y-3">
                   {allAssignments.map((a: any, idx: number) => (
                     <div
                       key={a.id || idx}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-white/5"
-                      style={{ background: "rgba(255,255,255,0.02)" }}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100"
+                      style={{ background: "#F8F7FF" }}
                       data-testid={`past-assignment-${a.id || idx}`}
                     >
                       <div className="min-w-0">
-                        <p className="text-sm text-white font-medium truncate">{a.assignedRole || "Intern"}</p>
+                        <p className="text-sm text-[#1E1B4B] font-medium truncate">{a.assignedRole || "Intern"}</p>
                         <p className="text-xs text-gray-500 capitalize">{a.status}</p>
                       </div>
                       <span className="text-xs text-gray-500 shrink-0">
@@ -426,8 +426,8 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           </>
         ) : (
           <div
-            className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
-            style={{ background: "rgba(255,255,255,0.02)" }}
+            className="text-center py-20 rounded-2xl backdrop-blur-xl"
+            style={{ background: "#F8F7FF" }}
           >
             <div
               className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
@@ -435,15 +435,15 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
             >
               <Briefcase className="w-10 h-10 text-violet-500" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }} data-testid="text-no-assignment-hub">
+            <h3 className="text-2xl font-bold text-[#1E1B4B] mb-3" style={{ fontFamily: "var(--font-display)" }} data-testid="text-no-assignment-hub">
               Welcome to Our Udyog
             </h3>
-            <p className="text-gray-400 max-w-md mx-auto mb-6">
+            <p className="text-gray-500 max-w-md mx-auto mb-6">
               Browse available internships and take a skill assessment to get matched with the perfect role.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href={ctaHref}>
-                <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-start-assessment-hub">
+                <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }} data-testid="button-start-assessment-hub">
                   <Rocket className="w-4 h-4 mr-2" />
                   Take Assessment
                 </Button>
@@ -464,11 +464,11 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
     >
       <div
         className="rounded-2xl border p-6"
-        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
+        style={{ background: "rgba(99,103,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-internship-name-hub">
+            <h2 className="text-xl font-bold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }} data-testid="text-internship-name-hub">
               {internship?.title || "Virtual Internship"}
             </h2>
             {assignment?.assignedRole && (
@@ -482,7 +482,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
             )}
           </div>
           <Link href="/shishya/udyog/dashboard">
-            <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-open-workspace">
+            <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }} data-testid="button-open-workspace">
               Open Workspace
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -490,25 +490,25 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-xl p-4 border border-[#EDE9FF]" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
             <p className="text-xs text-gray-400 mb-1">Progress</p>
             <p className="text-2xl font-bold text-violet-500" data-testid="text-progress-hub">{overallProgress}%</p>
-            <div className="w-full h-1.5 rounded-full mt-2" style={{ background: "rgba(255,255,255,0.1)" }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${overallProgress}%`, background: "linear-gradient(90deg, #6367FF, #14B8A6)" }} />
+            <div className="w-full h-1.5 rounded-full mt-2" style={{ background: "rgba(99,103,255,0.08)" }}>
+              <div className="h-full rounded-full transition-all" style={{ width: `${overallProgress}%`, background: "linear-gradient(90deg, #6367FF, #8494FF)" }} />
             </div>
           </div>
-          <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-xl p-4 border border-[#EDE9FF]" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
             <p className="text-xs text-gray-400 mb-1">Tasks Done</p>
-            <p className="text-2xl font-bold text-white">{completedTasksCount}<span className="text-sm text-gray-400">/{tasks.length}</span></p>
+            <p className="text-2xl font-bold text-[#1E1B4B]">{completedTasksCount}<span className="text-sm text-gray-400">/{tasks.length}</span></p>
           </div>
-          <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-xl p-4 border border-[#EDE9FF]" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
             <p className="text-xs text-gray-400 mb-1">Status</p>
             <p className="text-sm font-medium text-green-400 capitalize">{assignment?.status || "active"}</p>
           </div>
           {batch && (
-            <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <div className="rounded-xl p-4 border border-[#EDE9FF]" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
               <p className="text-xs text-gray-400 mb-1">Batch</p>
-              <p className="text-sm font-medium text-white">#{batch.batchNumber}</p>
+              <p className="text-sm font-medium text-[#1E1B4B]">#{batch.batchNumber}</p>
               <p className="text-xs text-gray-500 capitalize">{batch.status}</p>
             </div>
           )}
@@ -517,16 +517,16 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
 
       {assessments.length > 0 && (
         <div
-          className="rounded-2xl border border-white/10 p-6"
-          style={{ background: "rgba(255,255,255,0.03)" }}
+          className="rounded-2xl p-6"
+          style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}
         >
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-violet-500" />
-              <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
+              <h3 className="text-base font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
             </div>
             <Link href="/shishya/udyog/assess">
-              <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-retake-assessment-active">
+              <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }} data-testid="button-retake-assessment-active">
                 Retake Assessment
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -539,11 +539,11 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                 <div
                   key={a.id || idx}
                   className="rounded-xl border p-3 flex items-center gap-3"
-                  style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
+                  style={{ background: "rgba(99,103,255,0.01)", borderColor: "rgba(99,103,255,0.08)" }}
                   data-testid={`hub-assessment-score-${a.id || idx}`}
                 >
                   <div className="text-center shrink-0">
-                    <p className="text-xl font-bold text-white">{a.score}%</p>
+                    <p className="text-xl font-bold text-[#1E1B4B]">{a.score}%</p>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-gray-300 truncate">{a.domain}</p>
@@ -562,14 +562,14 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
       )}
 
       {tasks.length > 0 && (
-        <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-          <h3 className="text-base font-semibold text-white mb-4" style={{ fontFamily: "var(--font-display)" }}>Recent Tasks</h3>
+        <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
+          <h3 className="text-base font-semibold text-[#1E1B4B] mb-4" style={{ fontFamily: "var(--font-display)" }}>Recent Tasks</h3>
           <div className="space-y-2">
             {tasks.slice(0, 5).map((task: any) => (
               <div
                 key={task.id}
-                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-white/5"
-                style={{ background: "rgba(255,255,255,0.02)" }}
+                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100"
+                style={{ background: "#F8F7FF" }}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
@@ -607,10 +607,10 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
       <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{ fontFamily: "var(--font-display)" }} data-testid="text-internship-programs-title">
+        <h2 className="text-2xl md:text-3xl font-bold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }} data-testid="text-internship-programs-title">
           Available Internship Programs
         </h2>
-        <p className="text-gray-400 text-sm max-w-xl mx-auto">
+        <p className="text-gray-500 text-sm max-w-xl mx-auto">
           Choose from curated programs designed with industry partners
         </p>
       </div>
@@ -618,11 +618,11 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-              <Skeleton className="h-6 w-3/4 mb-3 bg-white/10" />
-              <Skeleton className="h-4 w-1/2 mb-2 bg-white/10" />
-              <Skeleton className="h-4 w-2/3 mb-4 bg-white/10" />
-              <Skeleton className="h-8 w-24 bg-white/10" />
+            <div key={i} className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
+              <Skeleton className="h-6 w-3/4 mb-3 bg-violet-100" />
+              <Skeleton className="h-4 w-1/2 mb-2 bg-violet-100" />
+              <Skeleton className="h-4 w-2/3 mb-4 bg-violet-100" />
+              <Skeleton className="h-8 w-24 bg-violet-100" />
             </div>
           ))}
         </div>
@@ -637,12 +637,12 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
             <motion.div
               key={internship.id}
               variants={itemVariants}
-              className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
-              style={{ background: "rgba(255,255,255,0.03)" }}
+              className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-300"
+              style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}
               whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
               data-testid={`hub-internship-${internship.id}`}
             >
-              <h3 className="text-lg font-semibold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>
+              <h3 className="text-lg font-semibold text-[#1E1B4B] mb-3" style={{ fontFamily: "var(--font-display)" }}>
                 {internship.title}
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -652,21 +652,21 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
                   </span>
                 )}
                 {internship.domain && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-300 border border-white/10">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-gray-600 border border-violet-100">
                     {internship.domain}
                   </span>
                 )}
               </div>
               {internship.duration && (
-                <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
                   <Clock className="w-4 h-4" />
                   <span>{internship.duration}</span>
                 </div>
               )}
               {internship.shortDescription && (
-                <p className="text-gray-400 text-sm mb-4 line-clamp-2">{internship.shortDescription}</p>
+                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{internship.shortDescription}</p>
               )}
-              <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -681,7 +681,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
                   <Button
                     size="sm"
                     className="ml-auto text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                     data-testid={`hub-apply-internship-${internship.id}`}
                   >
                     Apply Now
@@ -694,28 +694,28 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
         </motion.div>
       ) : (
         <motion.div
-          className="text-center py-16 rounded-2xl border border-white/10 backdrop-blur-xl"
-          style={{ background: "rgba(255,255,255,0.02)" }}
+          className="text-center py-16 rounded-2xl backdrop-blur-xl"
+          style={{ background: "#F8F7FF" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <Rocket className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className="text-xl font-semibold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Coming Soon
           </h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+          <p className="text-gray-500 max-w-md mx-auto">
             New internship programs are being curated. Check back soon!
           </p>
         </motion.div>
       )}
 
       <Dialog open={!!viewingInternship} onOpenChange={(open) => { if (!open) setViewingInternship(null); }}>
-        <DialogContent className="max-w-lg border-white/10 text-white" style={{ background: "linear-gradient(180deg, #0f1629 0%, #111827 100%)" }}>
+        <DialogContent className="max-w-lg border-[#EDE9FF]" style={{ background: "#FFFFFF" }}>
           <DialogHeader>
-            <DialogTitle className="text-white" data-testid="hub-internship-detail-title">
+            <DialogTitle className="text-[#1E1B4B]" data-testid="hub-internship-detail-title">
               {viewingInternship?.title}
             </DialogTitle>
-            <DialogDescription className="text-gray-400">Internship Program Details</DialogDescription>
+            <DialogDescription className="text-gray-500">Internship Program Details</DialogDescription>
           </DialogHeader>
           {viewingInternship && (
             <div className="space-y-4">
@@ -727,20 +727,20 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
                   </span>
                 )}
                 {viewingInternship.domain && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-300 border border-white/10">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-gray-600 border border-violet-100">
                     {viewingInternship.domain}
                   </span>
                 )}
               </div>
               {viewingInternship.duration && (
-                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
                   <Clock className="w-4 h-4" />
                   <span>{viewingInternship.duration}</span>
                 </div>
               )}
-              <div className="pt-3 border-t border-white/10">
+              <div className="pt-3 border-t border-[#EDE9FF]">
                 <Link href={ctaHref}>
-                  <Button className="w-full text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
+                  <Button className="w-full text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}>
                     Apply Now
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -807,13 +807,13 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
       <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{ fontFamily: "var(--font-display)" }} data-testid="text-jobs-hub-title">
+        <h2 className="text-2xl md:text-3xl font-bold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }} data-testid="text-jobs-hub-title">
           Career{" "}
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
+          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #8494FF)" }}>
             Opportunities
           </span>
         </h2>
-        <p className="text-gray-400 text-sm max-w-xl mx-auto mb-6">
+        <p className="text-gray-500 text-sm max-w-xl mx-auto mb-6">
           Explore job openings from top companies looking for Our Udyog graduates
         </p>
         <div className="max-w-md mx-auto relative">
@@ -823,8 +823,8 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
             placeholder="Search by title, skills, or company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-colors"
-            style={{ background: "rgba(255,255,255,0.05)" }}
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#EDE9FF] text-[#1E1B4B] placeholder-gray-400 focus:outline-none focus:border-violet-500/50 transition-colors"
+            style={{ background: "#F8F7FF" }}
             data-testid="input-search-jobs-hub"
           />
         </div>
@@ -833,11 +833,11 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-              <Skeleton className="h-6 w-3/4 mb-3 bg-white/10" />
-              <Skeleton className="h-4 w-1/2 mb-2 bg-white/10" />
-              <Skeleton className="h-4 w-2/3 mb-4 bg-white/10" />
-              <Skeleton className="h-10 w-28 bg-white/10" />
+            <div key={i} className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
+              <Skeleton className="h-6 w-3/4 mb-3 bg-violet-100" />
+              <Skeleton className="h-4 w-1/2 mb-2 bg-violet-100" />
+              <Skeleton className="h-4 w-2/3 mb-4 bg-violet-100" />
+              <Skeleton className="h-10 w-28 bg-violet-100" />
             </div>
           ))}
         </div>
@@ -860,17 +860,17 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
               <motion.div
                 key={job.id}
                 variants={itemVariants}
-                className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
-                style={{ background: "rgba(255,255,255,0.03)" }}
+                className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-300"
+                style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}
                 whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                 data-testid={`hub-job-${job.id}`}
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-white mb-1 truncate" style={{ fontFamily: "var(--font-display)" }}>
+                    <h3 className="text-lg font-bold text-[#1E1B4B] mb-1 truncate" style={{ fontFamily: "var(--font-display)" }}>
                       {job.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 text-gray-400 text-sm">
+                    <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                       <Building2 className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate">{hr?.companyName || "Company"}</span>
                     </div>
@@ -902,7 +902,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
                 {skills.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {skills.slice(0, 5).map((skill: string) => (
-                      <span key={skill} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-300 border border-white/10">
+                      <span key={skill} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-50 text-gray-600 border border-violet-100">
                         {skill}
                       </span>
                     ))}
@@ -915,12 +915,12 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
                 )}
 
                 {job.internshipRequired && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/15 text-teal-400 border border-teal-500/30 mb-3">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-violet-500/15 text-violet-500 border border-violet-500/30 mb-3">
                     Internship Required
                   </span>
                 )}
 
-                <div className="flex items-center gap-3 pt-3 border-t border-white/5">
+                <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
                   {isApplied ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/30" data-testid={`hub-applied-${job.id}`}>
                       <BadgeCheck className="w-3.5 h-3.5" />
@@ -930,7 +930,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
                     <Button
                       size="sm"
                       className="text-white border-0"
-                      style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
+                      style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                       onClick={() => handleApply(job.id)}
                       disabled={applyMutation.isPending || deadline.expired}
                       data-testid={`hub-apply-job-${job.id}`}
@@ -946,16 +946,16 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
         </motion.div>
       ) : (
         <motion.div
-          className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
-          style={{ background: "rgba(255,255,255,0.02)" }}
+          className="text-center py-20 rounded-2xl backdrop-blur-xl"
+          style={{ background: "#F8F7FF" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+          <h3 className="text-xl font-semibold text-[#1E1B4B] mb-2" style={{ fontFamily: "var(--font-display)" }}>
             {searchQuery ? "No matching jobs found" : "No Jobs Available"}
           </h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+          <p className="text-gray-500 max-w-md mx-auto">
             {searchQuery
               ? "Try adjusting your search terms"
               : "New job postings are added regularly. Check back soon!"}
@@ -979,34 +979,34 @@ function SettingsTab() {
       exit={{ opacity: 0 }}
       className="space-y-6"
     >
-      <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
+      <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
             <Bell className="w-5 h-5 text-violet-500" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Notifications</h3>
+            <h3 className="text-lg font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }}>Notifications</h3>
             <p className="text-xs text-gray-400">Manage how you receive updates</p>
           </div>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100" style={{ background: "#F8F7FF" }}>
             <div>
-              <Label className="text-sm text-gray-300">Email Notifications</Label>
+              <Label className="text-sm text-gray-600">Email Notifications</Label>
               <p className="text-xs text-gray-500">Receive internship updates via email</p>
             </div>
             <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} data-testid="switch-email-notifications" />
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100" style={{ background: "#F8F7FF" }}>
             <div>
-              <Label className="text-sm text-gray-300">Task Reminders</Label>
+              <Label className="text-sm text-gray-600">Task Reminders</Label>
               <p className="text-xs text-gray-500">Get reminded about upcoming deadlines</p>
             </div>
             <Switch checked={taskReminders} onCheckedChange={setTaskReminders} data-testid="switch-task-reminders" />
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100" style={{ background: "#F8F7FF" }}>
             <div>
-              <Label className="text-sm text-gray-300">Job Alerts</Label>
+              <Label className="text-sm text-gray-600">Job Alerts</Label>
               <p className="text-xs text-gray-500">Get notified about new job postings</p>
             </div>
             <Switch checked={jobAlerts} onCheckedChange={setJobAlerts} data-testid="switch-job-alerts" />
@@ -1014,20 +1014,20 @@ function SettingsTab() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
+      <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
             <Shield className="w-5 h-5 text-violet-500" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Privacy</h3>
+            <h3 className="text-lg font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }}>Privacy</h3>
             <p className="text-xs text-gray-400">Control your profile visibility</p>
           </div>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100" style={{ background: "#F8F7FF" }}>
             <div>
-              <Label className="text-sm text-gray-300">Profile Visible to HR</Label>
+              <Label className="text-sm text-gray-600">Profile Visible to HR</Label>
               <p className="text-xs text-gray-500">Allow recruiters to discover your profile</p>
             </div>
             <Switch checked={profileVisibility} onCheckedChange={setProfileVisibility} data-testid="switch-profile-visibility" />
@@ -1035,37 +1035,37 @@ function SettingsTab() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
+      <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
             <Globe className="w-5 h-5 text-violet-500" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Quick Links</h3>
+            <h3 className="text-lg font-semibold text-[#1E1B4B]" style={{ fontFamily: "var(--font-display)" }}>Quick Links</h3>
             <p className="text-xs text-gray-400">Navigate to other Udyog pages</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link href="/shishya/udyog">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-udyog-landing">
+            <div className="p-3 rounded-lg border border-gray-100 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "#F8F7FF" }} data-testid="link-udyog-landing">
               <p className="text-sm text-gray-300 font-medium">Our Udyog Landing</p>
               <p className="text-xs text-gray-500">View the full landing page</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/assess">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-assessment">
+            <div className="p-3 rounded-lg border border-gray-100 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "#F8F7FF" }} data-testid="link-assessment">
               <p className="text-sm text-gray-300 font-medium">Skill Assessment</p>
               <p className="text-xs text-gray-500">Take or retake your AI assessment</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/dashboard">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-workspace">
+            <div className="p-3 rounded-lg border border-gray-100 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "#F8F7FF" }} data-testid="link-workspace">
               <p className="text-sm text-gray-300 font-medium">Full Workspace</p>
               <p className="text-xs text-gray-500">Open the detailed intern workspace</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/jobs">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-jobs-page">
+            <div className="p-3 rounded-lg border border-gray-100 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "#F8F7FF" }} data-testid="link-jobs-page">
               <p className="text-sm text-gray-300 font-medium">Jobs Page</p>
               <p className="text-xs text-gray-500">Browse the full jobs listing</p>
             </div>
