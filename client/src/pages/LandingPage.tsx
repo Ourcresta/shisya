@@ -37,6 +37,15 @@ import {
   CheckCircle2,
   TrendingUp,
   Zap,
+  Users,
+  Shield,
+  BadgeCheck,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Instagram,
+  Heart,
+  Send,
 } from "lucide-react";
 import type { Course } from "@shared/schema";
 import ushaAvatarImage from "@assets/image_1767697725032.png";
@@ -189,6 +198,44 @@ function GlassCard({
       {...props}
     >
       {children}
+    </div>
+  );
+}
+
+function StatsBar() {
+  const stats = [
+    { value: "25K+", label: "Active Learners", icon: Users },
+    { value: "100+", label: "Expert Courses", icon: BookOpen },
+    { value: "4.9★", label: "Student Rating", icon: Star },
+    { value: "10K+", label: "Certs Issued", icon: Award },
+  ];
+  return (
+    <div style={{ background: "#FFFFFF", borderBottom: "1px solid #EDE9FF" }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-center gap-3 py-3"
+              style={{
+                borderRight: i < 3 ? "1px solid #EDE9FF" : "none",
+                borderLeft: i === 0 ? "none" : undefined,
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.15)" }}
+              >
+                <stat.icon className="w-4 h-4" style={{ color: C.teal }} />
+              </div>
+              <div>
+                <div className="text-base font-bold leading-none" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>{stat.value}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: C.textSecondary }}>{stat.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1333,45 +1380,73 @@ function AISection() {
               ))}
             </div>
           </div>
-          <div className="relative flex items-center justify-center">
+          {/* Usha Chat Mockup */}
+          <div className="relative flex items-center justify-center lg:justify-end">
             <div
-              className="relative rounded-2xl overflow-hidden flex items-center justify-center"
-              style={{
-                background: C.bgSecondary,
-                border: `1px solid ${C.cardBorder}`,
-                padding: "32px",
-                width: "100%",
-                maxWidth: "340px",
-                boxShadow: "0 4px 32px rgba(99,103,255,0.12)",
-              }}
+              className="relative w-full"
+              style={{ maxWidth: "320px", background: "#F8F7FF", border: `1px solid ${C.cardBorder}`, borderRadius: "20px", boxShadow: "0 8px 48px rgba(99,103,255,0.15)", overflow: "hidden" }}
             >
-              <div
-                className="relative w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden animate-float"
-                style={{
-                  background: `linear-gradient(135deg, ${C.teal}, ${C.purple}, ${C.lightBg})`,
-                  boxShadow: `0 0 40px -8px rgba(99,103,255,0.4)`,
-                  border: `3px solid rgba(99,103,255,0.25)`,
-                }}
-              >
-                <img
-                  src={ushaAvatarImage}
-                  alt="Usha AI Tutor"
-                  className="w-full h-full object-cover object-center scale-110"
-                  data-testid="img-usha-avatar-landing"
-                />
+              {/* Chat header */}
+              <div className="flex items-center gap-2.5 px-4 py-3" style={{ background: CTA_GRAD }}>
+                <img src={ushaAvatarImage} alt="Usha" className="w-8 h-8 rounded-full object-cover border-2 border-white/30" data-testid="img-usha-avatar-landing" />
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-white">Usha AI Tutor</div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-300" />
+                    <span className="text-[10px] text-white/80">Online · Asks smart hints</span>
+                  </div>
+                </div>
+                <Sparkles className="w-4 h-4 text-white/60" />
               </div>
-              {/* Floating chat bubbles */}
-              <div
-                className="absolute top-4 right-4 rounded-xl px-3 py-1.5"
-                style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}`, boxShadow: "0 2px 8px rgba(99,103,255,0.1)" }}
-              >
-                <p className="text-xs font-medium" style={{ color: C.textPrimary }}>Need a hint? 💡</p>
+
+              {/* Messages */}
+              <div className="p-4 space-y-3">
+                {/* Student */}
+                <div className="flex justify-end">
+                  <div className="rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%]" style={{ background: CTA_GRAD }}>
+                    <p className="text-xs text-white">Why does my for loop skip the last item? 😕</p>
+                  </div>
+                </div>
+                {/* Usha */}
+                <div className="flex gap-2 items-end">
+                  <img src={ushaAvatarImage} alt="Usha" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                  <div className="rounded-2xl rounded-bl-sm px-3 py-2" style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}` }}>
+                    <p className="text-xs" style={{ color: C.textPrimary }}>Try checking your loop's end condition — is it <code className="px-1 rounded text-[10px]" style={{ background: "rgba(99,103,255,0.1)", color: C.teal }}>{"< n"}</code> or <code className="px-1 rounded text-[10px]" style={{ background: "rgba(99,103,255,0.1)", color: C.teal }}>{"<= n"}</code>? 🤔</p>
+                  </div>
+                </div>
+                {/* Student */}
+                <div className="flex justify-end">
+                  <div className="rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%]" style={{ background: "rgba(99,103,255,0.09)", border: `1px solid rgba(99,103,255,0.2)` }}>
+                    <p className="text-xs" style={{ color: C.teal }}>Oh! I used {"< n"} but needed {"<= n"}. Fixed it! ✅</p>
+                  </div>
+                </div>
+                {/* Usha */}
+                <div className="flex gap-2 items-end">
+                  <img src={ushaAvatarImage} alt="Usha" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                  <div className="rounded-2xl rounded-bl-sm px-3 py-2" style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}` }}>
+                    <p className="text-xs" style={{ color: C.textPrimary }}>You solved it yourself — that's real learning! 🎉</p>
+                  </div>
+                </div>
+
+                {/* Typing indicator */}
+                <div className="flex gap-2 items-end">
+                  <img src={ushaAvatarImage} alt="Usha" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                  <div className="rounded-2xl rounded-bl-sm px-3 py-2.5 flex items-center gap-1" style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}` }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: C.teal, animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: C.teal, animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: C.teal, animationDelay: "300ms" }} />
+                  </div>
+                </div>
               </div>
-              <div
-                className="absolute bottom-4 left-4 rounded-xl px-3 py-1.5"
-                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.18)" }}
-              >
-                <p className="text-xs" style={{ color: C.teal }}>Ask Usha anytime</p>
+
+              {/* Input bar */}
+              <div className="px-4 pb-4">
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background: "#FFFFFF", border: `1px solid ${C.cardBorder}` }}>
+                  <span className="text-xs flex-1 select-none" style={{ color: "#9CA3AF" }}>Ask Usha anything...</span>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: CTA_GRAD }}>
+                    <Send className="w-3 h-3 text-white" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1638,6 +1713,20 @@ function CTASection() {
                 </>
               )}
             </div>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-5 mt-6">
+              {[
+                { icon: BadgeCheck, label: "500 free credits on signup" },
+                { icon: Shield, label: "No credit card required" },
+                { icon: CheckCircle2, label: "Cancel anytime" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <item.icon className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.7)" }} />
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.75)" }}>{item.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1648,52 +1737,123 @@ function CTASection() {
 function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const footerLinks = [
+    {
+      heading: "Platform",
+      links: [
+        { href: "/courses", label: "Courses", testId: "link-courses" },
+        { href: "/pricing", label: "Pricing", testId: "link-pricing" },
+        { href: "/ai-usha-mentor", label: "Usha AI", testId: "link-usha" },
+        { href: "/become-guru", label: "Become a Guru", testId: "link-become-guru" },
+      ],
+    },
+    {
+      heading: "Resources",
+      links: [
+        { href: "/help-center", label: "Help Center", testId: "link-help" },
+        { href: "/about", label: "About Us", testId: "link-about" },
+        { href: "/contact", label: "Contact", testId: "link-contact" },
+        { href: "/become-a-partner", label: "Partner With Us", testId: "link-partner" },
+      ],
+    },
+    {
+      heading: "Legal",
+      links: [
+        { href: "/privacy", label: "Privacy Policy", testId: "link-privacy" },
+        { href: "/terms", label: "Terms of Service", testId: "link-terms" },
+        { href: "/verify-certificate", label: "Verify Certificate", testId: "link-verify" },
+      ],
+    },
+  ];
+
+  const socials = [
+    { href: "#", icon: Linkedin, label: "LinkedIn" },
+    { href: "#", icon: Twitter, label: "Twitter" },
+    { href: "#", icon: Youtube, label: "YouTube" },
+    { href: "#", icon: Instagram, label: "Instagram" },
+  ];
+
   return (
-    <footer className="py-8" style={{ background: C.bgPrimary, borderTop: `1px solid ${C.cardBorder}` }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm"
-              style={{ background: CTA_GRAD }}
-            >
-              <GraduationCap className="w-4 h-4 text-white" />
-            </div>
-            <span
-              className="font-semibold"
-              style={{
-                fontFamily: "var(--font-display)",
-                background: CTA_GRAD,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              OurShiksha
-            </span>
-          </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            {[
-              { href: "/", label: "Home", testId: "link-home" },
-              { href: "/about", label: "About", testId: "link-about" },
-              { href: "/privacy", label: "Privacy Policy", testId: "link-privacy" },
-              { href: "/terms", label: "Terms of Service", testId: "link-terms" },
-              { href: "/contact", label: "Contact", testId: "link-contact" },
-            ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-[#6367FF]"
-                style={{ color: C.textSecondary }}
-                data-testid={link.testId}
+    <footer style={{ background: "#F8F7FF", borderTop: `1px solid ${C.cardBorder}` }}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-6">
+
+        {/* Top grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+
+          {/* Brand column */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: CTA_GRAD }}>
+                <GraduationCap className="w-4 h-4 text-white" />
+              </div>
+              <span
+                className="font-bold text-sm"
+                style={{ fontFamily: "var(--font-display)", background: CTA_GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
               >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <p className="text-sm" style={{ color: C.textSecondary }} data-testid="text-copyright">
-            OurShiksha {currentYear}
-          </p>
+                OurShiksha
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: C.textSecondary }}>
+              India's premier AI-powered e-learning platform. Learn. Build. Prove.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:-translate-y-0.5"
+                  style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.18)", color: C.teal }}
+                >
+                  <s.icon className="w-3.5 h-3.5" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Link columns */}
+          {footerLinks.map((col) => (
+            <div key={col.heading}>
+              <h4 className="font-semibold text-[11px] mb-3 tracking-widest uppercase" style={{ color: C.textPrimary }}>
+                {col.heading}
+              </h4>
+              <ul className="space-y-2">
+                {col.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-xs transition-colors hover:text-[#6367FF]"
+                      style={{ color: C.textSecondary }}
+                      data-testid={link.testId}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
+
+        {/* Bottom bar */}
+        <div
+          className="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3"
+          style={{ borderTop: `1px solid ${C.cardBorder}` }}
+        >
+          <p className="text-xs order-2 sm:order-1" style={{ color: "#9CA3AF" }} data-testid="text-copyright">
+            © {currentYear} OurShiksha. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 order-1 sm:order-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5" style={{ color: C.teal }} />
+              <span className="text-[11px]" style={{ color: "#9CA3AF" }}>SSL Secured</span>
+            </div>
+            <p className="text-[11px] flex items-center gap-1" style={{ color: "#9CA3AF" }}>
+              Made with <Heart className="w-3 h-3 fill-red-400 text-red-400" /> in India
+            </p>
+          </div>
+        </div>
+
       </div>
     </footer>
   );
@@ -1711,6 +1871,7 @@ export default function LandingPage() {
       <LandingNavbar />
       <main className="flex-1">
         <HeroSection />
+        <StatsBar />
         <JourneySection />
         <FeaturesSection />
         <AISection />
