@@ -1775,8 +1775,9 @@ function Footer() {
     { href: "#", icon: Twitter, label: "Twitter" },
   ];
 
-  const linkStyle = { color: "rgba(255,255,255,0.78)" };
-  const headingStyle = { color: "#FFFFFF", letterSpacing: "0.06em" };
+  const FH = "#1E1B4B";
+  const FB = "#2D2A7A";
+  const FM = "#3D3A99";
 
   return (
     <footer style={{ background: HERO_GRAD }}>
@@ -1790,16 +1791,16 @@ function Footer() {
             {/* Logo */}
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl"
-                style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
-                <GraduationCap className="w-5 h-5 text-white" />
+                style={{ background: "rgba(30,27,75,0.15)", border: "1px solid rgba(30,27,75,0.25)" }}>
+                <GraduationCap className="w-5 h-5" style={{ color: FH }} />
               </div>
-              <span className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "15px" }}>
+              <span className="font-bold" style={{ fontFamily: "var(--font-display)", fontSize: "15px", color: FH }}>
                 OurShiksha
               </span>
             </div>
 
             {/* Tagline */}
-            <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.7)", lineHeight: "1.7" }}>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: FB, lineHeight: "1.7" }}>
               India's premier AI-powered e-learning platform. Learn. Build. Prove.
             </p>
 
@@ -1808,9 +1809,9 @@ function Footer() {
               {socials.map((s) => (
                 <a key={s.label} href={s.href} aria-label={s.label}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 hover:scale-110"
-                  style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.28)", color: "#fff" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.28)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"; }}
+                  style={{ background: "rgba(30,27,75,0.12)", border: "1px solid rgba(30,27,75,0.22)", color: FH }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(30,27,75,0.22)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(30,27,75,0.12)"; }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
                 </a>
@@ -1819,15 +1820,15 @@ function Footer() {
 
             {/* Contact */}
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-white">Contact Us</p>
-              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.72)" }}>support@ourshiksha.com</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>+91 98765 43210</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: FH }}>Contact Us</p>
+              <p className="text-xs mb-1" style={{ color: FB }}>support@ourshiksha.com</p>
+              <p className="text-xs" style={{ color: FB }}>+91 98765 43210</p>
             </div>
 
             {/* Address */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-white">Registered Office</p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.65)", lineHeight: "1.65" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: FH }}>Registered Office</p>
+              <p className="text-xs leading-relaxed" style={{ color: FM, lineHeight: "1.65" }}>
                 AltF, Orchid Business Park,<br />
                 Sector 48, Gurugram,<br />
                 Haryana, 122004
@@ -1837,13 +1838,13 @@ function Footer() {
 
           {/* Column 2 — Company links */}
           <div>
-            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Company</h4>
+            <h4 className="font-bold text-[11px] mb-4 tracking-widest uppercase" style={{ color: FH, letterSpacing: "0.06em" }}>Company</h4>
             <ul className="space-y-2.5">
               {col1.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href}
-                    className="text-xs transition-colors hover:text-white"
-                    style={linkStyle}
+                    className="text-xs transition-colors"
+                    style={{ color: FB }}
                     data-testid={link.testId}
                   >{link.label}</Link>
                 </li>
@@ -1853,13 +1854,13 @@ function Footer() {
 
           {/* Column 3 — IT & Courses */}
           <div>
-            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>IT & Courses</h4>
+            <h4 className="font-bold text-[11px] mb-4 tracking-widest uppercase" style={{ color: FH, letterSpacing: "0.06em" }}>IT & Courses</h4>
             <ul className="space-y-2.5">
               {col2.map((link) => (
                 <li key={link.label}>
                   <Link href={link.href}
-                    className="text-xs transition-colors hover:text-white"
-                    style={linkStyle}
+                    className="text-xs transition-colors"
+                    style={{ color: FB }}
                   >{link.label}</Link>
                 </li>
               ))}
@@ -1868,13 +1869,13 @@ function Footer() {
 
           {/* Column 4 — Business Courses */}
           <div>
-            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Business Courses</h4>
+            <h4 className="font-bold text-[11px] mb-4 tracking-widest uppercase" style={{ color: FH, letterSpacing: "0.06em" }}>Business Courses</h4>
             <ul className="space-y-2.5">
               {col3.map((link) => (
                 <li key={link.label}>
                   <Link href={link.href}
-                    className="text-xs transition-colors hover:text-white"
-                    style={linkStyle}
+                    className="text-xs transition-colors"
+                    style={{ color: FB }}
                   >{link.label}</Link>
                 </li>
               ))}
@@ -1883,22 +1884,22 @@ function Footer() {
 
           {/* Column 5 — Internship Tracks */}
           <div>
-            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Internship Tracks</h4>
+            <h4 className="font-bold text-[11px] mb-4 tracking-widest uppercase" style={{ color: FH, letterSpacing: "0.06em" }}>Internship Tracks</h4>
             <ul className="space-y-2.5">
               {col4.map((link) => (
                 <li key={link.label}>
                   <Link href={link.href}
-                    className="text-xs transition-colors hover:text-white"
-                    style={linkStyle}
+                    className="text-xs transition-colors"
+                    style={{ color: FB }}
                   >{link.label}</Link>
                 </li>
               ))}
             </ul>
             {/* Verify cert link */}
-            <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.18)" }}>
+            <div className="mt-5 pt-4" style={{ borderTop: `1px solid rgba(30,27,75,0.2)` }}>
               <Link href="/verify-certificate"
-                className="text-xs font-medium flex items-center gap-1 hover:text-white transition-colors"
-                style={{ color: "rgba(255,255,255,0.85)" }}
+                className="text-xs font-semibold flex items-center gap-1 transition-colors"
+                style={{ color: FH }}
                 data-testid="link-verify"
               >
                 <BadgeCheck className="w-3.5 h-3.5" />
@@ -1910,10 +1911,10 @@ function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
-          <p className="text-[11px] order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.6)" }} data-testid="text-copyright">
+          style={{ borderTop: `1px solid rgba(30,27,75,0.2)` }}>
+          <p className="text-[11px] order-2 sm:order-1" style={{ color: FM }} data-testid="text-copyright">
             © {currentYear} OurShiksha. All rights reserved. · Made with{" "}
-            <Heart className="w-3 h-3 fill-red-300 text-red-300 inline-block mx-0.5" /> in India
+            <Heart className="w-3 h-3 fill-red-500 text-red-500 inline-block mx-0.5" /> in India
           </p>
           <div className="flex items-center gap-4 order-1 sm:order-2">
             {[
@@ -1922,8 +1923,8 @@ function Footer() {
               { icon: Star, label: "4.9 Rating" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-1.5">
-                <item.icon className="w-3.5 h-3.5 text-white opacity-80" />
-                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>{item.label}</span>
+                <item.icon className="w-3.5 h-3.5" style={{ color: FH }} />
+                <span className="text-[11px]" style={{ color: FB }}>{item.label}</span>
               </div>
             ))}
           </div>
