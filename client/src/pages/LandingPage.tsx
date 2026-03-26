@@ -671,7 +671,6 @@ function FeaturesSection() {
     <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgPrimary }}>
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
-
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-7">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
@@ -742,7 +741,6 @@ function FeaturesSection() {
                     <feature.icon className="w-4 h-4" style={{ color: accent }} />
                   )}
                 </div>
-
                 {/* Text */}
                 <div className="min-w-0">
                   <h3 className="font-semibold text-xs leading-tight truncate" style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}>
@@ -1330,7 +1328,6 @@ function AISection() {
     <section className="relative py-10 md:py-14 overflow-hidden" style={{ background: C.bgPrimary }}>
       <SectionGlow position="top-right" color={C.purple} />
       <SectionGlow position="bottom-left" color={C.teal} />
-
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
@@ -1775,9 +1772,8 @@ function Footer() {
 
   return (
     <footer style={{ background: "linear-gradient(160deg, #1E1B4B 0%, #2D2A7A 50%, #1E3A5F 100%)" }}>
-
       {/* Main link grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 bg-[#000417b0]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
           {/* Brand column */}
