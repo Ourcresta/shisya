@@ -1774,7 +1774,7 @@ function Footer() {
   ];
 
   return (
-    <footer style={{ background: "#F8F7FF", borderTop: `1px solid ${C.cardBorder}` }}>
+    <footer style={{ background: "#0C0B1A" }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-6">
 
         {/* Top grid */}
@@ -1793,7 +1793,7 @@ function Footer() {
                 OurShiksha
               </span>
             </div>
-            <p className="text-xs leading-relaxed mb-5" style={{ color: C.textSecondary }}>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
               India's premier AI-powered e-learning platform. Learn. Build. Prove.
             </p>
             <div className="flex gap-2 flex-wrap">
@@ -1803,7 +1803,15 @@ function Footer() {
                   href={s.href}
                   aria-label={s.label}
                   className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:-translate-y-0.5"
-                  style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.18)", color: C.teal }}
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "rgba(99,103,255,0.3)";
+                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)";
+                  }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
                 </a>
@@ -1814,7 +1822,7 @@ function Footer() {
           {/* Link columns */}
           {footerLinks.map((col) => (
             <div key={col.heading}>
-              <h4 className="font-semibold text-[11px] mb-3 tracking-widest uppercase" style={{ color: C.textPrimary }}>
+              <h4 className="font-semibold text-[11px] mb-3 tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.9)" }}>
                 {col.heading}
               </h4>
               <ul className="space-y-2">
@@ -1822,8 +1830,8 @@ function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-xs transition-colors hover:text-[#6367FF]"
-                      style={{ color: C.textSecondary }}
+                      className="text-xs transition-colors hover:text-white"
+                      style={{ color: "rgba(255,255,255,0.45)" }}
                       data-testid={link.testId}
                     >
                       {link.label}
@@ -1838,17 +1846,17 @@ function Footer() {
         {/* Bottom bar */}
         <div
           className="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3"
-          style={{ borderTop: `1px solid ${C.cardBorder}` }}
+          style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <p className="text-xs order-2 sm:order-1" style={{ color: "#9CA3AF" }} data-testid="text-copyright">
+          <p className="text-xs order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.3)" }} data-testid="text-copyright">
             © {currentYear} OurShiksha. All rights reserved.
           </p>
           <div className="flex items-center gap-4 order-1 sm:order-2">
             <div className="flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5" style={{ color: C.teal }} />
-              <span className="text-[11px]" style={{ color: "#9CA3AF" }}>SSL Secured</span>
+              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>SSL Secured</span>
             </div>
-            <p className="text-[11px] flex items-center gap-1" style={{ color: "#9CA3AF" }}>
+            <p className="text-[11px] flex items-center gap-1" style={{ color: "rgba(255,255,255,0.3)" }}>
               Made with <Heart className="w-3 h-3 fill-red-400 text-red-400" /> in India
             </p>
           </div>
