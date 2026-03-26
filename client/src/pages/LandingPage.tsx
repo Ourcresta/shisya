@@ -1800,9 +1800,9 @@ function Footer() {
                 { icon: BadgeCheck, label: "AI-Powered" },
                 { icon: Shield, label: "SSL Secured" },
               ].map((b, i) => (
-                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "#2A2760", border: "1px solid #3D3A80" }}>
                   <b.icon className="w-3 h-3" style={{ color: "#8494FF" }} />
-                  <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.6)" }}>{b.label}</span>
+                  <span className="text-[11px]" style={{ color: "#B0B8FF" }}>{b.label}</span>
                 </div>
               ))}
             </div>
@@ -1815,14 +1815,16 @@ function Footer() {
                   href={s.href}
                   aria-label={s.label}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.6)" }}
+                  style={{ background: "#2A2760", border: "1px solid #3D3A80", color: "#B0B8FF" }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(99,103,255,0.4)";
+                    (e.currentTarget as HTMLElement).style.background = "#6367FF";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#6367FF";
                     (e.currentTarget as HTMLElement).style.color = "#fff";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
-                    (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)";
+                    (e.currentTarget as HTMLElement).style.background = "#2A2760";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#3D3A80";
+                    (e.currentTarget as HTMLElement).style.color = "#B0B8FF";
                   }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
@@ -1859,7 +1861,7 @@ function Footer() {
         {/* Bottom bar */}
         <div
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ borderTop: "1px solid #2D2A5A" }}
         >
           <p className="text-xs order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.3)" }} data-testid="text-copyright">
             © {currentYear} OurShiksha. All rights reserved. · Made with <Heart className="w-3 h-3 fill-red-400 text-red-400 inline-block mx-0.5" /> in India
