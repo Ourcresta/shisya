@@ -39,7 +39,7 @@ const levelColors: Record<string, string> = {
 };
 
 const jobTypeBadgeColors: Record<string, string> = {
-  "full-time": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  "full-time": "bg-violet-500/20 text-violet-500 border-violet-500/30",
   "part-time": "bg-purple-500/20 text-purple-400 border-purple-500/30",
   "internship": "bg-green-500/20 text-green-400 border-green-500/30",
   "contract": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -100,7 +100,7 @@ export default function UdyogHub() {
             Our{" "}
             <span
               className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+              style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
             >
               Udyog
             </span>
@@ -119,9 +119,9 @@ export default function UdyogHub() {
                   onClick={() => setActiveTab(tab.key)}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
                   style={{
-                    background: isActive ? "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(20,184,166,0.15))" : "transparent",
-                    color: isActive ? "#22D3EE" : "#9CA3AF",
-                    border: isActive ? "1px solid rgba(34,211,238,0.3)" : "1px solid transparent",
+                    background: isActive ? "linear-gradient(135deg, rgba(99,103,255,0.2), rgba(20,184,166,0.15))" : "transparent",
+                    color: isActive ? "#6367FF" : "#9CA3AF",
+                    border: isActive ? "1px solid rgba(99,103,255,0.3)" : "1px solid transparent",
                   }}
                   data-testid={`tab-${tab.key}`}
                 >
@@ -223,7 +223,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
         className="text-center py-20 rounded-2xl border border-white/10 backdrop-blur-xl"
         style={{ background: "rgba(255,255,255,0.02)" }}
       >
-        <Briefcase className="w-12 h-12 text-cyan-400/50 mx-auto mb-4" />
+        <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
           Sign In Required
         </h3>
@@ -231,7 +231,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           Log in to view your internship dashboard and track your progress.
         </p>
         <Link href="/login?redirect=/shishya/udyog/hub">
-          <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
+          <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
             Sign In
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -271,14 +271,14 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           <>
             <div
               className="rounded-2xl border p-6"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(34,211,238,0.2)" }}
+              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.2), rgba(20,184,166,0.15))", border: "1px solid rgba(34,211,238,0.3)" }}
+                  style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.2), rgba(20,184,166,0.15))", border: "1px solid rgba(99,103,255,0.3)" }}
                 >
-                  <Brain className="w-5 h-5 text-cyan-400" />
+                  <Brain className="w-5 h-5 text-violet-500" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-assessment-dashboard-title">
@@ -319,7 +319,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
                         <div
                           className="h-full rounded-full transition-all"
-                          style={{ width: `${a.score}%`, background: `linear-gradient(90deg, ${levelStyle.text}, #22D3EE)` }}
+                          style={{ width: `${a.score}%`, background: `linear-gradient(90deg, ${levelStyle.text}, #6367FF)` }}
                         />
                       </div>
                       <p className="text-[10px] text-gray-500 mt-2 mb-3">
@@ -327,12 +327,12 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
                       </p>
                       <div className="pt-3 border-t border-white/5">
                         <p className="text-[10px] text-gray-500 mb-2">
-                          Qualifies as: <span className="text-cyan-400 font-medium">{roleLabel}</span>
+                          Qualifies as: <span className="text-violet-500 font-medium">{roleLabel}</span>
                         </p>
                         <Button
                           size="sm"
                           className="w-full text-white border-0 text-xs"
-                          style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                          style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                           onClick={() => assignMutation.mutate(a.id)}
                           disabled={assignMutation.isPending}
                           data-testid={`button-start-internship-${a.id || idx}`}
@@ -353,17 +353,17 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
               {bestAssessment && (
                 <div
                   className="rounded-xl border p-4 flex flex-wrap items-center gap-4"
-                  style={{ background: "rgba(34,211,238,0.04)", borderColor: "rgba(34,211,238,0.15)" }}
+                  style={{ background: "rgba(99,103,255,0.04)", borderColor: "rgba(99,103,255,0.15)" }}
                   data-testid="best-assessment-summary"
                 >
-                  <Award className="w-8 h-8 text-cyan-400 shrink-0" />
+                  <Award className="w-8 h-8 text-violet-500 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-white font-medium">
-                      Best Score: <span className="text-cyan-400">{bestAssessment.score}%</span> in {bestAssessment.domain}
+                      Best Score: <span className="text-violet-500">{bestAssessment.score}%</span> in {bestAssessment.domain}
                     </p>
                     <p className="text-xs text-gray-400">
                       Level: <span className="capitalize">{bestAssessment.level}</span> — You qualify as{" "}
-                      <span className="text-cyan-400 font-medium">
+                      <span className="text-violet-500 font-medium">
                         {bestAssessment.score >= 80 ? "Lead Developer" : bestAssessment.score >= 40 ? "Project Associate" : "Junior Intern"}
                       </span>
                     </p>
@@ -387,7 +387,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href={ctaHref}>
-                  <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-retake-assessment-hub">
+                  <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-retake-assessment-hub">
                     <Target className="w-4 h-4 mr-2" />
                     Take Assessment
                   </Button>
@@ -431,9 +431,9 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           >
             <div
               className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.3)" }}
+              style={{ background: "rgba(99,103,255,0.1)", border: "1px solid rgba(99,103,255,0.3)" }}
             >
-              <Briefcase className="w-10 h-10 text-cyan-400" />
+              <Briefcase className="w-10 h-10 text-violet-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }} data-testid="text-no-assignment-hub">
               Welcome to Our Udyog
@@ -443,7 +443,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link href={ctaHref}>
-                <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-start-assessment-hub">
+                <Button className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-start-assessment-hub">
                   <Rocket className="w-4 h-4 mr-2" />
                   Take Assessment
                 </Button>
@@ -464,7 +464,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
     >
       <div
         className="rounded-2xl border p-6"
-        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(34,211,238,0.2)" }}
+        style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(99,103,255,0.2)" }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
@@ -474,7 +474,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
             {assignment?.assignedRole && (
               <span
                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2"
-                style={{ background: "rgba(34,211,238,0.15)", color: "#22D3EE", border: "1px solid rgba(34,211,238,0.3)" }}
+                style={{ background: "rgba(99,103,255,0.15)", color: "#6367FF", border: "1px solid rgba(99,103,255,0.3)" }}
                 data-testid="badge-role-hub"
               >
                 {assignment.assignedRole}
@@ -482,7 +482,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
             )}
           </div>
           <Link href="/shishya/udyog/dashboard">
-            <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-open-workspace">
+            <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-open-workspace">
               Open Workspace
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -492,9 +492,9 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
             <p className="text-xs text-gray-400 mb-1">Progress</p>
-            <p className="text-2xl font-bold text-cyan-400" data-testid="text-progress-hub">{overallProgress}%</p>
+            <p className="text-2xl font-bold text-violet-500" data-testid="text-progress-hub">{overallProgress}%</p>
             <div className="w-full h-1.5 rounded-full mt-2" style={{ background: "rgba(255,255,255,0.1)" }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${overallProgress}%`, background: "linear-gradient(90deg, #22D3EE, #14B8A6)" }} />
+              <div className="h-full rounded-full transition-all" style={{ width: `${overallProgress}%`, background: "linear-gradient(90deg, #6367FF, #14B8A6)" }} />
             </div>
           </div>
           <div className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
@@ -522,11 +522,11 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
         >
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-cyan-400" />
+              <Brain className="w-5 h-5 text-violet-500" />
               <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Assessment Scores</h3>
             </div>
             <Link href="/shishya/udyog/assess">
-              <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }} data-testid="button-retake-assessment-active">
+              <Button size="sm" className="text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }} data-testid="button-retake-assessment-active">
                 Retake Assessment
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -588,7 +588,7 @@ function DashboardTab({ user, ctaHref }: { user: any; ctaHref: string }) {
           </div>
           {tasks.length > 5 && (
             <Link href="/shishya/udyog/dashboard">
-              <p className="text-xs text-cyan-400 mt-3 cursor-pointer">View all {tasks.length} tasks →</p>
+              <p className="text-xs text-violet-500 mt-3 cursor-pointer">View all {tasks.length} tasks →</p>
             </Link>
           )}
         </div>
@@ -639,7 +639,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
               variants={itemVariants}
               className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
               style={{ background: "rgba(255,255,255,0.03)" }}
-              whileHover={{ borderColor: "rgba(34,211,238,0.3)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+              whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
               data-testid={`hub-internship-${internship.id}`}
             >
               <h3 className="text-lg font-semibold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>
@@ -647,7 +647,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
                 {internship.skillLevel && (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[internship.skillLevel?.toLowerCase()] || "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[internship.skillLevel?.toLowerCase()] || "bg-violet-500/20 text-violet-500 border-violet-500/30"}`}>
                     {internship.skillLevel}
                   </span>
                 )}
@@ -670,7 +670,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                  className="text-violet-500 hover:text-violet-400 hover:bg-violet-500/10"
                   onClick={() => setViewingInternship(internship)}
                   data-testid={`hub-view-internship-${internship.id}`}
                 >
@@ -681,7 +681,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
                   <Button
                     size="sm"
                     className="ml-auto text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                     data-testid={`hub-apply-internship-${internship.id}`}
                   >
                     Apply Now
@@ -699,7 +699,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <Rocket className="w-12 h-12 text-cyan-400/50 mx-auto mb-4" />
+          <Rocket className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Coming Soon
           </h3>
@@ -722,7 +722,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
               <p className="text-gray-300 text-sm whitespace-pre-wrap">{viewingInternship.description}</p>
               <div className="flex flex-wrap gap-2">
                 {viewingInternship.skillLevel && (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[viewingInternship.skillLevel?.toLowerCase()] || "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[viewingInternship.skillLevel?.toLowerCase()] || "bg-violet-500/20 text-violet-500 border-violet-500/30"}`}>
                     {viewingInternship.skillLevel}
                   </span>
                 )}
@@ -740,7 +740,7 @@ function InternshipTab({ ctaHref }: { ctaHref: string }) {
               )}
               <div className="pt-3 border-t border-white/10">
                 <Link href={ctaHref}>
-                  <Button className="w-full text-white border-0" style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
+                  <Button className="w-full text-white border-0" style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
                     Apply Now
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -809,7 +809,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-2" style={{ fontFamily: "var(--font-display)" }} data-testid="text-jobs-hub-title">
           Career{" "}
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
+          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
             Opportunities
           </span>
         </h2>
@@ -823,7 +823,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
             placeholder="Search by title, skills, or company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-colors"
             style={{ background: "rgba(255,255,255,0.05)" }}
             data-testid="input-search-jobs-hub"
           />
@@ -862,7 +862,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
                 variants={itemVariants}
                 className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
                 style={{ background: "rgba(255,255,255,0.03)" }}
-                whileHover={{ borderColor: "rgba(34,211,238,0.3)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+                whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                 data-testid={`hub-job-${job.id}`}
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -930,7 +930,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
                     <Button
                       size="sm"
                       className="text-white border-0"
-                      style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                      style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                       onClick={() => handleApply(job.id)}
                       disabled={applyMutation.isPending || deadline.expired}
                       data-testid={`hub-apply-job-${job.id}`}
@@ -951,7 +951,7 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <Briefcase className="w-12 h-12 text-cyan-400/50 mx-auto mb-4" />
+          <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
             {searchQuery ? "No matching jobs found" : "No Jobs Available"}
           </h3>
@@ -981,8 +981,8 @@ function SettingsTab() {
     >
       <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-cyan-500/20" style={{ background: "rgba(34,211,238,0.1)" }}>
-            <Bell className="w-5 h-5 text-cyan-400" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
+            <Bell className="w-5 h-5 text-violet-500" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Notifications</h3>
@@ -1016,8 +1016,8 @@ function SettingsTab() {
 
       <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-cyan-500/20" style={{ background: "rgba(34,211,238,0.1)" }}>
-            <Shield className="w-5 h-5 text-cyan-400" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
+            <Shield className="w-5 h-5 text-violet-500" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Privacy</h3>
@@ -1037,8 +1037,8 @@ function SettingsTab() {
 
       <div className="rounded-2xl border border-white/10 p-6" style={{ background: "rgba(255,255,255,0.03)" }}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-cyan-500/20" style={{ background: "rgba(34,211,238,0.1)" }}>
-            <Globe className="w-5 h-5 text-cyan-400" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
+            <Globe className="w-5 h-5 text-violet-500" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>Quick Links</h3>
@@ -1047,25 +1047,25 @@ function SettingsTab() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link href="/shishya/udyog">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-cyan-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-udyog-landing">
+            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-udyog-landing">
               <p className="text-sm text-gray-300 font-medium">Our Udyog Landing</p>
               <p className="text-xs text-gray-500">View the full landing page</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/assess">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-cyan-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-assessment">
+            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-assessment">
               <p className="text-sm text-gray-300 font-medium">Skill Assessment</p>
               <p className="text-xs text-gray-500">Take or retake your AI assessment</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/dashboard">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-cyan-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-workspace">
+            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-workspace">
               <p className="text-sm text-gray-300 font-medium">Full Workspace</p>
               <p className="text-xs text-gray-500">Open the detailed intern workspace</p>
             </div>
           </Link>
           <Link href="/shishya/udyog/jobs">
-            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-cyan-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-jobs-page">
+            <div className="p-3 rounded-lg border border-white/5 cursor-pointer transition-all hover:border-violet-500/30" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="link-jobs-page">
               <p className="text-sm text-gray-300 font-medium">Jobs Page</p>
               <p className="text-xs text-gray-500">Browse the full jobs listing</p>
             </div>

@@ -19,7 +19,7 @@ const THEME_COLOR_KEY = "shishya-theme-color";
 const THEME_MODE_KEY = "shishya-theme-mode";
 
 export const themeColors: { id: ThemeColor; name: string; primary: string; description: string }[] = [
-  { id: "neon", name: "Neon", primary: "#22d3ee", description: "Cyan Glow" },
+  { id: "neon", name: "Violet", primary: "#6367FF", description: "Blue Violet" },
   { id: "cyberpunk", name: "Cyberpunk", primary: "#f0abfc", description: "Purple Neon" },
   { id: "minimal", name: "Minimal", primary: "#3b82f6", description: "Clean Blue" },
   { id: "ocean", name: "Ocean", primary: "#2dd4bf", description: "Teal Waves" },

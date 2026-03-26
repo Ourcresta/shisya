@@ -105,7 +105,7 @@ export default function GuruDashboard() {
           value: stats.totalProjects,
           description: "Capstone assignments",
           icon: FolderKanban,
-          color: "text-cyan-500",
+          color: "text-violet-500",
         },
       ]
     : [];

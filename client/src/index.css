@@ -43,11 +43,11 @@ html {
 
 /* Text selection */
 ::selection {
-  background: rgba(0,245,255,0.25);
+  background: rgba(99,103,255,0.22);
   color: inherit;
 }
 .dark ::selection {
-  background: rgba(34,211,238,0.3);
+  background: rgba(99,103,255,0.32);
 }
 
 /* Smooth image rendering */
@@ -81,51 +81,51 @@ img {
    NEON THEME (Cyan - Electric Glow)
    ============================================ */
 
-/* LIGHT MODE - Neon */
+/* LIGHT MODE - Blue Violet (OurShiksha Brand) */
 :root,
 [data-theme="neon"] {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(99,103,255, .04);
+  --elevate-2: rgba(99,103,255, .09);
   --background: 0 0% 100%;
   --foreground: 220 15% 15%;
-  --border: 220 10% 90%;
-  --card: 220 15% 98%;
+  --border: 238 30% 90%;
+  --card: 238 20% 98%;
   --card-foreground: 220 15% 15%;
-  --card-border: 220 10% 94%;
-  --sidebar: 220 15% 96%;
+  --card-border: 238 40% 93%;
+  --sidebar: 238 30% 97%;
   --sidebar-foreground: 220 15% 15%;
-  --sidebar-border: 220 10% 92%;
-  --sidebar-primary: 187 85% 53%;
-  --sidebar-primary-foreground: 220 15% 8%;
-  --sidebar-accent: 187 20% 88%;
-  --sidebar-accent-foreground: 220 15% 15%;
-  --sidebar-ring: 187 85% 53%;
-  --popover: 220 15% 95%;
+  --sidebar-border: 238 30% 91%;
+  --sidebar-primary: 238 100% 67%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 238 60% 93%;
+  --sidebar-accent-foreground: 238 60% 30%;
+  --sidebar-ring: 238 100% 67%;
+  --popover: 238 20% 96%;
   --popover-foreground: 220 15% 15%;
-  --popover-border: 220 10% 91%;
-  --primary: 187 85% 53%;
-  --primary-foreground: 220 15% 8%;
-  --secondary: 220 10% 92%;
-  --secondary-foreground: 220 15% 15%;
-  --muted: 220 10% 90%;
-  --muted-foreground: 220 10% 40%;
-  --accent: 187 15% 90%;
-  --accent-foreground: 220 15% 15%;
+  --popover-border: 238 30% 90%;
+  --primary: 238 100% 67%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 238 30% 93%;
+  --secondary-foreground: 238 60% 30%;
+  --muted: 238 20% 91%;
+  --muted-foreground: 238 15% 45%;
+  --accent: 238 60% 93%;
+  --accent-foreground: 238 60% 25%;
   --destructive: 0 84% 42%;
   --destructive-foreground: 0 0% 98%;
   --success: 142 76% 36%;
   --success-foreground: 0 0% 98%;
   --warning: 38 92% 50%;
   --warning-foreground: 0 0% 10%;
-  --info: 199 89% 48%;
+  --info: 238 80% 60%;
   --info-foreground: 0 0% 98%;
-  --input: 220 10% 75%;
-  --ring: 187 85% 53%;
-  --chart-1: 187 85% 45%;
-  --chart-2: 160 76% 45%;
+  --input: 238 20% 78%;
+  --ring: 238 100% 67%;
+  --chart-1: 238 100% 60%;
+  --chart-2: 232 100% 72%;
   --chart-3: 38 92% 50%;
   --chart-4: 280 65% 50%;
   --chart-5: 340 82% 50%;
@@ -161,92 +161,92 @@ img {
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* DARK MODE - Neon Modern (Premium AI EdTech) */
+/* DARK MODE - Blue Violet (OurShiksha Brand) */
 .dark,
 [data-theme="neon"].dark {
-  --button-outline: rgba(34,211,238, .15);
-  --badge-outline: rgba(34,211,238, .10);
+  --button-outline: rgba(99,103,255, .18);
+  --badge-outline: rgba(99,103,255, .12);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(34,211,238, .06);
-  --elevate-2: rgba(34,211,238, .12);
+  --elevate-1: rgba(99,103,255, .07);
+  --elevate-2: rgba(99,103,255, .14);
   
-  /* Deep dark navy - #020617 */
-  --background: 222 47% 2%;
-  --foreground: 220 13% 91%;
+  /* Deep dark navy */
+  --background: 240 25% 5%;
+  --foreground: 238 20% 92%;
   
-  /* Border with subtle cyan glow */
-  --border: 220 20% 14%;
+  /* Border with subtle violet glow */
+  --border: 238 20% 16%;
   
-  /* Cards with glass effect - rgba(15,23,42,0.6) base */
-  --card: 222 40% 8%;
-  --card-foreground: 220 13% 91%;
-  --card-border: 187 50% 25%;
+  /* Cards with glass effect */
+  --card: 240 25% 9%;
+  --card-foreground: 238 20% 92%;
+  --card-border: 238 40% 22%;
   
   /* Sidebar styling */
-  --sidebar: 222 40% 6%;
-  --sidebar-foreground: 220 13% 91%;
-  --sidebar-border: 220 20% 12%;
-  --sidebar-primary: 187 85% 53%;
-  --sidebar-primary-foreground: 222 47% 2%;
-  --sidebar-accent: 187 30% 15%;
-  --sidebar-accent-foreground: 220 13% 91%;
-  --sidebar-ring: 187 85% 53%;
+  --sidebar: 240 25% 7%;
+  --sidebar-foreground: 238 20% 92%;
+  --sidebar-border: 238 20% 14%;
+  --sidebar-primary: 238 100% 72%;
+  --sidebar-primary-foreground: 240 25% 5%;
+  --sidebar-accent: 238 30% 18%;
+  --sidebar-accent-foreground: 238 20% 92%;
+  --sidebar-ring: 238 100% 72%;
   
   /* Popover */
-  --popover: 222 40% 10%;
-  --popover-foreground: 220 13% 91%;
-  --popover-border: 187 40% 20%;
+  --popover: 240 25% 11%;
+  --popover-foreground: 238 20% 92%;
+  --popover-border: 238 30% 22%;
   
-  /* Neon Primary - Cyan #22d3ee */
-  --primary: 187 85% 53%;
-  --primary-foreground: 222 47% 2%;
+  /* Primary - Violet #6367FF */
+  --primary: 238 100% 72%;
+  --primary-foreground: 240 25% 5%;
   
   /* Secondary surfaces */
-  --secondary: 220 20% 14%;
-  --secondary-foreground: 220 13% 91%;
+  --secondary: 238 20% 16%;
+  --secondary-foreground: 238 20% 92%;
   
-  /* Muted text - #94a3b8 / #64748b */
-  --muted: 220 15% 18%;
-  --muted-foreground: 217 19% 60%;
+  /* Muted text */
+  --muted: 238 15% 20%;
+  --muted-foreground: 238 15% 62%;
   
-  /* Accent with neon tint */
-  --accent: 187 25% 18%;
-  --accent-foreground: 220 13% 91%;
+  /* Accent with violet tint */
+  --accent: 238 30% 20%;
+  --accent-foreground: 238 20% 92%;
   
-  /* Status colors - Neon variants */
+  /* Status colors */
   --destructive: 350 89% 60%;
   --destructive-foreground: 0 0% 98%;
   --success: 142 69% 58%;
   --success-foreground: 0 0% 98%;
   --warning: 48 96% 53%;
   --warning-foreground: 0 0% 10%;
-  --info: 199 89% 55%;
+  --info: 238 80% 72%;
   --info-foreground: 0 0% 98%;
   
-  --input: 220 20% 22%;
-  --ring: 187 85% 53%;
+  --input: 238 20% 24%;
+  --ring: 238 100% 72%;
   
-  /* Chart colors - Neon palette */
-  --chart-1: 187 85% 53%;
-  --chart-2: 199 89% 55%;
+  /* Chart colors - Violet palette */
+  --chart-1: 238 100% 72%;
+  --chart-2: 232 100% 76%;
   --chart-3: 271 81% 71%;
   --chart-4: 142 69% 58%;
   --chart-5: 48 96% 53%;
   
-  /* Neon color system */
-  --neon-primary: 187 85% 53%;
-  --neon-secondary: 199 89% 55%;
+  /* Violet color system (replaces neon-cyan) */
+  --neon-primary: 238 100% 72%;
+  --neon-secondary: 232 100% 76%;
   --neon-accent: 271 81% 71%;
   --neon-success: 142 69% 58%;
   --neon-warning: 48 96% 53%;
   --neon-danger: 350 89% 60%;
   
-  /* Glow effects */
-  --neon-glow: 0 0 20px rgba(34,211,238,0.4);
-  --neon-glow-strong: 0 0 30px rgba(34,211,238,0.6);
-  --border-glow: rgba(34,211,238,0.4);
+  /* Glow effects - violet */
+  --neon-glow: 0 0 20px rgba(99,103,255,0.4);
+  --neon-glow-strong: 0 0 30px rgba(99,103,255,0.6);
+  --border-glow: rgba(99,103,255,0.4);
   
-  /* Shadows with neon tint */
+  /* Shadows with violet tint */
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.30);
   --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.35);
   --shadow-sm: 0px 2px 4px -1px hsl(0 0% 0% / 0.40);
@@ -255,7 +255,7 @@ img {
   --shadow-lg: 0px 10px 20px -5px hsl(0 0% 0% / 0.55);
   --shadow-xl: 0px 20px 40px -10px hsl(0 0% 0% / 0.60);
   --shadow-2xl: 0px 25px 50px -12px hsl(0 0% 0% / 0.70);
-  --shadow-neon: 0 4px 20px -5px rgba(34,211,238,0.3);
+  --shadow-neon: 0 4px 20px -5px rgba(99,103,255,0.3);
 
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -273,9 +273,9 @@ img {
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* Cosmic gradient background for dark mode */
+/* Violet-tinted gradient background for dark mode */
 html.dark {
-  background: linear-gradient(180deg, #0a0e1a 0%, #111827 100%);
+  background: linear-gradient(180deg, #0a0814 0%, #0f0c1f 50%, #111827 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -289,18 +289,18 @@ html.dark body {
   background: transparent !important;
 }
 
-/* Universal cosmic glass cards in dark mode */
+/* Universal violet glass cards in dark mode */
 .dark .shadcn-card {
-  background: rgba(15, 23, 42, 0.5) !important;
+  background: rgba(15, 12, 40, 0.55) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-color: rgba(34, 211, 238, 0.12) !important;
+  border-color: rgba(99, 103, 255, 0.14) !important;
   transition: all 0.3s ease;
 }
 
 .dark .shadcn-card:hover {
-  border-color: rgba(34, 211, 238, 0.25) !important;
-  box-shadow: 0 4px 20px -5px rgba(34, 211, 238, 0.15);
+  border-color: rgba(99, 103, 255, 0.28) !important;
+  box-shadow: 0 4px 20px -5px rgba(99, 103, 255, 0.18);
 }
 
 /* Dark mode section backgrounds - transparent to show cosmic gradient */
@@ -725,9 +725,9 @@ html.dark body {
     @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
   }
   
-  /* Neon gradient text - Premium style */
+  /* Violet gradient text - Brand style */
   .neon-gradient-text {
-    background: linear-gradient(135deg, #22d3ee, #38bdf8, #a78bfa);
+    background: linear-gradient(135deg, #6367FF, #8494FF, #C9BEFF);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -735,38 +735,38 @@ html.dark body {
     animation: gradientShift 3s ease infinite;
   }
 
-  /* Neon button styles */
+  /* Violet button styles */
   .neon-button-primary {
-    background: linear-gradient(135deg, #22d3ee, #38bdf8);
-    color: #020617;
+    background: linear-gradient(135deg, #6367FF, #8494FF);
+    color: #ffffff;
     border-radius: 999px;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+    box-shadow: 0 4px 15px rgba(99, 103, 255, 0.3);
   }
   
   .neon-button-primary:hover {
-    box-shadow: 0 6px 25px rgba(34, 211, 238, 0.5);
+    box-shadow: 0 6px 25px rgba(99, 103, 255, 0.5);
     transform: translateY(-2px);
   }
   
   .neon-button-secondary {
     background: transparent;
-    color: #22d3ee;
-    border: 1px solid #22d3ee;
+    color: #6367FF;
+    border: 1px solid #6367FF;
     border-radius: 999px;
     font-weight: 500;
     transition: all 0.3s ease;
   }
   
   .neon-button-secondary:hover {
-    background: rgba(34, 211, 238, 0.1);
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    background: rgba(99, 103, 255, 0.1);
+    box-shadow: 0 0 20px rgba(99, 103, 255, 0.3);
   }
   
   .neon-button-ghost {
     background: transparent;
-    color: #22d3ee;
+    color: #6367FF;
     font-weight: 500;
     position: relative;
   }
@@ -778,7 +778,7 @@ html.dark body {
     left: 50%;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #22d3ee, #38bdf8);
+    background: linear-gradient(90deg, #6367FF, #8494FF);
     transition: all 0.3s ease;
     transform: translateX(-50%);
   }
@@ -806,7 +806,7 @@ html.dark body {
     background: rgba(2, 6, 23, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(34, 211, 238, 0.15);
+    border-bottom: 1px solid rgba(99, 103, 255, 0.15);
   }
   
   .neon-link-active {
@@ -820,7 +820,7 @@ html.dark body {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #22d3ee, #38bdf8);
+    background: linear-gradient(90deg, #6367FF, #8494FF);
     border-radius: 1px;
   }
 
@@ -3252,9 +3252,9 @@ html.dark body {
   outline: none;
 }
 .vuc-voice-orb:hover {
-  border-color: #22d3ee;
-  background: #22d3ee14;
-  color: #22d3ee;
+  border-color: #6367FF;
+  background: #6367FF14;
+  color: #6367FF;
   transform: scale(1.05);
 }
 .vuc-voice-orb-listening {
@@ -3264,9 +3264,9 @@ html.dark body {
   animation: vuc-orb-pulse 1.2s ease-in-out infinite;
 }
 .vuc-voice-orb-speaking {
-  border-color: #22d3ee !important;
-  background: #22d3ee14 !important;
-  color: #22d3ee !important;
+  border-color: #6367FF !important;
+  background: #6367FF14 !important;
+  color: #6367FF !important;
   animation: vuc-orb-wave 1.8s ease-in-out infinite;
 }
 @keyframes vuc-orb-pulse {
@@ -3274,8 +3274,8 @@ html.dark body {
   50%       { box-shadow: 0 0 0 12px #4ade8000; transform: scale(1.04); }
 }
 @keyframes vuc-orb-wave {
-  0%, 100% { box-shadow: 0 0 0 0 #22d3ee40; }
-  50%       { box-shadow: 0 0 0 14px #22d3ee00; }
+  0%, 100% { box-shadow: 0 0 0 0 #6367FF40; }
+  50%       { box-shadow: 0 0 0 14px #6367FF00; }
 }
 
 .scrollbar-hide {

@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
 const jobTypeBadgeColors: Record<string, string> = {
-  "full-time": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  "full-time": "bg-cyan-500/20 text-violet-500 border-violet-500/30",
   "part-time": "bg-purple-500/20 text-purple-400 border-purple-500/30",
   "internship": "bg-green-500/20 text-green-400 border-green-500/30",
   "contract": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -106,7 +106,7 @@ export default function UdyogJobs() {
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
         <Link href="/shishya/udyog">
-          <span className="inline-flex items-center gap-2 text-sm text-cyan-400 mb-8 cursor-pointer transition-colors" style={{ display: "inline-flex" }}>
+          <span className="inline-flex items-center gap-2 text-sm text-violet-500 mb-8 cursor-pointer transition-colors" style={{ display: "inline-flex" }}>
             <ArrowLeft className="w-4 h-4" />
             Back to Our Udyog
           </span>
@@ -122,7 +122,7 @@ export default function UdyogJobs() {
               Career{" "}
               <span
                 className="bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #8494FF)" }}
               >
                 Opportunities
               </span>
@@ -177,7 +177,7 @@ export default function UdyogJobs() {
                   variants={itemVariants}
                   className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
                   style={{ background: "rgba(255,255,255,0.03)" }}
-                  whileHover={{ borderColor: "rgba(34,211,238,0.3)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+                  whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                   data-testid={`job-card-${job.id}`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -251,7 +251,7 @@ export default function UdyogJobs() {
                       <Button
                         size="sm"
                         className="text-white border-0"
-                        style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                        style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                         onClick={() => handleApply(job.id)}
                         disabled={applyMutation.isPending || deadline.expired}
                         data-testid={`button-apply-${job.id}`}
@@ -272,7 +272,7 @@ export default function UdyogJobs() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <Briefcase className="w-12 h-12 text-cyan-400/50 mx-auto mb-4" />
+            <Briefcase className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
               {searchQuery ? "No matching jobs found" : "No Jobs Available"}
             </h3>

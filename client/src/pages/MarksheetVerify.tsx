@@ -43,7 +43,7 @@ interface VerificationResponse {
 function getClassificationColor(classification: string): string {
   const colors: Record<string, string> = {
     "Distinction": "text-yellow-400 bg-yellow-500/20 border-yellow-500/50",
-    "First Class": "text-cyan-400 bg-cyan-500/20 border-cyan-500/50",
+    "First Class": "text-violet-500 bg-violet-500/20 border-violet-500/50",
     "Second Class": "text-blue-400 bg-blue-500/20 border-blue-500/50",
     "Pass": "text-green-400 bg-green-500/20 border-green-500/50",
     "Below Pass": "text-red-400 bg-red-500/20 border-red-500/50",
@@ -55,7 +55,7 @@ function getGradeColor(grade: string): string {
   const colors: Record<string, string> = {
     "O": "text-yellow-400",
     "A+": "text-emerald-400",
-    "A": "text-cyan-400",
+    "A": "text-violet-500",
     "B+": "text-blue-400",
     "B": "text-purple-400",
     "C": "text-amber-400",
@@ -95,7 +95,7 @@ export default function MarksheetVerify() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0YjhhNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMDMiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50" />
       
-      <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
 
       <div className="relative max-w-2xl mx-auto px-4 py-16">
@@ -106,8 +106,8 @@ export default function MarksheetVerify() {
           className="text-center mb-8"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-2 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20">
-              <GraduationCap className="w-8 h-8 text-cyan-400" />
+            <div className="p-2 rounded-full bg-gradient-to-r from-violet-500/20 to-purple-500/20">
+              <GraduationCap className="w-8 h-8 text-violet-500" />
             </div>
             <h1 
               className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
@@ -125,10 +125,10 @@ export default function MarksheetVerify() {
           animate="animate"
         >
           <motion.div variants={staggerItem}>
-            <Card className="border-2 border-cyan-500/30 bg-slate-900/90 backdrop-blur-sm overflow-hidden">
+            <Card className="border-2 border-violet-500/30 bg-slate-900/90 backdrop-blur-sm overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5" />
               
-              <CardHeader className="relative border-b border-cyan-500/20 pb-4">
+              <CardHeader className="relative border-b border-violet-500/20 pb-4">
                 <div className="flex items-center justify-center gap-3">
                   {isValid ? (
                     <div className="p-2 rounded-full bg-green-500/20">
@@ -148,9 +148,9 @@ export default function MarksheetVerify() {
               <CardContent className="relative pt-6">
                 {isValid && marksheet ? (
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20">
                       <div className="flex items-center gap-3">
-                        <Shield className="w-5 h-5 text-cyan-400" />
+                        <Shield className="w-5 h-5 text-violet-500" />
                         <div>
                           <p className="text-xs text-muted-foreground">Marksheet ID</p>
                           <p className="font-mono font-medium text-white" data-testid="text-marksheet-id">{marksheet.marksheetId}</p>
@@ -190,7 +190,7 @@ export default function MarksheetVerify() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg bg-gradient-to-r from-cyan-500/10 via-purple-500/5 to-pink-500/10 border border-cyan-500/20">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg bg-gradient-to-r from-violet-500/10 via-purple-500/5 to-pink-500/10 border border-violet-500/20">
                       <div className="text-center">
                         <p className="text-xs text-muted-foreground mb-1">Credits</p>
                         <p className="text-xl font-bold text-white">{marksheet.totalCredits}</p>
@@ -201,7 +201,7 @@ export default function MarksheetVerify() {
                       </div>
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
-                          <Star className="w-3 h-3 text-cyan-400" />
+                          <Star className="w-3 h-3 text-violet-500" />
                           <p className="text-xs text-muted-foreground">CGPA</p>
                         </div>
                         <p className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
@@ -242,11 +242,11 @@ export default function MarksheetVerify() {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-cyan-500/20 text-center">
+                    <div className="pt-4 border-t border-violet-500/20 text-center">
                       <p className="text-xs text-muted-foreground mb-2">
                         Signed by: {marksheet.signedBy}
                       </p>
-                      <p className="text-xs text-cyan-400">
+                      <p className="text-xs text-violet-500">
                         Verified by: {marksheet.aiVerifierName}
                       </p>
                     </div>

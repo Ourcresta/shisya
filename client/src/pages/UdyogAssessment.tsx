@@ -320,9 +320,9 @@ export default function UdyogAssessment() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 mb-6" style={{ background: "rgba(34,211,238,0.1)" }}>
-                    <Brain className="w-4 h-4 text-cyan-400" />
-                    <span className="text-cyan-400 text-sm font-medium">AI Skill Assessment</span>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 mb-6" style={{ background: "rgba(99,103,255,0.1)" }}>
+                    <Brain className="w-4 h-4 text-violet-500" />
+                    <span className="text-violet-500 text-sm font-medium">AI Skill Assessment</span>
                   </div>
                 </motion.div>
                 <h1
@@ -331,7 +331,7 @@ export default function UdyogAssessment() {
                   data-testid="text-assessment-title"
                 >
                   Choose Your{" "}
-                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
+                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #8494FF)" }}>
                     Domain
                   </span>
                 </h1>
@@ -352,14 +352,14 @@ export default function UdyogAssessment() {
                       onClick={() => handleDomainSelect(domain.key)}
                       className="text-left rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300 cursor-pointer group"
                       style={{ background: "rgba(255,255,255,0.03)" }}
-                      whileHover={{ borderColor: "rgba(34,211,238,0.4)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+                      whileHover={{ borderColor: "rgba(99,103,255,0.4)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                       data-testid={`card-domain-${domain.key}`}
                     >
                       <div
-                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 border border-cyan-500/20 transition-all duration-300 group-hover:border-cyan-500/40"
-                        style={{ background: "rgba(34,211,238,0.1)" }}
+                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 border border-violet-500/20 transition-all duration-300 group-hover:border-cyan-500/40"
+                        style={{ background: "rgba(99,103,255,0.1)" }}
                       >
-                        <Icon className="w-7 h-7 text-cyan-400" />
+                        <Icon className="w-7 h-7 text-violet-500" />
                       </div>
                       <h3
                         className="text-lg font-semibold text-white mb-1"
@@ -369,7 +369,7 @@ export default function UdyogAssessment() {
                         {domain.label}
                       </h3>
                       <p className="text-gray-400 text-sm mb-3">{domain.description}</p>
-                      <div className="flex items-center gap-1 text-cyan-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 text-violet-500 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                         Start Assessment <ChevronRight className="w-4 h-4" />
                       </div>
                     </motion.button>
@@ -390,10 +390,10 @@ export default function UdyogAssessment() {
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center border border-cyan-500/20"
-                    style={{ background: "rgba(34,211,238,0.1)" }}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center border border-violet-500/20"
+                    style={{ background: "rgba(99,103,255,0.1)" }}
                   >
-                    {(() => { const Icon = questionBank[selectedDomain].icon; return <Icon className="w-5 h-5 text-cyan-400" />; })()}
+                    {(() => { const Icon = questionBank[selectedDomain].icon; return <Icon className="w-5 h-5 text-violet-500" />; })()}
                   </div>
                   <div>
                     <h2 className="text-white font-semibold" style={{ fontFamily: "var(--font-display)" }} data-testid="text-current-domain">
@@ -403,7 +403,7 @@ export default function UdyogAssessment() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10" style={{ background: "rgba(255,255,255,0.05)" }}>
-                  <Clock className="w-4 h-4 text-cyan-400" />
+                  <Clock className="w-4 h-4 text-violet-500" />
                   <span className="text-gray-300 text-sm font-mono" data-testid="text-elapsed-time">{formatTime(elapsedTime)}</span>
                 </div>
               </div>
@@ -411,12 +411,12 @@ export default function UdyogAssessment() {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-500 text-xs">Progress</span>
-                  <span className="text-cyan-400 text-xs font-medium">{Math.round(progressPercent)}%</span>
+                  <span className="text-violet-500 text-xs font-medium">{Math.round(progressPercent)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: "linear-gradient(90deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(90deg, #6367FF, #8494FF)" }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercent}%` }}
                     transition={{ duration: 0.3 }}
@@ -437,8 +437,8 @@ export default function UdyogAssessment() {
                 >
                   <div className="flex items-start gap-4 mb-8">
                     <div
-                      className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold text-cyan-400 border border-cyan-500/30"
-                      style={{ background: "rgba(34,211,238,0.1)" }}
+                      className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold text-violet-500 border border-violet-500/30"
+                      style={{ background: "rgba(99,103,255,0.1)" }}
                     >
                       {currentQuestion + 1}
                     </div>
@@ -456,18 +456,18 @@ export default function UdyogAssessment() {
                           onClick={() => handleOptionSelect(optIndex)}
                           className="w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-center gap-3"
                           style={{
-                            background: isSelected ? "rgba(34,211,238,0.1)" : "rgba(255,255,255,0.02)",
-                            borderColor: isSelected ? "rgba(34,211,238,0.5)" : "rgba(255,255,255,0.08)",
+                            background: isSelected ? "rgba(99,103,255,0.1)" : "rgba(255,255,255,0.02)",
+                            borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(255,255,255,0.08)",
                           }}
-                          whileHover={{ borderColor: "rgba(34,211,238,0.3)" }}
+                          whileHover={{ borderColor: "rgba(99,103,255,0.3)" }}
                           data-testid={`option-${optIndex}`}
                         >
                           <div
                             className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold border transition-all duration-200"
                             style={{
-                              background: isSelected ? "rgba(34,211,238,0.2)" : "rgba(255,255,255,0.05)",
-                              borderColor: isSelected ? "rgba(34,211,238,0.5)" : "rgba(255,255,255,0.1)",
-                              color: isSelected ? "#22D3EE" : "#9ca3af",
+                              background: isSelected ? "rgba(99,103,255,0.2)" : "rgba(255,255,255,0.05)",
+                              borderColor: isSelected ? "rgba(99,103,255,0.5)" : "rgba(255,255,255,0.1)",
+                              color: isSelected ? "#6367FF" : "#9ca3af",
                             }}
                           >
                             {String.fromCharCode(65 + optIndex)}
@@ -475,7 +475,7 @@ export default function UdyogAssessment() {
                           <span className={`text-sm md:text-base ${isSelected ? "text-cyan-300" : "text-gray-300"}`}>
                             {option}
                           </span>
-                          {isSelected && <CheckCircle className="w-5 h-5 text-cyan-400 ml-auto shrink-0" />}
+                          {isSelected && <CheckCircle className="w-5 h-5 text-violet-500 ml-auto shrink-0" />}
                         </motion.button>
                       );
                     })}
@@ -498,7 +498,7 @@ export default function UdyogAssessment() {
                 {currentQuestion < questions.length - 1 ? (
                   <Button
                     className="text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                     onClick={() => setCurrentQuestion((q) => q + 1)}
                     data-testid="button-next"
                   >
@@ -508,7 +508,7 @@ export default function UdyogAssessment() {
                 ) : (
                   <Button
                     className="text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                     data-testid="button-submit"
@@ -527,16 +527,16 @@ export default function UdyogAssessment() {
                     className="w-8 h-8 rounded-lg text-xs font-medium border transition-all duration-200 flex items-center justify-center"
                     style={{
                       background: i === currentQuestion
-                        ? "rgba(34,211,238,0.2)"
+                        ? "rgba(99,103,255,0.2)"
                         : answers[i] !== null
-                          ? "rgba(34,211,238,0.08)"
+                          ? "rgba(99,103,255,0.08)"
                           : "rgba(255,255,255,0.03)",
                       borderColor: i === currentQuestion
-                        ? "rgba(34,211,238,0.5)"
+                        ? "rgba(99,103,255,0.5)"
                         : answers[i] !== null
-                          ? "rgba(34,211,238,0.2)"
+                          ? "rgba(99,103,255,0.2)"
                           : "rgba(255,255,255,0.08)",
-                      color: i === currentQuestion ? "#22D3EE" : answers[i] !== null ? "#67e8f9" : "#6b7280",
+                      color: i === currentQuestion ? "#6367FF" : answers[i] !== null ? "#67e8f9" : "#6b7280",
                     }}
                     data-testid={`nav-question-${i}`}
                   >
@@ -562,7 +562,7 @@ export default function UdyogAssessment() {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
                 >
-                  <Award className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
+                  <Award className="w-12 h-12 text-violet-500 mx-auto mb-4" />
                 </motion.div>
                 <h1
                   className="text-3xl md:text-4xl font-bold text-white mb-2"
@@ -594,8 +594,8 @@ export default function UdyogAssessment() {
                       />
                       <defs>
                         <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#22D3EE" />
-                          <stop offset="100%" stopColor="#14B8A6" />
+                          <stop offset="0%" stopColor="#6367FF" />
+                          <stop offset="100%" stopColor="#8494FF" />
                         </linearGradient>
                       </defs>
                     </svg>
@@ -621,7 +621,7 @@ export default function UdyogAssessment() {
 
                 <div
                   className="rounded-xl border border-white/10 p-5 mb-8 text-center"
-                  style={{ background: "rgba(34,211,238,0.05)" }}
+                  style={{ background: "rgba(99,103,255,0.05)" }}
                   data-testid="card-role-preview"
                 >
                   <p className="text-gray-400 text-sm mb-1">Based on your score, you qualify as:</p>
@@ -644,7 +644,7 @@ export default function UdyogAssessment() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
                     className="flex-1 text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #8494FF)" }}
                     onClick={handleStartInternship}
                     disabled={isAssigning}
                     data-testid="button-start-internship"

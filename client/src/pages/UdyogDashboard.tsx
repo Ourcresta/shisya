@@ -42,15 +42,15 @@ const sidebarItems = [
 ];
 
 const roleColors: Record<string, string> = {
-  "Team Lead": "#22D3EE",
+  "Team Lead": "#6367FF",
   "Developer": "#14B8A6",
   "QA/Tester": "#8B5CF6",
   "developer": "#14B8A6",
-  "team_lead": "#22D3EE",
+  "team_lead": "#6367FF",
   "qa_tester": "#8B5CF6",
   "Junior Intern": "#F59E0B",
   "Project Associate": "#3B82F6",
-  "Lead Developer": "#22D3EE",
+  "Lead Developer": "#6367FF",
 };
 
 function getRoleColor(role: string): string {

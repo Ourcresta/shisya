@@ -341,7 +341,7 @@ export default function GuruStudents() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 rounded-lg border p-3">
-                  <FolderKanban className="w-4 h-4 text-cyan-500 shrink-0" />
+                  <FolderKanban className="w-4 h-4 text-violet-500 shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Project Submissions</p>
                     <p className="font-semibold" data-testid="text-detail-project-submissions">

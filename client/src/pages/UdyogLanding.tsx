@@ -116,7 +116,7 @@ export default function UdyogLanding() {
               <span
                 className="bg-clip-text text-transparent whitespace-nowrap"
                 style={{
-                  backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6, #22D3EE)",
+                  backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6, #6367FF)",
                   backgroundSize: "200% 200%",
                   animation: "gradientShift 3s ease infinite",
                 }}
@@ -135,7 +135,7 @@ export default function UdyogLanding() {
                 <Button
                   size="lg"
                   className="min-w-[220px] text-white border-0"
-                  style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                  style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                   data-testid="button-start-internship"
                 >
                   <Rocket className="w-5 h-5 mr-2" />
@@ -146,7 +146,7 @@ export default function UdyogLanding() {
               <Button
                 size="lg"
                 variant="outline"
-                className="min-w-[220px] border-cyan-500/30 text-cyan-400 bg-transparent"
+                className="min-w-[220px] border-violet-500/30 text-violet-500 bg-transparent"
                 onClick={scrollToPrograms}
                 data-testid="button-explore-programs"
               >
@@ -172,7 +172,7 @@ export default function UdyogLanding() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat) => (
               <div key={stat.label} className="flex items-center justify-center gap-3" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                <stat.icon className="w-5 h-5 text-cyan-400 shrink-0" />
+                <stat.icon className="w-5 h-5 text-violet-500 shrink-0" />
                 <span className="text-sm md:text-base font-medium text-gray-300">{stat.label}</span>
               </div>
             ))}
@@ -195,7 +195,7 @@ export default function UdyogLanding() {
               data-testid="text-how-udyog-works"
             >
               How{" "}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #6367FF, #14B8A6)" }}>
                 Our Udyog
               </span>{" "}
               Works
@@ -218,14 +218,14 @@ export default function UdyogLanding() {
                 variants={itemVariants}
                 className="relative group rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
                 style={{ background: "rgba(255,255,255,0.03)" }}
-                whileHover={{ borderColor: "rgba(34,211,238,0.3)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+                whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                 data-testid={`card-feature-${index + 1}`}
               >
-                <div className="absolute -top-3 -left-1 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-cyan-400 border border-cyan-500/30" style={{ background: "rgba(34,211,238,0.1)" }}>
+                <div className="absolute -top-3 -left-1 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-violet-500 border border-violet-500/30" style={{ background: "rgba(99,103,255,0.1)" }}>
                   {index + 1}
                 </div>
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 border border-cyan-500/20" style={{ background: "rgba(34,211,238,0.1)" }}>
-                  <feature.icon className="w-7 h-7 text-cyan-400" />
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 border border-violet-500/20" style={{ background: "rgba(99,103,255,0.1)" }}>
+                  <feature.icon className="w-7 h-7 text-violet-500" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
                   {feature.title}
@@ -273,10 +273,10 @@ export default function UdyogLanding() {
                   className="relative text-center"
                   data-testid={`step-${index + 1}`}
                 >
-                  <div className="relative z-10 mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-cyan-500/30" style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.15), rgba(20,184,166,0.1))" }}>
-                    <step.icon className="w-7 h-7 text-cyan-400" />
+                  <div className="relative z-10 mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-violet-500/30" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.15), rgba(20,184,166,0.1))" }}>
+                    <step.icon className="w-7 h-7 text-violet-500" />
                   </div>
-                  <div className="text-xs font-semibold text-cyan-400 mb-2 uppercase tracking-wider">Step {index + 1}</div>
+                  <div className="text-xs font-semibold text-violet-500 mb-2 uppercase tracking-wider">Step {index + 1}</div>
                   <h3 className="text-lg font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
                     {step.title}
                   </h3>
@@ -334,7 +334,7 @@ export default function UdyogLanding() {
                   variants={itemVariants}
                   className="rounded-2xl border border-white/10 p-6 backdrop-blur-xl transition-all duration-300"
                   style={{ background: "rgba(255,255,255,0.03)" }}
-                  whileHover={{ borderColor: "rgba(34,211,238,0.3)", boxShadow: "0 0 30px rgba(34,211,238,0.1)" }}
+                  whileHover={{ borderColor: "rgba(99,103,255,0.3)", boxShadow: "0 0 30px rgba(99,103,255,0.1)" }}
                   data-testid={`card-internship-${internship.id}`}
                 >
                   <h3 className="text-lg font-semibold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>
@@ -342,7 +342,7 @@ export default function UdyogLanding() {
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {internship.skillLevel && (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[internship.skillLevel?.toLowerCase()] || "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[internship.skillLevel?.toLowerCase()] || "bg-violet-500/20 text-violet-500 border-violet-500/30"}`}>
                         {internship.skillLevel}
                       </span>
                     )}
@@ -365,7 +365,7 @@ export default function UdyogLanding() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                      className="text-violet-500 hover:text-violet-400 hover:bg-violet-500/10"
                       onClick={() => setViewingInternship(internship)}
                       data-testid={`button-view-details-${internship.id}`}
                     >
@@ -376,7 +376,7 @@ export default function UdyogLanding() {
                       <Button
                         size="sm"
                         className="ml-auto text-white border-0"
-                        style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                        style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                         data-testid={`button-apply-${internship.id}`}
                       >
                         Apply Now
@@ -396,7 +396,7 @@ export default function UdyogLanding() {
               viewport={{ once: true }}
               data-testid="text-coming-soon"
             >
-              <Rocket className="w-12 h-12 text-cyan-400/50 mx-auto mb-4" />
+              <Rocket className="w-12 h-12 text-violet-500/50 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
                 Coming Soon
               </h3>
@@ -430,7 +430,7 @@ export default function UdyogLanding() {
             <Button
               size="lg"
               className="min-w-[200px] text-white border-0"
-              style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+              style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
               data-testid="button-start-now"
             >
               Start Now
@@ -455,7 +455,7 @@ export default function UdyogLanding() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {viewingInternship.skillLevel && (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[viewingInternship.skillLevel?.toLowerCase()] || "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[viewingInternship.skillLevel?.toLowerCase()] || "bg-violet-500/20 text-violet-500 border-violet-500/30"}`}>
                     {viewingInternship.skillLevel}
                   </span>
                 )}
@@ -475,7 +475,7 @@ export default function UdyogLanding() {
                 <Link href={ctaHref}>
                   <Button
                     className="w-full text-white border-0"
-                    style={{ background: "linear-gradient(135deg, #22D3EE, #14B8A6)" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #14B8A6)" }}
                     data-testid="button-apply-from-detail"
                   >
                     Apply Now
