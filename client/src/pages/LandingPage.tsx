@@ -1773,52 +1773,93 @@ function Footer() {
     { href: "#", icon: Instagram, label: "Instagram" },
   ];
 
-  const FBG = "#EEF2FF";
-  const FBORDER = "#DDE3FF";
-  const FTEXT_HEAD = "#1A1A2E";
-  const FTEXT_BODY = "#5B6490";
-  const FTEXT_MUTED = "#9CA3BF";
-
   return (
-    <footer style={{ background: FBG, borderTop: `1px solid ${FBORDER}` }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-6">
+    <footer style={{ background: "linear-gradient(160deg, #1E1B4B 0%, #2D2A7A 50%, #1E3A5F 100%)" }}>
 
-        {/* Top grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+      {/* Newsletter strip */}
+      <div style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-base font-bold text-white mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                Stay ahead with OurShiksha
+              </h3>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                New courses, AI features, and career tips — delivered weekly.
+              </p>
+            </div>
+            <div className="flex gap-2 w-full md:w-auto">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 md:w-64 px-4 py-2.5 rounded-xl text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  backdropFilter: "blur(8px)",
+                }}
+                data-testid="input-newsletter-email"
+              />
+              <button
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] shrink-0"
+                style={{ background: CTA_GRAD, color: "#fff", boxShadow: "0 4px 16px rgba(99,103,255,0.4)" }}
+                data-testid="button-newsletter-subscribe"
+              >
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main link grid */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: CTA_GRAD }}>
-                <GraduationCap className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: CTA_GRAD }}>
+                <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <span
-                className="font-bold text-sm"
-                style={{ fontFamily: "var(--font-display)", background: CTA_GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
-              >
+              <span className="font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF", fontSize: "16px" }}>
                 OurShiksha
               </span>
             </div>
-            <p className="text-xs leading-relaxed mb-5" style={{ color: FTEXT_BODY }}>
-              India's premier AI-powered e-learning platform. Learn. Build. Prove.
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.5)", lineHeight: "1.7" }}>
+              India's premier AI-powered e-learning platform combining courses, labs, projects, and Usha AI — your path to mastery.
             </p>
-            <div className="flex gap-2 flex-wrap">
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {[
+                { icon: BadgeCheck, label: "AI-Powered" },
+                { icon: Shield, label: "SSL Secured" },
+              ].map((b, i) => (
+                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <b.icon className="w-3 h-3" style={{ color: "#8494FF" }} />
+                  <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.6)" }}>{b.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Social icons */}
+            <div className="flex gap-2">
               {socials.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:-translate-y-0.5"
-                  style={{ background: "#FFFFFF", border: `1px solid ${FBORDER}`, color: C.teal }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.6)" }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = C.teal;
+                    (e.currentTarget as HTMLElement).style.background = "rgba(99,103,255,0.4)";
                     (e.currentTarget as HTMLElement).style.color = "#fff";
-                    (e.currentTarget as HTMLElement).style.borderColor = C.teal;
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "#FFFFFF";
-                    (e.currentTarget as HTMLElement).style.color = C.teal;
-                    (e.currentTarget as HTMLElement).style.borderColor = FBORDER;
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)";
                   }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
@@ -1830,18 +1871,19 @@ function Footer() {
           {/* Link columns */}
           {footerLinks.map((col) => (
             <div key={col.heading}>
-              <h4 className="font-semibold text-[11px] mb-3 tracking-widest uppercase" style={{ color: FTEXT_HEAD }}>
+              <h4 className="font-semibold text-xs mb-4 tracking-widest uppercase" style={{ color: "#8494FF", letterSpacing: "0.1em" }}>
                 {col.heading}
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-xs transition-colors hover:text-[#6367FF]"
-                      style={{ color: FTEXT_BODY }}
+                      className="text-sm transition-all hover:text-white flex items-center gap-1.5 group"
+                      style={{ color: "rgba(255,255,255,0.5)" }}
                       data-testid={link.testId}
                     >
+                      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-1 transition-all" style={{ color: "#8494FF" }} />
                       {link.label}
                     </Link>
                   </li>
@@ -1853,23 +1895,25 @@ function Footer() {
 
         {/* Bottom bar */}
         <div
-          className="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3"
-          style={{ borderTop: `1px solid ${FBORDER}` }}
+          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <p className="text-xs order-2 sm:order-1" style={{ color: FTEXT_MUTED }} data-testid="text-copyright">
-            © {currentYear} OurShiksha. All rights reserved.
+          <p className="text-xs order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.3)" }} data-testid="text-copyright">
+            © {currentYear} OurShiksha. All rights reserved. · Made with <Heart className="w-3 h-3 fill-red-400 text-red-400 inline-block mx-0.5" /> in India
           </p>
-          <div className="flex items-center gap-4 order-1 sm:order-2">
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5" style={{ color: C.teal }} />
-              <span className="text-[11px]" style={{ color: FTEXT_MUTED }}>SSL Secured</span>
-            </div>
-            <p className="text-[11px] flex items-center gap-1" style={{ color: FTEXT_MUTED }}>
-              Made with <Heart className="w-3 h-3 fill-red-400 text-red-400" /> in India
-            </p>
+          <div className="flex items-center gap-3 order-1 sm:order-2">
+            {[
+              { icon: BadgeCheck, label: "Verified Certs" },
+              { icon: Users, label: "25K+ Learners" },
+              { icon: Star, label: "4.9 Rating" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <item.icon className="w-3.5 h-3.5" style={{ color: "#8494FF" }} />
+                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
-
       </div>
     </footer>
   );
