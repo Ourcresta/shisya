@@ -1771,22 +1771,22 @@ function Footer() {
   ];
 
   return (
-    <footer style={{ background: "linear-gradient(160deg, #1E1B4B 0%, #2D2A7A 50%, #1E3A5F 100%)" }}>
+    <footer style={{ background: HERO_GRAD }}>
       {/* Main link grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 bg-[#000417b0]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: CTA_GRAD }}>
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
                 <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF", fontSize: "16px" }}>
+              <span className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "16px" }}>
                 OurShiksha
               </span>
             </div>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.5)", lineHeight: "1.7" }}>
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.78)", lineHeight: "1.7" }}>
               India's premier AI-powered e-learning platform combining courses, labs, projects, and Usha AI — your path to mastery.
             </p>
 
@@ -1796,9 +1796,9 @@ function Footer() {
                 { icon: BadgeCheck, label: "AI-Powered" },
                 { icon: Shield, label: "SSL Secured" },
               ].map((b, i) => (
-                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "#2A2760", border: "1px solid #3D3A80" }}>
-                  <b.icon className="w-3 h-3" style={{ color: "#8494FF" }} />
-                  <span className="text-[11px]" style={{ color: "#B0B8FF" }}>{b.label}</span>
+                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)" }}>
+                  <b.icon className="w-3 h-3 text-white" />
+                  <span className="text-[11px] text-white font-medium">{b.label}</span>
                 </div>
               ))}
             </div>
@@ -1811,16 +1811,12 @@ function Footer() {
                   href={s.href}
                   aria-label={s.label}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: "#2A2760", border: "1px solid #3D3A80", color: "#B0B8FF" }}
+                  style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff" }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "#6367FF";
-                    (e.currentTarget as HTMLElement).style.borderColor = "#6367FF";
-                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.3)";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "#2A2760";
-                    (e.currentTarget as HTMLElement).style.borderColor = "#3D3A80";
-                    (e.currentTarget as HTMLElement).style.color = "#B0B8FF";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)";
                   }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
@@ -1832,7 +1828,7 @@ function Footer() {
           {/* Link columns */}
           {footerLinks.map((col) => (
             <div key={col.heading}>
-              <h4 className="font-semibold text-xs mb-4 tracking-widest uppercase" style={{ color: "#8494FF", letterSpacing: "0.1em" }}>
+              <h4 className="font-semibold text-xs mb-4 tracking-widest uppercase text-white" style={{ letterSpacing: "0.1em" }}>
                 {col.heading}
               </h4>
               <ul className="space-y-3">
@@ -1840,11 +1836,11 @@ function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm transition-all hover:text-white flex items-center gap-1.5 group"
-                      style={{ color: "rgba(255,255,255,0.5)" }}
+                      className="text-sm transition-all flex items-center gap-1.5 group hover:text-white"
+                      style={{ color: "rgba(255,255,255,0.72)" }}
                       data-testid={link.testId}
                     >
-                      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-1 transition-all" style={{ color: "#8494FF" }} />
+                      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-1 transition-all text-white" />
                       {link.label}
                     </Link>
                   </li>
@@ -1857,10 +1853,10 @@ function Footer() {
         {/* Bottom bar */}
         <div
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid #2D2A5A" }}
+          style={{ borderTop: "1px solid rgba(255,255,255,0.25)" }}
         >
-          <p className="text-xs order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.3)" }} data-testid="text-copyright">
-            © {currentYear} OurShiksha. All rights reserved. · Made with <Heart className="w-3 h-3 fill-red-400 text-red-400 inline-block mx-0.5" /> in India
+          <p className="text-xs order-2 sm:order-1 text-white" style={{ color: "rgba(255,255,255,0.7)" }} data-testid="text-copyright">
+            © {currentYear} OurShiksha. All rights reserved. · Made with <Heart className="w-3 h-3 fill-red-300 text-red-300 inline-block mx-0.5" /> in India
           </p>
           <div className="flex items-center gap-3 order-1 sm:order-2">
             {[
@@ -1869,8 +1865,8 @@ function Footer() {
               { icon: Star, label: "4.9 Rating" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-1.5">
-                <item.icon className="w-3.5 h-3.5" style={{ color: "#8494FF" }} />
-                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>{item.label}</span>
+                <item.icon className="w-3.5 h-3.5 text-white" />
+                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.75)" }}>{item.label}</span>
               </div>
             ))}
           </div>
