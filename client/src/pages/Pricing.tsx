@@ -62,19 +62,20 @@ interface DBPlan {
 }
 
 const C = {
-  bgDeep: "#050A18",
-  bgPrimary: "#0B1D3A",
-  bgSecondary: "#0F172A",
-  cardBg: "rgba(255,255,255,0.04)",
-  cardBorder: "rgba(255,255,255,0.08)",
-  teal: "#00F5FF",
-  tealDark: "#0EA5E9",
-  purple: "#7C3AED",
+  bgDeep: "#F8F7FF",
+  bgPrimary: "#EDE9FF",
+  bgSecondary: "#F8F7FF",
+  cardBg: "#FFFFFF",
+  cardBorder: "#EDE9FF",
+  teal: "#6367FF",
+  tealDark: "#4F46E5",
+  purple: "#8494FF",
   success: "#10B981",
   warning: "#F59E0B",
   danger: "#EF4444",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#94A3B8",
+  textPrimary: "#1E1B4B",
+  textSecondary: "#6B7280",
+  heroGrad: "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)",
 };
 
 const fallbackPlans: DBPlan[] = [
@@ -184,7 +185,7 @@ function GlassCard({
   return (
     <div
       className={`rounded-[20px] backdrop-blur-[20px] transition-all duration-300 ${
-        hover ? "hover:-translate-y-1.5 hover:shadow-[0_12px_40px_-8px_rgba(0,245,255,0.15)]" : ""
+        hover ? "hover:-translate-y-1.5 hover:shadow-[0_12px_40px_-8px_rgba(99,103,255,0.15)]" : ""
       } ${className}`}
       style={{
         background: C.cardBg,
@@ -192,7 +193,7 @@ function GlassCard({
         ...style,
       }}
       onMouseEnter={(e) => {
-        if (hover) (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.2)";
+        if (hover) (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.25)";
       }}
       onMouseLeave={(e) => {
         if (hover) (e.currentTarget as HTMLElement).style.borderColor = C.cardBorder;
@@ -248,14 +249,14 @@ function PricingCard({
     <div
       className="relative rounded-[20px] backdrop-blur-[20px] transition-all duration-300 flex flex-col h-full overflow-hidden"
       style={{
-        background: isPopular ? "rgba(0,245,255,0.035)" : C.cardBg,
-        border: `1px solid ${isPopular ? "rgba(0,245,255,0.22)" : C.cardBorder}`,
-        boxShadow: isPopular ? "0 12px 48px -8px rgba(0,245,255,0.18)" : "none",
+        background: isPopular ? "rgba(99,103,255,0.06)" : C.cardBg,
+        border: `1px solid ${isPopular ? "rgba(99,103,255,0.28)" : C.cardBorder}`,
+        boxShadow: isPopular ? "0 12px 48px -8px rgba(99,103,255,0.22)" : "none",
       }}
       onMouseEnter={(e) => {
         if (!isPopular) {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,245,255,0.18)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 36px -8px rgba(0,245,255,0.1)";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,103,255,0.22)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 36px -8px rgba(99,103,255,0.12)";
           (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
         }
       }}
@@ -281,8 +282,8 @@ function PricingCard({
           <span
             className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1"
             style={{
-              background: "rgba(0,245,255,0.1)",
-              border: "1px solid rgba(0,245,255,0.25)",
+              background: "rgba(99,103,255,0.12)",
+              border: "1px solid rgba(99,103,255,0.30)",
               color: C.teal,
             }}
           >
@@ -298,8 +299,8 @@ function PricingCard({
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{
-              background: isPopular ? "rgba(0,245,255,0.1)" : isFree ? "rgba(255,255,255,0.05)" : "rgba(124,58,237,0.1)",
-              border: `1px solid ${isPopular ? "rgba(0,245,255,0.22)" : isFree ? "rgba(255,255,255,0.09)" : "rgba(124,58,237,0.25)"}`,
+              background: isPopular ? "rgba(99,103,255,0.12)" : isFree ? "rgba(99,103,255,0.06)" : "rgba(132,148,255,0.15)",
+              border: `1px solid ${isPopular ? "rgba(99,103,255,0.28)" : isFree ? "rgba(99,103,255,0.10)" : "rgba(132,148,255,0.15)"}`,
             }}
           >
             <IconComp className="w-5 h-5" style={{ color: tierColor }} />
@@ -374,12 +375,12 @@ function PricingCard({
                 ? {
                     background: "transparent",
                     color: C.teal,
-                    border: `1px solid rgba(0,245,255,0.28)`,
+                    border: `1px solid rgba(99,103,255,0.35)`,
                   }
                 : {
                     background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
                     color: C.bgDeep,
-                    boxShadow: "0 4px 18px rgba(0,245,255,0.28)",
+                    boxShadow: "0 4px 18px rgba(99,103,255,0.35)",
                     border: "none",
                   }
             }
@@ -403,7 +404,7 @@ function PricingCard({
             <li key={i} className="flex items-start gap-2.5 text-[13px]">
               <div
                 className="w-4 h-4 rounded-full flex items-center justify-center mt-0.5 shrink-0"
-                style={{ background: "rgba(0,245,255,0.1)" }}
+                style={{ background: "rgba(99,103,255,0.12)" }}
               >
                 <Check className="w-2.5 h-2.5" style={{ color: C.teal }} />
               </div>
@@ -503,7 +504,7 @@ export default function Pricing() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: `linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)`,
+        background: C.bgDeep,
         color: C.textPrimary,
       }}
     >
@@ -513,11 +514,11 @@ export default function Pricing() {
       <section className="relative overflow-hidden">
         {/* Ambient gradient glow */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.05) 55%, transparent 70%)",
         }} />
         {/* Dot-grid texture */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.025) 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle, rgba(99,103,255,0.04) 1px, transparent 1px)`,
           backgroundSize: "40px 40px",
         }} />
 
@@ -546,7 +547,7 @@ export default function Pricing() {
           style={{
             width: "480px",
             height: "480px",
-            background: "radial-gradient(ellipse 60% 60% at 80% 20%, rgba(0,245,255,0.07) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse 60% 60% at 80% 20%, rgba(99,103,255,0.10) 0%, transparent 70%)",
             zIndex: 0,
           }}
         />
@@ -558,8 +559,8 @@ export default function Pricing() {
             <div
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5"
               style={{
-                background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
-                border: "1px solid rgba(0,245,255,0.22)",
+                background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.08))",
+                border: "1px solid rgba(99,103,255,0.28)",
               }}
             >
               <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
@@ -605,7 +606,7 @@ export default function Pricing() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
                   style={{
                     background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.09)",
+                    border: "1px solid rgba(99,103,255,0.10)",
                     color: "#94A3B8",
                   }}
                 >
@@ -620,11 +621,11 @@ export default function Pricing() {
       </section>
 
       {/* thin separator */}
-      <div className="relative z-10 pointer-events-none" style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(0,245,255,0.08), transparent)" }} />
+      <div className="relative z-10 pointer-events-none" style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(99,103,255,0.12), transparent)" }} />
 
       <section className="relative z-10 py-8 md:py-10">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.05) 55%, transparent 70%)",
         }} />
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
           {isLoading ? (
@@ -669,14 +670,14 @@ export default function Pricing() {
       {/* ── COMPARE PLANS ── */}
       <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.05) 55%, transparent 70%)",
         }} />
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-8">
             <div
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-              style={{ background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.16)", color: C.teal }}
+              style={{ background: "rgba(99,103,255,0.09)", border: "1px solid rgba(99,103,255,0.18)", color: C.teal }}
             >
               <Check className="w-3 h-3" /> Side-by-side breakdown
             </div>
@@ -710,7 +711,7 @@ export default function Pricing() {
           <div
             className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap"
             style={{
-              background: "linear-gradient(135deg, rgba(0,245,255,0.03), rgba(124,58,237,0.02))",
+              background: "linear-gradient(135deg, rgba(99,103,255,0.15), rgba(132,148,255,0.04))",
               border: "1px solid rgba(255,255,255,0.07)",
             }}
             data-testid="section-trust-bar"
@@ -723,8 +724,8 @@ export default function Pricing() {
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
-                    border: "1px solid rgba(0,245,255,0.15)",
+                    background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.08))",
+                    border: "1px solid rgba(99,103,255,0.15)",
                   }}
                 >
                   <item.icon className="w-4 h-4" style={{ color: C.teal }} />
@@ -746,7 +747,7 @@ export default function Pricing() {
       {/* ── FAQ ── */}
       <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.05) 55%, transparent 70%)",
         }} />
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="grid lg:grid-cols-[2fr_3fr] gap-10 lg:gap-16 items-start">
@@ -754,8 +755,8 @@ export default function Pricing() {
               <div
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
                 style={{
-                  background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.04))",
-                  border: "1px solid rgba(0,245,255,0.18)",
+                  background: "linear-gradient(135deg, rgba(99,103,255,0.10), rgba(132,148,255,0.06))",
+                  border: "1px solid rgba(99,103,255,0.22)",
                   color: C.teal,
                 }}
               >
@@ -801,8 +802,8 @@ export default function Pricing() {
                       <span
                         className="flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center"
                         style={{
-                          background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.06))",
-                          border: "1px solid rgba(0,245,255,0.2)",
+                          background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.10))",
+                          border: "1px solid rgba(99,103,255,0.25)",
                           color: C.teal,
                           fontFamily: "var(--font-display)",
                         }}
@@ -816,7 +817,7 @@ export default function Pricing() {
                     className="pb-4 text-[13.5px] leading-relaxed"
                     style={{
                       color: "#7E99B8",
-                      borderLeft: `2px solid rgba(0,245,255,0.18)`,
+                      borderLeft: `2px solid rgba(99,103,255,0.22)`,
                       marginLeft: "0.75rem",
                       paddingLeft: "1.25rem",
                     }}
@@ -833,22 +834,22 @@ export default function Pricing() {
       {/* ── CTA ── */}
       <section className="relative py-10 md:py-12 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.05) 55%, transparent 70%)",
         }} />
         <div className="max-w-3xl mx-auto px-4 md:px-8 relative z-10 text-center">
           <div
             className="rounded-[24px] p-8 md:p-10"
             style={{
-              background: "linear-gradient(135deg, rgba(0,245,255,0.05) 0%, rgba(124,58,237,0.04) 50%, rgba(0,245,255,0.03) 100%)",
-              border: "1px solid rgba(0,245,255,0.14)",
-              boxShadow: "0 0 80px -20px rgba(0,245,255,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
+              background: "linear-gradient(135deg, rgba(99,103,255,0.08) 0%, rgba(132,148,255,0.06) 50%, rgba(99,103,255,0.15) 100%)",
+              border: "1px solid rgba(99,103,255,0.16)",
+              boxShadow: "0 0 80px -20px rgba(99,103,255,0.15), inset 0 1px 0 rgba(99,103,255,0.06)",
             }}
           >
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
               style={{
                 background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
-                boxShadow: "0 0 40px rgba(0,245,255,0.3)",
+                boxShadow: "0 0 40px rgba(99,103,255,0.35)",
               }}
             >
               <GraduationCap className="w-8 h-8" style={{ color: C.bgDeep }} />
@@ -872,7 +873,7 @@ export default function Pricing() {
                 style={{
                   background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
                   color: C.bgDeep,
-                  boxShadow: "0 4px 20px rgba(0,245,255,0.3)",
+                  boxShadow: "0 4px 20px rgba(99,103,255,0.35)",
                 }}
                 data-testid="button-final-cta"
               >

@@ -18,13 +18,14 @@ import {
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 
 const C = {
-  bg: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)",
-  teal: "#00F5FF",
-  purple: "#7C3AED",
-  textPrimary: "#E8F4FF",
-  textSecondary: "#7E99B8",
-  cardBg: "rgba(11,29,58,0.6)",
-  cardBorder: "rgba(0,245,255,0.1)",
+  bg: "#F8F7FF",
+  teal: "#6367FF",
+  purple: "#8494FF",
+  textPrimary: "#1E1B4B",
+  textSecondary: "#6B7280",
+  cardBg: "#FFFFFF",
+  cardBorder: "#EDE9FF",
+  heroGrad: "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)",
 };
 
 interface PublicConfig {
@@ -38,7 +39,7 @@ interface PublicConfig {
 function DarkFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer style={{ borderTop: "1px solid rgba(0,245,255,0.08)", background: "rgba(2,8,20,0.8)" }}>
+    <footer style={{ borderTop: `1px solid ${C.cardBorder}`, background: C.cardBg }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
@@ -54,7 +55,7 @@ function DarkFooter() {
               { href: "/terms", label: "Terms" },
               { href: "/contact", label: "Contact" },
             ].map((l) => (
-              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-white transition-colors">
+              <Link key={l.href} href={l.href} style={{ color: C.textSecondary }} className="hover:text-gray-900 transition-colors">
                 {l.label}
               </Link>
             ))}
@@ -71,7 +72,7 @@ const differentiators = [
     icon: Brain,
     title: "AI-Powered Learning",
     description: "Usha, our AI tutor, provides personalized guidance using Socratic methods — never giving direct answers, always encouraging genuine understanding.",
-    accent: "#00F5FF",
+    accent: "#6367FF",
   },
   {
     icon: Trophy,
@@ -95,13 +96,13 @@ const differentiators = [
     icon: Shield,
     title: "Academic Integrity",
     description: "Server-side test scoring, one-time attempts, and anti-cheating measures ensure your credentials are truly earned.",
-    accent: "#00F5FF",
+    accent: "#6367FF",
   },
   {
     icon: Users,
     title: "Public Portfolio",
     description: "Showcase your achievements with a shareable portfolio that recruiters and employers can verify at a glance.",
-    accent: "#7C3AED",
+    accent: "#8494FF",
   },
 ];
 
@@ -141,7 +142,7 @@ export default function About() {
               transition={{ duration: 0.6 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: C.teal }}>
+                style={{ background: "rgba(99,103,255,0.15)", border: "1px solid rgba(99,103,255,0.15)", color: C.teal }}>
                 <Sparkles className="w-3.5 h-3.5" />
                 About OurShiksha
               </div>
@@ -197,7 +198,7 @@ export default function About() {
                 {stepsData.map((step, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
-                      style={{ background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.15)" }}>
+                      style={{ background: "rgba(99,103,255,0.15)", border: "1px solid rgba(99,103,255,0.15)" }}>
                       <step.icon className="w-4 h-4" style={{ color: C.teal }} />
                       <div>
                         <div className="text-sm font-semibold" style={{ color: C.textPrimary }}>{step.label}</div>
@@ -223,7 +224,7 @@ export default function About() {
         {/* ── Differentiators ── */}
         <section className="py-10 md:py-14 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,245,255,0.04) 0%, rgba(124,58,237,0.02) 55%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99,103,255,0.15) 0%, rgba(132,148,255,0.15) 55%, transparent 70%)" }} />
 
           <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
             <motion.div className="text-center mb-10"
@@ -294,7 +295,7 @@ export default function About() {
                   style={{
                     background: `linear-gradient(135deg, ${C.teal}, ${C.purple})`,
                     color: "#fff",
-                    boxShadow: `0 0 20px rgba(0,245,255,0.25)`,
+                    boxShadow: `0 0 20px rgba(99,103,255,0.15)`,
                   }}
                   data-testid="button-start-learning"
                 >

@@ -10,14 +10,15 @@ import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { format } from "date-fns";
 
 const C = {
-  teal: "#00F5FF",
-  tealDark: "#00C4CC",
-  purple: "#7C3AED",
-  bgDeep: "#020814",
-  cardBg: "rgba(11,29,58,0.6)",
-  cardBorder: "rgba(0,245,255,0.1)",
-  textPrimary: "#E8F4FF",
-  textSecondary: "#7E99B8",
+  teal: "#6367FF",
+  tealDark: "#4F46E5",
+  purple: "#8494FF",
+  bgDeep: "#F8F7FF",
+  cardBg: "#FFFFFF",
+  cardBorder: "#EDE9FF",
+  textPrimary: "#1E1B4B",
+  textSecondary: "#6B7280",
+  heroGrad: "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)",
 };
 
 interface CertResult {
@@ -84,7 +85,7 @@ export default function CertVerificationHub() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: `linear-gradient(160deg, ${C.bgDeep} 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)`,
+        background: C.bgDeep,
         color: C.textPrimary,
         fontFamily: "Inter, sans-serif",
       }}
@@ -94,10 +95,10 @@ export default function CertVerificationHub() {
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 70% 60% at 50% 30%, rgba(0,245,255,0.06) 0%, rgba(124,58,237,0.03) 55%, transparent 70%)",
+          background: "radial-gradient(ellipse 70% 60% at 50% 30%, rgba(99,103,255,0.12) 0%, rgba(132,148,255,0.06) 55%, transparent 70%)",
         }} />
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `radial-gradient(circle, rgba(0,245,255,0.02) 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle, rgba(99,103,255,0.06) 1px, transparent 1px)`,
           backgroundSize: "36px 36px",
         }} />
 
@@ -106,9 +107,9 @@ export default function CertVerificationHub() {
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
             style={{
-              background: "linear-gradient(135deg, rgba(0,245,255,0.12), rgba(124,58,237,0.08))",
-              border: "1px solid rgba(0,245,255,0.25)",
-              boxShadow: "0 0 40px rgba(0,245,255,0.15)",
+              background: "linear-gradient(135deg, rgba(99,103,255,0.15), rgba(132,148,255,0.15))",
+              border: "1px solid rgba(99,103,255,0.30)",
+              boxShadow: "0 0 40px rgba(99,103,255,0.15)",
             }}
           >
             <Shield className="w-8 h-8" style={{ color: C.teal }} />
@@ -117,8 +118,8 @@ export default function CertVerificationHub() {
           <div
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4"
             style={{
-              background: "linear-gradient(135deg, rgba(0,245,255,0.07), rgba(124,58,237,0.04))",
-              border: "1px solid rgba(0,245,255,0.18)",
+              background: "linear-gradient(135deg, rgba(99,103,255,0.10), rgba(132,148,255,0.06))",
+              border: "1px solid rgba(99,103,255,0.22)",
             }}
           >
             <Sparkles className="w-3 h-3" style={{ color: C.teal }} />
@@ -154,8 +155,8 @@ export default function CertVerificationHub() {
               className="relative flex items-center rounded-2xl overflow-hidden"
               style={{
                 background: "rgba(11,29,58,0.7)",
-                border: `1px solid ${inputId ? "rgba(0,245,255,0.35)" : "rgba(0,245,255,0.12)"}`,
-                boxShadow: inputId ? "0 0 0 3px rgba(0,245,255,0.06)" : "none",
+                border: `1px solid ${inputId ? "rgba(99,103,255,0.15)" : "rgba(99,103,255,0.15)"}`,
+                boxShadow: inputId ? "0 0 0 3px rgba(99,103,255,0.09)" : "none",
                 transition: "border-color 0.2s, box-shadow 0.2s",
               }}
             >
@@ -218,7 +219,7 @@ export default function CertVerificationHub() {
                   <div
                     key={i}
                     className="h-4 rounded-full animate-pulse"
-                    style={{ width: `${w}%`, background: "rgba(0,245,255,0.07)" }}
+                    style={{ width: `${w}%`, background: "rgba(99,103,255,0.10)" }}
                   />
                 ))}
               </div>
@@ -299,10 +300,10 @@ export default function CertVerificationHub() {
                 className="rounded-2xl overflow-hidden"
                 style={{
                   background: C.cardBg,
-                  border: `1px solid ${isShiksha ? "rgba(0,245,255,0.22)" : "rgba(167,139,250,0.22)"}`,
+                  border: `1px solid ${isShiksha ? "rgba(99,103,255,0.28)" : "rgba(167,139,250,0.22)"}`,
                   backdropFilter: "blur(20px)",
                   boxShadow: isShiksha
-                    ? "0 0 60px -10px rgba(0,245,255,0.12)"
+                    ? "0 0 60px -10px rgba(99,103,255,0.15)"
                     : "0 0 60px -10px rgba(167,139,250,0.12)",
                 }}
               >
@@ -312,7 +313,7 @@ export default function CertVerificationHub() {
                   style={{
                     background: isShiksha
                       ? `linear-gradient(90deg, ${C.teal}, #38BDF8, ${C.purple})`
-                      : `linear-gradient(90deg, #A78BFA, #7C3AED, #38BDF8)`,
+                      : `linear-gradient(90deg, #A78BFA, #8494FF, #38BDF8)`,
                   }}
                 />
 
@@ -323,8 +324,8 @@ export default function CertVerificationHub() {
                       <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                         style={{
-                          background: isShiksha ? "rgba(0,245,255,0.1)" : "rgba(167,139,250,0.1)",
-                          border: isShiksha ? "1px solid rgba(0,245,255,0.22)" : "1px solid rgba(167,139,250,0.22)",
+                          background: isShiksha ? "rgba(99,103,255,0.12)" : "rgba(167,139,250,0.1)",
+                          border: isShiksha ? "1px solid rgba(99,103,255,0.28)" : "1px solid rgba(167,139,250,0.22)",
                         }}
                       >
                         {isShiksha
@@ -415,7 +416,7 @@ export default function CertVerificationHub() {
                   {isShiksha && result.skills && (
                     <div
                       className="rounded-xl p-4 mb-6"
-                      style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.1)" }}
+                      style={{ background: "rgba(99,103,255,0.15)", border: "1px solid rgba(99,103,255,0.12)" }}
                     >
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2.5" style={{ color: C.textSecondary }}>
                         Skills Validated
@@ -425,7 +426,7 @@ export default function CertVerificationHub() {
                           <span
                             key={s}
                             className="px-2.5 py-1 rounded-full text-xs font-medium"
-                            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: C.teal }}
+                            style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.15)", color: C.teal }}
                           >
                             {s.trim()}
                           </span>
@@ -452,7 +453,7 @@ export default function CertVerificationHub() {
                     <button
                       onClick={() => handleCopy(result.certificateId)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                      style={{ background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.12)", color: C.teal }}
+                      style={{ background: "rgba(99,103,255,0.09)", border: "1px solid rgba(99,103,255,0.15)", color: C.teal }}
                       data-testid="button-copy-cert-id"
                     >
                       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -468,9 +469,9 @@ export default function CertVerificationHub() {
                       style={{
                         background: isShiksha
                           ? `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`
-                          : `linear-gradient(135deg, #A78BFA, #7C3AED)`,
+                          : `linear-gradient(135deg, #A78BFA, #8494FF)`,
                         color: isShiksha ? C.bgDeep : "#fff",
-                        boxShadow: isShiksha ? "0 4px 20px rgba(0,245,255,0.25)" : "0 4px 20px rgba(124,58,237,0.25)",
+                        boxShadow: isShiksha ? "0 4px 20px rgba(99,103,255,0.30)" : "0 4px 20px rgba(132,148,255,0.15)",
                       }}
                       data-testid="button-view-certificate"
                     >
@@ -482,7 +483,7 @@ export default function CertVerificationHub() {
                       href={isShiksha ? `/shishya/certificates/${result.certificateId}` : `/shishya/udyog`}
                       className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
                       style={{
-                        background: "rgba(255,255,255,0.04)",
+                        background: "rgba(99,103,255,0.05)",
                         border: "1px solid rgba(255,255,255,0.12)",
                         color: C.textPrimary,
                       }}
@@ -513,8 +514,8 @@ export default function CertVerificationHub() {
                 label: "Our Shiksha",
                 sub: "Course completion certificates",
                 color: C.teal,
-                bg: "rgba(0,245,255,0.05)",
-                border: "rgba(0,245,255,0.14)",
+                bg: "rgba(99,103,255,0.08)",
+                border: "rgba(99,103,255,0.16)",
               },
               {
                 icon: Briefcase,

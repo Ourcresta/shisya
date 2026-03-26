@@ -57,14 +57,15 @@ const partnerFormSchema = z.object({
 type PartnerFormData = z.infer<typeof partnerFormSchema>;
 
 const C = {
-  bgPrimary: "#020814",
-  bgSecondary: "#060D1F",
-  cardBg: "rgba(11,29,58,0.6)",
-  cardBorder: "rgba(0,245,255,0.1)",
-  teal: "#00F5FF",
-  purple: "#7C3AED",
-  textPrimary: "#E8F4FF",
-  textSecondary: "#7E99B8",
+  bgPrimary: "#F8F7FF",
+  bgSecondary: "#EDE9FF",
+  cardBg: "#FFFFFF",
+  cardBorder: "#EDE9FF",
+  teal: "#6367FF",
+  purple: "#8494FF",
+  textPrimary: "#1E1B4B",
+  textSecondary: "#6B7280",
+  heroGrad: "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)",
 };
 
 const sectionVariants = {
@@ -194,7 +195,7 @@ function Footer() {
               { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" },
               { href: "/contact", label: "Contact" },
             ].map((l) => (
-              <Link key={l.href} href={l.href} className="transition-colors hover:text-white"
+              <Link key={l.href} href={l.href} className="transition-colors hover:text-gray-900"
                 style={{ color: C.textSecondary }}>{l.label}</Link>
             ))}
           </nav>
@@ -242,7 +243,7 @@ function PartnerForm() {
   };
 
   const inputStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.05)", border: `1px solid ${C.cardBorder}`,
+    background: "rgba(99,103,255,0.06)", border: `1px solid ${C.cardBorder}`,
     color: C.textPrimary, borderRadius: "8px", padding: "0.65rem 0.85rem",
     fontSize: "0.9rem", width: "100%", outline: "none",
   };
@@ -346,18 +347,18 @@ function FaqAccordion() {
 
 export default function BecomeAPartner() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: C.bgPrimary }}>
       <LandingNavbar />
 
       <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,245,255,0.08), transparent 70%),
-                       radial-gradient(ellipse 40% 40% at 80% 20%, rgba(124,58,237,0.06), transparent 60%)`,
+          background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(99,103,255,0.15), transparent 70%),
+                       radial-gradient(ellipse 40% 40% at 80% 20%, rgba(132,148,255,0.10), transparent 60%)`,
         }} />
         <motion.div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative"
           initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-            style={{ background: "rgba(0,245,255,0.1)", color: C.teal, border: `1px solid rgba(0,245,255,0.2)` }}
+            style={{ background: "rgba(99,103,255,0.12)", color: C.teal, border: `1px solid rgba(99,103,255,0.25)` }}
             data-testid="badge-hero">
             <School className="w-3.5 h-3.5" /> Partnership Program
           </span>
@@ -382,7 +383,7 @@ export default function BecomeAPartner() {
               style={{ background: `linear-gradient(135deg, ${C.purple}, #9333EA)`, color: "#fff" }}
               data-testid="button-cta-institution">Partner as an Institution</button>
             <button onClick={scrollToApply} className="px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105"
-              style={{ background: C.cardBg, color: C.teal, border: `1px solid rgba(0,245,255,0.25)` }}
+              style={{ background: C.cardBg, color: C.teal, border: `1px solid rgba(99,103,255,0.30)` }}
               data-testid="button-cta-affiliate">Become an Affiliate</button>
           </div>
         </motion.div>
@@ -405,7 +406,7 @@ export default function BecomeAPartner() {
                 style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
                 data-testid={`card-why-${i}`}>
                 <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
-                  style={{ background: "rgba(0,245,255,0.1)" }}>
+                  style={{ background: "rgba(99,103,255,0.12)" }}>
                   <item.icon className="w-6 h-6" style={{ color: C.teal }} />
                 </div>
                 <h3 className="font-semibold mb-2" style={{ color: C.textPrimary }}>{item.title}</h3>
@@ -511,7 +512,7 @@ export default function BecomeAPartner() {
                 style={{ background: C.cardBg, border: `1px solid ${C.cardBorder}` }}
                 data-testid={`card-ai-${i}`}>
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(124,58,237,0.12)" }}>
+                  style={{ background: "rgba(132,148,255,0.15)" }}>
                   <f.icon className="w-5 h-5" style={{ color: C.purple }} />
                 </div>
                 <span className="text-sm font-medium" style={{ color: C.textPrimary }}>{f.label}</span>
@@ -581,7 +582,7 @@ export default function BecomeAPartner() {
             viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <div className="text-center mb-8">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4"
-                style={{ background: "rgba(124,58,237,0.1)", color: C.purple, border: `1px solid rgba(124,58,237,0.2)` }}>
+                style={{ background: "rgba(132,148,255,0.15)", color: C.purple, border: `1px solid rgba(132,148,255,0.15)` }}>
                 <FileText className="w-3.5 h-3.5" /> Application
               </span>
               <h2 className="text-3xl md:text-4xl font-bold mb-2"

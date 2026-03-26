@@ -429,7 +429,7 @@ export default function Dashboard() {
   ];
 
   const quickLinks = [
-    { title: "My Learnings", icon: Library, href: "/shishya/my-learnings", color: "text-cyan-500 dark:text-cyan-400" },
+    { title: "My Learnings", icon: Library, href: "/shishya/my-learnings", color: "text-violet-500 dark:text-violet-400" },
     { title: "Courses", icon: BookOpen, href: "/courses", color: "text-blue-500 dark:text-blue-400" },
     { title: "Projects", icon: FolderOpen, href: "/shishya/projects", color: "text-violet-500 dark:text-violet-400" },
     { title: "Tests", icon: ClipboardCheck, href: "/shishya/tests", color: "text-amber-500 dark:text-amber-400" },
@@ -475,7 +475,7 @@ export default function Dashboard() {
           animate="animate"
         >
           <div className="relative rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background dark:from-white/[0.03] dark:via-transparent dark:to-transparent dark:border dark:border-white/10 dark:backdrop-blur-xl p-6 sm:p-8">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 dark:bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-lg font-bold shrink-0">
                 {firstName ? firstName.charAt(0).toUpperCase() : "S"}
@@ -566,7 +566,7 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
         >
           {activeCourse ? (
-            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent dark:from-cyan-500/[0.08] dark:to-transparent dark:border-cyan-500/20">
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent dark:from-violet-500/[0.08] dark:to-transparent dark:border-violet-500/20">
               <CardContent className="py-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -655,7 +655,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent dark:from-cyan-500/[0.08] dark:to-transparent dark:border-cyan-500/20">
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent dark:from-violet-500/[0.08] dark:to-transparent dark:border-violet-500/20">
               <CardContent className="py-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
@@ -743,7 +743,7 @@ export default function Dashboard() {
                     <Progress value={performanceScore.certScore} className="h-1.5" />
                   </div>
                 </div>
-                <div className="bg-primary/5 dark:bg-cyan-500/[0.06] dark:border dark:border-cyan-500/15 rounded-lg p-3">
+                <div className="bg-primary/5 dark:bg-violet-500/[0.06] dark:border dark:border-violet-500/15 rounded-lg p-3">
                   <div className="flex items-start gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                     <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid="text-ai-insight">

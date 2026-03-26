@@ -133,10 +133,9 @@ interface DailyLog {
 }
 
 const glassCard = {
-  background: "rgba(255,255,255,0.04)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "#FFFFFF",
+  border: "1px solid #EDE9FF",
+  boxShadow: "0 1px 4px rgba(99,103,255,0.08)",
 };
 
 const fadeInUp = {
@@ -457,16 +456,16 @@ export default function UdyogDashboard() {
 
   if (assignmentLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F7FF" }}>
         <motion.div
           className="flex flex-col items-center gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid #00F5FF", borderTopColor: "transparent", animation: "spin 1s linear infinite" }}>
-            <Briefcase className="w-6 h-6" style={{ color: "#00F5FF" }} />
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: "2px solid #6367FF", borderTopColor: "transparent", animation: "spin 1s linear infinite" }}>
+            <Briefcase className="w-6 h-6" style={{ color: "#6367FF" }} />
           </div>
-          <p style={{ color: "#94A3B8" }} className="text-sm">Loading your workspace...</p>
+          <p style={{ color: "#6B7280" }} className="text-sm">Loading your workspace...</p>
         </motion.div>
       </div>
     );
@@ -485,7 +484,7 @@ export default function UdyogDashboard() {
     };
 
     return (
-      <div className="min-h-screen px-4 py-12" style={{ background: "linear-gradient(135deg, #050A18, #0B1D3A, #0F172A)" }}>
+      <div className="min-h-screen px-4 py-12" style={{ background: "#F8F7FF" }}>
         <div className="max-w-4xl mx-auto space-y-8">
           <motion.div
             className="text-center"
@@ -495,18 +494,18 @@ export default function UdyogDashboard() {
           >
             <div
               className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: "radial-gradient(circle, rgba(0,245,255,0.15), transparent)", border: "2px solid rgba(0,245,255,0.3)" }}
+              style={{ background: "radial-gradient(circle, rgba(99,103,255,0.12), transparent)", border: "2px solid rgba(99,103,255,0.25)" }}
             >
-              <Briefcase className="w-10 h-10" style={{ color: "#00F5FF" }} />
+              <Briefcase className="w-10 h-10" style={{ color: "#6367FF" }} />
             </div>
             <h1
               className="text-3xl font-bold mb-3"
-              style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}
+              style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}
               data-testid="text-no-assignment"
             >
               {hasAssessments ? "Your Internship Dashboard" : "Welcome to Our Udyog"}
             </h1>
-            <p style={{ color: "#94A3B8" }} className="max-w-md mx-auto" data-testid="text-no-assignment-desc">
+            <p style={{ color: "#6B7280" }} className="max-w-md mx-auto" data-testid="text-no-assignment-desc">
               {hasAssessments
                 ? "You've completed your skill assessment. Browse internships and apply to get started."
                 : "Take a skill assessment to get matched with the perfect virtual internship."}
@@ -524,15 +523,15 @@ export default function UdyogDashboard() {
               <div className="flex items-center gap-3 mb-5">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.2), rgba(14,165,233,0.15))", border: "1px solid rgba(0,245,255,0.3)" }}
+                  style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.15), rgba(132,148,255,0.15))", border: "1px solid rgba(99,103,255,0.25)" }}
                 >
-                  <Target className="w-5 h-5" style={{ color: "#00F5FF" }} />
+                  <Target className="w-5 h-5" style={{ color: "#6367FF" }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                  <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>
                     Assessment Scores
                   </h2>
-                  <p className="text-xs" style={{ color: "#94A3B8" }}>Your AI-evaluated skill results</p>
+                  <p className="text-xs" style={{ color: "#6B7280" }}>Your AI-evaluated skill results</p>
                 </div>
               </div>
 
@@ -546,11 +545,11 @@ export default function UdyogDashboard() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 + idx * 0.08 }}
                       className="rounded-xl p-4"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+                      style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.10)" }}
                       data-testid={`dashboard-assessment-${a.id || idx}`}
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{a.domain}</span>
+                        <span className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{a.domain}</span>
                         <span
                           className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide"
                           style={{ background: levelStyle.bg, color: levelStyle.text, border: `1px solid ${levelStyle.border}` }}
@@ -559,19 +558,19 @@ export default function UdyogDashboard() {
                         </span>
                       </div>
                       <div className="flex items-end gap-2 mb-2">
-                        <span className="text-3xl font-bold" style={{ color: "#FFFFFF" }}>{a.score}</span>
-                        <span className="text-sm mb-1" style={{ color: "#64748B" }}>/ 100</span>
+                        <span className="text-3xl font-bold" style={{ color: "#1E1B4B" }}>{a.score}</span>
+                        <span className="text-sm mb-1" style={{ color: "#6B7280" }}>/ 100</span>
                       </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.12)" }}>
                         <motion.div
                           className="h-full rounded-full"
-                          style={{ background: `linear-gradient(90deg, ${levelStyle.text}, #00F5FF)` }}
+                          style={{ background: `linear-gradient(90deg, ${levelStyle.text}, #6367FF)` }}
                           initial={{ width: 0 }}
                           animate={{ width: `${a.score}%` }}
                           transition={{ duration: 0.8, delay: 0.3 + idx * 0.1 }}
                         />
                       </div>
-                      <p className="text-[10px] mt-2" style={{ color: "#64748B" }}>
+                      <p className="text-[10px] mt-2" style={{ color: "#6B7280" }}>
                         {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}
                       </p>
                     </motion.div>
@@ -582,17 +581,17 @@ export default function UdyogDashboard() {
               {bestAssessment && (
                 <div
                   className="rounded-xl p-4 flex flex-wrap items-center gap-4"
-                  style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.15)" }}
+                  style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.12)" }}
                   data-testid="best-assessment-summary-dashboard"
                 >
-                  <Award className="w-8 h-8 shrink-0" style={{ color: "#00F5FF" }} />
+                  <Award className="w-8 h-8 shrink-0" style={{ color: "#6367FF" }} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>
-                      Best Score: <span style={{ color: "#00F5FF" }}>{bestAssessment.score}%</span> in {bestAssessment.domain}
+                    <p className="text-sm font-medium" style={{ color: "#1E1B4B" }}>
+                      Best Score: <span style={{ color: "#6367FF" }}>{bestAssessment.score}%</span> in {bestAssessment.domain}
                     </p>
-                    <p className="text-xs" style={{ color: "#94A3B8" }}>
+                    <p className="text-xs" style={{ color: "#6B7280" }}>
                       Level: <span className="capitalize">{bestAssessment.level}</span> — You qualify as{" "}
-                      <span style={{ color: "#00F5FF" }} className="font-medium">
+                      <span style={{ color: "#6367FF" }} className="font-medium">
                         {bestAssessment.score >= 80 ? "Lead Developer" : bestAssessment.score >= 40 ? "Project Associate" : "Junior Intern"}
                       </span>
                     </p>
@@ -611,7 +610,7 @@ export default function UdyogDashboard() {
             <Link href="/shishya/udyog/hub">
               <button
                 className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
-                style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                 data-testid="button-browse-internships"
               >
                 Browse Internships
@@ -621,7 +620,7 @@ export default function UdyogDashboard() {
             <Link href="/shishya/udyog/assess">
               <button
                 className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                style={{ background: "rgba(99,103,255,0.06)", color: "#6367FF", border: "1px solid rgba(99,103,255,0.25)" }}
                 data-testid="button-start-assessment"
               >
                 {hasAssessments ? "Retake Assessment" : "Take Assessment"}
@@ -640,7 +639,7 @@ export default function UdyogDashboard() {
     const offset = circumference - (value / 100) * circumference;
     return (
       <svg width={size} height={size} className="transform -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(99,103,255,0.10)" strokeWidth={stroke} />
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius} fill="none"
           stroke="url(#progressGrad)" strokeWidth={stroke} strokeLinecap="round"
@@ -651,21 +650,21 @@ export default function UdyogDashboard() {
         />
         <defs>
           <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00F5FF" />
-            <stop offset="100%" stopColor="#0EA5E9" />
+            <stop offset="0%" stopColor="#6367FF" />
+            <stop offset="100%" stopColor="#4F46E5" />
           </linearGradient>
         </defs>
       </svg>
     );
   };
 
-  const SkillBar = ({ label, value, color = "#00F5FF" }: { label: string; value: number; color?: string }) => (
+  const SkillBar = ({ label, value, color = "#6367FF" }: { label: string; value: number; color?: string }) => (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm" style={{ color: "#94A3B8" }}>{label}</span>
+        <span className="text-sm" style={{ color: "#6B7280" }}>{label}</span>
         <span className="text-sm font-semibold" style={{ color }}>{value}%</span>
       </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.10)" }}>
         <motion.div
           className="h-full rounded-full"
           style={{ background: `linear-gradient(90deg, ${color}, ${color}88)` }}
@@ -679,41 +678,41 @@ export default function UdyogDashboard() {
 
   const renderOverview = () => {
     const statsCards = [
-      { label: "Tasks Assigned", value: tasks.length, icon: Target, color: "#00F5FF" },
-      { label: "In Progress", value: inProgressCount, icon: Zap, color: "#0EA5E9" },
+      { label: "Tasks Assigned", value: tasks.length, icon: Target, color: "#6367FF" },
+      { label: "In Progress", value: inProgressCount, icon: Zap, color: "#4F46E5" },
       { label: "Under Review", value: reviewCount, icon: Clock, color: "#F59E0B" },
       { label: "Performance", value: performanceScore ?? Math.round(overallProgress), icon: TrendingUp, color: "#10B981" },
     ];
 
     return (
       <motion.div key="overview" {...fadeInUp} className="space-y-6">
-        <div className="rounded-2xl p-6 md:p-8 relative overflow-visible" style={{ ...glassCard, background: "linear-gradient(135deg, rgba(0,245,255,0.06), rgba(14,165,233,0.04), rgba(124,58,237,0.03))" }}>
-          <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(0,245,255,0.08), transparent 60%)", pointerEvents: "none" }} />
+        <div className="rounded-2xl p-6 md:p-8 relative overflow-visible" style={{ ...glassCard, background: "linear-gradient(135deg, rgba(99,103,255,0.06), rgba(132,148,255,0.04), rgba(132,148,255,0.03))" }}>
+          <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(99,103,255,0.12), transparent 60%)", pointerEvents: "none" }} />
           <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-welcome-header">
+              <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-welcome-header">
                 {getGreeting()}, {username}
               </h1>
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 {assignment.assignedRole && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.25)" }} data-testid="badge-assigned-role">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(99,103,255,0.12)", color: "#6367FF", border: "1px solid rgba(99,103,255,0.2)" }} data-testid="badge-assigned-role">
                     {assignment.assignedRole}
                   </span>
                 )}
                 {hasBatch && batch && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.25)" }} data-testid="badge-batch-status">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ background: "rgba(132,148,255,0.12)", color: "#A78BFA", border: "1px solid rgba(132,148,255,0.12)" }} data-testid="badge-batch-status">
                     Batch #{batch.batchNumber} &middot; {batch.status}
                   </span>
                 )}
               </div>
-              <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-internship-title">
+              <p className="text-sm" style={{ color: "#6B7280" }} data-testid="text-internship-title">
                 {internship?.title || "Virtual Internship"} &middot; {daysRemaining} days remaining
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative flex items-center justify-center">
                 <CircularProgress value={overallProgress} size={80} stroke={6} />
-                <span className="absolute text-lg font-bold" style={{ color: "#FFFFFF" }} data-testid="text-progress-percent">{overallProgress}%</span>
+                <span className="absolute text-lg font-bold" style={{ color: "#1E1B4B" }} data-testid="text-progress-percent">{overallProgress}%</span>
               </div>
             </div>
           </div>
@@ -729,14 +728,14 @@ export default function UdyogDashboard() {
                 className="rounded-xl p-5 transition-all cursor-default"
                 style={{ ...glassCard }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = `${stat.color}40`; e.currentTarget.style.boxShadow = `0 8px 32px ${stat.color}15`; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.boxShadow = "none"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(99,103,255,0.10)"; e.currentTarget.style.boxShadow = "none"; }}
                 data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `linear-gradient(135deg, ${stat.color}30, ${stat.color}10)` }}>
                   <Icon className="w-5 h-5" style={{ color: stat.color }} />
                 </div>
-                <p className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>{stat.value}</p>
-                <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>{stat.label}</p>
+                <p className="text-2xl font-bold" style={{ color: "#1E1B4B" }}>{stat.value}</p>
+                <p className="text-xs mt-1" style={{ color: "#6B7280" }}>{stat.label}</p>
               </motion.div>
             );
           })}
@@ -745,40 +744,40 @@ export default function UdyogDashboard() {
         <div className="rounded-xl p-6" style={glassCard}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Current Project</h3>
-              <p className="text-sm" style={{ color: "#94A3B8" }}>{internship?.title || "Virtual Internship"}</p>
+              <h3 className="font-semibold mb-1" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Current Project</h3>
+              <p className="text-sm" style={{ color: "#6B7280" }}>{internship?.title || "Virtual Internship"}</p>
             </div>
             <button
               onClick={() => setActiveTab("tasks")}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.2)" }}
+              style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF", border: "1px solid rgba(99,103,255,0.15)" }}
               data-testid="button-open-tasks"
             >
               Open Tasks <ArrowRight className="w-4 h-4" />
             </button>
           </div>
           {internship?.description && (
-            <p className="text-sm mb-4" style={{ color: "#94A3B8" }} data-testid="text-internship-desc">{internship.description}</p>
+            <p className="text-sm mb-4" style={{ color: "#6B7280" }} data-testid="text-internship-desc">{internship.description}</p>
           )}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs" style={{ color: "#94A3B8" }}>Progress</span>
-            <span className="text-xs font-medium" style={{ color: "#00F5FF" }}>{overallProgress}%</span>
+            <span className="text-xs" style={{ color: "#6B7280" }}>Progress</span>
+            <span className="text-xs font-medium" style={{ color: "#6367FF" }}>{overallProgress}%</span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-            <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }} initial={{ width: 0 }} animate={{ width: `${overallProgress}%` }} transition={{ duration: 1 }} />
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.10)" }}>
+            <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #6367FF, #4F46E5)" }} initial={{ width: 0 }} animate={{ width: `${overallProgress}%` }} transition={{ duration: 1 }} />
           </div>
           <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
-            <span className="text-xs" style={{ color: "#64748B" }}>
+            <span className="text-xs" style={{ color: "#6B7280" }}>
               {assignment?.startedAt ? `Started ${new Date(assignment.startedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : ""}
             </span>
-            <span className="text-xs" style={{ color: "#64748B" }}>{daysRemaining} days remaining</span>
+            <span className="text-xs" style={{ color: "#6B7280" }}>{daysRemaining} days remaining</span>
           </div>
         </div>
 
         <div className="rounded-xl p-6" style={glassCard}>
           <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5" style={{ color: "#00F5FF" }} />
-            <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Team Members</h3>
+            <Users className="w-5 h-5" style={{ color: "#6367FF" }} />
+            <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Team Members</h3>
           </div>
           {batchMembers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -792,14 +791,14 @@ export default function UdyogDashboard() {
                   <div
                     key={m.member?.id || m.member?.userId}
                     className="flex items-center gap-3 p-3 rounded-lg"
-                    style={{ background: isCurrentUser ? "rgba(0,245,255,0.06)" : "rgba(255,255,255,0.03)", border: isCurrentUser ? "1px solid rgba(0,245,255,0.15)" : "1px solid transparent" }}
+                    style={{ background: isCurrentUser ? "rgba(99,103,255,0.06)" : "rgba(99,103,255,0.03)", border: isCurrentUser ? "1px solid rgba(99,103,255,0.12)" : "1px solid transparent" }}
                     data-testid={`team-member-${displayName.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: `${color}25`, color, border: `1px solid ${color}40` }}>
                       {initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate" style={{ color: "#FFFFFF" }}>
+                      <p className="text-sm font-medium truncate" style={{ color: "#1E1B4B" }}>
                         {displayName}{isCurrentUser ? " (You)" : ""}
                       </p>
                       <p className="text-xs" style={{ color }}>{role}</p>
@@ -816,7 +815,7 @@ export default function UdyogDashboard() {
           ) : (
             <div className="text-center py-8">
               <Users className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
-              <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-no-team">
+              <p className="text-sm" style={{ color: "#6B7280" }} data-testid="text-no-team">
                 {batch?.status === "forming" ? "Batch is forming — team members will appear once the batch is full." : "No team members yet."}
               </p>
             </div>
@@ -830,10 +829,10 @@ export default function UdyogDashboard() {
   const renderTasks = () => (
     <motion.div key="tasks" {...fadeInUp} className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-tasks-header">
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-tasks-header">
           Task Board
         </h2>
-        <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+        <span className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF" }}>
           {completedTasksCount}/{tasks.length} completed
         </span>
       </div>
@@ -857,7 +856,7 @@ export default function UdyogDashboard() {
                   return (
                     <div key={task.id} className="rounded-xl p-4 transition-all" style={glassCard} data-testid={`task-card-${task.id}`}>
                       <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <h4 className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{task.title}</h4>
+                        <h4 className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{task.title}</h4>
                         {task.score !== undefined && task.score !== null && task.status === "completed" && (
                           <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ background: "rgba(16,185,129,0.15)", color: "#10B981" }} data-testid={`task-score-${task.id}`}>
                             {task.score}pts
@@ -865,17 +864,17 @@ export default function UdyogDashboard() {
                         )}
                       </div>
                       {task.description && (
-                        <p className="text-xs mb-2 line-clamp-2" style={{ color: "#64748B" }}>{task.description}</p>
+                        <p className="text-xs mb-2 line-clamp-2" style={{ color: "#6B7280" }}>{task.description}</p>
                       )}
                       {task.subtasks && task.subtasks.length > 0 && (
                         <div className="mb-2 space-y-1" data-testid={`subtask-list-${task.id}`}>
-                          <p className="text-[10px] font-medium mb-1" style={{ color: "#7C3AED" }}>
+                          <p className="text-[10px] font-medium mb-1" style={{ color: "#8494FF" }}>
                             Steps ({task.subtasks.length})
                           </p>
                           {task.subtasks.slice(0, 3).map((sub: any, si: number) => (
                             <div key={si} className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded-full shrink-0" style={{ border: "1.5px solid rgba(124,58,237,0.5)", background: "rgba(124,58,237,0.08)" }} />
-                              <span className="text-[10px] line-clamp-1" style={{ color: "#94A3B8" }}>{sub.title}</span>
+                              <div className="w-3 h-3 rounded-full shrink-0" style={{ border: "1.5px solid rgba(132,148,255,0.12)", background: "rgba(132,148,255,0.12)" }} />
+                              <span className="text-[10px] line-clamp-1" style={{ color: "#6B7280" }}>{sub.title}</span>
                             </div>
                           ))}
                           {task.subtasks.length > 3 && (
@@ -891,8 +890,8 @@ export default function UdyogDashboard() {
                           </span>
                         )}
                         {assignedName && (
-                          <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: "#94A3B8" }} data-testid={`task-assigned-${task.id}`}>
-                            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ background: getRoleColor(getMemberRole(assignedMember!)), color: "#FFFFFF" }}>
+                          <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: "#6B7280" }} data-testid={`task-assigned-${task.id}`}>
+                            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ background: getRoleColor(getMemberRole(assignedMember!)), color: "#1E1B4B" }}>
                               {getInitials(assignedName).slice(0, 1)}
                             </span>
                             {assignedName.split(" ")[0]}
@@ -919,7 +918,7 @@ export default function UdyogDashboard() {
                   );
                 })}
                 {colTasks.length === 0 && (
-                  <div className="rounded-xl p-6 text-center" style={{ border: "2px dashed rgba(255,255,255,0.08)" }}>
+                  <div className="rounded-xl p-6 text-center" style={{ border: "2px dashed rgba(99,103,255,0.10)" }}>
                     <p className="text-xs" style={{ color: "#475569" }}>No tasks</p>
                   </div>
                 )}
@@ -930,15 +929,15 @@ export default function UdyogDashboard() {
       </div>
 
       <div className="rounded-xl p-6" style={glassCard}>
-        <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-submissions-header">Submit Work</h3>
+        <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-submissions-header">Submit Work</h3>
         {tasks.length > 0 && (
           <div className="mb-3">
-            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Select Task (optional)</label>
+            <label className="text-xs mb-1.5 block" style={{ color: "#6B7280" }}>Select Task (optional)</label>
             <select
               value={selectedTaskId || ""}
               onChange={(e) => setSelectedTaskId(e.target.value ? Number(e.target.value) : null)}
               className="w-full rounded-lg px-3 py-2.5 text-sm"
-              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+              style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
               data-testid="select-task"
             >
               <option value="">General Submission</option>
@@ -953,7 +952,7 @@ export default function UdyogDashboard() {
           onChange={(e) => setSubmissionContent(e.target.value)}
           placeholder="Describe your work, paste code, or share links..."
           className="w-full rounded-lg px-4 py-3 text-sm resize-none min-h-[120px]"
-          style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+          style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
           data-testid="textarea-submission"
         />
         <div className="flex justify-end mt-3">
@@ -967,7 +966,7 @@ export default function UdyogDashboard() {
             }}
             disabled={submitWorkMutation.isPending}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
-            style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+            style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
             data-testid="button-submit-work"
           >
             <Send className="w-4 h-4" />
@@ -978,13 +977,13 @@ export default function UdyogDashboard() {
 
       {submissions.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Previous Submissions</h3>
+          <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Previous Submissions</h3>
           {submissions.map((sub: any, idx: number) => {
             const statusStyle = submissionStatusColors[sub.status] || submissionStatusColors.pending;
             return (
               <div key={sub.id || idx} className="rounded-xl p-5" style={glassCard} data-testid={`submission-card-${sub.id || idx}`}>
                 <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                  <span className="text-sm" style={{ color: "#94A3B8" }}>
+                  <span className="text-sm" style={{ color: "#6B7280" }}>
                     {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : ""}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ background: statusStyle.bg, color: statusStyle.text }} data-testid={`badge-submission-status-${sub.id || idx}`}>
@@ -993,8 +992,8 @@ export default function UdyogDashboard() {
                 </div>
                 <p className="text-sm" style={{ color: "#CBD5E1" }}>{sub.content}</p>
                 {sub.aiFeedback && (
-                  <div className="mt-3 p-3 rounded-lg" style={{ background: "rgba(0,245,255,0.05)", border: "1px solid rgba(0,245,255,0.15)" }}>
-                    <p className="text-xs font-medium mb-1" style={{ color: "#00F5FF" }}>AI Feedback</p>
+                  <div className="mt-3 p-3 rounded-lg" style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.12)" }}>
+                    <p className="text-xs font-medium mb-1" style={{ color: "#6367FF" }}>AI Feedback</p>
                     <p className="text-xs" style={{ color: "#CBD5E1" }}>{sub.aiFeedback}</p>
                   </div>
                 )}
@@ -1014,24 +1013,24 @@ export default function UdyogDashboard() {
 
   const renderDailyLog = () => (
     <motion.div key="daily-log" {...fadeInUp} className="space-y-6">
-      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Daily Log</h2>
+      <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Daily Log</h2>
 
       <div className="rounded-xl p-6" style={glassCard}>
-        <h3 className="font-semibold mb-4" style={{ color: "#FFFFFF" }}>Add New Entry</h3>
+        <h3 className="font-semibold mb-4" style={{ color: "#1E1B4B" }}>Add New Entry</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Date</label>
+            <label className="text-xs mb-1.5 block" style={{ color: "#6B7280" }}>Date</label>
             <input
               type="date"
               value={logDate}
               onChange={(e) => setLogDate(e.target.value)}
               className="w-full rounded-lg px-3 py-2.5 text-sm"
-              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none", colorScheme: "dark" }}
+              style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none", colorScheme: "dark" }}
               data-testid="input-log-date"
             />
           </div>
           <div>
-            <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Hours Worked</label>
+            <label className="text-xs mb-1.5 block" style={{ color: "#6B7280" }}>Hours Worked</label>
             <input
               type="number"
               value={logHours}
@@ -1039,38 +1038,38 @@ export default function UdyogDashboard() {
               placeholder="e.g. 4"
               min="0" max="24" step="0.5"
               className="w-full rounded-lg px-3 py-2.5 text-sm"
-              style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+              style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
               data-testid="input-log-hours"
             />
           </div>
         </div>
         <div className="mb-4">
-          <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Description</label>
+          <label className="text-xs mb-1.5 block" style={{ color: "#6B7280" }}>Description</label>
           <textarea
             value={logDesc}
             onChange={(e) => setLogDesc(e.target.value)}
             placeholder="What did you work on today?"
             className="w-full rounded-lg px-4 py-3 text-sm resize-none min-h-[100px]"
-            style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+            style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
             data-testid="textarea-log-desc"
           />
         </div>
         <div className="mb-4">
-          <label className="text-xs mb-1.5 block" style={{ color: "#94A3B8" }}>Link (GitHub/Drive URL)</label>
+          <label className="text-xs mb-1.5 block" style={{ color: "#6B7280" }}>Link (GitHub/Drive URL)</label>
           <input
             type="url"
             value={logLink}
             onChange={(e) => setLogLink(e.target.value)}
             placeholder="https://github.com/..."
             className="w-full rounded-lg px-3 py-2.5 text-sm"
-            style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+            style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
             data-testid="input-log-link"
           />
         </div>
         <button
           onClick={handleAddLog}
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all"
-          style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+          style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
           data-testid="button-add-log"
         >
           <Plus className="w-4 h-4" />
@@ -1079,20 +1078,20 @@ export default function UdyogDashboard() {
       </div>
 
       <div className="rounded-xl overflow-hidden" style={glassCard}>
-        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Log History</h3>
+        <div className="px-6 py-4" style={{ borderBottom: "1px solid rgba(99,103,255,0.10)" }}>
+          <h3 className="font-semibold" style={{ color: "#1E1B4B" }}>Log History</h3>
         </div>
         {dailyLogs.length > 0 ? (
-          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="divide-y" style={{ borderColor: "rgba(99,103,255,0.07)" }}>
             {dailyLogs.map((log) => (
-              <div key={log.id} className="px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }} data-testid={`log-entry-${log.id}`}>
+              <div key={log.id} className="px-6 py-4" style={{ borderBottom: "1px solid rgba(99,103,255,0.07)" }} data-testid={`log-entry-${log.id}`}>
                 <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-                  <span className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{new Date(log.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>{log.hours}h</span>
+                  <span className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{new Date(log.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF" }}>{log.hours}h</span>
                 </div>
-                <p className="text-sm" style={{ color: "#94A3B8" }}>{log.description}</p>
+                <p className="text-sm" style={{ color: "#6B7280" }}>{log.description}</p>
                 {log.link && (
-                  <a href={log.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs" style={{ color: "#0EA5E9" }}>
+                  <a href={log.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs" style={{ color: "#4F46E5" }}>
                     <ExternalLink className="w-3 h-3" /> View Link
                   </a>
                 )}
@@ -1102,7 +1101,7 @@ export default function UdyogDashboard() {
         ) : (
           <div className="text-center py-12">
             <FileText className="w-8 h-8 mx-auto mb-2" style={{ color: "#475569" }} />
-            <p className="text-sm" style={{ color: "#94A3B8" }}>No log entries yet. Start tracking your daily work above.</p>
+            <p className="text-sm" style={{ color: "#6B7280" }}>No log entries yet. Start tracking your daily work above.</p>
           </div>
         )}
       </div>
@@ -1119,24 +1118,24 @@ export default function UdyogDashboard() {
 
     return (
       <motion.div key="performance" {...fadeInUp} className="space-y-6">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Performance</h2>
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Performance</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-xl p-6" style={glassCard}>
-            <h3 className="font-semibold mb-6" style={{ color: "#FFFFFF" }}>Skill Ratings</h3>
-            <SkillBar label="Technical Skills" value={techSkill} color="#00F5FF" />
-            <SkillBar label="Communication" value={communication} color="#0EA5E9" />
-            <SkillBar label="Teamwork" value={teamwork} color="#7C3AED" />
+            <h3 className="font-semibold mb-6" style={{ color: "#1E1B4B" }}>Skill Ratings</h3>
+            <SkillBar label="Technical Skills" value={techSkill} color="#6367FF" />
+            <SkillBar label="Communication" value={communication} color="#4F46E5" />
+            <SkillBar label="Teamwork" value={teamwork} color="#8494FF" />
             <SkillBar label="Problem Solving" value={problemSolving} color="#10B981" />
           </div>
 
           <div className="rounded-xl p-6 flex flex-col items-center justify-center" style={glassCard}>
-            <p className="text-xs mb-3 uppercase tracking-wider" style={{ color: "#94A3B8" }}>Overall Score</p>
+            <p className="text-xs mb-3 uppercase tracking-wider" style={{ color: "#6B7280" }}>Overall Score</p>
             <div className="relative flex items-center justify-center mb-3">
               <CircularProgress value={overallScore} size={120} stroke={8} />
-              <span className="absolute text-3xl font-bold" style={{ color: "#FFFFFF" }}>{overallScore}</span>
+              <span className="absolute text-3xl font-bold" style={{ color: "#1E1B4B" }}>{overallScore}</span>
             </div>
-            <p className="text-xs" style={{ color: "#64748B" }}>out of 100</p>
+            <p className="text-xs" style={{ color: "#6B7280" }}>out of 100</p>
           </div>
         </div>
 
@@ -1144,13 +1143,13 @@ export default function UdyogDashboard() {
           <div className="rounded-xl p-6" style={glassCard}>
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-5 h-5" style={{ color: "#F59E0B" }} />
-              <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Attendance</h3>
+              <h3 className="font-semibold" style={{ color: "#1E1B4B" }}>Attendance</h3>
             </div>
             <div className="flex items-end gap-3 mb-2">
-              <span className="text-3xl font-bold" style={{ color: "#FFFFFF" }}>{daysActive}</span>
-              <span className="text-sm mb-1" style={{ color: "#94A3B8" }}>/ {totalDays} days</span>
+              <span className="text-3xl font-bold" style={{ color: "#1E1B4B" }}>{daysActive}</span>
+              <span className="text-sm mb-1" style={{ color: "#6B7280" }}>/ {totalDays} days</span>
             </div>
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.10)" }}>
               <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #F59E0B, #F97316)" }} initial={{ width: 0 }} animate={{ width: `${totalDays > 0 ? (daysActive / totalDays) * 100 : 0}%` }} transition={{ duration: 1 }} />
             </div>
           </div>
@@ -1158,14 +1157,14 @@ export default function UdyogDashboard() {
           <div className="rounded-xl p-6" style={glassCard}>
             <div className="flex items-center gap-2 mb-4">
               <MessageSquare className="w-5 h-5" style={{ color: "#10B981" }} />
-              <h3 className="font-semibold" style={{ color: "#FFFFFF" }}>Leader Feedback</h3>
+              <h3 className="font-semibold" style={{ color: "#1E1B4B" }}>Leader Feedback</h3>
             </div>
             {feedbackSub ? (
               <div className="p-3 rounded-lg" style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)" }}>
                 <p className="text-sm" style={{ color: "#CBD5E1" }}>{feedbackSub.feedback}</p>
               </div>
             ) : (
-              <p className="text-sm" style={{ color: "#64748B" }}>Awaiting feedback from your mentor or team lead.</p>
+              <p className="text-sm" style={{ color: "#6B7280" }}>Awaiting feedback from your mentor or team lead.</p>
             )}
           </div>
         </div>
@@ -1175,15 +1174,15 @@ export default function UdyogDashboard() {
 
   const renderResources = () => {
     const resources = [
-      { icon: FileText, title: "Project Documentation", desc: "Access project briefs and requirements", color: "#00F5FF" },
-      { icon: Shield, title: "Company Guidelines", desc: "Workplace policies and best practices", color: "#7C3AED" },
-      { icon: BookOpen, title: "Learning Modules", desc: "Skill development resources", color: "#0EA5E9" },
+      { icon: FileText, title: "Project Documentation", desc: "Access project briefs and requirements", color: "#6367FF" },
+      { icon: Shield, title: "Company Guidelines", desc: "Workplace policies and best practices", color: "#8494FF" },
+      { icon: BookOpen, title: "Learning Modules", desc: "Skill development resources", color: "#4F46E5" },
       { icon: Video, title: "Meeting Recordings", desc: "Past team meeting archives", color: "#F59E0B" },
     ];
 
     return (
       <motion.div key="resources" {...fadeInUp} className="space-y-6">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>Resources</h2>
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>Resources</h2>
         <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-4" variants={stagger} initial="initial" animate="animate">
           {resources.map((res) => {
             const Icon = res.icon;
@@ -1203,8 +1202,8 @@ export default function UdyogDashboard() {
                   </div>
                   <span className="text-[10px] font-medium px-2 py-1 rounded-full" style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>Coming Soon</span>
                 </div>
-                <h4 className="font-semibold mb-1" style={{ color: "#FFFFFF" }}>{res.title}</h4>
-                <p className="text-sm" style={{ color: "#64748B" }}>{res.desc}</p>
+                <h4 className="font-semibold mb-1" style={{ color: "#1E1B4B" }}>{res.title}</h4>
+                <p className="text-sm" style={{ color: "#6B7280" }}>{res.desc}</p>
               </motion.div>
             );
           })}
@@ -1216,11 +1215,11 @@ export default function UdyogDashboard() {
   const renderMentor = () => (
     <motion.div key="mentor" {...fadeInUp} className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
       <div className="flex items-center gap-3 mb-4 p-4 rounded-xl" style={glassCard}>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
-          <Bot className="w-5 h-5" style={{ color: "#050A18" }} />
+        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)" }}>
+          <Bot className="w-5 h-5" style={{ color: "#1E1B4B" }} />
         </div>
         <div>
-          <h2 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-mentor-header">
+          <h2 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-mentor-header">
             Usha AI Mentor
           </h2>
           <div className="flex items-center gap-1.5">
@@ -1241,13 +1240,13 @@ export default function UdyogDashboard() {
               className="max-w-[80%] rounded-2xl px-4 py-3"
               style={{
                 background: msg.role === "user"
-                  ? "linear-gradient(135deg, #00F5FF, #0EA5E9)"
-                  : "rgba(255,255,255,0.06)",
-                border: msg.role === "ai" ? "1px solid rgba(255,255,255,0.08)" : "none",
+                  ? "linear-gradient(135deg, #6367FF, #4F46E5)"
+                  : "rgba(99,103,255,0.07)",
+                border: msg.role === "ai" ? "1px solid rgba(99,103,255,0.10)" : "none",
               }}
               data-testid={`chat-message-${idx}`}
             >
-              <p className="text-sm" style={{ color: msg.role === "user" ? "#050A18" : "#CBD5E1" }}>
+              <p className="text-sm" style={{ color: msg.role === "user" ? "#F8F7FF" : "#CBD5E1" }}>
                 {msg.text}
               </p>
             </div>
@@ -1262,13 +1261,13 @@ export default function UdyogDashboard() {
           onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
           placeholder="Ask Usha anything..."
           className="flex-1 rounded-xl px-4 py-3 text-sm"
-          style={{ background: "rgba(255,255,255,0.05)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.1)", outline: "none" }}
+          style={{ background: "rgba(99,103,255,0.06)", color: "#1E1B4B", border: "1px solid rgba(99,103,255,0.12)", outline: "none" }}
           data-testid="input-chat"
         />
         <button
           onClick={handleSendChat}
           className="px-4 py-3 rounded-xl transition-all"
-          style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+          style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
           data-testid="button-send-chat"
         >
           <Send className="w-4 h-4" />
@@ -1557,22 +1556,22 @@ export default function UdyogDashboard() {
               {!hasCertificate && (
                 <div className="text-center py-10 mb-6">
                   <div className="relative inline-flex items-center justify-center mb-6">
-                    <div className="absolute w-32 h-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%)", filter: "blur(20px)" }} />
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "2px solid rgba(0,245,255,0.4)" }}>
-                      <Award className="w-10 h-10" style={{ color: "#00F5FF" }} />
+                    <div className="absolute w-32 h-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(99,103,255,0.15), transparent 70%)", filter: "blur(20px)" }} />
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center relative" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.15))", border: "2px solid rgba(99,103,255,0.12)" }}>
+                      <Award className="w-10 h-10" style={{ color: "#6367FF" }} />
                     </div>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-congratulations">
+                  <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-congratulations">
                     Congratulations!
                   </h2>
-                  <p className="mb-6 max-w-md mx-auto text-sm" style={{ color: "#94A3B8" }}>
+                  <p className="mb-6 max-w-md mx-auto text-sm" style={{ color: "#6B7280" }}>
                     You have completed all tasks. Generate your official certificate to showcase your achievement.
                   </p>
                   <button
                     onClick={() => generateCertMutation.mutate()}
                     disabled={generateCertMutation.isPending}
                     className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-all text-lg"
-                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                     data-testid="button-generate-certificate"
                   >
                     <Award className="w-5 h-5" />
@@ -1583,12 +1582,12 @@ export default function UdyogDashboard() {
 
               {hasCertificate && (
                 <div className="space-y-6">
-                  <div className="rounded-2xl overflow-hidden" style={{ ...glassCard, borderColor: "rgba(0,245,255,0.15)" }} data-testid="certificate-card">
-                    <div className="relative p-1.5" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.08))" }}>
-                      <div className="rounded-xl p-6" style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)" }}>
+                  <div className="rounded-2xl overflow-hidden" style={{ ...glassCard, borderColor: "rgba(99,103,255,0.12)" }} data-testid="certificate-card">
+                    <div className="relative p-1.5" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.12))" }}>
+                      <div className="rounded-xl p-6" style={{ background: "linear-gradient(135deg, #F8F7FF 0%, #1E293B 50%, #F8F7FF 100%)" }}>
                         <div className="flex items-start gap-5">
-                          <div className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(14,165,233,0.15))", border: "1px solid rgba(0,245,255,0.3)" }}>
-                            <Award className="w-8 h-8" style={{ color: "#00F5FF" }} />
+                          <div className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.15))", border: "1px solid rgba(99,103,255,0.25)" }}>
+                            <Award className="w-8 h-8" style={{ color: "#6367FF" }} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -1596,30 +1595,30 @@ export default function UdyogDashboard() {
                                 Verified
                               </span>
                             </div>
-                            <h3 className="text-lg font-bold truncate" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+                            <h3 className="text-lg font-bold truncate" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>
                               {internship?.title || "Virtual Internship"}
                             </h3>
-                            <p className="text-sm mt-1" style={{ color: "#94A3B8" }}>
+                            <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
                               Certificate of Completion
                             </p>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
-                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Certificate ID</p>
-                            <p className="text-xs font-semibold" style={{ color: "#00F5FF", fontFamily: "monospace" }}>{certId}</p>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.07)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>Certificate ID</p>
+                            <p className="text-xs font-semibold" style={{ color: "#6367FF", fontFamily: "monospace" }}>{certId}</p>
                           </div>
-                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Role</p>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.07)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>Role</p>
                             <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{assignment.assignedRole}</p>
                           </div>
-                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Tasks Done</p>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.07)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>Tasks Done</p>
                             <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{completedTasksCount}/{tasks.length}</p>
                           </div>
-                          <div className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#64748B" }}>Date</p>
+                          <div className="rounded-lg p-3" style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.07)" }}>
+                            <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#6B7280" }}>Date</p>
                             <p className="text-xs font-semibold" style={{ color: "#E2E8F0" }}>{completionDate}</p>
                           </div>
                         </div>
@@ -1628,7 +1627,7 @@ export default function UdyogDashboard() {
                           <button
                             onClick={() => setViewCertificate(true)}
                             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
-                            style={{ border: "1px solid rgba(0,245,255,0.3)", background: "rgba(0,245,255,0.08)", color: "#00F5FF" }}
+                            style={{ border: "1px solid rgba(99,103,255,0.25)", background: "rgba(99,103,255,0.12)", color: "#6367FF" }}
                             data-testid="button-view-certificate"
                           >
                             <Eye className="w-4 h-4" />
@@ -1638,7 +1637,7 @@ export default function UdyogDashboard() {
                             onClick={handleDownloadCertificate}
                             disabled={downloading}
                             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
-                            style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                            style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                             data-testid="button-download-pdf"
                           >
                             <Download className="w-4 h-4" />
@@ -1651,19 +1650,19 @@ export default function UdyogDashboard() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="rounded-xl p-4 text-center" style={glassCard}>
-                      <Award className="w-6 h-6 mx-auto mb-2" style={{ color: "#00F5FF" }} />
-                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{internship?.title}</p>
-                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Program</p>
+                      <Award className="w-6 h-6 mx-auto mb-2" style={{ color: "#6367FF" }} />
+                      <p className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{internship?.title}</p>
+                      <p className="text-xs mt-1" style={{ color: "#6B7280" }}>Program</p>
                     </div>
                     <div className="rounded-xl p-4 text-center" style={glassCard}>
                       <CheckCircle2 className="w-6 h-6 mx-auto mb-2" style={{ color: "#10B981" }} />
-                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{completedTasksCount}/{tasks.length} Tasks</p>
-                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Completed</p>
+                      <p className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{completedTasksCount}/{tasks.length} Tasks</p>
+                      <p className="text-xs mt-1" style={{ color: "#6B7280" }}>Completed</p>
                     </div>
                     <div className="rounded-xl p-4 text-center" style={glassCard}>
                       <Shield className="w-6 h-6 mx-auto mb-2" style={{ color: "#A78BFA" }} />
-                      <p className="text-sm font-medium" style={{ color: "#FFFFFF" }}>{assignment.assignedRole}</p>
-                      <p className="text-xs mt-1" style={{ color: "#94A3B8" }}>Role</p>
+                      <p className="text-sm font-medium" style={{ color: "#1E1B4B" }}>{assignment.assignedRole}</p>
+                      <p className="text-xs mt-1" style={{ color: "#6B7280" }}>Role</p>
                     </div>
                   </div>
                 </div>
@@ -1672,21 +1671,21 @@ export default function UdyogDashboard() {
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-certification-progress">
+            <h2 className="text-xl font-bold mb-6" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-certification-progress">
               Certification Progress
             </h2>
 
             <div className="rounded-xl p-6 mb-6" style={glassCard}>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm" style={{ color: "#94A3B8" }}>Completion</span>
-                <span className="text-sm font-semibold" style={{ color: "#00F5FF" }}>
+                <span className="text-sm" style={{ color: "#6B7280" }}>Completion</span>
+                <span className="text-sm font-semibold" style={{ color: "#6367FF" }}>
                   {completedTasksCount}/{tasks.length} tasks
                 </span>
               </div>
-              <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(99,103,255,0.10)" }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: "linear-gradient(90deg, #00F5FF, #0EA5E9)" }}
+                  style={{ background: "linear-gradient(90deg, #6367FF, #4F46E5)" }}
                   initial={{ width: 0 }}
                   animate={{ width: `${certProgress}%` }}
                   transition={{ duration: 1 }}
@@ -1695,7 +1694,7 @@ export default function UdyogDashboard() {
             </div>
 
             <div className="space-y-2 mb-6">
-              <h3 className="text-sm font-medium mb-3" style={{ color: "#94A3B8" }}>Remaining Tasks</h3>
+              <h3 className="text-sm font-medium mb-3" style={{ color: "#6B7280" }}>Remaining Tasks</h3>
               {remainingTasks.map((task: any) => (
                 <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ ...glassCard }} data-testid={`remaining-task-${task.id}`}>
                   <AlertCircle className="w-4 h-4 shrink-0" style={{ color: "#F59E0B" }} />
@@ -1707,9 +1706,9 @@ export default function UdyogDashboard() {
               ))}
             </div>
 
-            <div className="rounded-xl p-5 text-center" style={{ background: "rgba(0,245,255,0.04)", border: "1px solid rgba(0,245,255,0.1)" }}>
-              <Zap className="w-5 h-5 mx-auto mb-2" style={{ color: "#00F5FF" }} />
-              <p className="text-sm font-medium" style={{ color: "#00F5FF" }} data-testid="text-motivational">
+            <div className="rounded-xl p-5 text-center" style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.08)" }}>
+              <Zap className="w-5 h-5 mx-auto mb-2" style={{ color: "#6367FF" }} />
+              <p className="text-sm font-medium" style={{ color: "#6367FF" }} data-testid="text-motivational">
                 You're {certProgress}% there! Keep pushing — your certificate awaits.
               </p>
             </div>
@@ -1738,7 +1737,7 @@ export default function UdyogDashboard() {
                   <button
                     onClick={() => setViewCertificate(false)}
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:opacity-80"
-                    style={{ background: "rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                    style={{ background: "rgba(99,103,255,0.12)", color: "#1E1B4B" }}
                     data-testid="button-close-certificate"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -1754,17 +1753,17 @@ export default function UdyogDashboard() {
                   className="w-full max-w-[860px] space-y-5"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="rounded-xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(0,245,255,0.15)" }}>
+                  <div className="rounded-xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(99,103,255,0.12)" }}>
                     {renderCertificateBody(false)}
                   </div>
 
-                  <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div className="rounded-xl p-4" style={{ background: "rgba(99,103,255,0.06)", border: "1px solid rgba(99,103,255,0.12)" }}>
                     <div className="flex flex-wrap gap-3 justify-center">
                       <button
                         onClick={handleDownloadCertificate}
                         disabled={downloading}
                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-90"
-                        style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                        style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                         data-testid="button-modal-download-pdf"
                       >
                         <Download className="w-4 h-4" />
@@ -1784,7 +1783,7 @@ export default function UdyogDashboard() {
                           }
                         }}
                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
-                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", color: "#FFFFFF" }}
+                        style={{ background: "rgba(99,103,255,0.10)", border: "1px solid #EDE9FF", color: "#1E1B4B" }}
                         data-testid="button-copy-verification"
                       >
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -1793,13 +1792,13 @@ export default function UdyogDashboard() {
                     </div>
                   </div>
 
-                  <div className="text-center text-sm" style={{ color: "#94A3B8" }}>
+                  <div className="text-center text-sm" style={{ color: "#6B7280" }}>
                     <p>
                       Verify this certificate at:{" "}
                       <a
                         href={`${window.location.origin}/verify/udyog/${assignment?.certificate?.certificateId || ""}`}
                         className="hover:underline"
-                        style={{ color: "#00F5FF" }}
+                        style={{ color: "#6367FF" }}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -1838,19 +1837,19 @@ export default function UdyogDashboard() {
       <motion.div key="portfolio" {...fadeInUp} className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-portfolio-title">
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-portfolio-title">
               My Portfolio
             </h2>
-            <p className="text-xs mt-0.5" style={{ color: "#64748B" }}>Manage your profile and see how recruiters view it</p>
+            <p className="text-xs mt-0.5" style={{ color: "#6B7280" }}>Manage your profile and see how recruiters view it</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid rgba(99,103,255,0.12)" }}>
               <button
                 onClick={() => setPortfolioMode("overview")}
                 className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-all"
                 style={{
-                  background: portfolioMode === "overview" ? "rgba(0,245,255,0.15)" : "transparent",
-                  color: portfolioMode === "overview" ? "#00F5FF" : "#94A3B8",
+                  background: portfolioMode === "overview" ? "rgba(99,103,255,0.12)" : "transparent",
+                  color: portfolioMode === "overview" ? "#6367FF" : "#94A3B8",
                 }}
                 data-testid="button-portfolio-overview"
               >
@@ -1860,8 +1859,8 @@ export default function UdyogDashboard() {
                 onClick={() => setPortfolioMode("edit")}
                 className="px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-all"
                 style={{
-                  background: portfolioMode === "edit" ? "rgba(0,245,255,0.15)" : "transparent",
-                  color: portfolioMode === "edit" ? "#00F5FF" : "#94A3B8",
+                  background: portfolioMode === "edit" ? "rgba(99,103,255,0.12)" : "transparent",
+                  color: portfolioMode === "edit" ? "#6367FF" : "#94A3B8",
                 }}
                 data-testid="button-portfolio-edit"
               >
@@ -1873,7 +1872,7 @@ export default function UdyogDashboard() {
                 <button
                   onClick={handlePortfolioCopyLink}
                   className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:opacity-80"
-                  style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#FFFFFF", background: "rgba(255,255,255,0.05)" }}
+                  style={{ border: "1px solid rgba(99,103,255,0.15)", color: "#1E1B4B", background: "rgba(99,103,255,0.06)" }}
                   data-testid="button-portfolio-copy-link"
                 >
                   {portfolioCopied ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
@@ -1884,7 +1883,7 @@ export default function UdyogDashboard() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:opacity-90"
-                  style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                  style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                   data-testid="button-portfolio-open-public"
                 >
                   <ExternalLink className="w-3.5 h-3.5" /> Open Public
@@ -1896,7 +1895,7 @@ export default function UdyogDashboard() {
 
         {portfolioMode === "edit" ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="rounded-xl p-6" style={{ ...glassCard, background: "rgba(255,255,255,0.03)" }}>
+            <div className="rounded-xl p-6" style={{ ...glassCard, background: "rgba(99,103,255,0.03)" }}>
               <ProfileForm
                 profile={prof}
                 onSave={handlePortfolioSave}
@@ -1931,9 +1930,9 @@ export default function UdyogDashboard() {
             )}
 
             <div className="rounded-xl overflow-hidden" style={glassCard}>
-              <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.12), rgba(124,58,237,0.08), transparent)" }}>
-                <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ background: "rgba(5,10,24,0.7)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <span className="flex items-center gap-1" style={{ color: "#94A3B8" }}>
+              <div className="h-24 relative" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.12), transparent)" }}>
+                <div className="absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs" style={{ background: "rgba(99,103,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(99,103,255,0.12)" }}>
+                  <span className="flex items-center gap-1" style={{ color: "#6B7280" }}>
                     {prof.portfolioVisible ? <><Eye className="w-3 h-3" /> Public</> : <><EyeOff className="w-3 h-3" /> Private</>}
                   </span>
                   <Switch
@@ -1956,14 +1955,14 @@ export default function UdyogDashboard() {
                       onChange={handlePortfolioPhotoUpload}
                       data-testid="input-portfolio-photo"
                     />
-                    <div className="p-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
+                    <div className="p-0.5 rounded-full" style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)" }}>
                       <Avatar
                         className="w-20 h-20 cursor-pointer"
-                        style={{ border: "3px solid #0F172A" }}
+                        style={{ border: "3px solid #F8F7FF" }}
                         onClick={() => portfolioPhotoRef.current?.click()}
                       >
                         <AvatarImage src={prof.profilePhoto || undefined} alt={prof.fullName} />
-                        <AvatarFallback className="text-xl font-bold" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+                        <AvatarFallback className="text-xl font-bold" style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF" }}>
                           {initials}
                         </AvatarFallback>
                       </Avatar>
@@ -1974,12 +1973,12 @@ export default function UdyogDashboard() {
                       onClick={() => portfolioPhotoRef.current?.click()}
                       data-testid="button-portfolio-change-photo"
                     >
-                      <Camera className="w-5 h-5" style={{ color: "#FFFFFF" }} />
+                      <Camera className="w-5 h-5" style={{ color: "#1E1B4B" }} />
                     </div>
                     {prof.portfolioVisible && (
-                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full" style={{ background: "#0F172A" }}>
+                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full" style={{ background: "#F8F7FF" }}>
                         <div className="p-0.5 rounded-full" style={{ background: "#10B981" }}>
-                          <CheckCircle2 className="w-3 h-3" style={{ color: "#FFFFFF" }} />
+                          <CheckCircle2 className="w-3 h-3" style={{ color: "#1E1B4B" }} />
                         </div>
                       </div>
                     )}
@@ -1989,7 +1988,7 @@ export default function UdyogDashboard() {
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }} data-testid="text-portfolio-name">
+                          <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-portfolio-name">
                             {prof.fullName}
                           </h3>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.2)" }}>
@@ -1997,32 +1996,32 @@ export default function UdyogDashboard() {
                           </span>
                         </div>
                         {prof.headline ? (
-                          <p className="text-sm" style={{ color: "#94A3B8" }} data-testid="text-portfolio-headline">{prof.headline}</p>
+                          <p className="text-sm" style={{ color: "#6B7280" }} data-testid="text-portfolio-headline">{prof.headline}</p>
                         ) : (
-                          <button onClick={() => setPortfolioMode("edit")} className="text-sm flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: "#64748B" }} data-testid="button-add-headline">
+                          <button onClick={() => setPortfolioMode("edit")} className="text-sm flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: "#6B7280" }} data-testid="button-add-headline">
                             <Pencil className="w-3 h-3" /> Add a headline
                           </button>
                         )}
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
-                          <span className="px-2 py-0.5 rounded text-xs font-mono" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }}>@{prof.username}</span>
+                          <span className="px-2 py-0.5 rounded text-xs font-mono" style={{ background: "rgba(99,103,255,0.07)", border: "1px solid rgba(99,103,255,0.12)", color: "#6B7280" }}>@{prof.username}</span>
                           {prof.location && (
-                            <span className="flex items-center gap-1 text-xs" style={{ color: "#64748B" }}>
+                            <span className="flex items-center gap-1 text-xs" style={{ color: "#6B7280" }}>
                               <MapPin className="w-3 h-3" /> {prof.location}
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => setPortfolioMode("edit")} className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="button-edit-portfolio">
+                        <button onClick={() => setPortfolioMode("edit")} className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(99,103,255,0.12)", color: "#6B7280" }} data-testid="button-edit-portfolio">
                           <Pencil className="w-4 h-4" />
                         </button>
                         {prof.githubUrl && (
-                          <a href={prof.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="link-portfolio-github">
+                          <a href={prof.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(99,103,255,0.12)", color: "#6B7280" }} data-testid="link-portfolio-github">
                             <Github className="w-4 h-4" />
                           </a>
                         )}
                         {prof.linkedinUrl && (
-                          <a href={prof.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#94A3B8" }} data-testid="link-portfolio-linkedin">
+                          <a href={prof.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg transition-all hover:opacity-80" style={{ border: "1px solid rgba(99,103,255,0.12)", color: "#6B7280" }} data-testid="link-portfolio-linkedin">
                             <Linkedin className="w-4 h-4" />
                           </a>
                         )}
@@ -2031,10 +2030,10 @@ export default function UdyogDashboard() {
                     {portfolioAllSkills.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {portfolioAllSkills.slice(0, 5).map(skill => (
-                          <span key={skill} className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "#00F5FF" }}>{skill}</span>
+                          <span key={skill} className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.12)", color: "#6367FF" }}>{skill}</span>
                         ))}
                         {portfolioAllSkills.length > 5 && (
-                          <span className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#64748B" }}>+{portfolioAllSkills.length - 5} more</span>
+                          <span className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: "rgba(99,103,255,0.06)", border: "1px solid rgba(99,103,255,0.12)", color: "#6B7280" }}>+{portfolioAllSkills.length - 5} more</span>
                         )}
                       </div>
                     )}
@@ -2051,8 +2050,8 @@ export default function UdyogDashboard() {
                       <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
                     </div>
                     <div>
-                      <div className="text-xl font-bold" style={{ color: "#FFFFFF" }} data-testid={`stat-portfolio-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>{stat.value}</div>
-                      <div className="text-[11px]" style={{ color: "#64748B" }}>{stat.label}</div>
+                      <div className="text-xl font-bold" style={{ color: "#1E1B4B" }} data-testid={`stat-portfolio-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>{stat.value}</div>
+                      <div className="text-[11px]" style={{ color: "#6B7280" }}>{stat.label}</div>
                     </div>
                   </div>
                 </div>
@@ -2061,13 +2060,13 @@ export default function UdyogDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <div className="lg:col-span-1 rounded-xl p-5" style={glassCard} data-testid="card-portfolio-strength">
-                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#FFFFFF" }}>
-                  <Zap className="w-4 h-4" style={{ color: "#00F5FF" }} /> Portfolio Strength
+                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#1E1B4B" }}>
+                  <Zap className="w-4 h-4" style={{ color: "#6367FF" }} /> Portfolio Strength
                 </h4>
                 <div className="flex flex-col items-center gap-3 mb-4">
                   <div className="relative w-20 h-20">
                     <svg className="w-20 h-20 -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(99,103,255,0.10)" strokeWidth="8" />
                       <circle
                         cx="50" cy="50" r="40" fill="none"
                         stroke={strengthColor}
@@ -2079,7 +2078,7 @@ export default function UdyogDashboard() {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-lg font-bold" style={{ color: strengthColor }}>{strengthScore}%</span>
-                      <span className="text-[10px]" style={{ color: "#64748B" }}>{strengthLabel}</span>
+                      <span className="text-[10px]" style={{ color: "#6B7280" }}>{strengthLabel}</span>
                     </div>
                   </div>
                 </div>
@@ -2091,12 +2090,12 @@ export default function UdyogDashboard() {
                       onClick={() => { if (!item.done) setPortfolioMode("edit"); }}
                       data-testid={`strength-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
-                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: item.done ? "#10B981" : "rgba(255,255,255,0.15)" }} />
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: item.done ? "#10B981" : "rgba(99,103,255,0.15)" }} />
                       <span style={{ color: item.done ? "#E2E8F0" : "#64748B" }} className="flex-1">{item.label}</span>
                       {item.done ? (
                         <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: "#10B981" }} />
                       ) : (
-                        <Pencil className="w-3 h-3 shrink-0" style={{ color: "rgba(255,255,255,0.2)" }} />
+                        <Pencil className="w-3 h-3 shrink-0" style={{ color: "#9CA3AF" }} />
                       )}
                     </button>
                   ))}
@@ -2107,23 +2106,23 @@ export default function UdyogDashboard() {
                 {prof.bio ? (
                   <>
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-medium flex items-center gap-2" style={{ color: "#FFFFFF" }}>
-                        <GraduationCap className="w-4 h-4" style={{ color: "#00F5FF" }} /> About
+                      <h4 className="text-sm font-medium flex items-center gap-2" style={{ color: "#1E1B4B" }}>
+                        <GraduationCap className="w-4 h-4" style={{ color: "#6367FF" }} /> About
                       </h4>
-                      <button onClick={() => setPortfolioMode("edit")} className="p-1.5 rounded-md transition-all hover:opacity-80" style={{ color: "#64748B" }} data-testid="button-edit-bio">
+                      <button onClick={() => setPortfolioMode("edit")} className="p-1.5 rounded-md transition-all hover:opacity-80" style={{ color: "#6B7280" }} data-testid="button-edit-bio">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#94A3B8" }} data-testid="text-portfolio-bio">{prof.bio}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "#6B7280" }} data-testid="text-portfolio-bio">{prof.bio}</p>
                   </>
                 ) : (
                   <div className="text-center py-8">
-                    <GraduationCap className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(255,255,255,0.15)" }} />
-                    <p className="text-sm mb-3" style={{ color: "#64748B" }}>Tell recruiters about yourself</p>
+                    <GraduationCap className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(99,103,255,0.15)" }} />
+                    <p className="text-sm mb-3" style={{ color: "#6B7280" }}>Tell recruiters about yourself</p>
                     <button
                       onClick={() => setPortfolioMode("edit")}
                       className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                      style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#94A3B8" }}
+                      style={{ border: "1px solid rgba(99,103,255,0.15)", color: "#6B7280" }}
                       data-testid="button-add-bio"
                     >
                       <Pencil className="w-3.5 h-3.5 inline mr-1.5" /> Add Bio
@@ -2133,21 +2132,21 @@ export default function UdyogDashboard() {
               </div>
             </div>
 
-            <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.06), rgba(124,58,237,0.06))", border: "1px solid rgba(0,245,255,0.12)" }}>
+            <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.06), rgba(132,148,255,0.12))", border: "1px solid rgba(99,103,255,0.12)" }}>
               <div className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,245,255,0.15)" }}>
-                    <Sparkles className="w-5 h-5" style={{ color: "#00F5FF" }} />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,103,255,0.12)" }}>
+                    <Sparkles className="w-5 h-5" style={{ color: "#6367FF" }} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Modern Portfolio</h3>
-                    <p className="text-xs" style={{ color: "#64748B" }}>Dark theme with 5 color options</p>
+                    <h3 className="font-semibold text-sm" style={{ color: "#1E1B4B" }}>Modern Portfolio</h3>
+                    <p className="text-xs" style={{ color: "#6B7280" }}>Dark theme with 5 color options</p>
                   </div>
                 </div>
                 <Link href="/shishya/profile/neon-portfolio">
                   <button
                     className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }}
+                    style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }}
                     data-testid="button-try-neon-portfolio"
                   >
                     <Sparkles className="w-3.5 h-3.5" /> Try Now
@@ -2158,17 +2157,17 @@ export default function UdyogDashboard() {
 
             {portfolioAllSkills.length > 0 && (
               <div className="rounded-xl p-5" style={glassCard}>
-                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#FFFFFF" }}>
-                  <Sparkles className="w-4 h-4" style={{ color: "#00F5FF" }} /> Skills
-                  <span className="text-[10px] font-normal" style={{ color: "#64748B" }}>(auto-generated from learning)</span>
+                <h4 className="text-sm font-medium flex items-center gap-2 mb-4" style={{ color: "#1E1B4B" }}>
+                  <Sparkles className="w-4 h-4" style={{ color: "#6367FF" }} /> Skills
+                  <span className="text-[10px] font-normal" style={{ color: "#6B7280" }}>(auto-generated from learning)</span>
                 </h4>
                 <div className="flex flex-wrap gap-2 mb-5">
                   {portfolioAllSkills.map(skill => (
-                    <span key={skill} className="px-2.5 py-1 rounded-lg text-xs" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "#00F5FF" }} data-testid={`skill-portfolio-${skill.toLowerCase().replace(/\s+/g, '-')}`}>{skill}</span>
+                    <span key={skill} className="px-2.5 py-1 rounded-lg text-xs" style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.12)", color: "#6367FF" }} data-testid={`skill-portfolio-${skill.toLowerCase().replace(/\s+/g, '-')}`}>{skill}</span>
                   ))}
                 </div>
-                <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h5 className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#64748B" }}>Skill Categories</h5>
+                <div className="pt-4" style={{ borderTop: "1px solid rgba(99,103,255,0.07)" }}>
+                  <h5 className="text-[10px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#6B7280" }}>Skill Categories</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {(() => {
                       const categories: Record<string, string[]> = {};
@@ -2183,14 +2182,14 @@ export default function UdyogDashboard() {
                         categories[cat].push(skill);
                       });
                       return Object.entries(categories).map(([cat, skills]) => (
-                        <div key={cat} className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div key={cat} className="p-3 rounded-lg" style={{ background: "rgba(99,103,255,0.03)", border: "1px solid rgba(99,103,255,0.07)" }}>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium" style={{ color: "#E2E8F0" }}>{cat}</span>
-                            <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: "rgba(255,255,255,0.06)", color: "#64748B" }}>{skills.length}</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: "rgba(99,103,255,0.07)", color: "#6B7280" }}>{skills.length}</span>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {skills.map((s, i) => (
-                              <span key={s} className="text-[11px]" style={{ color: "#94A3B8" }}>{s}{i < skills.length - 1 ? "," : ""}</span>
+                              <span key={s} className="text-[11px]" style={{ color: "#6B7280" }}>{s}{i < skills.length - 1 ? "," : ""}</span>
                             ))}
                           </div>
                         </div>
@@ -2201,11 +2200,11 @@ export default function UdyogDashboard() {
               </div>
             )}
 
-            <div className="pt-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <div className="flex items-center justify-center gap-2 text-sm" style={{ color: "#64748B" }}>
+            <div className="pt-4 text-center" style={{ borderTop: "1px solid rgba(99,103,255,0.07)" }}>
+              <div className="flex items-center justify-center gap-2 text-sm" style={{ color: "#6B7280" }}>
                 <GraduationCap className="w-4 h-4" />
                 <span>Portfolio by</span>
-                <span className="font-semibold" style={{ color: "#FFFFFF" }}>OurShiksha</span>
+                <span className="font-semibold" style={{ color: "#1E1B4B" }}>OurShiksha</span>
               </div>
               <p className="text-[11px] mt-1" style={{ color: "#475569" }}>
                 All skills and achievements verified through course completion, projects, and assessments.
@@ -2219,8 +2218,8 @@ export default function UdyogDashboard() {
 
   const renderProject = () => {
     const glassCard = {
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.08)",
+      background: "rgba(99,103,255,0.04)",
+      border: "1px solid rgba(99,103,255,0.10)",
       borderRadius: "16px",
       padding: "24px",
     };
@@ -2230,10 +2229,10 @@ export default function UdyogDashboard() {
 
     if (!internship) {
       return (
-        <div className="p-6" style={{ color: "#94A3B8" }}>
+        <div className="p-6" style={{ color: "#6B7280" }}>
           <div style={{ ...glassCard, textAlign: "center", padding: "40px" }}>
             <FolderKanban className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p style={{ color: "#94A3B8" }}>No internship assigned yet. Complete the skill assessment to get started.</p>
+            <p style={{ color: "#6B7280" }}>No internship assigned yet. Complete the skill assessment to get started.</p>
           </div>
         </div>
       );
@@ -2250,27 +2249,27 @@ export default function UdyogDashboard() {
     const featurePalette = [
       { border: "rgba(20,184,166,0.35)", header: "rgba(20,184,166,0.08)", dot: "#14B8A6", label: "#2DD4BF" },
       { border: "rgba(59,130,246,0.35)", header: "rgba(59,130,246,0.08)", dot: "#3B82F6", label: "#60A5FA" },
-      { border: "rgba(124,58,237,0.35)", header: "rgba(124,58,237,0.08)", dot: "#7C3AED", label: "#A78BFA" },
+      { border: "rgba(132,148,255,0.12)", header: "rgba(132,148,255,0.12)", dot: "#8494FF", label: "#A78BFA" },
     ];
 
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-6 space-y-4">
         <div style={glassCard}>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #7C3AED, #00F5FF)" }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #8494FF, #6367FF)" }}>
               <Layers className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{internship.title}</h2>
+              <h2 className="text-lg font-bold" style={{ color: "#1E1B4B", fontFamily: "var(--font-display)" }}>{internship.title}</h2>
               <div className="flex flex-wrap gap-2 mt-1">
                 {internship.domain && (
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(0,245,255,0.12)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.25)" }}>{internship.domain}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(99,103,255,0.12)", color: "#6367FF", border: "1px solid rgba(99,103,255,0.2)" }}>{internship.domain}</span>
                 )}
                 {internship.skillLevel && (
-                  <span className="text-xs px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(124,58,237,0.15)", color: "#A78BFA", border: "1px solid rgba(124,58,237,0.3)" }}>{internship.skillLevel}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(132,148,255,0.12)", color: "#A78BFA", border: "1px solid rgba(132,148,255,0.12)" }}>{internship.skillLevel}</span>
                 )}
                 {internship.duration && (
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>{internship.duration}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(99,103,255,0.07)", color: "#6B7280" }}>{internship.duration}</span>
                 )}
               </div>
             </div>
@@ -2278,23 +2277,23 @@ export default function UdyogDashboard() {
         </div>
 
         {internship.introduction && (
-          <div style={{ ...glassCard, borderLeft: "4px solid #7C3AED", padding: "20px" }}>
+          <div style={{ ...glassCard, borderLeft: "4px solid #8494FF", padding: "20px" }}>
             {sectionLabel("Project Introduction", "#A78BFA")}
             <p style={{ color: "#CBD5E1", fontSize: "14px", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{internship.introduction}</p>
           </div>
         )}
 
         {internship.goal && (
-          <div style={{ ...glassCard, borderLeft: "4px solid #00F5FF", padding: "20px" }}>
-            {sectionLabel("Project Goal", "#00F5FF")}
+          <div style={{ ...glassCard, borderLeft: "4px solid #6367FF", padding: "20px" }}>
+            {sectionLabel("Project Goal", "#6367FF")}
             <p style={{ color: "#CBD5E1", fontSize: "14px", lineHeight: "1.7" }}>{internship.goal}</p>
           </div>
         )}
 
         {!internship.projectStructure && !internship.introduction && (
           <div style={{ ...glassCard, textAlign: "center" as const, padding: "32px" }}>
-            <Layers className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "#00F5FF" }} />
-            <p style={{ color: "#64748B", fontSize: "14px" }}>Project guide not yet available for this internship.</p>
+            <Layers className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: "#6367FF" }} />
+            <p style={{ color: "#6B7280", fontSize: "14px" }}>Project guide not yet available for this internship.</p>
             <p style={{ color: "#475569", fontSize: "12px", marginTop: "4px" }}>Your admin will update this soon.</p>
           </div>
         )}
@@ -2302,9 +2301,9 @@ export default function UdyogDashboard() {
         {features.length > 0 && (
           <div style={glassCard}>
             <div className="flex items-center gap-2 mb-4">
-              <Layers className="w-4 h-4" style={{ color: "#00F5FF" }} />
-              <p style={{ color: "#FFFFFF", fontSize: "13px", fontWeight: 600 }}>Project Guide</p>
-              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>{features.length} Features · {features.reduce((a: number, f: any) => a + (f.tasks?.length || 0), 0)} Tasks</span>
+              <Layers className="w-4 h-4" style={{ color: "#6367FF" }} />
+              <p style={{ color: "#1E1B4B", fontSize: "13px", fontWeight: 600 }}>Project Guide</p>
+              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF" }}>{features.length} Features · {features.reduce((a: number, f: any) => a + (f.tasks?.length || 0), 0)} Tasks</span>
             </div>
             <div className="space-y-3">
               {features.map((feature: any, fi: number) => {
@@ -2313,15 +2312,15 @@ export default function UdyogDashboard() {
                 const fp = featurePalette[fi % featurePalette.length];
                 return (
                   <div key={fi} style={{ border: `1px solid ${fp.border}`, borderRadius: "12px", overflow: "hidden" }}>
-                    <button type="button" onClick={() => toggleProjectNode(fKey)} className="w-full flex items-center gap-2 p-3 text-left transition-colors" style={{ background: fOpen ? fp.header : "rgba(255,255,255,0.02)" }}>
-                      {fOpen ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: fp.label }} /> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "#64748B" }} />}
+                    <button type="button" onClick={() => toggleProjectNode(fKey)} className="w-full flex items-center gap-2 p-3 text-left transition-colors" style={{ background: fOpen ? fp.header : "rgba(99,103,255,0.02)" }}>
+                      {fOpen ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: fp.label }} /> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "#6B7280" }} />}
                       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: fp.dot }} />
                       <span style={{ color: fp.label, fontWeight: 700, fontSize: "14px", flex: 1, minWidth: 0 }}>{feature.title}</span>
                       <span className="text-xs px-1.5 py-0.5 rounded shrink-0" style={{ background: fp.header, color: fp.label }}>{feature.tasks?.length || 0} tasks</span>
                     </button>
                     {fOpen && (
                       <div style={{ padding: "12px", background: "rgba(0,0,0,0.12)" }} className="space-y-3">
-                        {feature.description && <p style={{ color: "#94A3B8", fontSize: "13px", paddingBottom: "4px" }}>{feature.description}</p>}
+                        {feature.description && <p style={{ color: "#6B7280", fontSize: "13px", paddingBottom: "4px" }}>{feature.description}</p>}
                         {(feature.tasks || []).map((task: any, ti: number) => {
                           const tKey = `f${fi}-t${ti}`;
                           const tOpen = expandedProjectNodes.has(tKey);
@@ -2329,19 +2328,19 @@ export default function UdyogDashboard() {
                             <div key={ti} style={{ border: "1px solid rgba(245,158,11,0.25)", borderRadius: "10px", overflow: "hidden" }}>
                               <button type="button" onClick={() => toggleProjectNode(tKey)} className="w-full flex items-center gap-2 p-2.5 text-left transition-colors" style={{ background: tOpen ? "rgba(245,158,11,0.09)" : "rgba(245,158,11,0.03)" }}>
                                 {tOpen ? <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: "#FBBF24" }} /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "#475569" }} />}
-                                <span style={{ color: "#64748B", fontFamily: "monospace", fontSize: "10px", shrink: 0 }}>{fi + 1}.{ti + 1}</span>
+                                <span style={{ color: "#6B7280", fontFamily: "monospace", fontSize: "10px", shrink: 0 }}>{fi + 1}.{ti + 1}</span>
                                 <span style={{ color: "#FDE68A", fontWeight: 600, fontSize: "13px", flex: 1, minWidth: 0 }}>{task.title}</span>
                                 <span className="text-[10px] px-1 py-0.5 rounded shrink-0" style={{ background: "rgba(245,158,11,0.12)", color: "#FBBF24" }}>{task.steps?.length || 0} steps</span>
                               </button>
                               {tOpen && (
                                 <div style={{ padding: "12px 14px 14px 14px", background: "rgba(0,0,0,0.08)" }} className="space-y-3">
-                                  {task.description && <p style={{ color: "#94A3B8", fontSize: "13px" }}>{task.description}</p>}
+                                  {task.description && <p style={{ color: "#6B7280", fontSize: "13px" }}>{task.description}</p>}
 
                                   {task.tools && task.tools.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 items-center">
-                                      <span style={{ color: "#64748B", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>Tools:</span>
+                                      <span style={{ color: "#6B7280", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>Tools:</span>
                                       {task.tools.map((tool: string, toi: number) => (
-                                        <span key={toi} style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: "#00F5FF", fontSize: "11px", padding: "1px 8px", borderRadius: "20px" }}>{tool}</span>
+                                        <span key={toi} style={{ background: "rgba(99,103,255,0.12)", border: "1px solid rgba(99,103,255,0.15)", color: "#6367FF", fontSize: "11px", padding: "1px 8px", borderRadius: "20px" }}>{tool}</span>
                                       ))}
                                     </div>
                                   )}
@@ -2355,7 +2354,7 @@ export default function UdyogDashboard() {
 
                                   {task.steps && task.steps.length > 0 && (
                                     <div>
-                                      <p style={{ color: "#64748B", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "10px" }}>Step-by-Step Guide</p>
+                                      <p style={{ color: "#6B7280", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "10px" }}>Step-by-Step Guide</p>
                                       <ol className="space-y-2">
                                         {task.steps.map((step: string, si: number) => (
                                           <li key={si} className="flex gap-3">
@@ -2372,7 +2371,7 @@ export default function UdyogDashboard() {
                                       <p style={{ color: "#4ADE80", fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: "8px" }}>Done Checklist</p>
                                       <ul className="space-y-1.5">
                                         {task.checklist.map((item: string, ci: number) => (
-                                          <li key={ci} className="flex items-start gap-2" style={{ color: "#94A3B8", fontSize: "12px" }}>
+                                          <li key={ci} className="flex items-start gap-2" style={{ color: "#6B7280", fontSize: "12px" }}>
                                             <span style={{ color: "#22C55E", marginTop: "1px", shrink: 0 }}>☐</span>
                                             <span>{item.replace(/^\[\s*\]\s*/, "")}</span>
                                           </li>
@@ -2404,23 +2403,23 @@ export default function UdyogDashboard() {
         {legacyInitiatives.length > 0 && features.length === 0 && (
           <div style={glassCard}>
             <div className="flex items-center gap-2 mb-3">
-              <Layers className="w-4 h-4" style={{ color: "#00F5FF" }} />
-              <p style={{ color: "#FFFFFF", fontSize: "13px", fontWeight: 600 }}>Project Structure</p>
-              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>{legacyInitiatives.length} Initiatives</span>
+              <Layers className="w-4 h-4" style={{ color: "#6367FF" }} />
+              <p style={{ color: "#1E1B4B", fontSize: "13px", fontWeight: 600 }}>Project Structure</p>
+              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(99,103,255,0.08)", color: "#6367FF" }}>{legacyInitiatives.length} Initiatives</span>
             </div>
             <div className="space-y-2">
               {legacyInitiatives.map((initiative: any, ii: number) => {
                 const iKey = `i${ii}`;
                 const iOpen = expandedProjectNodes.has(iKey);
                 return (
-                  <div key={ii} style={{ border: "1px solid rgba(124,58,237,0.3)", borderRadius: "12px", overflow: "hidden" }}>
-                    <button type="button" onClick={() => toggleProjectNode(iKey)} className="w-full flex items-center gap-2 p-3 text-left transition-colors" style={{ background: iOpen ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.05)" }}>
-                      {iOpen ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: "#A78BFA" }} /> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "#64748B" }} />}
+                  <div key={ii} style={{ border: "1px solid rgba(132,148,255,0.12)", borderRadius: "12px", overflow: "hidden" }}>
+                    <button type="button" onClick={() => toggleProjectNode(iKey)} className="w-full flex items-center gap-2 p-3 text-left transition-colors" style={{ background: iOpen ? "rgba(132,148,255,0.12)" : "rgba(132,148,255,0.12)" }}>
+                      {iOpen ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: "#A78BFA" }} /> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "#6B7280" }} />}
                       <span style={{ color: "#C4B5FD", fontWeight: 600, fontSize: "14px" }}>{initiative.title}</span>
                     </button>
                     {iOpen && initiative.description && (
                       <div style={{ padding: "10px 16px", background: "rgba(0,0,0,0.1)" }}>
-                        <p style={{ color: "#94A3B8", fontSize: "13px" }}>{initiative.description}</p>
+                        <p style={{ color: "#6B7280", fontSize: "13px" }}>{initiative.description}</p>
                       </div>
                     )}
                   </div>
@@ -2431,7 +2430,7 @@ export default function UdyogDashboard() {
         )}
 
         {[
-          { field: "finalIntegration", label: "Final Integration", icon: <Layers className="w-5 h-5" />, color: "#00F5FF", bg: "rgba(0,245,255,0.07)", border: "rgba(0,245,255,0.2)" },
+          { field: "finalIntegration", label: "Final Integration", icon: <Layers className="w-5 h-5" />, color: "#6367FF", bg: "rgba(99,103,255,0.12)", border: "rgba(99,103,255,0.15)" },
           { field: "testing", label: "Testing", icon: <FlaskConical className="w-5 h-5" />, color: "#FBBF24", bg: "rgba(245,158,11,0.07)", border: "rgba(245,158,11,0.2)" },
           { field: "deployment", label: "Deployment", icon: <Rocket className="w-5 h-5" />, color: "#FB923C", bg: "rgba(251,146,60,0.07)", border: "rgba(251,146,60,0.2)" },
           { field: "liveProjectOutput", label: "Live Project Output", icon: <Trophy className="w-5 h-5" />, color: "#4ADE80", bg: "rgba(74,222,128,0.07)", border: "rgba(74,222,128,0.2)" },
@@ -2445,7 +2444,7 @@ export default function UdyogDashboard() {
               <button type="button" onClick={() => toggleProjectNode(sKey)} className="w-full flex items-center gap-3 p-4 text-left transition-opacity hover:opacity-80">
                 <div style={{ color }}>{icon}</div>
                 <span style={{ color, fontWeight: 600, fontSize: "14px" }}>{label}</span>
-                {sOpen ? <ChevronDown className="w-4 h-4 ml-auto" style={{ color: "#64748B" }} /> : <ChevronRight className="w-4 h-4 ml-auto" style={{ color: "#64748B" }} />}
+                {sOpen ? <ChevronDown className="w-4 h-4 ml-auto" style={{ color: "#6B7280" }} /> : <ChevronRight className="w-4 h-4 ml-auto" style={{ color: "#6B7280" }} />}
               </button>
               {sOpen && (
                 <div style={{ padding: "0 16px 16px 16px" }}>
@@ -2477,17 +2476,17 @@ export default function UdyogDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: "linear-gradient(180deg, #050A18, #0B1D3A, #0F172A)" }}>
+    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: "linear-gradient(180deg, #F8F7FF, #EDE9FF, #F8F7FF)" }}>
       <div
         className="hidden md:flex flex-col w-64 shrink-0 fixed top-0 left-0 h-screen z-30"
-        style={{ background: "rgba(5,10,24,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ background: "rgba(99,103,255,0.08)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRight: "1px solid rgba(99,103,255,0.07)" }}
       >
-        <div className="p-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="p-5" style={{ borderBottom: "1px solid rgba(99,103,255,0.07)" }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)" }}>
-              <Briefcase className="w-4.5 h-4.5" style={{ color: "#050A18" }} />
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)" }}>
+              <Briefcase className="w-4.5 h-4.5" style={{ color: "#1E1B4B" }} />
             </div>
-            <span className="font-semibold text-sm" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>
+            <span className="font-semibold text-sm" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>
               Udyog Workspace
             </span>
           </div>
@@ -2502,10 +2501,10 @@ export default function UdyogDashboard() {
                 onClick={() => setActiveTab(item.key)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left"
                 style={{
-                  background: isActive ? "rgba(0,245,255,0.1)" : "transparent",
-                  borderLeft: isActive ? "3px solid #00F5FF" : "3px solid transparent",
-                  color: isActive ? "#00F5FF" : "#94A3B8",
-                  boxShadow: isActive ? "inset 0 0 20px rgba(0,245,255,0.05)" : "none",
+                  background: isActive ? "rgba(99,103,255,0.08)" : "transparent",
+                  borderLeft: isActive ? "3px solid #6367FF" : "3px solid transparent",
+                  color: isActive ? "#6367FF" : "#94A3B8",
+                  boxShadow: isActive ? "inset 0 0 20px rgba(99,103,255,0.12)" : "none",
                 }}
                 data-testid={`sidebar-item-${item.key}`}
               >
@@ -2515,9 +2514,9 @@ export default function UdyogDashboard() {
             );
           })}
         </nav>
-        <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="p-4" style={{ borderTop: "1px solid rgba(99,103,255,0.07)" }}>
           <Link href="/shishya/dashboard">
-            <div className="flex items-center gap-2 text-xs cursor-pointer transition-all" style={{ color: "#64748B" }} data-testid="link-back-dashboard">
+            <div className="flex items-center gap-2 text-xs cursor-pointer transition-all" style={{ color: "#6B7280" }} data-testid="link-back-dashboard">
               <Home className="w-3.5 h-3.5" />
               <span>Back to SHISHYA</span>
             </div>
@@ -2525,7 +2524,7 @@ export default function UdyogDashboard() {
         </div>
       </div>
 
-      <div className="md:hidden overflow-x-auto" style={{ background: "rgba(5,10,24,0.9)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="md:hidden overflow-x-auto" style={{ background: "rgba(99,103,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(99,103,255,0.07)" }}>
         <div className="flex px-2 py-2 gap-1 min-w-max" data-testid="mobile-tab-bar">
           {sidebarItems.map((item) => {
             const isActive = activeTab === item.key;
@@ -2536,8 +2535,8 @@ export default function UdyogDashboard() {
                 onClick={() => setActiveTab(item.key)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all"
                 style={{
-                  background: isActive ? "rgba(0,245,255,0.15)" : "transparent",
-                  color: isActive ? "#00F5FF" : "#94A3B8",
+                  background: isActive ? "rgba(99,103,255,0.12)" : "transparent",
+                  color: isActive ? "#6367FF" : "#94A3B8",
                 }}
                 data-testid={`mobile-tab-${item.key}`}
               >
@@ -2552,19 +2551,19 @@ export default function UdyogDashboard() {
       <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
         <div
           className="sticky top-0 z-20 hidden md:flex items-center justify-between px-8 py-4"
-          style={{ background: "rgba(5,10,24,0.7)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ background: "rgba(99,103,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(99,103,255,0.07)" }}
         >
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{currentLabel}</span>
+            <span className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>{currentLabel}</span>
             <ChevronRight className="w-4 h-4" style={{ color: "#475569" }} />
-            <span className="text-sm" style={{ color: "#94A3B8" }}>{internship?.title || "Workspace"}</span>
+            <span className="text-sm" style={{ color: "#6B7280" }}>{internship?.title || "Workspace"}</span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-lg transition-all" style={{ background: "rgba(255,255,255,0.04)" }} data-testid="button-notifications">
-              <Bell className="w-5 h-5" style={{ color: "#94A3B8" }} />
+            <button className="relative p-2 rounded-lg transition-all" style={{ background: "rgba(99,103,255,0.04)" }} data-testid="button-notifications">
+              <Bell className="w-5 h-5" style={{ color: "#6B7280" }} />
             </button>
             <Link href="/shishya/profile">
-              <button className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer transition-all hover:scale-105 hover:shadow-lg" style={{ background: "linear-gradient(135deg, #00F5FF, #0EA5E9)", color: "#050A18" }} data-testid="avatar-user">
+              <button className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer transition-all hover:scale-105 hover:shadow-lg" style={{ background: "linear-gradient(135deg, #6367FF, #4F46E5)", color: "#1E1B4B" }} data-testid="avatar-user">
                 {userInitial}
               </button>
             </Link>
