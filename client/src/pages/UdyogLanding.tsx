@@ -146,7 +146,7 @@ export default function UdyogLanding() {
               <Button
                 size="lg"
                 variant="outline"
-                className="min-w-[220px] border-violet-500/30 text-violet-500 bg-transparent"
+                className="min-w-[220px] border-violet-500/40 text-violet-600 bg-white hover:bg-violet-50"
                 onClick={scrollToPrograms}
                 data-testid="button-explore-programs"
               >

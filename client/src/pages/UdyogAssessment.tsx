@@ -305,7 +305,7 @@ export default function UdyogAssessment() {
                 <Link href="/shishya/udyog/hub">
                   <Button
                     variant="outline"
-                    className="border-[#EDE9FF] text-gray-600 bg-transparent hover:bg-violet-50"
+                    className="border-[#EDE9FF] text-gray-600 bg-white hover:bg-violet-50"
                     data-testid="button-back-hub"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -486,7 +486,7 @@ export default function UdyogAssessment() {
               <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
                 <Button
                   variant="outline"
-                  className="border-[#EDE9FF] text-gray-600 bg-transparent"
+                  className="border-[#EDE9FF] text-gray-600 bg-white hover:bg-violet-50"
                   onClick={() => setCurrentQuestion((q) => Math.max(0, q - 1))}
                   disabled={currentQuestion === 0}
                   data-testid="button-previous"
@@ -654,7 +654,7 @@ export default function UdyogAssessment() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-[#EDE9FF] text-gray-600 bg-transparent"
+                    className="border-[#EDE9FF] text-gray-600 bg-white hover:bg-violet-50"
                     onClick={() => {
                       setScreen("domain");
                       setResult(null);

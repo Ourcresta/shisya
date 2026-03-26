@@ -433,7 +433,7 @@ export default function CourseGroupPage() {
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 pb-20">
           <div className="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center justify-between">
-            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="text-2xl font-bold" style={{ color: C.textPrimary, fontFamily: "var(--font-display)" }}>
               Courses in this {isTrack ? "Track" : "Program"}
               <span className="ml-2 text-base font-normal" style={{ color: C.textSecondary }}>({filteredCourses.length})</span>
             </h2>
@@ -441,15 +441,16 @@ export default function CourseGroupPage() {
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <div
                 className="flex items-center gap-2 rounded-xl px-4 py-2.5 flex-1 sm:w-60"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
+                style={{ background: "#FFFFFF", border: "1px solid #EDE9FF", boxShadow: "0 1px 4px rgba(99,103,255,0.07)" }}
               >
-                <Search className="w-4 h-4 shrink-0" style={{ color: C.textSecondary }} />
+                <Search className="w-4 h-4 shrink-0" style={{ color: "#8494FF" }} />
                 <input
                   type="text"
                   placeholder="Search courses..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="bg-transparent text-sm text-white placeholder-gray-500 outline-none w-full"
+                  className="text-sm outline-none w-full"
+                  style={{ background: "transparent", color: C.textPrimary }}
                   data-testid="input-search-courses"
                 />
               </div>
@@ -461,8 +462,8 @@ export default function CourseGroupPage() {
                     onClick={() => setLevelFilter(lvl)}
                     className="px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all whitespace-nowrap"
                     style={levelFilter === lvl
-                      ? { background: isTrack ? "rgba(99,103,255,0.15)" : "rgba(132,148,255,0.15)", color: accentColor, border: `1px solid ${isTrack ? "rgba(99,103,255,0.15)" : "rgba(132,148,255,0.15)"}` }
-                      : { background: "rgba(255,255,255,0.05)", color: C.textSecondary, border: "1px solid rgba(255,255,255,0.08)" }
+                      ? { background: isTrack ? "#EDE9FF" : "#EDE9FF", color: accentColor, border: `1px solid ${accentColor}33` }
+                      : { background: "#FFFFFF", color: C.textSecondary, border: "1px solid #EDE9FF" }
                     }
                     data-testid={`filter-level-${lvl}`}
                   >
@@ -474,9 +475,9 @@ export default function CourseGroupPage() {
           </div>
 
           {filteredCourses.length === 0 ? (
-            <div className="text-center py-20 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+            <div className="text-center py-20 rounded-2xl" style={{ background: "#FFFFFF", border: "1px solid #EDE9FF" }}>
               <BookOpen className="w-10 h-10 mx-auto mb-3" style={{ color: C.textSecondary }} />
-              <p className="text-white font-medium mb-1">No courses match your search</p>
+              <p className="font-medium mb-1" style={{ color: C.textPrimary }}>No courses match your search</p>
               <p className="text-sm" style={{ color: C.textSecondary }}>Try adjusting your filters or search term</p>
             </div>
           ) : (

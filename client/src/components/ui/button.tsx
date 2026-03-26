@@ -19,8 +19,8 @@ const buttonVariants = cva(
           // Inherits the current text color.
           " border [border-color:var(--button-outline)]  shadow-xs active:shadow-none ",
         secondary: "border bg-secondary text-secondary-foreground border border-secondary-border ",
-        // Add a transparent border so that when someone toggles a border on later, it doesn't shift layout/size.
-        ghost: "border border-transparent",
+        // Ghost: subtle hover bg, transparent border preserved for layout stability
+        ghost: "border border-transparent hover:bg-violet-50 hover:text-violet-700 dark:hover:bg-violet-950/40 dark:hover:text-violet-300",
       },
       // Heights are set as "min" heights, because sometimes Ai will place large amount of content
       // inside buttons. With a min-height they will look appropriate with small amounts of content,

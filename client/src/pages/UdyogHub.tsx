@@ -823,8 +823,8 @@ function JobsTab({ user, toast }: { user: any; toast: any }) {
             placeholder="Search by title, skills, or company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#EDE9FF] text-[#1E1B4B] placeholder-gray-400 focus:outline-none focus:border-violet-500/50 transition-colors"
-            style={{ background: "#F8F7FF" }}
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#EDE9FF] text-[#1E1B4B] placeholder-gray-400 focus:outline-none focus:border-violet-500 transition-colors"
+            style={{ background: "#FFFFFF", boxShadow: "0 1px 4px rgba(99,103,255,0.08)" }}
             data-testid="input-search-jobs-hub"
           />
         </div>

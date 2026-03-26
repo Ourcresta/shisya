@@ -389,8 +389,60 @@ html.dark body {
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
-  border-color: rgba(34, 211, 238, 0.4) !important;
-  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.1) !important;
+  border-color: rgba(99, 103, 255, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(99, 103, 255, 0.12) !important;
+}
+
+/* =============================================
+   PREMIUM LIGHT-MODE FORM ELEMENTS
+   Solid white bg · violet border · elegant shadow
+   ============================================= */
+
+/* All native inputs in light mode get solid white + violet border */
+:root:not(.dark) input:not([type="radio"]):not([type="checkbox"]):not([type="range"]):not([type="color"]):not([type="file"]),
+:root:not(.dark) textarea,
+:root:not(.dark) select {
+  background-color: #FFFFFF !important;
+  border-color: #D8D4F5 !important;
+  color: #1E1B4B;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+:root:not(.dark) input:not([type="radio"]):not([type="checkbox"]):not([type="range"]):not([type="color"]):not([type="file"]):focus,
+:root:not(.dark) textarea:focus,
+:root:not(.dark) select:focus {
+  border-color: #6367FF !important;
+  box-shadow: 0 0 0 3px rgba(99, 103, 255, 0.12) !important;
+  outline: none !important;
+}
+
+:root:not(.dark) input::placeholder,
+:root:not(.dark) textarea::placeholder {
+  color: #9CA3AF;
+}
+
+/* Uniform select appearance */
+:root:not(.dark) select {
+  appearance: auto;
+  cursor: pointer;
+}
+
+/* =============================================
+   PREMIUM CARD ELEVATION — Light mode
+   ============================================= */
+
+:root:not(.dark) .shadcn-card,
+:root:not(.dark) [class*="rounded-2xl"][class*="border"],
+:root:not(.dark) [class*="rounded-xl"][class*="border"] {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+/* =============================================
+   OUTLINE BUTTON — Solid white background
+   ============================================= */
+
+:root:not(.dark) button.border:not([class*="bg-"]):not([class*="text-white"]) {
+  background-color: #FFFFFF;
 }
 
 /* Dark mode popover/dropdown glass */
