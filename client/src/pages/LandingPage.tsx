@@ -1730,143 +1730,205 @@ function CTASection() {
 function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = [
-    {
-      heading: "Platform",
-      links: [
-        { href: "/courses", label: "Courses", testId: "link-courses" },
-        { href: "/pricing", label: "Pricing", testId: "link-pricing" },
-        { href: "/ai-usha-mentor", label: "Usha AI", testId: "link-usha" },
-        { href: "/become-guru", label: "Become a Guru", testId: "link-become-guru" },
-      ],
-    },
-    {
-      heading: "Resources",
-      links: [
-        { href: "/help-center", label: "Help Center", testId: "link-help" },
-        { href: "/about", label: "About Us", testId: "link-about" },
-        { href: "/contact", label: "Contact", testId: "link-contact" },
-        { href: "/become-a-partner", label: "Partner With Us", testId: "link-partner" },
-      ],
-    },
-    {
-      heading: "Legal",
-      links: [
-        { href: "/privacy", label: "Privacy Policy", testId: "link-privacy" },
-        { href: "/terms", label: "Terms of Service", testId: "link-terms" },
-        { href: "/verify-certificate", label: "Verify Certificate", testId: "link-verify" },
-      ],
-    },
+  const col1 = [
+    { href: "/about", label: "About Us", testId: "link-about" },
+    { href: "/contact", label: "Contact Us", testId: "link-contact" },
+    { href: "/privacy", label: "Privacy Policy", testId: "link-privacy" },
+    { href: "/terms", label: "Terms of Use", testId: "link-terms" },
+    { href: "/help-center", label: "Help Center", testId: "link-help" },
+    { href: "/become-a-partner", label: "Partner With Us", testId: "link-partner" },
+  ];
+
+  const col2 = [
+    { href: "/courses?cat=web", label: "Web Development" },
+    { href: "/courses?cat=data", label: "Data Science" },
+    { href: "/courses?cat=ai", label: "AI & Machine Learning" },
+    { href: "/courses?cat=design", label: "UI/UX Designing" },
+    { href: "/courses?cat=python", label: "Python" },
+    { href: "/courses?cat=dsa", label: "DSA with C++" },
+    { href: "/courses?cat=java", label: "Java" },
+    { href: "/courses?cat=cloud", label: "Cloud Computing" },
+  ];
+
+  const col3 = [
+    { href: "/courses?cat=business", label: "Digital Marketing" },
+    { href: "/courses?cat=finance", label: "Financial Modelling" },
+    { href: "/courses?cat=stock", label: "Stock Trading" },
+    { href: "/courses?cat=analytics", label: "Data Analytics" },
+    { href: "/courses?cat=powerbi", label: "Power BI" },
+    { href: "/courses?cat=excel", label: "Excel & Sheets" },
+  ];
+
+  const col4 = [
+    { href: "/shishya/udyog", label: "App Dev Internship" },
+    { href: "/shishya/udyog", label: "Data Science Track" },
+    { href: "/shishya/udyog", label: "Full Stack Track" },
+    { href: "/shishya/udyog", label: "Python Track" },
+    { href: "/shishya/udyog", label: "UI/UX Track" },
+    { href: "/shishya/udyog", label: "AI Engineer Track" },
   ];
 
   const socials = [
     { href: "#", icon: Linkedin, label: "LinkedIn" },
-    { href: "#", icon: Twitter, label: "Twitter" },
-    { href: "#", icon: Youtube, label: "YouTube" },
     { href: "#", icon: Instagram, label: "Instagram" },
+    { href: "#", icon: Youtube, label: "YouTube" },
+    { href: "#", icon: Twitter, label: "Twitter" },
   ];
+
+  const linkStyle = { color: "rgba(255,255,255,0.78)" };
+  const headingStyle = { color: "#FFFFFF", letterSpacing: "0.06em" };
 
   return (
     <footer style={{ background: HERO_GRAD }}>
-      {/* Main link grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-6">
 
-          {/* Brand column */}
+        {/* Main 5-column grid */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
+
+          {/* Column 1 — Brand + Contact + Address */}
           <div className="col-span-2 md:col-span-1">
+            {/* Logo */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl"
+                style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}>
                 <GraduationCap className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "16px" }}>
+              <span className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "15px" }}>
                 OurShiksha
               </span>
             </div>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.78)", lineHeight: "1.7" }}>
-              India's premier AI-powered e-learning platform combining courses, labs, projects, and Usha AI — your path to mastery.
+
+            {/* Tagline */}
+            <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.7)", lineHeight: "1.7" }}>
+              India's premier AI-powered e-learning platform. Learn. Build. Prove.
             </p>
 
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-5">
-              {[
-                { icon: BadgeCheck, label: "AI-Powered" },
-                { icon: Shield, label: "SSL Secured" },
-              ].map((b, i) => (
-                <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)" }}>
-                  <b.icon className="w-3 h-3 text-white" />
-                  <span className="text-[11px] text-white font-medium">{b.label}</span>
-                </div>
-              ))}
-            </div>
-
             {/* Social icons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-6">
               {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-                  style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)";
-                  }}
+                <a key={s.label} href={s.href} aria-label={s.label}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 hover:scale-110"
+                  style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.28)", color: "#fff" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.28)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.15)"; }}
                 >
                   <s.icon className="w-3.5 h-3.5" />
                 </a>
               ))}
             </div>
+
+            {/* Contact */}
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-white">Contact Us</p>
+              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.72)" }}>support@ourshiksha.com</p>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.72)" }}>+91 98765 43210</p>
+            </div>
+
+            {/* Address */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-white">Registered Office</p>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.65)", lineHeight: "1.65" }}>
+                AltF, Orchid Business Park,<br />
+                Sector 48, Gurugram,<br />
+                Haryana, 122004
+              </p>
+            </div>
           </div>
 
-          {/* Link columns */}
-          {footerLinks.map((col) => (
-            <div key={col.heading}>
-              <h4 className="font-semibold text-xs mb-4 tracking-widest uppercase text-white" style={{ letterSpacing: "0.1em" }}>
-                {col.heading}
-              </h4>
-              <ul className="space-y-3">
-                {col.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm transition-all flex items-center gap-1.5 group hover:text-white"
-                      style={{ color: "rgba(255,255,255,0.72)" }}
-                      data-testid={link.testId}
-                    >
-                      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -ml-1 transition-all text-white" />
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          {/* Column 2 — Company links */}
+          <div>
+            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Company</h4>
+            <ul className="space-y-2.5">
+              {col1.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href}
+                    className="text-xs transition-colors hover:text-white"
+                    style={linkStyle}
+                    data-testid={link.testId}
+                  >{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3 — IT & Courses */}
+          <div>
+            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>IT & Courses</h4>
+            <ul className="space-y-2.5">
+              {col2.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href}
+                    className="text-xs transition-colors hover:text-white"
+                    style={linkStyle}
+                  >{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4 — Business Courses */}
+          <div>
+            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Business Courses</h4>
+            <ul className="space-y-2.5">
+              {col3.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href}
+                    className="text-xs transition-colors hover:text-white"
+                    style={linkStyle}
+                  >{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 5 — Internship Tracks */}
+          <div>
+            <h4 className="font-semibold text-[11px] mb-4 tracking-widest uppercase" style={headingStyle}>Internship Tracks</h4>
+            <ul className="space-y-2.5">
+              {col4.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href}
+                    className="text-xs transition-colors hover:text-white"
+                    style={linkStyle}
+                  >{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+            {/* Verify cert link */}
+            <div className="mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.18)" }}>
+              <Link href="/verify-certificate"
+                className="text-xs font-medium flex items-center gap-1 hover:text-white transition-colors"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+                data-testid="link-verify"
+              >
+                <BadgeCheck className="w-3.5 h-3.5" />
+                Verify Certificate
+              </Link>
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Bottom bar */}
-        <div
-          className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.25)" }}
-        >
-          <p className="text-xs order-2 sm:order-1 text-white" style={{ color: "rgba(255,255,255,0.7)" }} data-testid="text-copyright">
-            © {currentYear} OurShiksha. All rights reserved. · Made with <Heart className="w-3 h-3 fill-red-300 text-red-300 inline-block mx-0.5" /> in India
+        <div className="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.2)" }}>
+          <p className="text-[11px] order-2 sm:order-1" style={{ color: "rgba(255,255,255,0.6)" }} data-testid="text-copyright">
+            © {currentYear} OurShiksha. All rights reserved. · Made with{" "}
+            <Heart className="w-3 h-3 fill-red-300 text-red-300 inline-block mx-0.5" /> in India
           </p>
-          <div className="flex items-center gap-3 order-1 sm:order-2">
+          <div className="flex items-center gap-4 order-1 sm:order-2">
             {[
               { icon: BadgeCheck, label: "Verified Certs" },
               { icon: Users, label: "25K+ Learners" },
               { icon: Star, label: "4.9 Rating" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-1.5">
-                <item.icon className="w-3.5 h-3.5 text-white" />
-                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.75)" }}>{item.label}</span>
+                <item.icon className="w-3.5 h-3.5 text-white opacity-80" />
+                <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>{item.label}</span>
               </div>
             ))}
           </div>
         </div>
+
       </div>
     </footer>
   );
@@ -1893,6 +1955,7 @@ export default function LandingPage() {
         <FAQSection />
         <CTASection />
       </main>
+      <Footer />
     </div>
   );
 }
