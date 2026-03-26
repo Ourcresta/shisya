@@ -1779,7 +1779,7 @@ function Footer() {
   const headingStyle = { color: "#FFFFFF", letterSpacing: "0.06em" };
 
   return (
-    <footer style={{ background: HERO_GRAD }}>
+    <footer style={{ background: "#1E1B4B" }}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-6">
 
         {/* Main 5-column grid */}
