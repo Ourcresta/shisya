@@ -315,16 +315,6 @@ export default function UdyogAssessment() {
               </div>
 
               <div className="text-center mb-12">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 mb-6" style={{ background: "rgba(99,103,255,0.1)" }}>
-                    <Brain className="w-4 h-4 text-violet-500" />
-                    <span className="text-violet-500 text-sm font-medium">AI Skill Assessment</span>
-                  </div>
-                </motion.div>
                 <h1
                   className="text-3xl md:text-5xl font-bold text-[#1E1B4B] mb-4"
                   style={{ fontFamily: "var(--font-display)" }}

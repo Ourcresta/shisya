@@ -141,11 +141,6 @@ export default function About() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(99,103,255,0.15)", border: "1px solid rgba(99,103,255,0.15)", color: C.teal }}>
-                <Sparkles className="w-3.5 h-3.5" />
-                About OurShiksha
-              </div>
 
               <h1
                 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-5 leading-tight"

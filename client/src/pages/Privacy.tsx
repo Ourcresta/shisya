@@ -65,11 +65,6 @@ export default function Privacy() {
           <div className="max-w-3xl mx-auto px-4 md:px-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
 
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
-                <Shield className="w-3.5 h-3.5" />
-                Privacy
-              </div>
 
               <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
                 Privacy Policy

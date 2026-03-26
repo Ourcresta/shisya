@@ -94,11 +94,6 @@ export default function AiUshaMentor() {
 
           <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
             <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-sm font-medium"
-                style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
-                <Brain className="w-3.5 h-3.5" />
-                AI Mentor
-              </div>
 
               <h1
                 className="text-4xl md:text-5xl font-bold tracking-tight mb-4"

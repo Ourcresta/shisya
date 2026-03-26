@@ -357,11 +357,6 @@ export default function BecomeAPartner() {
         }} />
         <motion.div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative"
           initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-            style={{ background: "rgba(99,103,255,0.12)", color: C.teal, border: `1px solid rgba(99,103,255,0.25)` }}
-            data-testid="badge-hero">
-            <School className="w-3.5 h-3.5" /> Partnership Program
-          </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6"
             style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
             data-testid="text-hero-heading">
@@ -581,10 +576,6 @@ export default function BecomeAPartner() {
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <div className="text-center mb-8">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4"
-                style={{ background: "rgba(132,148,255,0.15)", color: C.purple, border: `1px solid rgba(132,148,255,0.15)` }}>
-                <FileText className="w-3.5 h-3.5" /> Application
-              </span>
               <h2 className="text-3xl md:text-4xl font-bold mb-2"
                 style={{ fontFamily: "var(--font-display)", color: C.textPrimary }}
                 data-testid="text-form-heading">

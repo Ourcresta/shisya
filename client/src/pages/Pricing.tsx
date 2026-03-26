@@ -555,20 +555,6 @@ export default function Pricing() {
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative" style={{ zIndex: 4 }}>
           <div className="py-12 md:py-16 max-w-[580px]">
 
-            {/* Badge */}
-            <div
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5"
-              style={{
-                background: "linear-gradient(135deg, rgba(99,103,255,0.12), rgba(132,148,255,0.08))",
-                border: "1px solid rgba(99,103,255,0.28)",
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5" style={{ color: C.teal }} />
-              <span className="text-xs font-semibold tracking-wide" style={{ color: C.teal }}>
-                Flexible plans for every learner
-              </span>
-            </div>
-
             <h1
               className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold mb-4 leading-[1.06]"
               style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}
@@ -675,12 +661,6 @@ export default function Pricing() {
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="text-center mb-8">
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-              style={{ background: "rgba(99,103,255,0.09)", border: "1px solid rgba(99,103,255,0.18)", color: C.teal }}
-            >
-              <Check className="w-3 h-3" /> Side-by-side breakdown
-            </div>
             <h2
               className="text-2xl md:text-3xl font-bold mb-2"
               style={{
@@ -752,16 +732,6 @@ export default function Pricing() {
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
           <div className="grid lg:grid-cols-[2fr_3fr] gap-10 lg:gap-16 items-start">
             <div className="lg:sticky lg:top-24">
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-                style={{
-                  background: "linear-gradient(135deg, rgba(99,103,255,0.10), rgba(132,148,255,0.06))",
-                  border: "1px solid rgba(99,103,255,0.22)",
-                  color: C.teal,
-                }}
-              >
-                <Sparkles className="w-3 h-3" /> FAQ
-              </div>
               <h2
                 className="text-2xl md:text-3xl font-bold mb-3 leading-tight"
                 style={{ fontFamily: "var(--font-display)", color: C.textPrimary, letterSpacing: "-0.02em" }}

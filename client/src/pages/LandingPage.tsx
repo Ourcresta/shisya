@@ -304,12 +304,6 @@ function HeroSection() {
 
           {/* Left: Text content */}
           <div className="text-center lg:text-left space-y-6 py-14 lg:py-20 xl:py-24">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
-              style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", backdropFilter: "blur(8px)" }}>
-              <Sparkles className="w-3.5 h-3.5" />
-              India's Premier AI Learning Platform
-            </div>
 
             <div className="min-h-[140px] md:min-h-[170px] lg:min-h-[190px] flex flex-col justify-center">
               <p
@@ -553,10 +547,6 @@ function JourneySection() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}>
-            How It Works
-          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-2"
             style={{
@@ -673,10 +663,6 @@ function FeaturesSection() {
       <SectionGlow position="bottom-left" color={C.teal} />
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-7">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(132,148,255,0.1)", border: "1px solid rgba(132,148,255,0.25)", color: C.purple }}>
-            Platform Features
-          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-2"
             style={{
@@ -1078,11 +1064,6 @@ function FeaturedCoursesSection() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2"
-            style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}
-          >
-            <span style={{ fontSize: "8px" }}>●</span> Our Catalogue
-          </div>
           <h2
             className="text-2xl md:text-3xl font-bold"
             style={{
@@ -1331,10 +1312,6 @@ function AISection() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
-              style={{ background: "rgba(132,148,255,0.1)", border: "1px solid rgba(132,148,255,0.25)", color: C.purple }}>
-              AI-Powered Learning
-            </div>
             <h2
               className="text-2xl md:text-3xl font-bold"
               style={{
@@ -1521,12 +1498,6 @@ function FAQSection() {
 
           {/* Left: sticky header */}
           <div className="lg:sticky lg:top-24">
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold mb-4 tracking-widest uppercase"
-              style={{ background: "rgba(99,103,255,0.08)", border: "1px solid rgba(99,103,255,0.2)", color: C.teal }}
-            >
-              FAQ
-            </div>
             <h2
               className="text-2xl md:text-3xl font-bold mb-3 leading-tight"
               style={{
