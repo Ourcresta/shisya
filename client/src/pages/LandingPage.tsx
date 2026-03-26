@@ -1460,10 +1460,6 @@ function TestimonialsSection() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         <div className="text-center mb-7">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-3 tracking-widest uppercase"
-            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", color: "#D97706" }}>
-            Student Reviews
-          </div>
           <h2
             className="text-2xl md:text-3xl font-bold mb-2"
             style={{
