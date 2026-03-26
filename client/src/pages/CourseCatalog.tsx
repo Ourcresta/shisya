@@ -78,6 +78,12 @@ function StarRating({ rating }: { rating: number }) {
   return <div className="flex items-center gap-0.5">{stars}</div>;
 }
 
+const V = "#6367FF";
+const V2 = "#8494FF";
+const VGLOW = "rgba(99,103,255,0.18)";
+const VBORDER = "#EDE9FF";
+const VBG = "rgba(99,103,255,0.07)";
+
 function PremiumCourseCard({ course: initialCourse, languageVariants }: { course: Course; languageVariants?: Course[] }) {
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
@@ -100,18 +106,16 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
 
   return (
     <motion.div
-      className="group relative rounded-2xl overflow-hidden h-full flex flex-col"
+      className="group relative rounded-2xl overflow-hidden h-full flex flex-col bg-white"
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(12px)",
+        border: `1px solid ${VBORDER}`,
+        boxShadow: "0 2px 12px -4px rgba(99,103,255,0.08)",
       }}
       whileHover={{
-        y: -6,
-        boxShadow: "0 20px 40px -12px rgba(0, 245, 255, 0.2), 0 0 20px rgba(0, 245, 255, 0.15)",
-        borderColor: "rgba(0, 245, 255, 0.3)",
+        y: -5,
+        boxShadow: `0 16px 40px -10px ${VGLOW}, 0 0 0 1px rgba(99,103,255,0.2)`,
       }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       data-testid={`card-course-${course.id}`}
     >
       <div className="relative aspect-video overflow-hidden">
@@ -126,23 +130,23 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, rgba(0,245,255,0.1), rgba(124,58,237,0.08))" }}
+            style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.05))" }}
           >
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.25)" }}
+              style={{ background: "rgba(99,103,255,0.12)", border: `1px solid rgba(99,103,255,0.22)` }}
             >
-              <BookOpen className="w-8 h-8" style={{ color: "#00F5FF" }} />
+              <BookOpen className="w-8 h-8" style={{ color: V }} />
             </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/5 via-transparent to-transparent" />
 
         {course.category && (
           <div className="absolute top-3 left-3">
             <span
-              className="px-2.5 py-1 rounded-full text-xs font-medium"
-              style={{ background: "rgba(0,245,255,0.85)", color: "#0B1D3A", backdropFilter: "blur(8px)" }}
+              className="px-2.5 py-1 rounded-full text-xs font-semibold"
+              style={{ background: V, color: "#fff", backdropFilter: "blur(8px)" }}
               data-testid={`badge-category-${course.id}`}
             >
               {course.category}
@@ -160,13 +164,12 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
             </span>
           </div>
         )}
-
       </div>
 
       <div className="flex flex-col flex-1 p-4 gap-2.5">
         <h3
-          className="text-sm font-bold leading-snug line-clamp-2 text-white"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="text-sm font-bold leading-snug line-clamp-2"
+          style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}
           data-testid={`text-course-title-${course.id}`}
         >
           {course.groupTitle || course.title}
@@ -175,23 +178,21 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
         {rating > 0 && (
           <div className="flex items-center gap-2" data-testid={`rating-${course.id}`}>
             <StarRating rating={rating} />
-            <span className="text-xs font-medium text-gray-400">{rating.toFixed(1)}</span>
+            <span className="text-xs font-medium text-gray-500">{rating.toFixed(1)}</span>
             {totalStudents > 0 && (
-              <span className="text-xs text-gray-500">({totalStudents.toLocaleString()})</span>
+              <span className="text-xs text-gray-400">({totalStudents.toLocaleString()})</span>
             )}
           </div>
         )}
 
         {course.description && (
-          <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed" data-testid={`text-course-description-${course.id}`}>
+          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed" data-testid={`text-course-description-${course.id}`}>
             {course.description}
           </p>
         )}
 
-        {/* Level badge — prominent colored pill */}
         <LevelBadge level={course.level as any} />
 
-        {/* Stats row: Credits + Projects + Duration */}
         <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
           {!isFree && !isEnrolled && creditCost > 0 && (
             <span className="flex items-center gap-1 font-medium" style={{ color: "#F59E0B" }} data-testid={`text-price-${course.id}`}>
@@ -200,41 +201,37 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
             </span>
           )}
           {isFree && (
-            <span className="text-emerald-400 font-medium" data-testid={`text-price-${course.id}`}>Free</span>
+            <span className="text-emerald-600 font-medium" data-testid={`text-price-${course.id}`}>Free</span>
           )}
           {isEnrolled && (
-            <span className="text-emerald-400 font-medium" data-testid={`badge-enrolled-${course.id}`}>Enrolled</span>
+            <span className="text-emerald-600 font-medium" data-testid={`badge-enrolled-${course.id}`}>Enrolled</span>
           )}
           {projectCount > 0 && (
             <>
-              <span className="text-gray-700">|</span>
+              <span className="text-gray-300">·</span>
               <span className="flex items-center gap-1" data-testid={`text-projects-${course.id}`}>
-                <FolderKanban className="w-3 h-3" style={{ color: "#00F5FF" }} />
+                <FolderKanban className="w-3 h-3" style={{ color: V }} />
                 {projectCount} Projects
               </span>
             </>
           )}
           {course.duration && (
             <>
-              <span className="text-gray-700">|</span>
+              <span className="text-gray-300">·</span>
               <span className="flex items-center gap-1" data-testid={`text-duration-${course.id}`}>
-                <Clock className="w-3 h-3 text-gray-500" />
+                <Clock className="w-3 h-3 text-gray-400" />
                 {course.duration}
               </span>
             </>
           )}
         </div>
 
-        <div className="mt-auto pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="mt-auto pt-3" style={{ borderTop: `1px solid ${VBORDER}` }}>
           {isEnrolled ? (
             <Link href={`/courses/${course.id}`} className="block">
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                  color: "#fff",
-                  boxShadow: "0 4px 14px -3px rgba(79,70,229,0.4)",
-                }}
+                style={{ background: `linear-gradient(135deg, ${V}, ${V2})`, color: "#fff", boxShadow: `0 4px 14px -3px ${VGLOW}` }}
                 data-testid={`button-continue-${course.id}`}
               >
                 <Play className="w-4 h-4" />
@@ -245,11 +242,7 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
             <Link href={`/courses/${course.id}`} className="block">
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #10B981, #059669)",
-                  color: "#fff",
-                  boxShadow: "0 4px 14px -3px rgba(16,185,129,0.4)",
-                }}
+                style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#fff", boxShadow: "0 4px 14px -3px rgba(16,185,129,0.35)" }}
                 data-testid={`button-start-learning-${course.id}`}
               >
                 Start Learning
@@ -260,14 +253,10 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
             <Link href={`/courses/${course.id}`} className="block">
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
-                  color: "#0B1D3A",
-                  boxShadow: "0 4px 14px -3px rgba(0,245,255,0.4)",
-                }}
+                style={{ background: `linear-gradient(135deg, ${V}, ${V2})`, color: "#fff", boxShadow: `0 4px 14px -3px ${VGLOW}` }}
                 data-testid={`button-view-course-${course.id}`}
               >
-                <Coins className="w-4 h-4 text-amber-300" />
+                <Coins className="w-4 h-4 text-amber-200" />
                 Enroll for {creditCost} Credits
               </button>
             </Link>
@@ -275,21 +264,17 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
             <Link href={`/courses/${course.id}`} className="block">
               <button
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-                  color: "#fff",
-                  boxShadow: "0 4px 14px -3px rgba(79,70,229,0.4)",
-                }}
+                style={{ background: `linear-gradient(135deg, ${V}, ${V2})`, color: "#fff", boxShadow: `0 4px 14px -3px ${VGLOW}` }}
                 data-testid={`button-enroll-${course.id}`}
               >
-                <Coins className="w-4 h-4 text-amber-300" />
+                <Coins className="w-4 h-4 text-amber-200" />
                 Enroll for {creditCost} Credits
               </button>
             </Link>
           ) : (
             <button
               className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}
+              style={{ background: "#F3F4F6", color: "#9ca3af" }}
               disabled
               data-testid={`button-insufficient-${course.id}`}
             >
@@ -306,22 +291,22 @@ function PremiumCourseCard({ course: initialCourse, languageVariants }: { course
 function PremiumSkeleton() {
   return (
     <div
-      className="rounded-2xl overflow-hidden h-full flex flex-col animate-pulse"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+      className="rounded-2xl overflow-hidden h-full flex flex-col animate-pulse bg-white"
+      style={{ border: `1px solid ${VBORDER}` }}
     >
-      <div className="aspect-video" style={{ background: "rgba(255,255,255,0.06)" }} />
+      <div className="aspect-video" style={{ background: "#F3F4F6" }} />
       <div className="p-4 space-y-3 flex-1">
-        <div className="h-5 rounded" style={{ background: "rgba(255,255,255,0.08)", width: "75%" }} />
+        <div className="h-5 rounded" style={{ background: "#E9EAFF", width: "75%" }} />
         <div className="space-y-2">
-          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "100%" }} />
-          <div className="h-4 rounded" style={{ background: "rgba(255,255,255,0.06)", width: "60%" }} />
+          <div className="h-4 rounded" style={{ background: "#F3F4F6", width: "100%" }} />
+          <div className="h-4 rounded" style={{ background: "#F3F4F6", width: "60%" }} />
         </div>
         <div className="flex gap-2">
-          <div className="h-6 w-16 rounded-md" style={{ background: "rgba(255,255,255,0.06)" }} />
-          <div className="h-6 w-20 rounded-md" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <div className="h-6 w-16 rounded-md" style={{ background: "#F3F4F6" }} />
+          <div className="h-6 w-20 rounded-md" style={{ background: "#F3F4F6" }} />
         </div>
         <div className="mt-auto pt-3">
-          <div className="h-10 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <div className="h-10 rounded-xl" style={{ background: "#E9EAFF" }} />
         </div>
       </div>
     </div>
@@ -333,7 +318,7 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", height: 320 }} />
+          <div key={i} className="rounded-2xl overflow-hidden animate-pulse bg-white" style={{ border: `1px solid ${VBORDER}`, height: 320 }} />
         ))}
       </div>
     );
@@ -342,13 +327,13 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
   if (groups.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}>
-          {type === "track" ? <Layers className="w-10 h-10" style={{ color: "#00F5FF" }} /> : <Trophy className="w-10 h-10" style={{ color: "#00F5FF" }} />}
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ background: VBG, border: `1px solid rgba(99,103,255,0.18)` }}>
+          {type === "track" ? <Layers className="w-10 h-10" style={{ color: V }} /> : <Trophy className="w-10 h-10" style={{ color: V }} />}
         </div>
-        <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)" }}>
+        <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>
           No {type === "track" ? "Tracks" : "Programs"} yet
         </h3>
-        <p className="text-gray-400 max-w-sm">
+        <p className="text-gray-500 max-w-sm">
           {type === "track"
             ? "Tracks bundle related courses into a learning path. Check back soon!"
             : "Programs are comprehensive learning journeys. Check back soon!"}
@@ -368,11 +353,10 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
       {groups.map(group => (
         <motion.div key={group.id} variants={staggerItem} data-testid={`card-${type}-${group.id}`}>
           <div
-            className="rounded-2xl overflow-hidden flex flex-col h-full group transition-all duration-300 hover:-translate-y-1"
+            className="rounded-2xl overflow-hidden flex flex-col h-full group transition-all duration-300 hover:-translate-y-1 bg-white"
             style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              boxShadow: "0 4px 24px -6px rgba(0,0,0,0.3)",
+              border: `1px solid ${VBORDER}`,
+              boxShadow: "0 2px 12px -4px rgba(99,103,255,0.08)",
             }}
           >
             <div className="relative aspect-video overflow-hidden">
@@ -385,16 +369,15 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
               ) : (
                 <div
                   className="absolute inset-0 flex items-center justify-center"
-                  style={{ background: type === "track" ? "linear-gradient(135deg, rgba(0,245,255,0.1), rgba(6,182,212,0.06))" : "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(139,92,246,0.08))" }}
+                  style={{ background: "linear-gradient(135deg, rgba(99,103,255,0.08), rgba(132,148,255,0.05))" }}
                 >
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: type === "track" ? "rgba(0,245,255,0.15)" : "rgba(124,58,237,0.18)", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.25)" : "rgba(124,58,237,0.3)"}` }}>
-                    {type === "track" ? <Layers className="w-8 h-8" style={{ color: "#00F5FF" }} /> : <Trophy className="w-8 h-8" style={{ color: "#A78BFA" }} />}
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: VBG, border: `1px solid rgba(99,103,255,0.22)` }}>
+                    {type === "track" ? <Layers className="w-8 h-8" style={{ color: V }} /> : <Trophy className="w-8 h-8" style={{ color: V2 }} />}
                   </div>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A]/80 via-transparent to-transparent" />
               <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold capitalize" style={{ background: type === "track" ? "rgba(0,245,255,0.85)" : "rgba(124,58,237,0.85)", color: "#fff", backdropFilter: "blur(8px)" }}>
+                <span className="px-2.5 py-1 rounded-full text-xs font-semibold capitalize" style={{ background: V, color: "#fff" }}>
                   {type === "track" ? "🛤 Track" : "🎓 Program"}
                 </span>
               </div>
@@ -415,8 +398,8 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
 
             <div className="flex flex-col flex-1 p-5 gap-3">
               <div>
-                <h3 className="text-white font-semibold text-lg leading-snug mb-1" style={{ fontFamily: "var(--font-display)" }}>{group.name}</h3>
-                {group.description && <p className="text-gray-400 text-sm line-clamp-2">{group.description}</p>}
+                <h3 className="font-semibold text-lg leading-snug mb-1" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }}>{group.name}</h3>
+                {group.description && <p className="text-gray-500 text-sm line-clamp-2">{group.description}</p>}
               </div>
 
               <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
@@ -430,18 +413,18 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
                     {group.totalDuration}
                   </span>
                 )}
-                <span className="capitalize px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}>{group.level}</span>
+                <span className="capitalize px-2 py-0.5 rounded-full text-xs" style={{ background: VBG, color: V }}>{group.level}</span>
               </div>
 
               {group.aggregatedSkills && (
                 <div className="flex flex-wrap gap-1">
                   {group.aggregatedSkills.split(",").slice(0, 4).map((s, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(0,245,255,0.08)", color: "#67E8F9", border: "1px solid rgba(0,245,255,0.15)" }}>
+                    <span key={i} className="px-2 py-0.5 rounded-full text-xs" style={{ background: VBG, color: V, border: `1px solid rgba(99,103,255,0.18)` }}>
                       {s.trim()}
                     </span>
                   ))}
                   {group.aggregatedSkills.split(",").length > 4 && (
-                    <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}>
+                    <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: "#F3F4F6", color: "#9ca3af" }}>
                       +{group.aggregatedSkills.split(",").length - 4} more
                     </span>
                   )}
@@ -449,19 +432,19 @@ function GroupCatalogGrid({ groups, type, isLoading }: { groups: CourseGroupData
               )}
 
               <div className="mt-auto pt-2">
-                <div className="text-xs text-gray-500 mb-3">
+                <div className="text-xs text-gray-400 mb-3">
                   {group.courses.slice(0, 3).map((c, i) => (
                     <div key={c.id} className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ background: "rgba(0,245,255,0.12)", color: "#00F5FF" }}>{i + 1}</span>
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ background: VBG, color: V }}>{i + 1}</span>
                       <span className="truncate">{c.title}</span>
                     </div>
                   ))}
-                  {group.courseCount > 3 && <p className="text-gray-600 pl-5">+{group.courseCount - 3} more courses</p>}
+                  {group.courseCount > 3 && <p className="text-gray-400 pl-5">+{group.courseCount - 3} more courses</p>}
                 </div>
                 <Link href={`/group/${group.id}`} className="block">
                   <button
                     className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                    style={{ background: type === "track" ? "rgba(0,245,255,0.1)" : "rgba(124,58,237,0.12)", color: type === "track" ? "#00F5FF" : "#A78BFA", border: `1px solid ${type === "track" ? "rgba(0,245,255,0.2)" : "rgba(124,58,237,0.25)"}` }}
+                    style={{ background: `linear-gradient(135deg, ${V}, ${V2})`, color: "#fff", boxShadow: `0 4px 14px -3px ${VGLOW}` }}
                     data-testid={`button-view-${type}-${group.id}`}
                   >
                     View {type === "track" ? "Track" : "Program"}
@@ -592,8 +575,8 @@ export default function CourseCatalog() {
   const filterSidebarContent = (
     <div className="space-y-6">
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Skill Level</h4>
-        <div className="space-y-1.5">
+        <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#6B7280", letterSpacing: "0.06em" }}>Skill Level</h4>
+        <div className="space-y-1">
           {[
             { id: "all" as LevelFilter, label: "All Levels" },
             { id: "beginner" as LevelFilter, label: "Beginner", count: levelCounts.beginner },
@@ -606,15 +589,16 @@ export default function CourseCatalog() {
               onClick={() => setSelectedLevel(level.id)}
               className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all"
               style={{
-                background: selectedLevel === level.id ? "rgba(0,245,255,0.12)" : "transparent",
-                color: selectedLevel === level.id ? "#00F5FF" : "#9ca3af",
-                border: selectedLevel === level.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
+                background: selectedLevel === level.id ? VBG : "transparent",
+                color: selectedLevel === level.id ? V : "#6B7280",
+                border: selectedLevel === level.id ? `1px solid rgba(99,103,255,0.25)` : "1px solid transparent",
+                fontWeight: selectedLevel === level.id ? 600 : 400,
               }}
               data-testid={`filter-level-${level.id}`}
             >
               <span>{level.label}</span>
               {level.count !== undefined && level.count > 0 && (
-                <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{level.count}</span>
+                <span className="text-xs" style={{ color: selectedLevel === level.id ? V : "#9CA3AF" }}>{level.count}</span>
               )}
             </button>
           ))}
@@ -622,8 +606,8 @@ export default function CourseCatalog() {
       </div>
 
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Pricing</h4>
-        <div className="space-y-1.5">
+        <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#6B7280", letterSpacing: "0.06em" }}>Pricing</h4>
+        <div className="space-y-1">
           {[
             { id: "all" as PricingFilter, label: "All Pricing" },
             { id: "free" as PricingFilter, label: "Free" },
@@ -634,9 +618,10 @@ export default function CourseCatalog() {
               onClick={() => setSelectedPricing(pricing.id)}
               className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
               style={{
-                background: selectedPricing === pricing.id ? "rgba(0,245,255,0.12)" : "transparent",
-                color: selectedPricing === pricing.id ? "#00F5FF" : "#9ca3af",
-                border: selectedPricing === pricing.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
+                background: selectedPricing === pricing.id ? VBG : "transparent",
+                color: selectedPricing === pricing.id ? V : "#6B7280",
+                border: selectedPricing === pricing.id ? `1px solid rgba(99,103,255,0.25)` : "1px solid transparent",
+                fontWeight: selectedPricing === pricing.id ? 600 : 400,
               }}
               data-testid={`filter-pricing-${pricing.id}`}
             >
@@ -646,10 +631,9 @@ export default function CourseCatalog() {
         </div>
       </div>
 
-
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Sort By</h4>
-        <div className="space-y-1.5">
+        <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#6B7280", letterSpacing: "0.06em" }}>Sort By</h4>
+        <div className="space-y-1">
           {[
             { id: "default" as SortOption, label: "Default" },
             { id: "title-asc" as SortOption, label: "Title: A to Z" },
@@ -663,9 +647,10 @@ export default function CourseCatalog() {
               onClick={() => setSortBy(sort.id)}
               className="w-full flex items-center px-3 py-2 rounded-lg text-sm transition-all text-left"
               style={{
-                background: sortBy === sort.id ? "rgba(0,245,255,0.12)" : "transparent",
-                color: sortBy === sort.id ? "#00F5FF" : "#9ca3af",
-                border: sortBy === sort.id ? "1px solid rgba(0,245,255,0.25)" : "1px solid transparent",
+                background: sortBy === sort.id ? VBG : "transparent",
+                color: sortBy === sort.id ? V : "#6B7280",
+                border: sortBy === sort.id ? `1px solid rgba(99,103,255,0.25)` : "1px solid transparent",
+                fontWeight: sortBy === sort.id ? 600 : 400,
               }}
               data-testid={`filter-sort-${sort.id}`}
             >
@@ -679,7 +664,7 @@ export default function CourseCatalog() {
         <button
           onClick={clearFilters}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
-          style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+          style={{ background: "rgba(239,68,68,0.06)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.18)" }}
           data-testid="button-clear-filters"
         >
           <X className="w-4 h-4" />
@@ -689,8 +674,10 @@ export default function CourseCatalog() {
     </div>
   );
 
+  const HERO_GRAD = "linear-gradient(135deg, #6367FF 0%, #8494FF 60%, #C9BEFF 100%)";
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(160deg, #020814 0%, #060D1F 25%, #081428 55%, #0B1D3A 80%, #060D1F 100%)", color: "#E8F4FF" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#F8F7FF", color: "#1A1A1A" }}>
       <LandingNavbar />
       <div className="flex-1">
 
@@ -698,39 +685,29 @@ export default function CourseCatalog() {
 
           {/* ═══ HERO BANNER ═══ */}
           <div className="mx-4 md:mx-8 mt-5 rounded-2xl overflow-hidden relative"
-            style={{
-              background: "linear-gradient(130deg, #070E22 0%, #0C1835 50%, #0A1628 100%)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              boxShadow: "0 8px 48px -12px rgba(0,0,0,0.6)",
-            }}
+            style={{ background: HERO_GRAD, boxShadow: "0 8px 32px -8px rgba(99,103,255,0.4)" }}
           >
-            {/* Ambient glows inside banner */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute -top-20 left-1/4 w-80 h-80 rounded-full blur-[100px] opacity-25"
-                style={{ background: "radial-gradient(circle, #4F46E5, transparent)" }} />
-              <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-[80px] opacity-20"
-                style={{ background: "radial-gradient(circle, #00F5FF, transparent)" }} />
-              <div className="absolute top-0 right-1/3 w-48 h-48 rounded-full blur-[70px] opacity-15"
-                style={{ background: "radial-gradient(circle, #F59E0B, transparent)" }} />
+              <div className="absolute -top-16 right-1/4 w-64 h-64 rounded-full blur-[80px] opacity-30"
+                style={{ background: "radial-gradient(circle, rgba(255,255,255,0.6), transparent)" }} />
+              <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px] opacity-20"
+                style={{ background: "radial-gradient(circle, rgba(255,219,253,0.8), transparent)" }} />
             </div>
 
             <div className="relative flex items-center justify-between px-6 md:px-10 py-8">
-              {/* Left: Title + subtitle + stats */}
               <div className="flex-1 max-w-xl">
-                <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-2"
+                <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-2 text-white"
                   style={{ fontFamily: "var(--font-display)" }}>
-                  <span className="text-white">Our </span>
-                  <span style={{ color: "#00F5FF" }}>Courses</span>
+                  Our <span style={{ color: "#FFDBFD" }}>Courses</span>
                 </h1>
-                <p className="text-sm md:text-base text-gray-300 mb-7">
+                <p className="text-sm md:text-base mb-7" style={{ color: "rgba(255,255,255,0.82)" }}>
                   Designed by{" "}
-                  <span className="font-semibold" style={{ color: "#F59E0B" }}>IIT Alumni</span>
+                  <span className="font-semibold text-white">IIT Alumni</span>
                   {" "}•{" "}
                   Learn from{" "}
-                  <span className="font-semibold" style={{ color: "#00F5FF" }}>Industry Experts</span>
+                  <span className="font-semibold text-white">Industry Experts</span>
                 </p>
 
-                {/* Stats row */}
                 <div className="flex items-center gap-3 flex-wrap">
                   {[
                     { icon: BookOpen, value: `${courses?.length ? `${courses.length}+` : "100+"}`, label: "Courses" },
@@ -741,34 +718,29 @@ export default function CourseCatalog() {
                     <div
                       key={i}
                       className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"
-                      style={{
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.09)",
-                        backdropFilter: "blur(8px)",
-                      }}
+                      style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)" }}
                     >
                       <div
                         className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: "rgba(0,245,255,0.12)", border: "1px solid rgba(0,245,255,0.2)" }}
+                        style={{ background: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.4)" }}
                       >
-                        <stat.icon className="w-3.5 h-3.5" style={{ color: "#00F5FF" }} />
+                        <stat.icon className="w-3.5 h-3.5 text-white" />
                       </div>
                       <div>
                         <div className="text-white font-bold text-sm leading-none">{stat.value}</div>
-                        <div className="text-gray-400 text-xs mt-0.5 whitespace-nowrap">{stat.label}</div>
+                        <div className="text-xs mt-0.5 whitespace-nowrap" style={{ color: "rgba(255,255,255,0.75)" }}>{stat.label}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Right: Illustration */}
               <div className="hidden md:flex items-end justify-end shrink-0 ml-6 self-end">
                 <img
                   src={catalogIllustration}
                   alt="Learning illustration"
                   className="h-56 w-auto object-contain drop-shadow-2xl select-none"
-                  style={{ filter: "drop-shadow(0 0 32px rgba(0,245,255,0.18))" }}
+                  style={{ filter: "drop-shadow(0 0 24px rgba(255,255,255,0.25)) brightness(1.05)" }}
                 />
               </div>
             </div>
@@ -779,19 +751,20 @@ export default function CourseCatalog() {
             <div className="flex items-center gap-3 flex-wrap">
               {/* Search */}
               <div className="relative flex-1 min-w-[180px] max-w-xs">
-                <div className="flex items-center rounded-xl overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <Search className="w-4 h-4 text-gray-500 ml-3 shrink-0" />
+                <div className="flex items-center rounded-xl overflow-hidden bg-white"
+                  style={{ border: `1px solid ${VBORDER}`, boxShadow: "0 1px 4px -1px rgba(99,103,255,0.08)" }}>
+                  <Search className="w-4 h-4 ml-3 shrink-0" style={{ color: V }} />
                   <input
                     type="text"
                     placeholder="Search skills, tools, careers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent px-3 py-2.5 text-white placeholder:text-gray-600 outline-none text-sm"
+                    className="flex-1 bg-transparent px-3 py-2.5 placeholder:text-gray-400 outline-none text-sm"
+                    style={{ color: "#1A1A1A" }}
                     data-testid="input-search-courses"
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm("")} className="p-2 mr-1 text-gray-500 hover:text-white transition-colors">
+                    <button onClick={() => setSearchTerm("")} className="p-2 mr-1 text-gray-400 hover:text-gray-700 transition-colors">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -799,8 +772,8 @@ export default function CourseCatalog() {
               </div>
 
               {/* Course / Track / Program tabs */}
-              <div className="flex items-center gap-1.5 shrink-0 px-1 py-1 rounded-xl"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="flex items-center gap-1 shrink-0 px-1 py-1 rounded-xl bg-white"
+                style={{ border: `1px solid ${VBORDER}` }}>
                 {([
                   { id: "course" as CatalogTab, label: "Courses", icon: BookOpen },
                   { id: "track" as CatalogTab,  label: "Tracks",  icon: Layers },
@@ -811,9 +784,9 @@ export default function CourseCatalog() {
                     onClick={() => setCatalogTab(tab.id)}
                     className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-sm font-semibold transition-all whitespace-nowrap"
                     style={{
-                      background: catalogTab === tab.id ? "rgba(0,245,255,0.15)" : "transparent",
-                      color: catalogTab === tab.id ? "#00F5FF" : "#6b7280",
-                      boxShadow: catalogTab === tab.id ? "0 0 12px rgba(0,245,255,0.15)" : "none",
+                      background: catalogTab === tab.id ? V : "transparent",
+                      color: catalogTab === tab.id ? "#fff" : "#6B7280",
+                      boxShadow: catalogTab === tab.id ? `0 2px 10px -2px ${VGLOW}` : "none",
                     }}
                     data-testid={`tab-catalog-${tab.id}`}
                   >
@@ -841,10 +814,10 @@ export default function CourseCatalog() {
                       onClick={() => setSelectedCategory(cat.id)}
                       className="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap"
                       style={{
-                        background: isActive ? "rgba(0,245,255,0.15)" : "rgba(255,255,255,0.04)",
-                        color: isActive ? "#00F5FF" : "#6b7280",
-                        border: isActive ? "1px solid rgba(0,245,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
-                        boxShadow: isActive ? "0 0 10px rgba(0,245,255,0.18)" : "none",
+                        background: isActive ? V : "#fff",
+                        color: isActive ? "#fff" : "#6B7280",
+                        border: isActive ? `1px solid ${V}` : `1px solid ${VBORDER}`,
+                        boxShadow: isActive ? `0 2px 10px -2px ${VGLOW}` : "none",
                       }}
                       data-testid={`pill-category-${cat.id}`}
                     >
@@ -862,26 +835,23 @@ export default function CourseCatalog() {
               {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
                 <aside className="hidden lg:block w-56 shrink-0">
                   <div
-                    className="sticky top-24 rounded-2xl p-5 overflow-y-auto max-h-[calc(100vh-8rem)]"
-                    style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
+                    className="sticky top-24 rounded-2xl p-5 overflow-y-auto max-h-[calc(100vh-8rem)] bg-white"
+                    style={{ border: `1px solid ${VBORDER}`, boxShadow: "0 2px 12px -4px rgba(99,103,255,0.08)" }}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-bold text-white">Filter Courses</h3>
+                      <h3 className="text-sm font-bold" style={{ color: "#1E1B4B" }}>Filter Courses</h3>
                       {hasActiveFilters && (
                         <button
                           onClick={clearFilters}
-                          className="text-xs font-medium transition-colors"
-                          style={{ color: "#00F5FF" }}
+                          className="text-xs font-semibold transition-colors"
+                          style={{ color: V }}
                           data-testid="button-reset-sidebar"
                         >
                           Reset
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mb-4" data-testid="text-total-courses">
+                    <p className="text-xs text-gray-400 mb-4" data-testid="text-total-courses">
                       Showing {totalCourses} course{totalCourses !== 1 ? "s" : ""}
                     </p>
                     {filterSidebarContent}
@@ -901,24 +871,18 @@ export default function CourseCatalog() {
                 {/* Mobile filter + sort bar */}
                 {catalogTab === "course" && !isLoading && !error && courses && courses.length > 0 && (
                   <div className="flex items-center justify-between mb-4 gap-3">
-                    {/* All Courses heading */}
-                    <h2 className="text-sm font-semibold text-white">
+                    <h2 className="text-sm font-semibold" style={{ color: "#1E1B4B" }}>
                       {selectedCategory === "all" ? "All Courses" : selectedCategory}{" "}
-                      <span className="text-gray-500">({totalCourses})</span>
+                      <span className="text-gray-400">({totalCourses})</span>
                     </h2>
 
                     <div className="flex items-center gap-2 ml-auto">
-                      {/* Sort dropdown */}
                       <div className="relative">
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as SortOption)}
-                          className="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-medium outline-none cursor-pointer"
-                          style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.09)",
-                            color: "#9ca3af",
-                          }}
+                          className="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-medium outline-none cursor-pointer bg-white"
+                          style={{ border: `1px solid ${VBORDER}`, color: "#6B7280" }}
                           data-testid="select-sort"
                         >
                           <option value="default">Sort: Recommended</option>
@@ -928,9 +892,8 @@ export default function CourseCatalog() {
                           <option value="price-high">Price: High to Low</option>
                           <option value="newest">Newest First</option>
                         </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-500" />
+                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none text-gray-400" />
                       </div>
-
                     </div>
                   </div>
                 )}
@@ -943,52 +906,46 @@ export default function CourseCatalog() {
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
-                    >
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                      style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.18)" }}>
                       <BookOpen className="w-10 h-10 text-red-400" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-empty-title">
+                    <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-empty-title">
                       Unable to load courses
                     </h3>
-                    <p className="text-gray-400 max-w-md" data-testid="text-empty-message">
+                    <p className="text-gray-500 max-w-md" data-testid="text-empty-message">
                       We're having trouble fetching courses. Please try again later.
                     </p>
                   </div>
                 ) : !courses || courses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}
-                    >
-                      <BookOpen className="w-10 h-10" style={{ color: "#00F5FF" }} />
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                      style={{ background: VBG, border: `1px solid rgba(99,103,255,0.18)` }}>
+                      <BookOpen className="w-10 h-10" style={{ color: V }} />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-empty-title">
+                    <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-empty-title">
                       No courses available
                     </h3>
-                    <p className="text-gray-400 max-w-md" data-testid="text-empty-message">
+                    <p className="text-gray-500 max-w-md" data-testid="text-empty-message">
                       Please check back later for new learning opportunities.
                     </p>
                   </div>
                 ) : groupedCourses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)" }}
-                    >
-                      <Search className="w-10 h-10" style={{ color: "#00F5FF" }} />
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                      style={{ background: VBG, border: `1px solid rgba(99,103,255,0.18)` }}>
+                      <Search className="w-10 h-10" style={{ color: V }} />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: "var(--font-display)" }} data-testid="text-empty-title">
+                    <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "#1E1B4B" }} data-testid="text-empty-title">
                       No courses found
                     </h3>
-                    <p className="text-gray-400 max-w-md mb-4" data-testid="text-empty-message">
+                    <p className="text-gray-500 max-w-md mb-4" data-testid="text-empty-message">
                       Try adjusting your search or filters to find what you're looking for.
                     </p>
                     <button
                       onClick={clearFilters}
-                      className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
-                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.2)" }}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                      style={{ background: V, color: "#fff", boxShadow: `0 4px 12px -3px ${VGLOW}` }}
                       data-testid="button-reset-filters"
                     >
                       Reset All Filters
@@ -1019,16 +976,13 @@ export default function CourseCatalog() {
                   >
                     <div
                       className="rounded-2xl p-8 text-center space-y-4"
-                      style={{
-                        background: "linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.05))",
-                        border: "1px solid rgba(0,245,255,0.15)",
-                      }}
+                      style={{ background: HERO_GRAD, boxShadow: `0 8px 32px -8px ${VGLOW}` }}
                     >
                       <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
-                        style={{ background: "rgba(0,245,255,0.12)", border: "1px solid rgba(0,245,255,0.25)" }}
+                        style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)" }}
                       >
-                        <Sparkles className="w-7 h-7" style={{ color: "#00F5FF" }} />
+                        <Sparkles className="w-7 h-7 text-white" />
                       </div>
                       <h3
                         className="text-xl font-semibold text-white"
@@ -1037,18 +991,14 @@ export default function CourseCatalog() {
                       >
                         Ready to start learning?
                       </h3>
-                      <p className="text-gray-400 max-w-md mx-auto">
+                      <p style={{ color: "rgba(255,255,255,0.82)" }} className="max-w-md mx-auto">
                         Create a free account to enroll in courses, track your progress, earn certificates, and build your learning portfolio.
                       </p>
                       <div className="flex items-center justify-center gap-3 flex-wrap pt-2">
                         <Link href="/signup">
                           <button
                             className="px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
-                            style={{
-                              background: "linear-gradient(135deg, #00F5FF, #06B6D4)",
-                              color: "#0B1D3A",
-                              boxShadow: "0 4px 14px -3px rgba(0,245,255,0.4)",
-                            }}
+                            style={{ background: "#fff", color: V, boxShadow: "0 4px 14px -3px rgba(255,255,255,0.4)" }}
                             data-testid="button-signup-cta"
                           >
                             <UserPlus className="w-4 h-4" />
@@ -1058,11 +1008,7 @@ export default function CourseCatalog() {
                         <Link href="/login">
                           <button
                             className="px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
-                            style={{
-                              background: "rgba(255,255,255,0.05)",
-                              color: "#00F5FF",
-                              border: "1px solid rgba(0,245,255,0.25)",
-                            }}
+                            style={{ background: "rgba(255,255,255,0.18)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}
                             data-testid="button-login-cta"
                           >
                             <LogIn className="w-4 h-4" />
