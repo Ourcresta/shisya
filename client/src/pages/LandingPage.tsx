@@ -1875,7 +1875,7 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col landing-page-light"
       style={{
         background: "#FFFFFF",
         color: C.textPrimary,
